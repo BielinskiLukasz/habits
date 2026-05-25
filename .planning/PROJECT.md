@@ -34,7 +34,8 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 - [ ] History — navigate any past day, mark habits as not-completed; bulk "mark all not-yet-completed as uncompleted" on a given day; per-habit edit history; undo last action
 - [ ] Habit edits don't rewrite history — definition changes apply forward only; the habit identity is preserved
 - [ ] Seeded data — hand-curated JSON bundled with the app, parsed once from `Nawyki v1.xlsx` + `Nawyki-fale.txt`
-- [ ] JSON export/import — manual backup/restore from IndexedDB
+- [ ] JSON export/import — manual backup/restore from IndexedDB (full fidelity, round-trippable)
+- [ ] CSV export — flattened table-shaped export of logs and habit definitions, so the data can be pasted into Excel for ad-hoc analysis (read-only; not used for import)
 - [ ] PWA — installable, works offline
 - [ ] Desktop analytics layout — separate, richer layouts for stats/planning views (not just a wider Today)
 - [ ] Scoring model — research phase to propose 2-3 alternatives, user picks one for v1
@@ -102,6 +103,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 | IndexedDB + JSON export/import (not localStorage, not cloud) | Capacity for years of logs; manual backup is acceptable for a personal tool | — Pending |
 | English UI, Polish habit names (data) | UI cleanliness without translating user content; no i18n layer | — Pending |
 | Seed data as bundled hand-curated JSON | Faster v1, no importer code in-app, future-resilient | — Pending |
+| Two export formats: JSON (full backup, round-trippable) + CSV (flattened, Excel-pasteable, read-only) | JSON for the app, CSV for the user's Excel-based ad-hoc analysis habits | — Pending |
 | Threshold model: 90% / 70 days, configurable globally + per-habit override | Matches existing xlsx model exactly; allows per-habit tuning that the spreadsheet already required | — Pending |
 | Graduation: stay on Today, muted/badged (don't hide) | User wants to keep "feeding" mastered habits without pressure | — Pending |
 | Stage advancement: multiple triggers per habit (manual OR scheduled-by-week OR after-N-days), composable | Honors the diversity in the existing system (some habits step up by calendar, some by effort, some on-demand) | — Pending |
