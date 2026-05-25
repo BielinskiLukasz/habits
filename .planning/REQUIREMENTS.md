@@ -238,17 +238,148 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-To be populated by the roadmapper. Each requirement maps to exactly one phase.
+Every v1 requirement maps to exactly one phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Filled during roadmap creation) | — | Pending |
+| CORE-01 | Phase 3 | Pending |
+| CORE-02 | Phase 3 | Pending |
+| CORE-03 | Phase 3 | Pending |
+| CORE-04 | Phase 3 | Pending |
+| CORE-05 | Phase 3 | Pending |
+| CORE-06 | Phase 3 | Pending |
+| CATALOG-01 | Phase 4 | Pending |
+| CATALOG-02 | Phase 4 | Pending |
+| CATALOG-03 | Phase 4 | Pending |
+| CATALOG-04 | Phase 4 | Pending |
+| CATALOG-05 | Phase 4 | Pending |
+| CATALOG-06 | Phase 4 | Pending |
+| CATALOG-07 | Phase 4 | Pending |
+| CADENCE-01 | Phase 4 | Pending |
+| CADENCE-02 | Phase 4 | Pending |
+| CADENCE-03 | Phase 4 | Pending |
+| CADENCE-04 | Phase 4 | Pending |
+| CADENCE-05 | Phase 4 | Pending |
+| CADENCE-06 | Phase 4 | Pending |
+| CADENCE-07 | Phase 4 | Pending |
+| STAGE-01 | Phase 4 | Pending |
+| STAGE-02 | Phase 4 | Pending |
+| STAGE-03 | Phase 4 | Pending |
+| STAGE-04 | Phase 4 | Pending |
+| STAGE-05 | Phase 4 | Pending |
+| STAGE-06 | Phase 4 | Pending |
+| STAGE-07 | Phase 4 | Pending |
+| MASTERY-01 | Phase 4 | Pending |
+| MASTERY-02 | Phase 4 | Pending |
+| MASTERY-03 | Phase 4 | Pending |
+| MASTERY-04 | Phase 4 | Pending |
+| MASTERY-05 | Phase 4 | Pending |
+| MASTERY-06 | Phase 4 | Pending |
+| MASTERY-07 | Phase 4 | Pending |
+| LOG-01 | Phase 3 | Pending |
+| LOG-02 | Phase 4 | Pending |
+| LOG-03 | Phase 4 | Pending |
+| LOG-04 | Phase 4 | Pending |
+| LOG-05 | Phase 4 | Pending |
+| LOG-06 | Phase 4 | Pending |
+| HISTORY-01 | Phase 4 | Pending |
+| HISTORY-02 | Phase 4 | Pending |
+| HISTORY-03 | Phase 4 | Pending |
+| HISTORY-04 | Phase 4 | Pending |
+| HISTORY-05 | Phase 4 | Pending |
+| HISTORY-06 | Phase 4 | Pending |
+| WAVE-01 | Phase 4 | Pending |
+| WAVE-02 | Phase 4 | Pending |
+| WAVE-03 | Phase 4 | Pending |
+| WAVE-04 | Phase 4 | Pending |
+| WAVE-05 | Phase 4 | Pending |
+| WAVE-06 | Phase 4 | Pending |
+| UNDO-01 | Phase 3 | Pending |
+| UNDO-02 | Phase 3 | Pending |
+| UNDO-03 | Phase 3 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| DATA-02 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Pending |
+| DATA-04 | Phase 2 | Pending |
+| DATA-05 | Phase 2 | Pending |
+| DATA-06 | Phase 2 | Pending |
+| DATA-07 | Phase 2 | Pending |
+| DATA-08 | Phase 2 | Pending |
+| EXPORT-01 | Phase 5 | Pending |
+| EXPORT-02 | Phase 5 | Pending |
+| EXPORT-03 | Phase 5 | Pending |
+| EXPORT-04 | Phase 5 | Pending |
+| EXPORT-05 | Phase 5 | Pending |
+| EXPORT-06 | Phase 5 | Pending |
+| EXPORT-07 | Phase 5 | Pending |
+| EXPORT-08 | Phase 5 | Pending |
+| IMPORT-01 | Phase 5 | Pending |
+| IMPORT-02 | Phase 5 | Pending |
+| IMPORT-03 | Phase 5 | Pending |
+| IMPORT-04 | Phase 5 | Pending |
+| IMPORT-05 | Phase 5 | Pending |
+| SCORING-01 | Phase 6 | Pending |
+| SCORING-02 | Phase 6 | Pending |
+| SCORING-03 | Phase 6 | Pending |
+| SCORING-04 | Phase 6 | Pending |
+| SCORING-05 | Phase 6 | Pending |
+| SCORING-06 | Phase 6 | Pending |
+| SCORING-07 | Phase 6 | Pending |
+| SCORING-08 | Phase 6 | Pending |
+| SCORING-09 | Phase 6 | Pending |
+| DESKTOP-01 | Phase 6 | Pending |
+| DESKTOP-02 | Phase 6 | Pending |
+| DESKTOP-03 | Phase 6 | Pending |
+| DESKTOP-04 | Phase 6 | Pending |
+| DESKTOP-05 | Phase 6 | Pending |
+| DESKTOP-06 | Phase 6 | Pending |
+| DESKTOP-07 | Phase 6 | Pending |
+| PWA-01 | Phase 1 | Pending |
+| PWA-02 | Phase 1 | Pending |
+| PWA-03 | Phase 1 | Pending |
+| PWA-04 | Phase 1 | Pending |
+| PWA-05 | Phase 1 | Pending |
+| PWA-06 | Phase 1 | Pending |
+| PWA-07 | Phase 3 | Pending |
+| SEED-01 | Phase 2 | Pending |
+| SEED-02 | Phase 2 | Pending |
+| SEED-03 | Phase 2 | Pending |
+| SEED-04 | Phase 2 | Pending |
+| SEED-05 | Phase 2 | Pending |
+| SETTINGS-01 | Phase 4 | Pending |
+| SETTINGS-02 | Phase 6 | Pending |
+| SETTINGS-03 | Phase 5 | Pending |
+| SETTINGS-04 | Phase 3 | Pending |
+| SETTINGS-05 | Phase 3 | Pending |
+| SETTINGS-06 | Phase 6 | Pending |
+| SETTINGS-07 | Phase 1 | Pending |
+| NFR-01 | Phase 3 | Pending |
+| NFR-02 | Phase 3 | Pending |
+| NFR-03 | Phase 6 | Pending |
+| NFR-04 | Phase 1 | Pending |
+| NFR-05 | Phase 6 | Pending |
+| NFR-06 | Phase 3 | Pending |
+| NFR-07 | Phase 3 | Pending |
+| NFR-08 | Phase 6 | Pending |
+| NFR-09 | Phase 1 | Pending |
+| NFR-10 | Phase 4 | Pending |
+| NFR-11 | Phase 1 | Pending |
+| NFR-12 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 96 total (CORE 6, CATALOG 7, CADENCE 7, STAGE 7, MASTERY 7, LOG 6, HISTORY 6, WAVE 6, UNDO 3, DATA 8, EXPORT 8, IMPORT 5, SCORING 9, DESKTOP 7, PWA 7, SEED 5, SETTINGS 7, NFR 12)
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 96 ⚠️ (until roadmap created)
+- v1 requirements: 123 total (CORE 6, CATALOG 7, CADENCE 7, STAGE 7, MASTERY 7, LOG 6, HISTORY 6, WAVE 6, UNDO 3, DATA 8, EXPORT 8, IMPORT 5, SCORING 9, DESKTOP 7, PWA 7, SEED 5, SETTINGS 7, NFR 12)
+- Mapped to phases: 123 ✓
+- Unmapped: 0 ✓
+- Coverage: 100%
+
+**Per-Phase Counts:**
+- Phase 1 — PWA Shell & Tooling Hygiene: 11 requirements (PWA-01..06, SETTINGS-07, NFR-04, NFR-09, NFR-11, NFR-12)
+- Phase 2 — Storage Foundation: 13 requirements (DATA-01..08, SEED-01..05)
+- Phase 3 — Today View & Settings v1: 17 requirements (CORE-01..06, LOG-01, UNDO-01..03, SETTINGS-04, SETTINGS-05, PWA-07, NFR-01, NFR-02, NFR-06, NFR-07)
+- Phase 4 — Domain Model: 47 requirements (CATALOG-01..07, CADENCE-01..07, STAGE-01..07, MASTERY-01..07, LOG-02..06, HISTORY-01..06, WAVE-01..06, SETTINGS-01, NFR-10)
+- Phase 5 — Backup & Restore: 14 requirements (EXPORT-01..08, IMPORT-01..05, SETTINGS-03)
+- Phase 6 — Desktop Analytics & Scoring Trio: 21 requirements (SCORING-01..09, DESKTOP-01..07, SETTINGS-02, SETTINGS-06, NFR-03, NFR-05, NFR-08)
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 after initial definition*
+*Last updated: 2026-05-26 after roadmap creation (123 requirements mapped to 6 phases)*
