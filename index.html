@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habits</title>
+  <meta name="description" content="Personal multi-year habit tracker.">
+  <meta name="theme-color" content="#f5a623">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Habits">
+  <link rel="icon" href="./icon.svg">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./css/main.css">
+</head>
+<body>
+  <header class="today-header">
+    <h1 data-app-title>Habits</h1>
+    <div class="today-date" aria-label="Today's date"></div>
+    <div class="today-wave" aria-label="Current wave"></div>
+  </header>
+  <main>
+    <ul class="today-list" aria-label="Today's habits"></ul>
+  </main>
+  <nav class="today-footer-nav" aria-label="Primary navigation">
+    <span>today</span>
+    <span>history</span>
+    <span>settings</span>
+  </nav>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
