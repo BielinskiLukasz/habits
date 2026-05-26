@@ -518,7 +518,7 @@ self.addEventListener('activate', e => {
 - ✅ `./sw.js`, `./manifest.json`, `./icon.svg`, `./css/main.css`, `./js/main.js`, `./js/util/version.js`.
 - ❌ `/sw.js`, `/manifest.json`, `https://…`, `sw.js` (bare — works in mb but Nawyki standardizes on `./`).
 
-**Why:** Same bytes deploy under `file://`, `https://lukasz-bielinski.github.io/habits/`, or any sub-path with zero env config.
+**Why:** Same bytes deploy under `file://`, `https://bielinskilukasz.github.io/habits/`, or any sub-path with zero env config.
 
 ---
 

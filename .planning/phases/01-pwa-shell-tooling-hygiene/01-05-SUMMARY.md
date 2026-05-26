@@ -35,7 +35,7 @@ key_files:
   modified: []
 decisions:
   - "README structure: seven sections in the order specified by the plan (What this is, Run modes, Bumping the version, Diagnostics & recovery, Static gates, Manual smoke-test checklist, Constraints)"
-  - "Trailing-slash convention documented prominently in the GitHub Pages subsection — both the canonical URL `https://lukasz-bielinski.github.io/habits/` and the failure mode (no trailing slash → SW scope misresolves) are called out per Pitfall 3"
+  - "Trailing-slash convention documented prominently in the GitHub Pages subsection — both the canonical URL `https://bielinskilukasz.github.io/habits/` and the failure mode (no trailing slash → SW scope misresolves) are called out per Pitfall 3"
   - "Three static gates shipped as fenced shell-command blocks with `sh` syntax hint (not raw shell-prompt prose) so they are copy-paste-safe on Windows + POSIX"
   - "D-06 Reset-shell confirm copy quoted verbatim inside a fenced block so a future grep across the repo (e.g., 'Reset shell — unregister') finds it in both the implementation (js/views/diagnostics.js) and the docs (README.md)"
   - "Manual smoke-test checklist deliberately points to the three planning artifacts (RESEARCH.md, VALIDATION.md, SKELETON.md) rather than re-stating their content — single source of truth"
@@ -62,7 +62,7 @@ One atomic commit added one new file at the project root: `README.md`. No source
 
 | File | Purpose |
 | --- | --- |
-| `README.md` | 109 lines. Seven sections in the order required by the plan: (1) **What this is** — one-paragraph project description from PROJECT.md; (2) **Run modes** — three subsections for `file://`, localhost (`python -m http.server 8000`), GitHub Pages (`https://lukasz-bielinski.github.io/habits/` with the trailing-slash warning); (3) **Bumping the version** — the D-10 + D-12 procedure (one edit in `js/util/version.js`, then redeploy) and the controllerchange + toast user-side flow; (4) **Diagnostics & recovery** — the two D-02 triggers (`?debug=1` and long-press) plus the verbatim D-06 Reset-shell confirm string inside a fenced block; (5) **Static gates** — three fenced shell-command blocks for NFR-04, NFR-11, NFR-12 with a one-line rationale each; (6) **Manual smoke-test checklist** — relative pointers to `01-RESEARCH.md`, `01-VALIDATION.md`, `01-SKELETON.md` inside the `.planning/` tree; (7) **Constraints** — the nine-bullet list from PROJECT.md §Constraints (vanilla stack, multi-file, IDB-primary in P2+, static + file://-safe, fully offline, EN chrome / PL data, distinct mobile vs desktop, history integrity, privacy-first). |
+| `README.md` | 109 lines. Seven sections in the order required by the plan: (1) **What this is** — one-paragraph project description from PROJECT.md; (2) **Run modes** — three subsections for `file://`, localhost (`python -m http.server 8000`), GitHub Pages (`https://bielinskilukasz.github.io/habits/` with the trailing-slash warning); (3) **Bumping the version** — the D-10 + D-12 procedure (one edit in `js/util/version.js`, then redeploy) and the controllerchange + toast user-side flow; (4) **Diagnostics & recovery** — the two D-02 triggers (`?debug=1` and long-press) plus the verbatim D-06 Reset-shell confirm string inside a fenced block; (5) **Static gates** — three fenced shell-command blocks for NFR-04, NFR-11, NFR-12 with a one-line rationale each; (6) **Manual smoke-test checklist** — relative pointers to `01-RESEARCH.md`, `01-VALIDATION.md`, `01-SKELETON.md` inside the `.planning/` tree; (7) **Constraints** — the nine-bullet list from PROJECT.md §Constraints (vanilla stack, multi-file, IDB-primary in P2+, static + file://-safe, fully offline, EN chrome / PL data, distinct mobile vs desktop, history integrity, privacy-first). |
 
 ## Locked Sections + Phrasings
 
@@ -70,7 +70,7 @@ One atomic commit added one new file at the project root: `README.md`. No source
 | --- | --- | --- |
 | Run modes — file:// | `js/platform/sw-register.js` guards register() behind `location.protocol.startsWith('http')` + silent `.catch(() => {})` — copied verbatim as the explanation in README | grep "file:\/\/" README.md → 2 matches |
 | Run modes — localhost | Canonical command is `python -m http.server 8000` matching VALIDATION.md and PROJECT.md install instructions | grep "python -m http.server 8000" README.md → 1 match |
-| Run modes — GitHub Pages | Canonical URL `https://lukasz-bielinski.github.io/habits/` documented with the trailing-slash failure mode (Pitfall 3) | grep "lukasz-bielinski.github.io/habits/" README.md → 2 matches |
+| Run modes — GitHub Pages | Canonical URL `https://bielinskilukasz.github.io/habits/` documented with the trailing-slash failure mode (Pitfall 3) | grep "bielinskilukasz.github.io/habits/" README.md → 2 matches |
 | Bumping the version | `js/util/version.js` referenced; APP_VERSION constant called out; D-10 rule (shell-asset-only bumps) documented; D-11 SWR-for-/js/ rationale included | grep "APP_VERSION" README.md → 3 matches |
 | Reset shell confirm | D-06 phrasing inside a fenced block: `Reset shell — unregister service worker and clear all caches. Logs are NOT affected. Reload to a fresh install.` Em-dash matches `js/views/diagnostics.js` source | grep "Reset shell — unregister service worker" README.md → 1 match |
 | Static gates | Three fenced shell-command blocks (`grep -rE`, `ls \| grep`, `grep -nE`) with one-line rationale each | grep "grep" README.md → matches three commands |
@@ -98,7 +98,7 @@ README content gates from the plan's `<verification>` section:
 
 | Gate | Output |
 | --- | --- |
-| `grep -c "lukasz-bielinski\.github\.io/habits/" README.md` | 2 matches |
+| `grep -c "bielinskilukasz\.github\.io/habits/" README.md` | 2 matches |
 | `grep -c "Reset shell — unregister service worker" README.md` | 1 match (verbatim D-06) |
 | `grep -c "APP_VERSION" README.md` | 3 matches |
 | `grep -c "?debug=1" README.md` | 2 matches |
@@ -130,7 +130,7 @@ Run on the developer machine, in order:
 
 At least one of the following MUST pass; the others are best-effort and may be deferred with reason:
 
-- **Desktop Chrome / Edge** (MANDATORY per plan acceptance) — Open `https://lukasz-bielinski.github.io/habits/` → URL-bar install icon appears → click → "Install Habits?" prompt → click Install → standalone window opens (no URL bar, no tabs). In DevTools console of the standalone window: `navigator.serviceWorker.controller` returns a SW reference; `window.matchMedia('(display-mode: standalone)').matches` returns `true`; `?debug=1` shows Install state row as "standalone".
+- **Desktop Chrome / Edge** (MANDATORY per plan acceptance) — Open `https://bielinskilukasz.github.io/habits/` → URL-bar install icon appears → click → "Install Habits?" prompt → click Install → standalone window opens (no URL bar, no tabs). In DevTools console of the standalone window: `navigator.serviceWorker.controller` returns a SW reference; `window.matchMedia('(display-mode: standalone)').matches` returns `true`; `?debug=1` shows Install state row as "standalone".
 - **Android Chrome** (best-effort) — Visit the GH Pages URL on Android Chrome → Install prompt OR menu → "Install app" / "Add to Home Screen" → confirm. Tap home-screen icon → app launches standalone (no URL bar). Long-press the "Habits" title for ~1.5 s → diagnostics panel mounts (verifies long-press on real touch hardware).
 - **iOS Safari** (best-effort) — Visit the GH Pages URL on iOS Safari → Share → "Add to Home Screen" → confirm name "Habits" → Add. Tap home-screen icon → app launches standalone (no Safari chrome). Hold the "Habits" title for ~1.5 s → diagnostics panel mounts.
 
@@ -146,7 +146,7 @@ For each platform where install succeeded, verify offline reload:
 
 After pushing `main` to GH Pages and waiting for the build to complete:
 
-- Open `https://lukasz-bielinski.github.io/habits/` (note the trailing slash). DevTools → Application → Service Workers: scope shows `https://lukasz-bielinski.github.io/habits/` (sub-path correctly resolved, not the origin root). Cache Storage: `nawyki-v1` populated with all 17 SHELL entries, all under `/habits/` prefix.
+- Open `https://bielinskilukasz.github.io/habits/` (note the trailing slash). DevTools → Application → Service Workers: scope shows `https://bielinskilukasz.github.io/habits/` (sub-path correctly resolved, not the origin root). Cache Storage: `nawyki-v1` populated with all 17 SHELL entries, all under `/habits/` prefix.
 - Local re-run: `grep -nE '"\s*/[a-z]' index.html desktop.html manifest.json sw.js` returns empty (no absolute-path landmines snuck in).
 
 ### Acceptance threshold
@@ -179,7 +179,7 @@ None. No new attack surface introduced beyond what the plan's `<threat_model>` a
 - ✅ `git log --oneline` shows commit `fd1ea0a` with the `docs(01-05): add README documenting chassis + install modes + grep gates` subject.
 - ✅ Plan's automated verify (`node -e "..."`) printed `OK lines=110` (≥60-line floor).
 - ✅ All seven required sections present in order: `# Habits`, `## Run modes`, `## Bumping the version`, `## Diagnostics & recovery`, `## Static gates`, `## Manual smoke-test checklist`, `## Constraints`.
-- ✅ GitHub Pages URL `https://lukasz-bielinski.github.io/habits/` mentioned with trailing-slash failure mode (Pitfall 3).
+- ✅ GitHub Pages URL `https://bielinskilukasz.github.io/habits/` mentioned with trailing-slash failure mode (Pitfall 3).
 - ✅ D-06 Reset-shell confirm string is verbatim, inside a fenced block.
 - ✅ Three static-grep gates present as fenced `sh` blocks (NFR-04, NFR-11, NFR-12).
 - ✅ Pointers to `01-VALIDATION.md`, `01-RESEARCH.md`, `01-SKELETON.md` all present with relative paths.

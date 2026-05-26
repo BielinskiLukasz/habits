@@ -25,7 +25,7 @@ Then visit `http://localhost:8000/`. The service worker registers, the `nawyki-v
 Push to `main`. GitHub Pages serves the chassis at:
 
 ```
-https://lukasz-bielinski.github.io/habits/
+https://bielinskilukasz.github.io/habits/
 ```
 
 **The URL must end with a trailing slash (`/habits/`), not `/habits`.** Without the trailing slash the browser does not resolve `./sw.js` against the `/habits/` directory and the service-worker scope collapses — the `.planning/research/PITFALLS.md` writeup of GitHub Pages sub-path breakage covers the failure mode. GitHub Pages itself adds the slash automatically when the link points to a directory; only typed/copied URLs need explicit care.
@@ -47,7 +47,7 @@ The relative-paths rule (D-19) is the only thing that lets the chassis deploy un
 
 Two triggers (D-02) — both mount the same panel:
 
-- Append `?debug=1` to any URL. Example: `http://localhost:8000/?debug=1` or `https://lukasz-bielinski.github.io/habits/?debug=1`. Reading is via `new URLSearchParams(location.search)`.
+- Append `?debug=1` to any URL. Example: `http://localhost:8000/?debug=1` or `https://bielinskilukasz.github.io/habits/?debug=1`. Reading is via `new URLSearchParams(location.search)`.
 - Long-press the "Habits" title for ~1.5 s. Works on touch (phone) and mouse (desktop) from a single Pointer Events code path. Movement greater than ~10 px cancels the press (Pitfall 7 — does not fire during a normal scroll).
 
 The panel renders six rows: app version, schema version (`n/a (P2)` until IDB ships), service-worker state (`unsupported` / `controlled` / `registered, not yet controlled`), cache name (the first `nawyki-` prefixed entry from `caches.keys()` or `none`), install state (`standalone` when launched as an installed PWA, `browser` otherwise, via `matchMedia('(display-mode: standalone)')`), and persistence state (`n/a (P2)` until `navigator.storage.persist()` lands in Phase 2). Three buttons follow: Reset shell, Reset data (disabled placeholder, tooltip `available in P2` per D-05), Check for update (forces `registration.update()` and reports outcome).

@@ -55,7 +55,7 @@
 - **Toast component skeleton:** D-08 mentions the toast is a shared primitive. Planner picks the minimal CSS + JS shape (probably `<div class="toast" role="status">`). No design decision here — just keep it accessible.
 - **`APP_VERSION` location:** D-12 says one source of truth. Planner picks the file (`js/util/version.js` is a reasonable default; could also be `js/version.js` at the top of `js/`).
 - **Diagnostics panel layout:** the contents are pinned in D-03; the visual layout is open. Default to a vertical key/value list.
-- **HTTPS deploy target for installability testing:** PROJECT.md says GitHub Pages. Planner confirms whether it's `lukasz-bielinski.github.io/habits/` or another path during the planning step. The phase-1 implementation must work under any sub-path because all paths are relative (D-19).
+- **HTTPS deploy target for installability testing:** PROJECT.md says GitHub Pages. Planner confirms whether it's `bielinskilukasz.github.io/habits/` or another path during the planning step. The phase-1 implementation must work under any sub-path because all paths are relative (D-19).
 
 ### Deferred Ideas (OUT OF SCOPE)
 
@@ -96,7 +96,7 @@ Phase 1 ships a single, deterministic PWA chassis: a versioned cache-first servi
 The technical heart is **three load-bearing patterns** mirrored from `mindful-breathing` and extended:
 1. **SW registration guarded** by `location.protocol.startsWith('http')` + silent `.catch()` so `file://` opens never call `navigator.serviceWorker.register()`.
 2. **Versioned cache name** (`nawyki-v1`, `nawyki-v2`, …) where `activate` deletes everything that isn't the current name, combined with `skipWaiting()` + `clients.claim()`.
-3. **All paths relative (`./`)** in HTML, manifest, and sw.js so the same bytes deploy under `file://`, `https://lukasz-bielinski.github.io/habits/`, or any other sub-path with zero config.
+3. **All paths relative (`./`)** in HTML, manifest, and sw.js so the same bytes deploy under `file://`, `https://bielinskilukasz.github.io/habits/`, or any other sub-path with zero config.
 
 **The seven open questions in CONTEXT.md resolve as:**
 
@@ -567,7 +567,7 @@ export function showUpdateToast() {
 
 ### Pitfall 3: GitHub Pages Sub-Path Breakage
 
-**What goes wrong:** App deploys to `https://lukasz-bielinski.github.io/habits/`. HTML uses absolute paths (`/sw.js`, `/manifest.json`). Service worker tries to fetch `https://lukasz-bielinski.github.io/sw.js` — 404. PWA install criteria fails.
+**What goes wrong:** App deploys to `https://bielinskilukasz.github.io/habits/`. HTML uses absolute paths (`/sw.js`, `/manifest.json`). Service worker tries to fetch `https://bielinskilukasz.github.io/sw.js` — 404. PWA install criteria fails.
 
 **Why it happens:** Mixing absolute and relative paths.
 
@@ -793,7 +793,7 @@ if (params.get('debug') === '1') mountDiagnostics();
 | A2 | Approach B for `version.js` (single file, side-effect import, `self.APP_VERSION` global) is cleaner than Approach A (two files) or Approach C (wrapper file). | §"Pattern 2: version.js" | If wrong: planner picks A or C, both equally correct. **Risk: NONE** — this is a style preference, not a correctness question. |
 | A3 | 10 px movement tolerance + 1500 ms long-press is the right calibration for a phone-held-in-hand. | §"Pattern 4: Long-press" | If too short: accidental triggers during normal taps. If too long: user gives up. **Mitigation:** these are constants in one file; the user can tune after first feel. **Risk: LOW** (well within standard mobile UX literature range). |
 | A4 | `<meta name="apple-mobile-web-app-capable" content="yes">` is still recommended for iOS Safari 2026 even with a valid manifest. | §"State of the Art" | If unnecessary: harmless meta tag adds 0 KB. If needed and missing: iOS install may show URL bar in standalone mode. **Risk: NEGLIGIBLE** — mindful-breathing/index.html includes it; carry forward. |
-| A5 | The GitHub Pages deploy path is `lukasz-bielinski.github.io/habits/`. | §"GitHub Pages sub-path validation" | If wrong: still works because all paths are relative (D-19). **Risk: NONE.** |
+| A5 | The GitHub Pages deploy path is `bielinskilukasz.github.io/habits/`. | §"GitHub Pages sub-path validation" | If wrong: still works because all paths are relative (D-19). **Risk: NONE.** |
 | A6 | `?debug=1` as the URL parameter name (not `?diagnostics`, not `?dev`). | §"Pattern 5" | Naming choice; no correctness implication. **Risk: NONE.** |
 | A7 | Stale-while-revalidate's correctness depends on the SW being the canonical source of cached responses. If the browser HTTP cache holds an older copy, SWR's `fetch(request)` might return that copy. | §"Pattern 1" | **Mitigation:** the SW's network request goes through the HTTP cache, but the browser HTTP cache for served-via-SW resources is typically bypassed. **Risk: LOW** — would manifest as one extra reload to pick up the change; not a correctness bug. |
 
@@ -880,7 +880,7 @@ This is the canonical "Looks Done But Isn't" list for Phase 1, derived from PITF
 11. **Diagnostics on `?debug=1`** — Open `index.html?debug=1` → panel mounts.
 12. **`display-mode: standalone` detection** — Open installed PWA → diagnostics shows "Install state: standalone". Open in browser tab → diagnostics shows "Install state: browser".
 13. **Polish characters render in fonts** — (UI is English in P1, but verify system fonts handle ą ć ł — manifest description is English so not actually testable here; deferred to P3.)
-14. **GitHub Pages sub-path** — Deploy to `https://lukasz-bielinski.github.io/habits/`. Open URL. SW registers under `/habits/` scope. Install works. Offline reload works.
+14. **GitHub Pages sub-path** — Deploy to `https://bielinskilukasz.github.io/habits/`. Open URL. SW registers under `/habits/` scope. Install works. Offline reload works.
 
 ### Sampling Rate
 

@@ -70,7 +70,7 @@ The 11 requirements in scope (PWA-01..06, SETTINGS-07, NFR-04, NFR-09, NFR-11, N
 - **Toast component skeleton:** D-08 mentions the toast is a shared primitive. Planner picks the minimal CSS + JS shape (probably `<div class="toast" role="status">`). No design decision here — just keep it accessible.
 - **`APP_VERSION` location:** D-12 says one source of truth. Planner picks the file (`js/util/version.js` is a reasonable default; could also be `js/version.js` at the top of `js/`). Doesn't matter for correctness, only for greppability.
 - **Diagnostics panel layout:** the contents are pinned in D-03; the visual layout is open. Default to a vertical key/value list (no styling sophistication needed; this is a debug surface).
-- **HTTPS deploy target for installability testing:** PROJECT.md says GitHub Pages. Planner confirms whether it's `lukasz-bielinski.github.io/habits/` or another path during the planning step. The phase-1 implementation must work under any sub-path because all paths are relative (D-19).
+- **HTTPS deploy target for installability testing:** PROJECT.md says GitHub Pages. Planner confirms whether it's `bielinskilukasz.github.io/habits/` or another path during the planning step. The phase-1 implementation must work under any sub-path because all paths are relative (D-19).
 
 </decisions>
 

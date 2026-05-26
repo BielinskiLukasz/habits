@@ -26,7 +26,7 @@ The thinnest possible end-to-end story. Each step unlocks the next:
 
 Steps 1–7 run on the developer machine. The phase-gate hands-on check adds:
 
-8. **GH Pages install** — Push to GitHub Pages at `https://lukasz-bielinski.github.io/habits/`. Open on desktop Chrome → URL-bar install icon → standalone window. Open on Android Chrome → Install prompt or Add to Home Screen. Open on iOS Safari → Share → Add to Home Screen. Each installed icon launches standalone, no browser chrome. Offline reload still works on each.
+8. **GH Pages install** — Push to GitHub Pages at `https://bielinskilukasz.github.io/habits/`. Open on desktop Chrome → URL-bar install icon → standalone window. Open on Android Chrome → Install prompt or Add to Home Screen. Open on iOS Safari → Share → Add to Home Screen. Each installed icon launches standalone, no browser chrome. Offline reload still works on each.
 
 ## What the Skeleton Deliberately Does NOT Prove
 
@@ -64,7 +64,7 @@ These decisions will not be renegotiated in subsequent phases:
 | All paths relative (`./…`) in HTML + manifest + sw.js + module imports | D-19 + NFR-12 | Every later file inherits this rule |
 | iOS Safari standalone meta trio (`apple-mobile-web-app-*`) | Pattern D (mindful-breathing analog) | Both shells carry it forever |
 | Maskable icon — full canvas background, glyph inside r=205 safe-zone, no `rx` on background rect | D-17 + research §Pitfall 5 | Real icon design in P3 stays maskable |
-| GH Pages deploy at `https://lukasz-bielinski.github.io/habits/` (trailing slash) | D-19 + research §Pitfall 3 + §A5 | All later phases hostable under any sub-path with zero env config |
+| GH Pages deploy at `https://bielinskilukasz.github.io/habits/` (trailing slash) | D-19 + research §Pitfall 3 + §A5 | All later phases hostable under any sub-path with zero env config |
 
 ## File Set (Minimum End-to-End Working Slice)
 

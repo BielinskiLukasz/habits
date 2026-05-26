@@ -83,7 +83,7 @@ P1 deliberately ships **no test framework** — PROJECT.md forbids npm/build too
 | Long-press does NOT fire on scroll | D-02 / SETTINGS-07 (UX) | Gesture interaction; static analysis cannot prove pointer-cancellation logic works on real touch input | On phone: tap title and immediately drag-scroll downward. Diagnostics panel should NOT mount. |
 | Update toast does NOT fire on first install | D-08 | `controllerchange` semantics — only meaningful via the actual install flow | Clear all site data → fresh install → SW activates → confirm NO toast appears. |
 | `display-mode: standalone` detection accurate | PWA-05 / D-03 | Browsers differ in when `matchMedia('(display-mode: standalone)')` returns true | Open installed PWA: diagnostics shows "Install state: standalone". Open same URL in browser tab: diagnostics shows "Install state: browser". |
-| GitHub Pages sub-path deploy works | NFR-12 | Relative-path correctness is only provable against a real sub-path host | Deploy to `https://lukasz-bielinski.github.io/habits/`. Open URL. Confirm SW registers under `/habits/` scope (DevTools), install works, offline reload works. |
+| GitHub Pages sub-path deploy works | NFR-12 | Relative-path correctness is only provable against a real sub-path host | Deploy to `https://bielinskilukasz.github.io/habits/`. Open URL. Confirm SW registers under `/habits/` scope (DevTools), install works, offline reload works. |
 
 ---
 
