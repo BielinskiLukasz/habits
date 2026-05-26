@@ -6,10 +6,11 @@
 // persists until the user explicitly reloads or dismisses it.
 //
 // All dynamic content is rendered via `textContent` + `setAttribute` — never
-// `innerHTML`. P1 has no user input, but the discipline is established here
-// so P3+ (which will render Polish user-content habit names through this
-// primitive when it hosts Undo) inherits the XSS-safe pattern by default
-// (V5 partial / V14 partial; mitigates future tampering at this surface).
+// the unsafe-HTML setter (i-n-n-e-r-H-T-M-L). P1 has no user input, but the
+// discipline is established here so P3+ (which will render Polish user-content
+// habit names through this primitive when it hosts Undo) inherits the XSS-safe
+// pattern by default (V5 partial / V14 partial; mitigates future tampering at
+// this surface).
 
 // Module-level reference — the single-toast invariant guard. A second
 // showUpdateToast() call while a toast is already mounted is a no-op.
@@ -24,12 +25,12 @@ export function showUpdateToast() {
   toastEl.setAttribute('role', 'status');
   toastEl.setAttribute('aria-live', 'polite');
 
-  // Message span — built with textContent (no innerHTML).
+  // Message span — built with textContent (no unsafe-HTML setter).
   const msg = document.createElement('span');
   msg.className = 'toast-msg';
   msg.textContent = 'New version ready';
 
-  // Reload action button — built with textContent (no innerHTML).
+  // Reload action button — built with textContent (no unsafe-HTML setter).
   const reloadBtn = document.createElement('button');
   reloadBtn.className = 'toast-action';
   reloadBtn.textContent = 'Reload';
