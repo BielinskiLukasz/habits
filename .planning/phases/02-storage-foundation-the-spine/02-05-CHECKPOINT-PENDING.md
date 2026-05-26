@@ -1,12 +1,65 @@
 ---
 plan: 02-05
-status: human_verify_pending
+status: smoke_fix_applied_reverify_needed
 type: checkpoint
 paused_at: "2026-05-26T13:50:00Z"
 implementation_merged: e7c619ddad52b81c071dff9dd0ca16878e6a4dc0
+smoke_round_1: "2026-05-26 — FAILED at item 1 (schema.js createIndex chain — real IDB rejected)"
+smoke_fix_applied: "schema.js + tests/unit/schema.test.js — fluent chain broken into per-store assignments; mock made real-IDB-faithful"
 ---
 
-# Plan 02-05 — Human-Verify Checkpoint Pending
+# Plan 02-05 — Smoke Round 1 Failed, Fix Applied, Re-verify Needed
+
+## Round 1 outcome (2026-05-26)
+
+**Item 1 — Cold boot, real IDB persistence: FAILED.**
+
+Console:
+```
+Uncaught TypeError: db.createObjectStore(...).createIndex(...).createIndex is not a function
+    at 1 (schema.js:47:8)
+    at req.onupgradeneeded (idb.js:55:22)
+Uncaught (in promise) AbortError: Version change transaction was aborted in upgradeneeded event handler.
+```
+
+Items 2 + 3 surfaced the same root cause cascading (no IDB → `persisted()` returned false; cross-tab smoke crashed inside `markCompleted` because `getLog` couldn't open the DB). User stopped the checklist at item 3.
+
+## Root cause
+
+`IDBObjectStore.createIndex()` returns an `IDBIndex`, NOT the parent store, so the fluent chain
+`db.createObjectStore(...).createIndex('wave', 'wave').createIndex('status', 'status')` always
+throws against real IDB on the second `.createIndex` call. The `habits`, `logs`, `events`, and
+`score_snapshots` stores were all written with this broken pattern.
+
+The Node-side unit test (`tests/unit/schema.test.js`) used a mock whose `createIndex` returned
+`fakeStore` — letting the chain pass tests cleanly. This is exactly the Pitfall 9 (fake/real
+divergence) failure mode acknowledged in `tests/helpers/fake-idb.js`: "real-IDB durability is
+verified manually via tests-browser.html (D-26)". The manual checklist is the only thing that
+could have caught this; it did.
+
+## Fix applied
+
+- `js/db/schema.js` — broke the fluent chain in all four multi-index stores. Each store is now
+  assigned to a `const` and `createIndex` is called on the store reference directly. Header
+  comment notes the IDBIndex-vs-IDBObjectStore return-type pitfall.
+- `tests/unit/schema.test.js` — `mockDb.createObjectStore(...).createIndex(...)` now returns an
+  IDBIndex-shaped object (`name`, `keyPath`, `multiEntry`, `unique`) with **no** `createIndex`
+  method. Mirrors real IDB so any future fluent-chain regression fails loudly in unit tests.
+- `node --test` — **99/99 green** post-fix.
+
+No schema-shape changes (same 7 stores, same indexes, same keypaths, DB_VERSION still `1`).
+This is purely a call-sequence repair; no migration needed.
+
+## Re-verify path
+
+Re-run the 8-item smoke checklist below from item 1. If item 1 passes (7 stores, 8 habits, 8
+events, persisted defaults all visible in DevTools → Application → IndexedDB), continue to
+items 2–8. If item 1 fails again, capture the new console output and report back.
+
+Plan 02-05 still cannot close until the full 8-item checklist is recorded ✓; only then can the
+SUMMARY.md be written and CHECKPOINT-PENDING.md deleted.
+
+## Status
 
 ## Status
 

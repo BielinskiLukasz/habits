@@ -14,8 +14,14 @@ import { DB_VERSION, MIGRATIONS } from '../../js/db/schema.js';
 
 /**
  * Mock IDB-style `db` that captures `createObjectStore`/`createIndex` calls.
- * Each `createObjectStore` returns a mock store with `createIndex` recording
- * index names. Returned `_stores` is the introspection surface.
+ *
+ * Each `createObjectStore` returns a mock store. `store.createIndex(name, path)`
+ * returns an IDBIndex-shaped object — NOT the parent store — exactly like real
+ * IndexedDB does. This matters: previous versions of this mock returned the
+ * store, which let a fluent `.createIndex().createIndex()` chain pass tests
+ * even though the second call throws against real IDB ("createIndex is not a
+ * function on IDBIndex"). That divergence (Pitfall 9 — fake/real divergence)
+ * shipped a broken schema in Phase 2 Wave 5. Mock fidelity is the contract.
  *
  * @returns {{ createObjectStore: (name: string, opts: object) => object, _stores: Array<{name: string, opts: object, indexes: string[]}> }}
  */
@@ -26,13 +32,20 @@ function mockDb() {
       const indexes = [];
       const storeRec = { name, opts, indexes };
       stores.push(storeRec);
-      const fakeStore = {
-        createIndex(iname, _path) {
+      return {
+        createIndex(iname, keyPath, options) {
           indexes.push(iname);
-          return fakeStore;
+          // IDBIndex-shaped: name + keyPath + multiEntry/unique flags. NO
+          // createIndex method here — mirrors the real-IDB return type so
+          // `.createIndex().createIndex()` chains fail loudly in tests.
+          return {
+            name: iname,
+            keyPath,
+            multiEntry: !!(options && options.multiEntry),
+            unique: !!(options && options.unique),
+          };
         },
       };
-      return fakeStore;
     },
     _stores: stores,
   };

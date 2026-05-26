@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: paused
-stopped_at: Phase 02 Wave 5 — human-verify checkpoint pending (manual browser smoke)
-last_updated: "2026-05-26T13:51:00.000Z"
-last_activity: 2026-05-26 -- Phase 02 Waves 1-4 complete + Wave 5 implementation merged; paused at human-verify checkpoint
+stopped_at: Phase 02 Wave 5 — smoke round 1 failed at item 1 (schema.js createIndex chain), fix applied, awaiting re-verify
+last_updated: "2026-05-26T14:30:00.000Z"
+last_activity: 2026-05-26 -- Smoke round 1 hit Pitfall 9 (fake/real divergence) at schema.js:47; fluent chain replaced with per-store assignment + mock made IDBIndex-faithful; 99/99 green; awaiting browser re-verify
 progress:
   total_phases: 5
   completed_phases: 0
@@ -32,20 +32,21 @@ Last activity: 2026-05-26 -- Wave 5 implementation merged at e7c619d; SUMMARY.md
 
 Progress: [██████░░░░] 67% of Phase 02 (Waves 1-4 done + Wave 5 implementation merged; Wave 5 SUMMARY + Wave 6 remaining)
 
-## Resume Instructions (tomorrow)
+## Resume Instructions
 
-**Phase 02 Wave 5 paused at human-verify checkpoint.** Implementation is merged to main at `e7c619d`; tests 99/99 green; manual browser smoke checklist not yet run.
+**Phase 02 Wave 5 — smoke round 1 caught a schema.js bug; fix is in working tree (not yet committed); re-verify needed.**
 
-### Step 1 — Run the manual smoke checklist
+### Step 1 — Re-run the manual smoke checklist
 
-See `.planning/phases/02-storage-foundation-the-spine/02-05-CHECKPOINT-PENDING.md` for the full 8-item checklist. Setup:
+See `.planning/phases/02-storage-foundation-the-spine/02-05-CHECKPOINT-PENDING.md` for the full 8-item checklist plus the round-1 failure record. Setup:
 
 ```
-node --test                    # confirm still 99/99 green
-node scripts/serve.js           # boot dev server on :8080
+node --test                    # confirm still 99/99 green (post-fix)
+node scripts/serve.js          # boot dev server on :8080
 ```
 
 Open `http://localhost:8080/` in Chrome/Edge. Walk through items 1–8. Record ✓/✗ + notes.
+Item 1 must show 7 stores + 8 habits + 8 events in DevTools → Application → IndexedDB.
 
 ### Step 2 — Resume execution
 

@@ -42,22 +42,34 @@ export const DB_VERSION = 1;
  */
 export const MIGRATIONS = {
   1: (db, _tx) => {
-    db.createObjectStore('habits', { keyPath: 'id' })
-      .createIndex('wave', 'wave')
-      .createIndex('status', 'status');
-    db.createObjectStore('habit_versions', { keyPath: ['habitId', 'effectiveFrom'] })
-      .createIndex('habitId', 'habitId');
-    db.createObjectStore('logs', { keyPath: ['habitId', 'date'] })
-      .createIndex('date', 'date')
-      .createIndex('habitId', 'habitId');
-    db.createObjectStore('events', { keyPath: 'id' })  // D-42 — UUID, not autoincrement
-      .createIndex('at', 'at')
-      .createIndex('type', 'type')
-      .createIndex('habitId', 'habitId');
+    // IDBObjectStore.createIndex() returns the IDBIndex (NOT the parent store),
+    // so multi-index stores cannot use a fluent chain — capture the store and
+    // call createIndex on it directly. Caught during Phase 2 Wave 5 human-verify
+    // when the Node-side fake-IDB mock incorrectly returned the store from
+    // createIndex, masking the failure (Pitfall 9 — fake/real divergence).
+    const habits = db.createObjectStore('habits', { keyPath: 'id' });
+    habits.createIndex('wave', 'wave');
+    habits.createIndex('status', 'status');
+
+    const habitVersions = db.createObjectStore('habit_versions', { keyPath: ['habitId', 'effectiveFrom'] });
+    habitVersions.createIndex('habitId', 'habitId');
+
+    const logs = db.createObjectStore('logs', { keyPath: ['habitId', 'date'] });
+    logs.createIndex('date', 'date');
+    logs.createIndex('habitId', 'habitId');
+
+    // D-42 — UUID, not autoincrement.
+    const events = db.createObjectStore('events', { keyPath: 'id' });
+    events.createIndex('at', 'at');
+    events.createIndex('type', 'type');
+    events.createIndex('habitId', 'habitId');
+
     db.createObjectStore('settings', { keyPath: 'key' });
     db.createObjectStore('meta', { keyPath: 'key' });
-    db.createObjectStore('score_snapshots', { keyPath: ['habitId', 'date'] })  // D-39 — declared empty
-      .createIndex('date', 'date')
-      .createIndex('habitId', 'habitId');
+
+    // D-39 — declared empty so P6 starts writing without a v2 migration.
+    const snapshots = db.createObjectStore('score_snapshots', { keyPath: ['habitId', 'date'] });
+    snapshots.createIndex('date', 'date');
+    snapshots.createIndex('habitId', 'habitId');
   },
 };
