@@ -62,7 +62,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 02-04-PLAN.md — seed/habits.json (8 habits covering D-32 matrix) + js/io/seed.js (idempotent merge-by-id + first-run persist()) + integration tests (split per W2: seed-only)
+- [x] 02-04-PLAN.md — seed/habits.json (8 habits covering D-32 matrix) + js/io/seed.js (idempotent merge-by-id + first-run persist()) + integration tests (split per W2: seed-only)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
-| 2. Storage Foundation (The Spine) | 3/6 | In Progress|  |
+| 2. Storage Foundation (The Spine) | 4/6 | In Progress|  |
 | 3. Today View & Settings v1 | 0/TBD | Not started | - |
 | 4. Domain Model | 0/TBD | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
