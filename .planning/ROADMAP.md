@@ -50,7 +50,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — CI workflow + scripts/serve.js + test fakes (fake-IDB with tx-shape per W1, fake-BC, fake-storage, fake-document) + js/util/date.js (DATA-06 with DST + leap fixtures) + js/util/id.js (UUID + Pitfall 13 fallback)
+- [x] 02-01-PLAN.md — CI workflow + scripts/serve.js + test fakes (fake-IDB with tx-shape per W1, fake-BC, fake-storage, fake-document) + js/util/date.js (DATA-06 with DST + leap fixtures) + js/util/id.js (UUID + Pitfall 13 fallback)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
-| 2. Storage Foundation (The Spine) | 0/TBD | Not started | - |
+| 2. Storage Foundation (The Spine) | 1/6 | In Progress|  |
 | 3. Today View & Settings v1 | 0/TBD | Not started | - |
 | 4. Domain Model | 0/TBD | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
