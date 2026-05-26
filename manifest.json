@@ -1,0 +1,20 @@
+{
+  "name": "Habits",
+  "short_name": "Habits",
+  "description": "Personal multi-year habit tracker.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f0f10",
+  "theme_color": "#f5a623",
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
