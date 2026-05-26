@@ -37,4 +37,11 @@ export const APP_VERSION = '0.1.0';
 // Convenience side-effect assignment — exposes APP_VERSION on `self` /
 // `globalThis` for ad-hoc DevTools probing in either context. Not relied on
 // by any code path (the module import is the canonical accessor).
-self.APP_VERSION = APP_VERSION;
+//
+// Why `globalThis` (not bare `self`): Node 20+ runs this module from
+// `tests/unit/_smoke.test.js` per D-23/D-38, and `self` is undefined in
+// Node. `globalThis` is defined in every JS runtime (window,
+// ServiceWorkerGlobalScope, Node 12+) and equals `self` in both browser and
+// service-worker contexts, so the DevTools `self.APP_VERSION` probe keeps
+// working unchanged.
+globalThis.APP_VERSION = APP_VERSION;
