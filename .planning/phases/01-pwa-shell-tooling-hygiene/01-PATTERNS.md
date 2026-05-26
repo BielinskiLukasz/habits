@@ -247,7 +247,7 @@ if ("serviceWorker" in navigator) {
 // js/util/version.js
 // Single source of truth for app version (D-12).
 // Bump this string to force a new SW cache (per D-10: only on shell-asset change).
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '0.1.0';
 
 // Make the constant available to the service worker context, which loads this file
 // via importScripts (where ES `export` is ignored, but `self.X = ...` works).

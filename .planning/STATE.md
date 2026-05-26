@@ -94,7 +94,7 @@ Locked during Phase 1 execution (2026-05-26):
 - D-25: Integration tests in Node via hand-written ~30-line in-memory fake IDB repo (same surface as real `js/db/repo.js`); real-IDB integration stays in `tests-browser.html` (manual)
 - D-26: UI testing two-tier — pure view "builders" unit-tested in Node (returning `{tag, attrs, children}` descriptions); browser smoke via `tests-browser.html`; no DOM polyfill; Phase 3 first consumer
 - D-27: JSDoc as standard for file headers (`/** @file ... */`) and exported APIs (`@param`/`@returns`/`@type`); inline `//` only for "why" notes; banned for line-by-line restatements
-- D-28: `APP_VERSION` follows Semantic Versioning 2.0.0 (https://semver.org/); starting value `'1.0.0'`; cache name format `nawyki-${APP_VERSION}` (no `v` literal prefix); Phase 1 retro-converted from `'v1'`/`nawyki-v1`
+- D-28: `APP_VERSION` follows Semantic Versioning 2.0.0 (https://semver.org/); starting value `'0.1.0'`; cache name format `nawyki-${APP_VERSION}` (no `v` literal prefix); Phase 1 retro-converted from `'v1'`/`nawyki-v1`
 - TDD mode flipped on (`workflow.tdd_mode: true`) — Phase 2+ MVP+TDD gate is blocking
 
 ### Pending Todos

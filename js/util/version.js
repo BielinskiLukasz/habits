@@ -3,9 +3,17 @@
  *
  * Format: Semantic Versioning 2.0.0 — https://semver.org/
  *   MAJOR.MINOR.PATCH (optionally `-prerelease` and/or `+build` suffixes)
- *   - MAJOR — incompatible API or storage-shape changes
- *   - MINOR — backwards-compatible feature additions
- *   - PATCH — backwards-compatible bug fixes or shell-asset-only changes
+ *
+ * CURRENT PHASE — Initial Development (`0.y.z`)
+ *   Per SemVer §4: "Major version zero (0.y.z) is for initial development.
+ *   Anything MAY change at any time. The public API SHOULD NOT be considered
+ *   stable." During this phase:
+ *     - PATCH (0.1.0 → 0.1.1) — bug fix, refactor, shell-asset-only change
+ *     - MINOR (0.1.0 → 0.2.0) — phase completion, breaking change, new feature
+ *     - MAJOR stays at 0 until the v1.0 milestone (Phase 6) is sealed
+ *   After v1.0 ships, standard MAJOR/MINOR/PATCH rules apply.
+ *
+ * See VERSIONING.md at the project root for the full policy.
  *
  * Bumping this string forces a new SW cache name (per D-10: cache name is
  * derived from APP_VERSION as `nawyki-${APP_VERSION}` — bump on any
@@ -22,7 +30,7 @@
  */
 
 /** @type {string} */
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '0.1.0';
 
 // Side-effect assignment so the classic SW context (which ignores `export`
 // under importScripts) can still read the global.

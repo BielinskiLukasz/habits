@@ -45,7 +45,7 @@ key_files:
     - manifest.json
   modified: []
 decisions:
-  - "APP_VERSION starts at '1.0.0'; bump per D-10 (only on shell-asset changes)"
+  - "APP_VERSION starts at '0.1.0'; bump per D-10 (only on shell-asset changes)"
   - "Palette locked at #0f0f10 (bg) / #f5a623 (accent) per D-16; identical strings in manifest and tokens.css"
   - "Cascade Layer order: reset, tokens, base, layout, components, view, utilities (layout + utilities ship empty in P1)"
   - "Icon = amber dot on near-black, circle r=160 at (256,256) inside 80% safe-zone r=205; no rx on background rect"
@@ -71,7 +71,7 @@ Three atomic commits added nine new files at the project root and under `css/` +
 
 | File | Purpose |
 | --- | --- |
-| `js/util/version.js` | Single source of truth for `APP_VERSION = '1.0.0'` (D-12). Exports as ES module **and** assigns `self.APP_VERSION = APP_VERSION` so the classic-SW context (Plan 02) can read it via `importScripts`. Bumping the version is exactly one edit, in exactly one file. |
+| `js/util/version.js` | Single source of truth for `APP_VERSION = '0.1.0'` (D-12). Exports as ES module **and** assigns `self.APP_VERSION = APP_VERSION` so the classic-SW context (Plan 02) can read it via `importScripts`. Bumping the version is exactly one edit, in exactly one file. |
 | `icon.svg` | Maskable placeholder per D-17/D-18: `viewBox="0 0 512 512"`, full-canvas background rect `fill="#0f0f10"` (no `rx` — the OS supplies the corner mask via maskable-icon protocol), centered glyph `<circle cx="256" cy="256" r="160" fill="#f5a623"/>` sitting comfortably inside the 80% safe-zone radius of 205 (Pitfall 5 mitigated). |
 
 ### Task 2 — CSS Cascade Layers composer + tokens (commit `6f354c7`)
@@ -107,11 +107,11 @@ This guarantees the install splash, the in-app surface, and the OS theme-color m
 ## APP_VERSION Starting Value
 
 ```
-APP_VERSION = '1.0.0'
+APP_VERSION = '0.1.0'
 ```
 
 - Per D-10: bump only on shell-asset changes (`index.html`, `desktop.html`, `manifest.json`, `sw.js`, `icon.svg`, anything under `css/`). Pure JS module changes do NOT bump the cache.
-- Plan 02's `sw.js` derives the cache name as `nawyki-${self.APP_VERSION}` → `nawyki-1.0.0` initially.
+- Plan 02's `sw.js` derives the cache name as `nawyki-${self.APP_VERSION}` → `nawyki-0.1.0` initially.
 - Plan 03's diagnostics panel reads the same constant to display the running version.
 
 ## Token Vocabulary Available to Downstream Plans
@@ -143,7 +143,7 @@ Any later CSS file can reference these via `var(--...)`:
 2. ✅ **Token integrity:** `--color-bg: #0f0f10` and `--color-accent: #f5a623` both present in `css/tokens.css`.
 3. ✅ **Layer composer ready:** `@layer reset, tokens, base, layout, components, view, utilities;` present in `css/main.css`.
 4. ✅ **Maskable safe-zone:** `cx="256" cy="256" r="160"` matches in `icon.svg`; no `rx=` on background rect.
-5. ✅ **Version source-of-truth:** Both `export const APP_VERSION = '1.0.0'` and `self.APP_VERSION = APP_VERSION` present in `js/util/version.js`.
+5. ✅ **Version source-of-truth:** Both `export const APP_VERSION = '0.1.0'` and `self.APP_VERSION = APP_VERSION` present in `js/util/version.js`.
 6. ✅ **V14 Configuration:** `grep -E 'https?://' manifest.json` returns no matches.
 7. ✅ **NFR-12 (relative paths):** `grep -nE '"\s*/[a-z]' manifest.json` returns empty.
 8. ✅ **NFR-11 (no build):** No `node_modules/`, `package.json`, `dist/`, or `build/` created.
@@ -152,7 +152,7 @@ Any later CSS file can reference these via `var(--...)`:
 
 None — plan executed exactly as written.
 
-The verify regexes for Task 1 explicitly require BOTH `export const APP_VERSION = '1.0.0'` AND `self.APP_VERSION = APP_VERSION` in the same file. This corresponds to a hybrid of RESEARCH.md's Approach B (single-file) with the explicit `export` line — chosen because the plan's `<behavior>`, `<action>`, `<verify>`, and `<acceptance_criteria>` blocks all explicitly require both lines coexisting. The classic-SW `importScripts` evaluator in Plan 02 will need to handle the `export` token (either by using `type: "module"` SW registration or by sourcing version via a wrapper file) — Plan 02's design decision, flagged here for that planner.
+The verify regexes for Task 1 explicitly require BOTH `export const APP_VERSION = '0.1.0'` AND `self.APP_VERSION = APP_VERSION` in the same file. This corresponds to a hybrid of RESEARCH.md's Approach B (single-file) with the explicit `export` line — chosen because the plan's `<behavior>`, `<action>`, `<verify>`, and `<acceptance_criteria>` blocks all explicitly require both lines coexisting. The classic-SW `importScripts` evaluator in Plan 02 will need to handle the `export` token (either by using `type: "module"` SW registration or by sourcing version via a wrapper file) — Plan 02's design decision, flagged here for that planner.
 
 ## Known Stubs
 
@@ -172,7 +172,7 @@ None. No new attack surface introduced beyond what the plan's `<threat_model>` a
 
 ## Self-Check: PASSED
 
-- ✅ `js/util/version.js` exists; contains `export const APP_VERSION = '1.0.0'` AND `self.APP_VERSION = APP_VERSION`.
+- ✅ `js/util/version.js` exists; contains `export const APP_VERSION = '0.1.0'` AND `self.APP_VERSION = APP_VERSION`.
 - ✅ `icon.svg` exists; `viewBox="0 0 512 512"`, no `rx=`, contains `<circle cx="256" cy="256" r="160" fill="#f5a623"/>`.
 - ✅ `manifest.json` exists; parses as valid JSON; 11 locked fields match.
 - ✅ `css/main.css` exists; declares `@layer reset, tokens, base, layout, components, view, utilities;`.

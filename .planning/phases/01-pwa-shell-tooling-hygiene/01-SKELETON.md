@@ -17,12 +17,12 @@ created: 2026-05-26
 The thinnest possible end-to-end story. Each step unlocks the next:
 
 1. **File:// open** — A user opens `index.html` directly from disk. Page renders the empty Today scaffold. Console is clean. No SW registration is attempted.
-2. **HTTPS open** — A user opens the same `index.html` via `python -m http.server 8000` at `http://localhost:8000/`. Page renders identically. SW registers. Cache `nawyki-1.0.0` is populated with the shell asset list.
+2. **HTTPS open** — A user opens the same `index.html` via `python -m http.server 8000` at `http://localhost:8000/`. Page renders identically. SW registers. Cache `nawyki-0.1.0` is populated with the shell asset list.
 3. **Offline reload** — A user toggles DevTools → Network → Offline and reloads. Page loads from cache. Empty Today scaffold renders identically.
 4. **`?debug=1` trigger** — A user navigates to `?debug=1`. The diagnostics panel mounts in place of the empty scaffold, showing app version, schema version (placeholder), SW state, cache name, install state, and persistence state ("n/a (P2)").
 5. **Long-press trigger** — A user long-presses the title for 1.5 s. The same diagnostics panel mounts.
 6. **Reset shell** — A user clicks "Reset shell" in diagnostics → confirms → SW unregisters + caches clear + page reloads to a fresh install.
-7. **Update toast** — A developer bumps `APP_VERSION` to `'1.0.1'` in `js/util/version.js` and redeploys. On the next reload of a still-open tab, `controllerchange` fires → the toast "New version ready — Reload" appears. Clicking Reload activates the new cache `nawyki-1.0.1`; the old `nawyki-1.0.0` is deleted.
+7. **Update toast** — A developer bumps `APP_VERSION` to `'0.1.1'` in `js/util/version.js` and redeploys. On the next reload of a still-open tab, `controllerchange` fires → the toast "New version ready — Reload" appears. Clicking Reload activates the new cache `nawyki-0.1.1`; the old `nawyki-0.1.0` is deleted.
 
 Steps 1–7 run on the developer machine. The phase-gate hands-on check adds:
 
@@ -90,7 +90,7 @@ habits/
     ├── desktop.js                  # Desktop entry — SW register + ?debug=1
     │
     ├── util/
-    │   └── version.js              # APP_VERSION = '1.0.0' — single source of truth (D-12)
+    │   └── version.js              # APP_VERSION = '0.1.0' — single source of truth (D-12)
     │
     ├── platform/
     │   └── sw-register.js          # Protocol-guarded + silent-catch registration + controllerchange wiring
