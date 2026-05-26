@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-05-26T13:28:55.106Z"
-last_activity: 2026-05-26 -- Phase 02 execution started
+status: paused
+stopped_at: Phase 02 Wave 5 — human-verify checkpoint pending (manual browser smoke)
+last_updated: "2026-05-26T13:51:00.000Z"
+last_activity: 2026-05-26 -- Phase 02 Waves 1-4 complete + Wave 5 implementation merged; paused at human-verify checkpoint
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 0
+  completed_plans: 4
   percent: 0
 ---
 
@@ -21,34 +21,61 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 02 — storage-foundation-the-spine
+**Current focus:** Phase 02 — storage-foundation-the-spine (Wave 5/6 paused at human-verify)
 
 ## Current Position
 
-Phase: 02 (storage-foundation-the-spine) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 02
-Last activity: 2026-05-26 -- Phase 02 execution started
+Phase: 02 (storage-foundation-the-spine) — PAUSED at Wave 5 human-verify checkpoint
+Plan: 5 of 6 (Tasks 1-3 merged, Task 4 = manual smoke pending, Task 5 = SUMMARY write pending)
+Status: Paused — awaiting manual browser smoke checklist
+Last activity: 2026-05-26 -- Wave 5 implementation merged at e7c619d; SUMMARY.md not yet written
 
-Progress: [█░░░░░░░░░] 17% (1/6 phases complete)
+Progress: [██████░░░░] 67% of Phase 02 (Waves 1-4 done + Wave 5 implementation merged; Wave 5 SUMMARY + Wave 6 remaining)
 
-## Resume Instructions
+## Resume Instructions (tomorrow)
 
-Next up — Phase 2: Storage Foundation (The Spine). 13 requirements (DATA-01..08, SEED-01..05).
+**Phase 02 Wave 5 paused at human-verify checkpoint.** Implementation is merged to main at `e7c619d`; tests 99/99 green; manual browser smoke checklist not yet run.
 
-Recommended entry points:
+### Step 1 — Run the manual smoke checklist
 
-  - `/gsd-discuss-phase 2 ${GSD_WS}` — gather context, lock decisions before planning (recommended)
-  - `/gsd-plan-phase 2 ${GSD_WS}` — skip discuss, go straight to planning
-  - `/gsd-execute-phase 2 ${GSD_WS}` — only after planning lands
+See `.planning/phases/02-storage-foundation-the-spine/02-05-CHECKPOINT-PENDING.md` for the full 8-item checklist. Setup:
+
+```
+node --test                    # confirm still 99/99 green
+node scripts/serve.js           # boot dev server on :8080
+```
+
+Open `http://localhost:8080/` in Chrome/Edge. Walk through items 1–8. Record ✓/✗ + notes.
+
+### Step 2 — Resume execution
+
+Re-invoke `/gsd-execute-phase 2`. The safe-resume gate will detect that plan 02-05 has commits on main (grep `02-05`) but no `02-05-SUMMARY.md`. It will offer:
+
+- **close out manually** ← pick this. Write `02-05-SUMMARY.md` capturing the smoke checklist outcomes (template at `$HOME/.claude/get-shit-done/templates/summary.md`), then delete `02-05-CHECKPOINT-PENDING.md`.
+- If anything fails: report which item, orchestrator routes to a fix plan.
+
+After SUMMARY.md commits, the orchestrator advances to Wave 6 (plan 02-06 — APP_VERSION 0.2.0 bump, CLAUDE.md/PROJECT.md doc reversals, README node serve script, ARCHITECTURE.md edits), then runs phase verification + code review + roadmap close-out.
+
+### What's done so far (this session)
+
+| Wave | Plan | Status | Commits |
+|------|------|--------|---------|
+| 1 | 02-01 | ✓ Complete | CI workflow + dev server + test fakes + `date.js` + `id.js` (7 commits, merged) |
+| 2 | 02-02 | ✓ Complete | `schema.js` (7-store v1) + `idb.js` wrapper + `repo.js` facade + A7 contract test (7 commits, merged) |
+| 3 | 02-03 | ✓ Complete | `apply.js` chokepoint + `markCompleted` + `undo.js` + `sync.js` + `lifecycle.js` + `store.js` (9 commits, merged) |
+| 4 | 02-04 | ✓ Complete | `seed/habits.json` 8-habit fixture + `js/io/seed.js` idempotent loader + persist() + D-45 defaults (5 commits, merged) |
+| 5 | 02-05 | ⏸ Paused | Tasks 1-3 merged (3 commits); Task 4 = human-verify pending; Task 5 = SUMMARY pending |
+| 6 | 02-06 | ☐ Not started | APP_VERSION 0.2.0 + doc reversals |
+
+Test suite: **99/99 green** at HEAD `e7c619d`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 
-  - SemVer (D-28) — bump to 0.2.0 when Phase 2 ships
+  - SemVer (D-28) — bump to 0.2.0 when Phase 2 ships (Wave 6 owns this)
   - Module SW (D-29) — already in place; don't touch
   - JSDoc (D-27) — all new files start with /** @file ... */
-  - Tests (D-23..D-26) — `tests/` directory introduced this phase; node --test in CI
-  - TDD (workflow.tdd_mode=true) — MVP+TDD blocking gate is active
+  - Tests (D-23..D-26) — node --test in CI on Node 20
+  - TDD (workflow.tdd_mode=true) — RED→GREEN enforced per behavior-adding task
 
 ## Performance Metrics
 
