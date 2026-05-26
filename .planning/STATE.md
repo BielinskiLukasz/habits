@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: paused
-stopped_at: Phase 02 Wave 5 — smoke round 1 failed at item 1 (schema.js createIndex chain), fix applied, awaiting re-verify
-last_updated: "2026-05-26T14:30:00.000Z"
-last_activity: 2026-05-26 -- Smoke round 1 hit Pitfall 9 (fake/real divergence) at schema.js:47; fluent chain replaced with per-store assignment + mock made IDBIndex-faithful; 99/99 green; awaiting browser re-verify
+status: ready
+stopped_at: Phase 02 Wave 5 closed (plan 02-05 SUMMARY committed) — next is Wave 6 / plan 02-06 (APP_VERSION 0.2.0 + doc reversals)
+last_updated: "2026-05-27T10:00:00.000Z"
+last_activity: 2026-05-27 -- Smoke round 2 cleared items 1-7 + item 8 PASS-with-Chromium-caveat; 02-05 SUMMARY committed; ready to start Wave 6
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -21,41 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 02 — storage-foundation-the-spine (Wave 5/6 paused at human-verify)
+**Current focus:** Phase 02 — storage-foundation-the-spine (Wave 6 / plan 02-06 ready to start)
 
 ## Current Position
 
-Phase: 02 (storage-foundation-the-spine) — PAUSED at Wave 5 human-verify checkpoint
-Plan: 5 of 6 (Tasks 1-3 merged, Task 4 = manual smoke pending, Task 5 = SUMMARY write pending)
-Status: Paused — awaiting manual browser smoke checklist
-Last activity: 2026-05-26 -- Wave 5 implementation merged at e7c619d; SUMMARY.md not yet written
+Phase: 02 (storage-foundation-the-spine) — Wave 5 closed, Wave 6 ready
+Plan: 5 of 6 complete; plan 02-06 = next
+Status: Ready — re-invoke `/gsd-execute-phase 2` to start Wave 6
+Last activity: 2026-05-27 -- Smoke round 2 cleared items 1-7 + item 8 PASS-with-Chromium-caveat; 02-05 SUMMARY committed; CHECKPOINT-PENDING deleted
 
-Progress: [██████░░░░] 67% of Phase 02 (Waves 1-4 done + Wave 5 implementation merged; Wave 5 SUMMARY + Wave 6 remaining)
+Progress: [████████░░] 83% of Phase 02 (Waves 1-5 closed; Wave 6 remaining = plan 02-06: APP_VERSION 0.2.0 + doc reversals)
 
 ## Resume Instructions
 
-**Phase 02 Wave 5 — smoke round 1 caught a schema.js bug; fix is in working tree (not yet committed); re-verify needed.**
-
-### Step 1 — Re-run the manual smoke checklist
-
-See `.planning/phases/02-storage-foundation-the-spine/02-05-CHECKPOINT-PENDING.md` for the full 8-item checklist plus the round-1 failure record. Setup:
-
-```
-node --test                    # confirm still 99/99 green (post-fix)
-node scripts/serve.js          # boot dev server on :8080
-```
-
-Open `http://localhost:8080/` in Chrome/Edge. Walk through items 1–8. Record ✓/✗ + notes.
-Item 1 must show 7 stores + 8 habits + 8 events in DevTools → Application → IndexedDB.
-
-### Step 2 — Resume execution
-
-Re-invoke `/gsd-execute-phase 2`. The safe-resume gate will detect that plan 02-05 has commits on main (grep `02-05`) but no `02-05-SUMMARY.md`. It will offer:
-
-- **close out manually** ← pick this. Write `02-05-SUMMARY.md` capturing the smoke checklist outcomes (template at `$HOME/.claude/get-shit-done/templates/summary.md`), then delete `02-05-CHECKPOINT-PENDING.md`.
-- If anything fails: report which item, orchestrator routes to a fix plan.
-
-After SUMMARY.md commits, the orchestrator advances to Wave 6 (plan 02-06 — APP_VERSION 0.2.0 bump, CLAUDE.md/PROJECT.md doc reversals, README node serve script, ARCHITECTURE.md edits), then runs phase verification + code review + roadmap close-out.
+**Phase 02 Wave 5 is closed. Plan 02-06 is the only remaining plan.** Re-invoking `/gsd-execute-phase 2` will dispatch Wave 6 (plan 02-06: APP_VERSION 0.2.0 bump, CLAUDE.md/PROJECT.md doc reversals, README node serve script, ARCHITECTURE.md edits), then run phase verification + code review + roadmap close-out.
 
 ### What's done so far (this session)
 
@@ -65,10 +44,10 @@ After SUMMARY.md commits, the orchestrator advances to Wave 6 (plan 02-06 — AP
 | 2 | 02-02 | ✓ Complete | `schema.js` (7-store v1) + `idb.js` wrapper + `repo.js` facade + A7 contract test (7 commits, merged) |
 | 3 | 02-03 | ✓ Complete | `apply.js` chokepoint + `markCompleted` + `undo.js` + `sync.js` + `lifecycle.js` + `store.js` (9 commits, merged) |
 | 4 | 02-04 | ✓ Complete | `seed/habits.json` 8-habit fixture + `js/io/seed.js` idempotent loader + persist() + D-45 defaults (5 commits, merged) |
-| 5 | 02-05 | ⏸ Paused | Tasks 1-3 merged (3 commits); Task 4 = human-verify pending; Task 5 = SUMMARY pending |
+| 5 | 02-05 | ✓ Complete | Reset-data + boot wiring + sw.js SHELL + smoke (4 implementation commits + 1 smoke-fix commit `389b9d9` + SUMMARY); 7/8 smoke items full PASS + item 8 PASS-with-Chromium-caveat |
 | 6 | 02-06 | ☐ Not started | APP_VERSION 0.2.0 + doc reversals |
 
-Test suite: **99/99 green** at HEAD `e7c619d`.
+Test suite: **99/99 green** at HEAD `389b9d9`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 
@@ -144,7 +123,7 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| Browser support | Chromium-family browsers (Chrome / Edge / Brave) refuse to load ES module scripts from `file://` — `'file:' URLs are treated as unique security origins`. Firefox + Safari work fine on `file://`. Workarounds: serve via `node scripts/serve.js` or GitHub Pages (both already supported). **Possible future investigation:** an optional single-file inline-bundled `index.html` for Chromium file:// users, IF the constraint becomes painful. Currently it isn't — local dev uses the node server, distribution uses GitHub Pages. CLAUDE.md's stack section already states this limitation. | Documented | 2026-05-27 (Phase 02 plan 05 smoke item 8) |
 
 ## Session Continuity
 
