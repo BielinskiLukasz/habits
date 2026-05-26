@@ -54,7 +54,7 @@ describe('undo: round-trip via meta.undoToken (D-43, UNDO-02)', () => {
     const repo = createFakeRepo();
     const { applyMod, undoMod } = await freshApplyAndUndo();
     applyMod.configure({ repo, broadcast: () => {}, trackTx: () => {} });
-    undoMod.configureUndo({ repo });
+    undoMod.configureUndo({ repo, apply: applyMod.apply });
 
     const markId = await applyMod.apply({
       type: 'markCompleted',
@@ -99,7 +99,7 @@ describe('undo: survives simulated reload (UNDO-02, Assumption A9)', () => {
     {
       const { applyMod, undoMod } = await freshApplyAndUndo();
       applyMod.configure({ repo, broadcast: () => {}, trackTx: () => {} });
-      undoMod.configureUndo({ repo });
+      undoMod.configureUndo({ repo, apply: applyMod.apply });
       const undoneId = await undoMod.undo();
       assert.match(undoneId, UUID_V4);
       // The log row must be gone now.
