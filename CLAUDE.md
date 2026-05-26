@@ -340,7 +340,16 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+### Comment Style (D-27, locked 2026-05-26)
+
+JSDoc is the standard for file headers and exported APIs:
+
+- **File-level header** — every `.js` file starts with `/** @file <one-line summary>. <rationale + cross-references to D-XX decisions> */`.
+- **Exported functions** — `/** <one-line description> @param {Type} name desc @returns {Type} desc */` above the export.
+- **Exported constants with non-obvious type** — `/** @type {Type} */` above the declaration.
+- **Inline `//` comments** — still allowed inside function bodies for "why this is non-obvious" notes (a subtle invariant, a workaround for a specific bug, a hidden constraint). NOT for one-line restatements of what the next line does — the code already says that.
+
+JSDoc gives editor type hints + structured API docs without a TypeScript compile step, fitting the zero-build / no-npm constraint.
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->

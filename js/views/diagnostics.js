@@ -1,20 +1,21 @@
-// js/views/diagnostics.js — Diagnostics panel + long-press attach +
-// Reset-shell handler (D-02, D-03, D-05, D-06, SETTINGS-07 placeholder).
-//
-// Two exports:
-//   - attachLongPress(el, onLongPress) — Pointer Events long-press detector
-//     per RESEARCH.md §Pattern 4 + Pitfall 7. 1500 ms timer with 10 px
-//     movement-cancellation tolerance.
-//   - mountDiagnostics() — renders the six-row diagnostics panel and three
-//     action buttons (Reset shell wired, Reset data disabled placeholder
-//     per D-05, Check for update wired).
-//
-// Both `textContent` and `setAttribute` are used exclusively for any
-// rendered value (no unsafe-HTML setter, i-n-n-e-r-H-T-M-L, of dynamic
-// data). P1 has no user input, but the discipline lands here so P3+
-// inherits the XSS-safe pattern when the panel renders user-content (V5
-// partial / V14 partial; mitigates future tampering at this surface per
-// the plan's threat model).
+/**
+ * @file Diagnostics panel + long-press attach + Reset-shell handler
+ * (D-02, D-03, D-05, D-06, SETTINGS-07 placeholder).
+ *
+ * Two exports:
+ *   - `attachLongPress(el, onLongPress)` — Pointer Events long-press detector
+ *     per RESEARCH.md §Pattern 4 + Pitfall 7. 1500 ms timer with 10 px
+ *     movement-cancellation tolerance.
+ *   - `mountDiagnostics()` — renders the six-row diagnostics panel and three
+ *     action buttons (Reset shell wired, Reset data disabled placeholder per
+ *     D-05, Check for update wired).
+ *
+ * Both `textContent` and `setAttribute` are used exclusively for any rendered
+ * value (no unsafe-HTML setter). P1 has no user input, but the discipline
+ * lands here so P3+ inherits the XSS-safe pattern when the panel renders
+ * user-content (V5 partial / V14 partial; mitigates future tampering at this
+ * surface per the plan's threat model).
+ */
 
 import { APP_VERSION } from '../util/version.js';
 
@@ -36,6 +37,10 @@ let panelEl = null;
  * up unexpectedly when the user starts a normal tap-and-scroll).
  *
  * Ignores non-primary pointer buttons (e.g., right-click on mouse).
+ *
+ * @param {Element} el - Element to bind the long-press detector to.
+ * @param {() => void} onLongPress - Invoked after a successful long-press.
+ * @returns {void}
  */
 export function attachLongPress(el, onLongPress) {
   let timer = null;
@@ -79,6 +84,8 @@ export function attachLongPress(el, onLongPress) {
  * Cache name, Install state, Persistence) + three action buttons (Reset
  * shell wired, Reset data disabled placeholder, Check for update wired)
  * per D-03 + D-05.
+ *
+ * @returns {void}
  */
 export function mountDiagnostics() {
   // Idempotent mount guard.

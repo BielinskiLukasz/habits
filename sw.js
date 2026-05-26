@@ -1,42 +1,43 @@
-// sw.js — Classic service worker for Nawyki (file://-safe via sw-register.js guard).
-//
-// Why CLASSIC service worker (not `type: "module"`):
-//   Module-form SWs are not yet Baseline on Firefox/Safari (Pitfall 4 in
-//   01-RESEARCH.md). Stable Firefox + Safari "download and attempt to execute
-//   the ES module flavor of service worker, and only raise an exception when
-//   there's a syntax error due to the usage of ES module imports." A silent-
-//   failing SW is unacceptable for an offline-first app, so we use the classic
-//   form + `importScripts('./js/util/version.js')` to share the version
-//   constant with the window context (D-12, research §Q2).
-//
-// Locked decisions implemented here:
-//   - D-09: `skipWaiting()` + `clients.claim()` are unconditional; new SWs
-//           take over immediately. The user-facing "New version ready" toast
-//           lives in sw-register.js (controllerchange listener); the SW never
-//           auto-reloads.
-//   - D-10: Cache name `nawyki-${APP_VERSION}`. Activate handler deletes every
-//           cache whose name is not the current one. Bumping APP_VERSION in
-//           js/util/version.js is the only operation needed to invalidate.
-//   - D-11: Strategy router: cache-first for the shell asset list (HTML, CSS,
-//           manifest, icon, pinned JS entry points) and stale-while-revalidate
-//           for everything under /js/. SWR honors D-10 (JS module changes do
-//           NOT need a cache-name bump because SWR refreshes on every fetch)
-//           while still satisfying NFR-04 (fully offline on cache fallback).
-//   - D-12: Single source of truth for the version constant. `self.APP_VERSION`
-//           is set by `importScripts('./js/util/version.js')` below.
-//   - D-19: Every URL in this file is relative (`./…`); no absolute paths and
-//           no off-origin (h-t-t-p-s) URLs (NFR-12 + T-01-NoNet).
-//
-// Threat mitigations landed here:
-//   - T-01-CacheScope: `fetch` handler early-returns when
-//     `url.origin !== self.location.origin`. Cross-origin requests are never
-//     intercepted, never cached, never produce opaque responses.
-//   - T-01-StaleCache: Versioned cache name + activate cleanup.
-//   - T-01-OfflineFail: `staleWhileRevalidate` catches network errors and
-//     falls back to the cached copy. Cache-first branch never depends on the
-//     network when the cache is populated.
-//   - T-01-NoNet: Zero off-origin (h-t-t-p-s) URLs in this file. The only
-//     network destinations are same-origin GETs derived from `e.request.url`.
+/**
+ * @file Classic service worker for Nawyki (file://-safe via sw-register.js guard).
+ *
+ * Why CLASSIC service worker (not `type: "module"`):
+ *   Module-form SWs are not yet Baseline on Firefox/Safari (Pitfall 4 in
+ *   01-RESEARCH.md). A silent-failing SW is unacceptable for an offline-first
+ *   app, so we use the classic form + `importScripts('./js/util/version.js')`
+ *   to share the version constant with the window context (D-12, research §Q2).
+ *
+ * Locked decisions implemented here:
+ *   - D-09: `skipWaiting()` + `clients.claim()` are unconditional; new SWs
+ *           take over immediately. The user-facing "New version ready" toast
+ *           lives in sw-register.js (controllerchange listener); the SW
+ *           never auto-reloads.
+ *   - D-10: Cache name `nawyki-${APP_VERSION}`. Activate handler deletes
+ *           every cache whose name is not the current one. Bumping
+ *           APP_VERSION in js/util/version.js is the only operation needed
+ *           to invalidate.
+ *   - D-11: Strategy router — cache-first for the shell asset list (HTML,
+ *           CSS, manifest, icon, pinned JS entry points) and
+ *           stale-while-revalidate for everything under /js/. SWR honors
+ *           D-10 (JS module changes do NOT need a cache-name bump because
+ *           SWR refreshes on every fetch) while still satisfying NFR-04
+ *           (fully offline on cache fallback).
+ *   - D-12: Single source of truth for the version constant.
+ *           `self.APP_VERSION` is set by `importScripts(...)` below.
+ *   - D-19: Every URL in this file is relative (`./…`); no absolute paths
+ *           and no off-origin URLs (NFR-12 + T-01-NoNet).
+ *
+ * Threat mitigations landed here:
+ *   - T-01-CacheScope: `fetch` handler early-returns when
+ *     `url.origin !== self.location.origin`. Cross-origin requests are never
+ *     intercepted, never cached, never produce opaque responses.
+ *   - T-01-StaleCache: Versioned cache name + activate cleanup.
+ *   - T-01-OfflineFail: `staleWhileRevalidate` catches network errors and
+ *     falls back to the cached copy. Cache-first branch never depends on the
+ *     network when the cache is populated.
+ *   - T-01-NoNet: Zero off-origin URLs in this file. The only network
+ *     destinations are same-origin GETs derived from `e.request.url`.
+ */
 
 importScripts('./js/util/version.js');
 
@@ -117,6 +118,15 @@ self.addEventListener('fetch', e => {
   );
 });
 
+/**
+ * Stale-while-revalidate strategy for /js/ requests. Returns the cached copy
+ * immediately if present; revalidates from the network in the background and
+ * updates the cache. Falls back to the cached copy if the network is offline
+ * (NFR-04 / PWA-06).
+ *
+ * @param {Request} request - Same-origin GET request to handle.
+ * @returns {Promise<Response>} The response to serve.
+ */
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE);
   const cached = await cache.match(request);
