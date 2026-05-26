@@ -1,0 +1,19 @@
+/* css/base.css — html/body typography defaults (Phase 1, Plan 1).
+ *
+ * All values reference tokens from css/tokens.css. No literal hex codes.
+ */
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+}

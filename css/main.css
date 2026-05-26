@@ -1,0 +1,26 @@
+/* css/main.css — Cascade Layers composer (Phase 1, Plan 1).
+ *
+ * This file is the SINGLE place where the @layer order is declared.
+ * All other CSS files wrap their rules in an explicit `@layer <name> { ... }`
+ * block, and are joined here via `@import url("./*.css") layer(<name>);`.
+ *
+ * Layer order (lowest → highest specificity):
+ *   reset      — modern minimal reset
+ *   tokens     — :root custom properties (palette, spacing, type, radii, z)
+ *   base       — html/body typography defaults that reference tokens
+ *   layout     — (empty in P1; reserved for app-shell layout primitives)
+ *   components — toast/button/panel primitive classes
+ *   view       — view-specific layouts (today, history, settings, desktop)
+ *   utilities  — (empty in P1; reserved for last-word overrides)
+ *
+ * Linked from both index.html and desktop.html (D-04, D-19) using a
+ * relative `./css/main.css` href.
+ */
+
+@layer reset, tokens, base, layout, components, view, utilities;
+
+@import url("./reset.css")      layer(reset);
+@import url("./tokens.css")     layer(tokens);
+@import url("./base.css")       layer(base);
+@import url("./components.css") layer(components);
+@import url("./today.css")      layer(view);

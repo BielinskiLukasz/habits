@@ -1,0 +1,27 @@
+/* css/reset.css — Minimal modern reset (Phase 1, Plan 1).
+ *
+ * Intentionally tiny. The full Cascade Layers contract means anything we
+ * miss here can be set in `base` without specificity gymnastics.
+ */
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  ul,
+  ol,
+  figure {
+    margin: 0;
+  }
+}

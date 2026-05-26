@@ -1,0 +1,60 @@
+/* css/components.css — Primitive component classes (Phase 1, Plan 1).
+ *
+ * Just enough primitives to support Plan 03's update toast and Plan 04's
+ * diagnostics surface. All colors/spacings/radii reference tokens; zero
+ * literal hex codes here.
+ */
+
+@layer components {
+  /* Toast primitive (D-08).
+   * Used by sw-register controllerchange handler to surface
+   * "New version ready — Reload". No auto-dismiss; persists until the user
+   * reloads or clicks the close button. */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: var(--space-4);
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    z-index: var(--z-toast);
+    font-size: var(--text-sm);
+    max-width: calc(100vw - var(--space-5));
+  }
+
+  .toast-action {
+    color: var(--color-accent);
+    background: none;
+    border: none;
+    padding: var(--space-2) var(--space-3);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  .toast-close {
+    color: var(--color-fg-muted);
+    background: none;
+    border: none;
+    padding: var(--space-1) var(--space-2);
+    font: inherit;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Panel primitive — used by the Plan 03 diagnostics surface and any
+   * future card/section that needs a bordered container. */
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+  }
+}
