@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 1 context gathered
-last_updated: "2026-05-26T07:04:06.537Z"
-last_activity: 2026-05-26 -- Phase 01 planning complete
+status: awaiting_human_verify
+stopped_at: Phase 1 code complete — awaiting device-install gate
+last_updated: "2026-05-26T20:00:00.000Z"
+last_activity: 2026-05-26 -- Phase 01 wave 4 complete; D-23..D-27 locked; JSDoc retro-converted
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 5
+  completed_plans: 5
+  percent: 17
 ---
 
 # Project State
@@ -26,11 +26,23 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 ## Current Position
 
 Phase: 1 of 6 (PWA Shell & Tooling Hygiene)
-Plan: 0 of TBD in current phase
-Status: Ready to execute
-Last activity: 2026-05-26 -- Phase 01 planning complete
+Plan: 5 of 5 complete — awaiting human verification gate (PWA-05 / PWA-06 / NFR-12 + Walking Skeleton steps 1-7)
+Status: Awaiting human verification — see .planning/phases/01-pwa-shell-tooling-hygiene/01-05-SUMMARY.md §Awaiting Human Verification
+Last activity: 2026-05-26 -- Phase 01 code complete; D-23..D-27 locked; JSDoc retro-converted
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 17% (Phase 1/6 code complete)
+
+## Resume Instructions
+
+When ready, reply with one of:
+  - `approved` + which platforms succeeded (desktop Chrome mandatory; Android, iOS deferrable) → I spawn gsd-verifier and close Phase 1
+  - Report failing steps (which step, exact symptom, DevTools / device behavior) → opens gap-closure phase
+  - `verify anyway` → I spawn gsd-verifier without waiting on device gate (will mark human_verification items as pending)
+
+The full gate checklist is in:
+  - .planning/phases/01-pwa-shell-tooling-hygiene/01-05-SUMMARY.md §Awaiting Human Verification
+  - .planning/phases/01-pwa-shell-tooling-hygiene/01-VALIDATION.md (per-requirement matrix)
+  - README.md §"How to verify" (the user-facing copy of the same checklist)
 
 ## Performance Metrics
 
@@ -44,7 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. PWA Shell & Tooling Hygiene | 0 | — | — |
+| 1. PWA Shell & Tooling Hygiene | 5 | — | — |
 | 2. Storage Foundation | 0 | — | — |
 | 3. Today View & Settings v1 | 0 | — | — |
 | 4. Domain Model | 0 | — | — |
@@ -75,6 +87,15 @@ Locked at roadmap creation:
 - Definition edits NEVER rewrite history (versioned via `habit_versions`)
 - Distinct mobile + desktop DOMs (not responsive)
 
+Locked during Phase 1 execution (2026-05-26):
+
+- D-23: Unit tests use Node's built-in `node --test`; tests live in `tests/` (excluded from SW shell and GH Pages deploy); pure-function modules only
+- D-24: GitHub Actions CI runs `node --test tests/` on push/PR; single workflow file; ships in Phase 2
+- D-25: Integration tests in Node via hand-written ~30-line in-memory fake IDB repo (same surface as real `js/db/repo.js`); real-IDB integration stays in `tests-browser.html` (manual)
+- D-26: UI testing two-tier — pure view "builders" unit-tested in Node (returning `{tag, attrs, children}` descriptions); browser smoke via `tests-browser.html`; no DOM polyfill; Phase 3 first consumer
+- D-27: JSDoc as standard for file headers (`/** @file ... */`) and exported APIs (`@param`/`@returns`/`@type`); inline `//` only for "why" notes; banned for line-by-line restatements
+- TDD mode flipped on (`workflow.tdd_mode: true`) — Phase 2+ MVP+TDD gate is blocking
+
 ### Pending Todos
 
 None yet.
@@ -91,6 +112,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-25T23:40:19.874Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-pwa-shell-tooling-hygiene/01-CONTEXT.md
+Last session: 2026-05-26T20:00:00.000Z
+Stopped at: Phase 1 code complete (5/5 plans + 5 plan SUMMARYs); awaiting human-verify gate
+Resume file: .planning/phases/01-pwa-shell-tooling-hygiene/01-05-SUMMARY.md §Awaiting Human Verification
