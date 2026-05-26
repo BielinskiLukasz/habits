@@ -181,14 +181,20 @@ describe('seed: 8 habits covering D-32 matrix (SEED-02)', () => {
 });
 
 describe('seed: no xlsx/txt parser in js/ (SEED-05)', () => {
-  test('zero matches for xlsx|XLSX|SheetJS|exceljs|read_xlsx|parse_xlsx in any js/**/*.js', () => {
+  test('zero matches for xlsx|XLSX|SheetJS|exceljs|read_xlsx|parse_xlsx in any js/**/*.js (comments stripped)', () => {
+    // Strip block + line comments before matching so JSDoc files that explain
+    // the negative-space invariant ("no xlsx parsers allowed") don't trigger
+    // a false positive. Same convention as tests/unit/apply.discipline.test.js.
     const forbidden = /xlsx|XLSX|SheetJS|exceljs|read_xlsx|parse_xlsx/;
     const files = walkDir(join(ROOT, 'js'));
     /** @type {string[]} */
     const violations = [];
     for (const path of files) {
-      const src = readFileSync(path, 'utf8');
-      const m = src.match(forbidden);
+      const raw = readFileSync(path, 'utf8');
+      const stripped = raw
+        .replace(/\/\*[\s\S]*?\*\//g, '') // block + JSDoc comments
+        .replace(/^\s*\/\/.*$/gm, '');    // line comments
+      const m = stripped.match(forbidden);
       if (m) {
         violations.push(`${path}: matched '${m[0]}'`);
       }
