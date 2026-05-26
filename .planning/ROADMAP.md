@@ -21,18 +21,14 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ## Phase Details
 
-### Phase 1: PWA Shell & Tooling Hygiene
-**Goal**: Ship a static-hostable, file://-safe PWA chassis that can be deployed and updated without bricking users
-**Mode:** mvp
-**Depends on**: Nothing (first phase)
-**Requirements**: PWA-01, PWA-02, PWA-03, PWA-04, PWA-05, PWA-06, SETTINGS-07, NFR-04, NFR-09, NFR-11, NFR-12
-**Success Criteria** (what must be TRUE):
-  1. User can open `index.html` directly from disk (`file://`) and the page loads cleanly (service worker silently no-ops)
-  2. User can install the app on Android Chrome, iOS Safari (Add to Home Screen), and desktop Chrome/Edge from an HTTPS deploy
-  3. User can reload the installed app while fully offline and it still loads
-  4. User can deploy a new release and a subsequent reload picks up the new versioned cache (no stale-asset white-screen)
-  5. User can trigger a hidden "Reset app" debug action that unregisters the SW, clears caches, and reloads to a known good state
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Static scaffolding (APP_VERSION constant, CSS Cascade-Layers composer, locked token set, maskable icon, Web App Manifest)
+- [ ] 01-02-PLAN.md — Classic service worker (versioned cache, activate cleanup, same-origin guard, cache-first shell + stale-while-revalidate for js/**)
+- [ ] 01-03-PLAN.md — Toast primitive + diagnostics panel (long-press, ?debug=1, Reset-shell handler with D-06 verbatim confirm)
+- [ ] 01-04-PLAN.md — Wiring (sw-register.js, mobile shell with empty Today scaffold, desktop stub, entry points; Walking Skeleton acceptance steps 1-7)
+- [ ] 01-05-PLAN.md — README + phase-gate device installs + GH Pages sub-path deploy verification
 
 ### Phase 2: Storage Foundation (The Spine)
 **Goal**: Make every catastrophic data-integrity pitfall structurally impossible before any feature ships
