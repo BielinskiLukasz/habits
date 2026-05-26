@@ -12,7 +12,7 @@ A vanilla multi-file static PWA habit tracker delivered in 6 phases: P1 lays a t
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: PWA Shell & Tooling Hygiene** - Static-hostable, file://-safe, versioned-cache PWA chassis with reset-app debug
+- [x] **Phase 1: PWA Shell & Tooling Hygiene** - Static-hostable, file://-safe, versioned-cache PWA chassis with reset-app debug (completed 2026-05-26)
 - [ ] **Phase 2: Storage Foundation (The Spine)** - Date utils, raw IDB, 7 stores + migrations, repo, single mutator, sync, lifecycle, seed
 - [ ] **Phase 3: Today View & Settings v1 (First Usable Slice)** - Mobile shell rendering seed data, single-tap binary mark/unmark, persistent undo, install help, persistence status
 - [ ] **Phase 4: Domain Model (Cadence, Catalog, Stages, Mastery, Multi-occurrence, History, Waves)** - Full habit lifecycle honoring the versioned-edit invariant
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. PWA Shell & Tooling Hygiene | 5/5 | Awaiting human verification | - |
+| 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
 | 2. Storage Foundation (The Spine) | 0/TBD | Not started | - |
 | 3. Today View & Settings v1 | 0/TBD | Not started | - |
 | 4. Domain Model | 0/TBD | Not started | - |

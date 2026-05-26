@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: awaiting_human_verify
-stopped_at: Phase 1 code complete — awaiting device-install gate
-last_updated: "2026-05-26T20:00:00.000Z"
-last_activity: 2026-05-26 -- Phase 01 wave 4 complete; D-23..D-27 locked; JSDoc retro-converted
+status: phase_complete
+stopped_at: Phase 1 verified passed (30/30 must-haves); ready for Phase 2 discuss
+last_updated: "2026-05-26T22:00:00.000Z"
+last_activity: 2026-05-26 -- Phase 01 verified passed; D-23..D-29 locked
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
   completed_plans: 5
   percent: 17
@@ -25,24 +25,27 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 1 of 6 (PWA Shell & Tooling Hygiene)
-Plan: 5 of 5 complete — awaiting human verification gate (PWA-05 / PWA-06 / NFR-12 + Walking Skeleton steps 1-7)
-Status: Awaiting human verification — see .planning/phases/01-pwa-shell-tooling-hygiene/01-05-SUMMARY.md §Awaiting Human Verification
-Last activity: 2026-05-26 -- Phase 01 code complete; D-23..D-27 locked; JSDoc retro-converted
+Phase: 2 of 6 (Storage Foundation — next up)
+Status: Phase 1 complete + verified. Ready for `/gsd-discuss-phase 2` or `/gsd-plan-phase 2`.
+Last activity: 2026-05-26 -- Phase 01 verified passed (30/30 must-haves)
 
-Progress: [█░░░░░░░░░] 17% (Phase 1/6 code complete)
+Progress: [█░░░░░░░░░] 17% (1/6 phases complete)
 
 ## Resume Instructions
 
-When ready, reply with one of:
-  - `approved` + which platforms succeeded (desktop Chrome mandatory; Android, iOS deferrable) → I spawn gsd-verifier and close Phase 1
-  - Report failing steps (which step, exact symptom, DevTools / device behavior) → opens gap-closure phase
-  - `verify anyway` → I spawn gsd-verifier without waiting on device gate (will mark human_verification items as pending)
+Next up — Phase 2: Storage Foundation (The Spine). 13 requirements (DATA-01..08, SEED-01..05).
 
-The full gate checklist is in:
-  - .planning/phases/01-pwa-shell-tooling-hygiene/01-05-SUMMARY.md §Awaiting Human Verification
-  - .planning/phases/01-pwa-shell-tooling-hygiene/01-VALIDATION.md (per-requirement matrix)
-  - README.md §"How to verify" (the user-facing copy of the same checklist)
+Recommended entry points:
+  - `/gsd-discuss-phase 2 ${GSD_WS}` — gather context, lock decisions before planning (recommended)
+  - `/gsd-plan-phase 2 ${GSD_WS}` — skip discuss, go straight to planning
+  - `/gsd-execute-phase 2 ${GSD_WS}` — only after planning lands
+
+Phase 2 inherits the conventions locked during Phase 1:
+  - SemVer (D-28) — bump to 0.2.0 when Phase 2 ships
+  - Module SW (D-29) — already in place; don't touch
+  - JSDoc (D-27) — all new files start with /** @file ... */
+  - Tests (D-23..D-26) — `tests/` directory introduced this phase; node --test in CI
+  - TDD (workflow.tdd_mode=true) — MVP+TDD blocking gate is active
 
 ## Performance Metrics
 
@@ -114,6 +117,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-26T20:00:00.000Z
-Stopped at: Phase 1 code complete (5/5 plans + 5 plan SUMMARYs); awaiting human-verify gate
-Resume file: .planning/phases/01-pwa-shell-tooling-hygiene/01-05-SUMMARY.md §Awaiting Human Verification
+Last session: 2026-05-26T22:00:00.000Z
+Stopped at: Phase 1 verified passed; ready for Phase 2 discuss/plan
+Resume file: .planning/phases/01-pwa-shell-tooling-hygiene/01-VERIFICATION.md (audit trail)
