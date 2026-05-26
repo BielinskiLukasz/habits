@@ -18,7 +18,7 @@ Double-click `index.html`. The empty Today scaffold renders. The service worker 
 python -m http.server 8000
 ```
 
-Then visit `http://localhost:8000/`. The service worker registers, the `nawyki-v1` cache populates with the 17-entry SHELL list, and the page is fully offline-reloadable. Use this for service-worker + cache behavior testing (DevTools → Application → Service Workers / Cache Storage). The desktop-Chrome "Install" UI requires HTTPS or `localhost`; on `localhost` the install affordance is available, but real installability + cross-device verification happens against the GitHub Pages deploy below.
+Then visit `http://localhost:8000/`. The service worker registers, the `nawyki-1.0.0` cache populates with the 17-entry SHELL list, and the page is fully offline-reloadable. Use this for service-worker + cache behavior testing (DevTools → Application → Service Workers / Cache Storage). The desktop-Chrome "Install" UI requires HTTPS or `localhost`; on `localhost` the install affordance is available, but real installability + cross-device verification happens against the GitHub Pages deploy below.
 
 ### GitHub Pages deploy
 
@@ -34,9 +34,15 @@ The relative-paths rule (D-19) is the only thing that lets the chassis deploy un
 
 ## Bumping the version
 
-`APP_VERSION` is the single source of truth for the cache name (`nawyki-${APP_VERSION}`) and the diagnostics panel's "App version" row. To ship a shell update:
+`APP_VERSION` is the single source of truth for the cache name (`nawyki-${APP_VERSION}`) and the diagnostics panel's "App version" row. The value follows [Semantic Versioning 2.0.0](https://semver.org/) — `MAJOR.MINOR.PATCH`:
 
-- Edit `js/util/version.js` and change `export const APP_VERSION = 'v1'` to the new value (e.g. `'v2'`). The file also assigns `self.APP_VERSION = APP_VERSION` so the classic service worker can read it via `importScripts('./js/util/version.js')` — one edit, one file.
+- **PATCH** (`1.0.0` → `1.0.1`) — backwards-compatible bug fix or shell-asset-only change (CSS tweak, icon adjustment, HTML copy fix).
+- **MINOR** (`1.0.1` → `1.1.0`) — backwards-compatible feature addition (new view, new optional capability).
+- **MAJOR** (`1.1.0` → `2.0.0`) — incompatible API change or breaking storage-shape migration. Bump MAJOR whenever a `schemaVersion` migration runs against existing user data.
+
+To ship a shell update:
+
+- Edit `js/util/version.js` and change `export const APP_VERSION = '1.0.0'` to the new value (e.g. `'1.0.1'`). The file also assigns `self.APP_VERSION = APP_VERSION` so the classic service worker can read it via `importScripts('./js/util/version.js')` — one edit, one file.
 - Commit and push. The GitHub Pages build serves the new bytes.
 - Per D-10, only bump when **shell assets** change: `index.html`, `desktop.html`, `manifest.json`, `sw.js`, `icon.svg`, anything under `css/`. Pure JS-module changes do NOT require a version bump — `sw.js` routes `/js/` URLs through stale-while-revalidate (D-11), so module updates propagate within one reload without invalidating the cache.
 - On the user's next page load, `sw.js`'s `activate` handler deletes every cache whose name is not the current `nawyki-${APP_VERSION}`, then `clients.claim()` takes over. Because `hadController` was true going into the new SW, `controllerchange` fires and the toast "New version ready — Reload" appears. The user clicks Reload at their leisure — there is no auto-reload (D-08/D-09).

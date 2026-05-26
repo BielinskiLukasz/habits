@@ -199,12 +199,12 @@ Per-task automated verifies (all printed `OK`):
 Runtime gates (deferred to Task 5 checkpoint — see below):
 
 11. ⏳ Open `index.html` via `file://` → empty Today scaffold renders, console clean, `navigator.serviceWorker.controller === null`.
-12. ⏳ Open via `http://localhost:8000/` → DevTools → Application → Service Workers shows `sw.js` activated; Cache Storage shows `nawyki-v1` with 17 entries.
+12. ⏳ Open via `http://localhost:8000/` → DevTools → Application → Service Workers shows `sw.js` activated; Cache Storage shows `nawyki-1.0.0` with 17 entries.
 13. ⏳ Offline reload → page renders identically.
 14. ⏳ `?debug=1` → diagnostics panel mounts with all six rows.
 15. ⏳ Long-press app title 1.5 s → diagnostics panel mounts; immediate drag cancels.
 16. ⏳ Reset shell → confirm D-06 phrasing → SW unregisters + caches clear + reload.
-17. ⏳ Bump APP_VERSION to `'v2'`, redeploy, reload twice → toast "New version ready — Reload" appears; old user (first install) does NOT see toast on initial install.
+17. ⏳ Bump APP_VERSION to `'1.0.1'`, redeploy, reload twice → toast "New version ready — Reload" appears; old user (first install) does NOT see toast on initial install.
 
 ## Task 5 Checkpoint Outcome
 

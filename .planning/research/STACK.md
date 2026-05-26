@@ -140,7 +140,7 @@ habits/
 │       └── id.js               # crypto.randomUUID() wrapper with file:// fallback
 │
 └── seed/
-    └── nawyki-v1.seed.json     # Hand-curated bundled seed (read-only)
+    └── nawyki-1.0.0.seed.json     # Hand-curated bundled seed (read-only)
 ```
 
 **Why this shape:**
@@ -288,7 +288,7 @@ A snapshot row is recomputed when:
 Copy the structure of `mindful-breathing/sw.js`, expanded for multiple files:
 
 ```js
-const CACHE = 'nawyki-v1';
+const CACHE = 'nawyki-1.0.0';
 const ASSETS = [
   './',
   './index.html',
@@ -305,7 +305,7 @@ const ASSETS = [
   './js/main.js',
   './js/desktop.js',
   // ... every module file
-  './seed/nawyki-v1.seed.json',
+  './seed/nawyki-1.0.0.seed.json',
 ];
 
 self.addEventListener('install', e =>
@@ -413,7 +413,7 @@ Each HTML shell:
   "schemaVersion": 1,
   "scoreVersion": 1,
   "exportedAt": "2026-05-26T18:00:00.000Z",
-  "appVersion": "nawyki-v1",
+  "appVersion": "nawyki-1.0.0",
   "habits": [...],
   "logs": [...],
   "history_edits": [...],

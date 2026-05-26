@@ -38,7 +38,7 @@
 **Warning signs:** White screen after deploy; `Application → Service Workers` in DevTools shows old version "waiting"; users report "it loads forever."
 
 **Prevention:**
-- Use **versioned cache name** (`nawyki-v1`, bump every release). `activate` deletes non-current caches.
+- Use **versioned cache name** (`nawyki-1.0.0`, bump every release). `activate` deletes non-current caches.
 - `skipWaiting()` + `clients.claim()` so new SW takes over immediately.
 - Registration guarded by `location.protocol.startsWith('http')` and a silent `.catch()` (matches mindful-breathing).
 - Hidden Settings → "Reset app" button that calls `registration.unregister()` and `caches.delete(*)` then reloads.

@@ -119,12 +119,12 @@ Phase 1 is not yet "complete" — three classes of verification require physical
 Run on the developer machine, in order:
 
 1. **File:// open** — Double-click `index.html`. Empty Today scaffold renders. DevTools console clean. `navigator.serviceWorker.controller === null`.
-2. **HTTPS open via localhost** — `python -m http.server 8000` then visit `http://localhost:8000/`. Empty Today scaffold renders identically. DevTools → Application → Service Workers shows `sw.js` activated. Cache Storage shows `nawyki-v1` populated with all 17 SHELL entries.
+2. **HTTPS open via localhost** — `python -m http.server 8000` then visit `http://localhost:8000/`. Empty Today scaffold renders identically. DevTools → Application → Service Workers shows `sw.js` activated. Cache Storage shows `nawyki-1.0.0` populated with all 17 SHELL entries.
 3. **Offline reload** — DevTools → Network → Offline → reload. Page renders from cache identically.
-4. **`?debug=1` trigger** — Navigate to `http://localhost:8000/?debug=1`. Diagnostics panel mounts with all six rows (App version=v1, Schema version=n/a (P2), Service worker=controlled, Cache name=nawyki-v1, Install state=browser, Persistence=n/a (P2)).
+4. **`?debug=1` trigger** — Navigate to `http://localhost:8000/?debug=1`. Diagnostics panel mounts with all six rows (App version=1.0.0, Schema version=n/a (P2), Service worker=controlled, Cache name=nawyki-1.0.0, Install state=browser, Persistence=n/a (P2)).
 5. **Long-press trigger** — On the page (not in debug mode), long-press the "Habits" title for ~1.5 s. Diagnostics panel mounts. Then refresh, tap the title and immediately drag-scroll — diagnostics should NOT mount (Pitfall 7).
 6. **Reset shell** — Diagnostics → click "Reset shell" → confirm dialog shows the verbatim D-06 string → click OK → SW unregisters + caches clear + page reloads to a fresh install.
-7. **Update toast** — Bump `APP_VERSION` to `'v2'` in `js/util/version.js`. Reload. The toast "New version ready — Reload" appears (because `hadController` was true going into the new SW; first-install never sees the toast — Pitfall 6). Click Reload. New cache `nawyki-v2` is now active; old `nawyki-v1` deleted. Restore `APP_VERSION` to `'v1'` for subsequent testing.
+7. **Update toast** — Bump `APP_VERSION` to `'1.0.1'` in `js/util/version.js`. Reload. The toast "New version ready — Reload" appears (because `hadController` was true going into the new SW; first-install never sees the toast — Pitfall 6). Click Reload. New cache `nawyki-1.0.1` is now active; old `nawyki-1.0.0` deleted. Restore `APP_VERSION` to `'1.0.0'` for subsequent testing.
 
 ### PWA-05: Installability on at least one target platform
 
@@ -146,7 +146,7 @@ For each platform where install succeeded, verify offline reload:
 
 After pushing `main` to GH Pages and waiting for the build to complete:
 
-- Open `https://bielinskilukasz.github.io/habits/` (note the trailing slash). DevTools → Application → Service Workers: scope shows `https://bielinskilukasz.github.io/habits/` (sub-path correctly resolved, not the origin root). Cache Storage: `nawyki-v1` populated with all 17 SHELL entries, all under `/habits/` prefix.
+- Open `https://bielinskilukasz.github.io/habits/` (note the trailing slash). DevTools → Application → Service Workers: scope shows `https://bielinskilukasz.github.io/habits/` (sub-path correctly resolved, not the origin root). Cache Storage: `nawyki-1.0.0` populated with all 17 SHELL entries, all under `/habits/` prefix.
 - Local re-run: `grep -nE '"\s*/[a-z]' index.html desktop.html manifest.json sw.js` returns empty (no absolute-path landmines snuck in).
 
 ### Acceptance threshold

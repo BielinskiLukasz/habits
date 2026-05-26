@@ -11,7 +11,7 @@ Ship the static, file://-safe, versioned-cache PWA chassis that the rest of Nawy
 - `index.html` + `desktop.html` shells (both ship in P1; only the mobile shell carries visible content this phase)
 - `manifest.json` + maskable SVG icon at the root (mirrors `mindful-breathing` layout)
 - `sw.js` registered with silent `.catch()` so `file://` opens stay broken-but-safe
-- Versioned cache `nawyki-vN` with `skipWaiting()` + `clients.claim()` activation
+- Versioned cache `nawyki-X.Y.Z` with `skipWaiting()` + `clients.claim()` activation
 - A diagnostics + Reset-app surface for debugging deploys across all remaining phases
 - A controllerchange-driven update toast so a new deploy never traps a user on stale assets
 

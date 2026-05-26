@@ -74,7 +74,7 @@ User skipped "Reset-app surface" — captured by default as part of the diagnost
 **User's choice:** Toast 'Updated — Reload'.
 **Notes:** Non-blocking; the user can keep tapping the current page until they reload. Toast primitive will later host Undo notifications too.
 
-### Question 2: When does nawyki-vN actually bump?
+### Question 2: When does nawyki-X.Y.Z actually bump?
 
 | Option | Description | Selected |
 |--------|-------------|----------|

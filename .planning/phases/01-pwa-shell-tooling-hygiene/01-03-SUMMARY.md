@@ -86,7 +86,7 @@ The follow-up `02b9481` commit was a comment-only scrub: three header-comment oc
 
 | # | Label | Value source |
 | --- | --- | --- |
-| 1 | App version | `APP_VERSION` import (currently `'v1'`) |
+| 1 | App version | `APP_VERSION` import (currently `'1.0.0'`) |
 | 2 | Schema version | Literal `'n/a (P2)'` (D-03 — lands when IDB ships) |
 | 3 | Service worker | `computeSwState()` — `'unsupported'` / `'controlled'` / `'registered, not yet controlled'` |
 | 4 | Cache name | Renders `'loading…'` synchronously; async `caches.keys()` updates the `<dd>` to the first `nawyki-` prefixed key, or `'none'` |

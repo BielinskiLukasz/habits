@@ -76,7 +76,7 @@
 | ID | Description | Research Support |
 |----|-------------|------------------|
 | PWA-01 | App ships `manifest.json` with name, icons, start_url, scope, display: standalone | §"manifest.json shape" + §"Maskable icon safe-zone" |
-| PWA-02 | Service worker registered with cache-first strategy + versioned cache (`nawyki-vN`) | §"sw.js core skeleton" + §"D-11 resolution" |
+| PWA-02 | Service worker registered with cache-first strategy + versioned cache (`nawyki-X.Y.Z`) | §"sw.js core skeleton" + §"D-11 resolution" |
 | PWA-03 | SW uses `skipWaiting()` + `clients.claim()` | §"sw.js core skeleton" + §"Update propagation" |
 | PWA-04 | SW registration silently fails on `file://` | §"sw-register.js shape" |
 | PWA-05 | Installable on Android Chrome, iOS Safari, desktop Chrome/Edge | §"Manifest installability checklist" + §"Validation Architecture" |
@@ -95,7 +95,7 @@ Phase 1 ships a single, deterministic PWA chassis: a versioned cache-first servi
 
 The technical heart is **three load-bearing patterns** mirrored from `mindful-breathing` and extended:
 1. **SW registration guarded** by `location.protocol.startsWith('http')` + silent `.catch()` so `file://` opens never call `navigator.serviceWorker.register()`.
-2. **Versioned cache name** (`nawyki-v1`, `nawyki-v2`, …) where `activate` deletes everything that isn't the current name, combined with `skipWaiting()` + `clients.claim()`.
+2. **Versioned cache name** (`nawyki-1.0.0`, `nawyki-1.0.1`, …) where `activate` deletes everything that isn't the current name, combined with `skipWaiting()` + `clients.claim()`.
 3. **All paths relative (`./`)** in HTML, manifest, and sw.js so the same bytes deploy under `file://`, `https://bielinskilukasz.github.io/habits/`, or any other sub-path with zero config.
 
 **The seven open questions in CONTEXT.md resolve as:**
@@ -217,7 +217,7 @@ The technical heart is **three load-bearing patterns** mirrored from `mindful-br
                               │     Service Worker thread (separate)            │
                               │                                                 │
                               │  sw.js (classic, importScripts version.js)      │
-                              │     ├─ install → caches.open(`nawyki-v${V}`)    │
+                              │     ├─ install → caches.open(`nawyki-${V}`)    │
                               │     │           → addAll(SHELL_ASSETS)          │
                               │     │           → skipWaiting()                 │
                               │     │                                           │
@@ -245,7 +245,7 @@ The technical heart is **three load-bearing patterns** mirrored from `mindful-br
 1. User hits the deployed URL (or opens index.html via file://).
 2. Browser fetches HTML, then CSS via `<link>`, then JS via `<script type="module">`.
 3. JS entry point reads `APP_VERSION`, decides whether to mount diagnostics, registers SW (only if http(s)).
-4. SW thread, on install, pre-caches the shell asset list under `nawyki-v${APP_VERSION}`.
+4. SW thread, on install, pre-caches the shell asset list under `nawyki-${APP_VERSION}`.
 5. On activate, SW deletes any cache whose name isn't the current one, then claims clients.
 6. On subsequent loads, fetch handler answers from cache (shell) or stale-while-revalidate (js/**).
 7. When a new SW activates while the page is open, `controllerchange` fires → main thread renders the update toast.
@@ -274,7 +274,7 @@ habits/
 │   ├── desktop.js              # Desktop entry — same SW register, redirect to index.html
 │   │
 │   ├── util/
-│   │   └── version.js          # export const APP_VERSION = 'v1'; also self-runnable via importScripts
+│   │   └── version.js          # export const APP_VERSION = '1.0.0'; also self-runnable via importScripts
 │   │
 │   ├── platform/
 │   │   └── sw-register.js      # The protocol-guard + silent-catch registration
@@ -380,7 +380,7 @@ async function staleWhileRevalidate(request) {
 // js/util/version.js
 // Single source of truth for app version (D-12).
 // Bump this string to force a new SW cache (per D-10: only on shell-asset change).
-export const APP_VERSION = 'v1';
+export const APP_VERSION = '1.0.0';
 
 // Make the constant available to the service worker context, which loads this file
 // via importScripts (where ES `export` is ignored, but `self.X = ...` works).
@@ -388,11 +388,11 @@ self.APP_VERSION = APP_VERSION;
 ```
 
 **Why this works:**
-- In the window context, `<script type="module">` parses `export const APP_VERSION = 'v1'`. The `self.APP_VERSION = APP_VERSION` line is a harmless side-effect on `window`.
+- In the window context, `<script type="module">` parses `export const APP_VERSION = '1.0.0'`. The `self.APP_VERSION = APP_VERSION` line is a harmless side-effect on `window`.
 - In the SW context, `importScripts` evaluates as a classic script. The `export` token is a SyntaxError in classic scripts — **so this must be done carefully**. Two valid approaches:
-  - **Approach A (recommended):** Two files. `js/util/version.js` is the module-form (with `export`); `js/util/version.sw.js` is the SW-form (`self.APP_VERSION = 'v1'`). Both contain the same string literal; the planner adds a comment to the top of one explaining that bumping the constant requires changing both. **Risk: two-file drift.**
+  - **Approach A (recommended):** Two files. `js/util/version.js` is the module-form (with `export`); `js/util/version.sw.js` is the SW-form (`self.APP_VERSION = '1.0.0'`). Both contain the same string literal; the planner adds a comment to the top of one explaining that bumping the constant requires changing both. **Risk: two-file drift.**
   - **Approach B:** Single file, no `export` line. Module form imports it via `import './version.js'` (side-effect import) and reads `self.APP_VERSION` or `window.APP_VERSION`. **Risk: relies on side-effect imports and globals, slightly less clean.**
-  - **Approach C:** Single file via a wrapper. `js/util/version.js` has only `self.APP_VERSION = 'v1';`. The module-form is `js/util/version-module.js` which re-exports: `import './version.js'; export const APP_VERSION = self.APP_VERSION;`. Single source of truth, no drift, slightly more files.
+  - **Approach C:** Single file via a wrapper. `js/util/version.js` has only `self.APP_VERSION = '1.0.0';`. The module-form is `js/util/version-module.js` which re-exports: `import './version.js'; export const APP_VERSION = self.APP_VERSION;`. Single source of truth, no drift, slightly more files.
 
 **Recommendation:** **Approach B for v1** — simplest, single file, no drift, one global. The "global pollution" complaint is fully defensible at this scale (one constant). Migrate to Approach C if future SW imports grow.
 
@@ -543,7 +543,7 @@ export function showUpdateToast() {
 **Why it happens:** No versioned cache name; or `activate` doesn't delete old caches; or no escape hatch.
 
 **How to avoid:**
-1. Versioned cache name `nawyki-v${APP_VERSION}` (D-10, D-12).
+1. Versioned cache name `nawyki-${APP_VERSION}` (D-10, D-12).
 2. `activate` deletes all caches that aren't the current name.
 3. `skipWaiting()` + `clients.claim()` (D-09) so new SW takes over immediately.
 4. Diagnostics panel includes a **"Reset shell"** button (D-05) that calls `registration.unregister()` + iterates `caches.keys()` + `location.reload()`.
@@ -850,8 +850,8 @@ None blocking. The seven CONTEXT.md open research questions are resolved in this
 | Req ID | Behavior | Test Type | Verification | File Exists? |
 |--------|----------|-----------|--------------|--------------|
 | PWA-01 | manifest.json valid (name, icons, start_url, scope, display) | Static analysis | `cat manifest.json` + DevTools → Application → Manifest tab shows no errors | ❌ (created in this phase) |
-| PWA-02 | SW registers with cache-first + versioned cache (`nawyki-vN`) | Browser DevTools | Open app over `http://localhost:8000`, DevTools → Application → Service Workers shows registered SW; Application → Cache Storage shows `nawyki-v1` | ❌ (created in this phase) |
-| PWA-03 | `skipWaiting()` + `clients.claim()` | Browser DevTools | Bump APP_VERSION to `v2`, redeploy locally, reload → DevTools shows old `nawyki-v1` cache deleted, new `nawyki-v2` active, no "waiting" SW | ❌ |
+| PWA-02 | SW registers with cache-first + versioned cache (`nawyki-X.Y.Z`) | Browser DevTools | Open app over `http://localhost:8000`, DevTools → Application → Service Workers shows registered SW; Application → Cache Storage shows `nawyki-1.0.0` | ❌ (created in this phase) |
+| PWA-03 | `skipWaiting()` + `clients.claim()` | Browser DevTools | Bump APP_VERSION to `v2`, redeploy locally, reload → DevTools shows old `nawyki-1.0.0` cache deleted, new `nawyki-1.0.1` active, no "waiting" SW | ❌ |
 | PWA-04 | SW silently fails on `file://` | Manual | Open `index.html` directly via `file://`. DevTools console shows NO errors. `navigator.serviceWorker.controller` is null. Page loads cleanly. | ❌ |
 | PWA-05 | Installable on Android Chrome | Manual on device | Deploy to GH Pages → open URL on Android Chrome → "Install" prompt appears OR Settings → Add to Home Screen completes; opened from home screen shows no URL bar | ❌ |
 | PWA-05 | Installable on iOS Safari | Manual on device | Open URL on iOS Safari → Share → "Add to Home Screen" succeeds; opened icon launches standalone (no Safari chrome) | ❌ |
@@ -872,7 +872,7 @@ This is the canonical "Looks Done But Isn't" list for Phase 1, derived from PITF
 3. **HTTPS install (Android)** — Open URL on Android Chrome. Install prompt or Add to Home Screen. Launch from home screen icon. Standalone (no URL bar).
 4. **HTTPS install (iOS)** — Open URL on iOS Safari. Share → Add to Home Screen. Launch from icon. Standalone (no Safari chrome).
 5. **Offline reload (installed)** — From installed PWA: enable airplane mode → reload → page loads, no errors.
-6. **Cache version bump** — Bump `APP_VERSION` to `'v2'` in `version.js`. Redeploy. Hard-reload. DevTools → Cache Storage shows OLD `nawyki-v1` deleted, NEW `nawyki-v2` active. Update toast fires.
+6. **Cache version bump** — Bump `APP_VERSION` to `'1.0.1'` in `version.js`. Redeploy. Hard-reload. DevTools → Cache Storage shows OLD `nawyki-1.0.0` deleted, NEW `nawyki-1.0.1` active. Update toast fires.
 7. **Reset shell** — Long-press title (or `?debug=1`) → diagnostics → "Reset shell" → confirm → reload → DevTools shows SW unregistered, cache cleared, then re-registered.
 8. **Long-press doesn't fire on scroll** — Tap title and immediately drag-scroll. Diagnostics should NOT mount.
 9. **Update toast doesn't fire on first install** — Clear all site data → fresh install → SW activates → NO toast.
@@ -943,12 +943,12 @@ P1 ships every test artifact it needs (which is "none — manual only"). There i
 The thinnest possible end-to-end story:
 
 1. **A user opens `index.html` from disk (`file://`)** → page renders the empty Today scaffold. Console clean. No SW registration attempted.
-2. **A user opens the same `index.html` over `http://localhost:8000`** → page renders identically. SW registers. Cache `nawyki-v1` populates with the shell asset list.
+2. **A user opens the same `index.html` over `http://localhost:8000`** → page renders identically. SW registers. Cache `nawyki-1.0.0` populates with the shell asset list.
 3. **A user goes offline (DevTools → Network → Offline) and reloads** → page loads from cache. Empty Today scaffold renders identically.
 4. **A user navigates to `?debug=1`** → diagnostics panel mounts in place of the empty scaffold, showing app version, SW state, cache name, install state.
 5. **A user long-presses the title for 1.5 s** → diagnostics panel mounts.
 6. **A user clicks "Reset shell" in diagnostics** → confirm dialog → unregister SW + clear caches + reload → fresh install.
-7. **A developer bumps `APP_VERSION` to `'v2'` in `version.js` and redeploys** → on next page load (while the old version is still open in a tab), `controllerchange` fires → toast "New version ready — Reload" appears. User clicks Reload → new cache `nawyki-v2` active, old `nawyki-v1` deleted.
+7. **A developer bumps `APP_VERSION` to `'1.0.1'` in `version.js` and redeploys** → on next page load (while the old version is still open in a tab), `controllerchange` fires → toast "New version ready — Reload" appears. User clicks Reload → new cache `nawyki-1.0.1` active, old `nawyki-1.0.0` deleted.
 
 ### What the Skeleton Does NOT Prove (Out of P1 Scope)
 
@@ -985,7 +985,7 @@ Total: ~14 files, ~250–300 LOC.
 Run in this order — each step unlocks the next:
 
 1. ✅ `index.html` opens via `file://`, renders, console clean.
-2. ✅ `python -m http.server 8000` → `http://localhost:8000/` → page loads, SW registers, `nawyki-v1` cache populated.
+2. ✅ `python -m http.server 8000` → `http://localhost:8000/` → page loads, SW registers, `nawyki-1.0.0` cache populated.
 3. ✅ DevTools offline → reload → page still renders.
 4. ✅ `?debug=1` → diagnostics mounts with all six rows present.
 5. ✅ Long-press title 1.5 s → diagnostics mounts.
