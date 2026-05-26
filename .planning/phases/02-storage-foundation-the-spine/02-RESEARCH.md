@@ -937,27 +937,27 @@ See `../sleep-tracker/scripts/serve.js` — 58 lines, `node:http` + `node:fs` + 
 
 **If this table is empty:** N/A — there ARE assumptions. The planner and discuss-phase should review especially A4 (seed cadence schema) and A7 (fake-IDB surface contract) — those are the only assumptions where being wrong costs more than "rare-path fallback code runs."
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the planner pre-write the cadence schema for the 8 seed habits, or defer it?**
    - What we know: D-32 specifies the cadence shapes (daily binary × 2, weekly binary, every-2-days binary, day-of-week-subset binary, daily numeric counter, slot-checklist anonymous, slot-checklist user-labeled). P4 builds the cadence engine that interprets this.
    - What's unclear: Whether P2 should ship a stable cadence schema (a `cadence_v: 1` field on each habit record) or leave the cadence shape provisional until P4.
-   - Recommendation: **Lock the cadence schema in P2's seed-loader plan.** Use the FEATURES.md descriptions + cross-check with ARCHITECTURE.md's domain notes. Treat the seed as the source of truth for "what shapes the cadence engine must support in P4." If P4 needs to extend the shape, that's an additive (forward-compatible) change.
+   - RESOLVED: **Lock the cadence schema in P2's seed-loader plan.** Use the FEATURES.md descriptions + cross-check with ARCHITECTURE.md's domain notes. Treat the seed as the source of truth for "what shapes the cadence engine must support in P4." If P4 needs to extend the shape, that's an additive (forward-compatible) change.
 
 2. **Should `apply.js` accept an injected `repo` for testability, or rely on the parallel `tests/helpers/fake-idb.js`?**
    - What we know: D-25 locks the fake-IDB-as-parallel-implementation pattern.
    - What's unclear: Whether the same fake-IDB approach extends cleanly to `apply.js` tests, or whether DI is cleaner there.
-   - Recommendation: **Stick with D-25's parallel-implementation pattern for the integration tests.** No DI in production code. Tests construct the fake repo, pass it to apply.js explicitly (via a tiny `apply.configure({ repo })` boot step). This keeps production code DI-free while making tests trivial.
+   - RESOLVED: **Stick with D-25's parallel-implementation pattern for the integration tests.** No DI in production code. Tests construct the fake repo, pass it to apply.js explicitly (via a tiny `apply.configure({ repo })` boot step). This keeps production code DI-free while making tests trivial.
 
 3. **What does the seed file's outer shape look like?**
    - What we know: D-31, D-32 specify the contents. D-33 specifies the merge semantics.
    - What's unclear: Whether `seed/habits.json` is a flat array of habits, or a wrapped object `{ schemaVersion: 1, habits: [...] }`.
-   - Recommendation: **Wrapped object.** Including `schemaVersion` and `seedVersion` at the top level lets the loader assert compatibility and gives the future full-65 seed a place to put metadata.
+   - RESOLVED: **Wrapped object.** Including `schemaVersion` and `seedVersion` at the top level lets the loader assert compatibility and gives the future full-65 seed a place to put metadata.
 
 4. **Should P2 ship a minimal `state/store.js` (with subscribe API) or defer it to P3?**
    - What we know: P3's Today view will consume it. P2's success criteria don't reference views.
    - What's unclear: Whether the round-trip test in `apply.markCompleted.test.js` benefits from going through `state/store.js` or whether it's cleaner to assert on the IDB outcome directly.
-   - Recommendation: **Ship a minimal `state/store.js` in P2** — just `hydrate()` + `subscribe()` + `notify()`. ~60 lines. Means P3 doesn't have to retrofit subscribers into already-shipped `apply.js` mid-feature.
+   - RESOLVED: **Ship a minimal `state/store.js` in P2** — just `hydrate()` + `subscribe()` + `notify()`. ~60 lines. Means P3 doesn't have to retrofit subscribers into already-shipped `apply.js` mid-feature.
 
 ## Environment Availability
 
