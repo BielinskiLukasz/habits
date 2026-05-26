@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 5 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Static scaffolding (APP_VERSION constant, CSS Cascade-Layers composer, locked token set, maskable icon, Web App Manifest)
+- [x] 01-01-PLAN.md — Static scaffolding (APP_VERSION constant, CSS Cascade-Layers composer, locked token set, maskable icon, Web App Manifest)
 - [ ] 01-02-PLAN.md — Classic service worker (versioned cache, activate cleanup, same-origin guard, cache-first shell + stale-while-revalidate for js/**)
 - [ ] 01-03-PLAN.md — Toast primitive + diagnostics panel (long-press, ?debug=1, Reset-shell handler with D-06 verbatim confirm)
 - [ ] 01-04-PLAN.md — Wiring (sw-register.js, mobile shell with empty Today scaffold, desktop stub, entry points; Walking Skeleton acceptance steps 1-7)
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. PWA Shell & Tooling Hygiene | 0/TBD | Not started | - |
+| 1. PWA Shell & Tooling Hygiene | 1/5 | In progress | - |
 | 2. Storage Foundation (The Spine) | 0/TBD | Not started | - |
 | 3. Today View & Settings v1 | 0/TBD | Not started | - |
 | 4. Domain Model | 0/TBD | Not started | - |

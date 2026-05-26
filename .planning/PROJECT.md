@@ -113,6 +113,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 | Scoring model deferred to research (3 alternatives → user picks) | The xlsx's "WYNIK SKORYGOWANY" is a candidate but not the only good answer; this deserves a deliberate redesign | — Pending |
 | Ongoing tool, multi-year (waves are seed plan, not a hard endpoint) | The 47-week plan is the first wave plan, not the whole product | — Pending |
 | Reminders/notifications OUT of v1 | User explicitly opted out for now; revisit later | — Pending |
+| D-23: Unit tests use Node's built-in `node --test` runner; tests live in `tests/` (excluded from SW shell and GH Pages deploy); cover pure-function modules only (domain logic, db migrations, utils); browser-driven integration testing remains manual via DevTools | Zero npm/build dependency matches anti-stack rule; pure ES modules already import-compatible with Node; tests must never reach the browser (no app-shell impact, GH Pages stays vanilla) | Locked 2026-05-26; introduce starting Phase 2 (first phase with testable logic — schema migrations, date utils, cadence engine) |
 
 ## Evolution
 
