@@ -13,7 +13,7 @@ dependency_graph:
     - js/util/version.js (Plan 01-01 — supplies self.APP_VERSION via importScripts)
   provides:
     - sw.js (the classic service worker registered by Plan 03 sw-register.js)
-    - `nawyki-${APP_VERSION}` cache namespace (read by Plan 03 diagnostics panel)
+    - `habits-${APP_VERSION}` cache namespace (read by Plan 03 diagnostics panel)
     - SHELL asset manifest (17 entries — drives the runtime smoke-test verifications in Plan 04)
   affects:
     - Plan 03 (sw-register.js registers this file; controllerchange wiring depends on its skipWaiting+clients.claim semantics)
@@ -36,7 +36,7 @@ key_files:
   modified: []
 decisions:
   - "Classic SW (not type: module) per Pitfall 4 — Firefox/Safari silently fail on module-form SWs"
-  - "Cache name format: `nawyki-${self.APP_VERSION}` — currently resolves to `nawyki-0.1.0`"
+  - "Cache name format: `habits-${self.APP_VERSION}` — currently resolves to `habits-0.1.0`"
   - "Strategy router: /js/ → staleWhileRevalidate; everything else same-origin → cache-first"
   - "Same-origin guard at sw.js line 105 — cross-origin requests are never intercepted, never cached"
   - "SHELL list shipped at 17 entries — matches research §Pattern 1 verbatim; cache.addAll will only succeed once Plans 03+04 land the remaining files"
@@ -52,7 +52,23 @@ metrics:
 
 # Phase 1 Plan 2: Service Worker Summary
 
-**One-liner:** Classic service worker — versioned cache derived from `APP_VERSION`, install-time pre-cache of the locked 17-entry SHELL list, activate-time cleanup of all prior caches, and a same-origin-only fetch handler that routes `/js/` through stale-while-revalidate and everything else through cache-first.
+**One-liner:** Module service worker — versioned cache derived from `APP_VERSION` (imported via ES module), install-time pre-cache of the locked 17-entry SHELL list, activate-time cleanup of all prior caches, and a same-origin-only fetch handler that routes `/js/` through stale-while-revalidate and everything else through cache-first.
+
+## Post-execution fix (2026-05-26)
+
+The original plan + this summary's first version specified a **classic** service worker that loaded the version constant via `importScripts('./js/util/version.js')`. That design was broken: `importScripts` evaluates its target as classic script, and the `export const APP_VERSION = '0.1.0'` in `js/util/version.js` is a SyntaxError in classic-script mode. The SW therefore threw `Uncaught SyntaxError: Unexpected token 'export'` during install, the install handler rejected, and the SW never reached `activated` — cache never populated, update toast never fired.
+
+The bug was caught by the **human-verify gate** (the human walkthrough surfaced what the regex-based plan-verify and `node --check` syntax-verify could not). It was fixed by switching to a **module** service worker:
+
+- `js/platform/sw-register.js` now calls `register('./sw.js', { type: 'module' })`.
+- `sw.js` now uses `import { APP_VERSION } from './js/util/version.js'` instead of `importScripts(...)`.
+- Cache prefix renamed `nawyki-` → `habits-` at the user's request (the public-facing app name; D-10 does not lock the prefix).
+
+Module SWs have been Baseline since Firefox 114 (Jun 2023) and Safari 16 (Sep 2022); in 2026 every target browser supports them. The original RESEARCH.md §Pitfall 4 warning about FF/Safari silent-failure is from 2023 data and no longer accurate.
+
+The plan's must_haves, key_links, verify regex, and acceptance criteria were retro-updated to match the actual shipped implementation. The historical narrative below (sections "What Shipped" onward) still describes the original classic-SW implementation — kept as the educational record of "what we thought; here's what we learned when we actually ran it."
+
+---
 
 ## What Shipped
 
@@ -62,16 +78,16 @@ One atomic commit added a single new file at the project root: `sw.js`. No HTML,
 
 | File | Purpose |
 | --- | --- |
-| `sw.js` | 128 lines. Classic-form service worker. Loads `self.APP_VERSION` via `importScripts('./js/util/version.js')` (Plan 01-01 supplies the constant). Derives `CACHE = \`nawyki-${self.APP_VERSION}\`` (currently `nawyki-0.1.0`). Install handler pre-caches the locked 17-entry SHELL list then unconditionally calls `self.skipWaiting()` (D-09). Activate handler iterates `caches.keys()`, deletes every cache whose name is not the current `CACHE`, then calls `self.clients.claim()` (D-09 + T-01-StaleCache mitigation). Fetch handler: non-GET → passthrough; cross-origin → early-return (V14 Configuration; T-01-CacheScope mitigation); same-origin URLs containing `/js/` → `staleWhileRevalidate(request)`; everything else → cache-first via `caches.match(request).then(r => r || fetch(request))`. The `staleWhileRevalidate` helper opens the named cache, kicks off network in parallel with cache lookup, calls `cache.put(request, response.clone())` on a successful network response, and `.catch()`-falls-back to the cached copy on network failure — preserving offline behavior (NFR-04 / PWA-06 / T-01-OfflineFail mitigation). Returns `cached || networkPromise` so a cached entry is served immediately when present. |
+| `sw.js` | 128 lines. Classic-form service worker. Loads `self.APP_VERSION` via `importScripts('./js/util/version.js')` (Plan 01-01 supplies the constant). Derives `CACHE = \`habits-${self.APP_VERSION}\`` (currently `habits-0.1.0`). Install handler pre-caches the locked 17-entry SHELL list then unconditionally calls `self.skipWaiting()` (D-09). Activate handler iterates `caches.keys()`, deletes every cache whose name is not the current `CACHE`, then calls `self.clients.claim()` (D-09 + T-01-StaleCache mitigation). Fetch handler: non-GET → passthrough; cross-origin → early-return (V14 Configuration; T-01-CacheScope mitigation); same-origin URLs containing `/js/` → `staleWhileRevalidate(request)`; everything else → cache-first via `caches.match(request).then(r => r || fetch(request))`. The `staleWhileRevalidate` helper opens the named cache, kicks off network in parallel with cache lookup, calls `cache.put(request, response.clone())` on a successful network response, and `.catch()`-falls-back to the cached copy on network failure — preserving offline behavior (NFR-04 / PWA-06 / T-01-OfflineFail mitigation). Returns `cached || networkPromise` so a cached entry is served immediately when present. |
 
 ## Cache Name Format
 
 ```
-nawyki-${self.APP_VERSION}
+habits-${self.APP_VERSION}
 ```
 
-- Currently resolves to `nawyki-0.1.0` (APP_VERSION = '0.1.0' per Plan 01-01).
-- Bumping `APP_VERSION` to `'0.1.1'` in `js/util/version.js` is the only operation needed to invalidate every cached shell asset; the activate handler will delete `nawyki-0.1.0` on the next SW activation.
+- Currently resolves to `habits-0.1.0` (APP_VERSION = '0.1.0' per Plan 01-01).
+- Bumping `APP_VERSION` to `'0.1.1'` in `js/util/version.js` is the only operation needed to invalidate every cached shell asset; the activate handler will delete `habits-0.1.0` on the next SW activation.
 - Per D-10: bump only on shell-asset changes (`index.html`, `desktop.html`, `manifest.json`, `sw.js`, `icon.svg`, anything under `css/`). Pure JS module changes do NOT bump the cache — the SWR branch for `/js/` URLs refreshes them within one reload.
 
 ## SHELL Asset List (as Shipped)
@@ -125,7 +141,7 @@ Four T-01 threat IDs land their mitigations in this plan:
 | Threat ID | Disposition | Implementation in sw.js |
 | --- | --- | --- |
 | **T-01-CacheScope** | mitigated | `fetch` handler line 105 — early-return on `url.origin !== self.location.origin`. No cross-origin response can enter the cache; no opaque-response cache bloat is possible. |
-| **T-01-StaleCache** | mitigated | Versioned cache name (`nawyki-${APP_VERSION}`) + `activate` handler iterates `caches.keys()` and deletes every cache where `k !== CACHE`. Bumping APP_VERSION in `js/util/version.js` is the only operation needed. |
+| **T-01-StaleCache** | mitigated | Versioned cache name (`habits-${APP_VERSION}`) + `activate` handler iterates `caches.keys()` and deletes every cache where `k !== CACHE`. Bumping APP_VERSION in `js/util/version.js` is the only operation needed. |
 | **T-01-OfflineFail** | mitigated | `staleWhileRevalidate` helper `.catch(() => cached)` falls back to the cached copy on network failure. Cache-first branch never depends on the network when the cache is populated. NFR-04 + PWA-06 satisfied at the source level. |
 | **T-01-NoNet** | mitigated | Zero off-origin URLs in source — raw `grep -E 'https?://' sw.js` returns empty. The only network destinations are same-origin GETs derived from `e.request.url`. No telemetry, no third-party CDN, no preconnect. |
 
@@ -148,7 +164,7 @@ Static gates from the plan's `<verification>` section:
 Source assertions from `<acceptance_criteria>`:
 
 5. ✅ `importScripts('./js/util/version.js')` present.
-6. ✅ `const CACHE = \`nawyki-${self.APP_VERSION}\`` present.
+6. ✅ `const CACHE = \`habits-${self.APP_VERSION}\`` present.
 7. ✅ SHELL array contains all 17 entries from RESEARCH.md §Pattern 1, all relative `./…`.
 8. ✅ `install` handler chains `caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())`.
 9. ✅ `activate` handler iterates `caches.keys()`, deletes every cache where `k !== CACHE`, then calls `self.clients.claim()`.
@@ -159,8 +175,8 @@ Source assertions from `<acceptance_criteria>`:
 Runtime gates (deferred to Plan 04 once HTML shells + sw-register.js are wired):
 
 13. ⏳ DevTools → Application → Service Workers shows `sw.js` activated under HTTPS.
-14. ⏳ Cache Storage shows `nawyki-0.1.0` populated with all 17 SHELL entries.
-15. ⏳ Bump APP_VERSION to `'0.1.1'` → reload twice → `nawyki-0.1.0` deleted, `nawyki-0.1.1` active.
+14. ⏳ Cache Storage shows `habits-0.1.0` populated with all 17 SHELL entries.
+15. ⏳ Bump APP_VERSION to `'0.1.1'` → reload twice → `habits-0.1.0` deleted, `habits-0.1.1` active.
 16. ⏳ DevTools → Network → Offline → reload → page renders from cache.
 
 ## Deviations from Plan

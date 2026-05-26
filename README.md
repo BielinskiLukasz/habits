@@ -10,7 +10,15 @@ The same bytes work in three places. Every path in `index.html`, `desktop.html`,
 
 ### Open directly (file://)
 
-Double-click `index.html`. The empty Today scaffold renders. The service worker silently no-ops because `js/platform/sw-register.js` guards `register()` behind `location.protocol.startsWith('http')` and a silent `.catch(() => {})`. Useful for layout/CSS work without a server.
+Double-click `index.html`. The empty Today scaffold renders **layout-only** — useful for CSS / HTML iteration without a server.
+
+**Known limitations under `file://`** (browser security; not bugs in the app):
+
+- ES modules fail to load. Chrome / Edge / Firefox all block `import` from `file://` because `origin: null` triggers CORS, blocking `js/main.js` and its transitive imports. The DevTools console will show `Access to script ... has been blocked by CORS policy`. Use one of the HTTPS modes below to exercise JavaScript.
+- `manifest.json` fails to load for the same reason — install criteria can't be checked from `file://`.
+- The service worker silently no-ops because `js/platform/sw-register.js` guards `register()` behind `location.protocol.startsWith('http')` (D-20). Service workers require a secure context — `file://` doesn't qualify.
+
+In short: `file://` is for visually checking the static HTML / CSS only. Everything dynamic — SW, manifest install criteria, JS-driven UI, diagnostics panel — requires `localhost` or HTTPS.
 
 ### Localhost development
 
@@ -18,7 +26,7 @@ Double-click `index.html`. The empty Today scaffold renders. The service worker 
 python -m http.server 8000
 ```
 
-Then visit `http://localhost:8000/`. The service worker registers, the `nawyki-0.1.0` cache populates with the 17-entry SHELL list, and the page is fully offline-reloadable. Use this for service-worker + cache behavior testing (DevTools → Application → Service Workers / Cache Storage). The desktop-Chrome "Install" UI requires HTTPS or `localhost`; on `localhost` the install affordance is available, but real installability + cross-device verification happens against the GitHub Pages deploy below.
+Then visit `http://localhost:8000/`. The service worker registers, the `habits-0.1.0` cache populates with the 17-entry SHELL list, and the page is fully offline-reloadable. Use this for service-worker + cache behavior testing (DevTools → Application → Service Workers / Cache Storage). The desktop-Chrome "Install" UI requires HTTPS or `localhost`; on `localhost` the install affordance is available, but real installability + cross-device verification happens against the GitHub Pages deploy below.
 
 ### GitHub Pages deploy
 
@@ -34,7 +42,7 @@ The relative-paths rule (D-19) is the only thing that lets the chassis deploy un
 
 ## Bumping the version
 
-`APP_VERSION` is the single source of truth for the cache name (`nawyki-${APP_VERSION}`) and the diagnostics panel's "App version" row. The value follows [Semantic Versioning 2.0.0](https://semver.org/) — see [`VERSIONING.md`](./VERSIONING.md) for the full policy.
+`APP_VERSION` is the single source of truth for the cache name (`habits-${APP_VERSION}`) and the diagnostics panel's "App version" row. The value follows [Semantic Versioning 2.0.0](https://semver.org/) — see [`VERSIONING.md`](./VERSIONING.md) for the full policy.
 
 **Current phase: Initial Development (`0.y.z`)** — per SemVer §4, anything may change while the v1.0 milestone (Phases 1-6) is being built. Quick reference:
 
@@ -46,10 +54,10 @@ After v1.0 ships, standard SemVer rules apply (MAJOR for breaking, MINOR for add
 
 To ship a shell update:
 
-- Edit `js/util/version.js` and change `export const APP_VERSION = '0.1.0'` to the new value (e.g. `'0.1.1'`). The file also assigns `self.APP_VERSION = APP_VERSION` so the classic service worker can read it via `importScripts('./js/util/version.js')` — one edit, one file.
+- Edit `js/util/version.js` and change `export const APP_VERSION = '0.1.0'` to the new value (e.g. `'0.1.1'`). Both the window context and the module service worker (registered by `js/platform/sw-register.js` with `{ type: 'module' }`) import the same file — one edit, one file (D-12).
 - Commit and push. The GitHub Pages build serves the new bytes.
 - Per D-10, only bump when **shell assets** change: `index.html`, `desktop.html`, `manifest.json`, `sw.js`, `icon.svg`, anything under `css/`. Pure JS-module changes do NOT require a version bump — `sw.js` routes `/js/` URLs through stale-while-revalidate (D-11), so module updates propagate within one reload without invalidating the cache.
-- On the user's next page load, `sw.js`'s `activate` handler deletes every cache whose name is not the current `nawyki-${APP_VERSION}`, then `clients.claim()` takes over. Because `hadController` was true going into the new SW, `controllerchange` fires and the toast "New version ready — Reload" appears. The user clicks Reload at their leisure — there is no auto-reload (D-08/D-09).
+- On the user's next page load, `sw.js`'s `activate` handler deletes every cache whose name is not the current `habits-${APP_VERSION}`, then `clients.claim()` takes over. Because `hadController` was true going into the new SW, `controllerchange` fires and the toast "New version ready — Reload" appears. The user clicks Reload at their leisure — there is no auto-reload (D-08/D-09).
 
 ## Diagnostics & recovery
 
@@ -60,7 +68,7 @@ Two triggers (D-02) — both mount the same panel:
 - Append `?debug=1` to any URL. Example: `http://localhost:8000/?debug=1` or `https://bielinskilukasz.github.io/habits/?debug=1`. Reading is via `new URLSearchParams(location.search)`.
 - Long-press the "Habits" title for ~1.5 s. Works on touch (phone) and mouse (desktop) from a single Pointer Events code path. Movement greater than ~10 px cancels the press (Pitfall 7 — does not fire during a normal scroll).
 
-The panel renders six rows: app version, schema version (`n/a (P2)` until IDB ships), service-worker state (`unsupported` / `controlled` / `registered, not yet controlled`), cache name (the first `nawyki-` prefixed entry from `caches.keys()` or `none`), install state (`standalone` when launched as an installed PWA, `browser` otherwise, via `matchMedia('(display-mode: standalone)')`), and persistence state (`n/a (P2)` until `navigator.storage.persist()` lands in Phase 2). Three buttons follow: Reset shell, Reset data (disabled placeholder, tooltip `available in P2` per D-05), Check for update (forces `registration.update()` and reports outcome).
+The panel renders six rows: app version, schema version (`n/a (P2)` until IDB ships), service-worker state (`unsupported` / `controlled` / `registered, not yet controlled`), cache name (the first `habits-` prefixed entry from `caches.keys()` or `none`), install state (`standalone` when launched as an installed PWA, `browser` otherwise, via `matchMedia('(display-mode: standalone)')`), and persistence state (`n/a (P2)` until `navigator.storage.persist()` lands in Phase 2). Three buttons follow: Reset shell, Reset data (disabled placeholder, tooltip `available in P2` per D-05), Check for update (forces `registration.update()` and reports outcome).
 
 ### Reset shell
 

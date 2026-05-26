@@ -144,7 +144,7 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 ### PWA — Installable offline app
 
 - [ ] **PWA-01**: App ships a `manifest.json` with name, icons, start_url, scope, display: standalone
-- [ ] **PWA-02**: App registers a service worker (`sw.js`) using cache-first strategy with versioned cache name (`nawyki-X.Y.Z`)
+- [ ] **PWA-02**: App registers a service worker (`sw.js`) using cache-first strategy with versioned cache name (`habits-X.Y.Z`)
 - [ ] **PWA-03**: Service worker uses `skipWaiting()` + `clients.claim()` so updates take effect on next reload
 - [ ] **PWA-04**: Service worker registration silently fails (silent `.catch()`) when running over `file://`
 - [ ] **PWA-05**: App is installable on Android Chrome, iOS Safari (Add to Home Screen), and desktop Chrome/Edge

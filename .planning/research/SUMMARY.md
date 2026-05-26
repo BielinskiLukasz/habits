@@ -21,7 +21,7 @@ A vanilla multi-file static PWA (`index.html` + `desktop.html`, no framework, no
 - **Persistence trigger:** `visibilitychange -> hidden` (NOT `beforeunload`).
 - **Cross-tab sync:** `BroadcastChannel('nawyki')`.
 - **PWA:** `manifest.json` + `sw.js` registered with silent `.catch()` guarded by `location.protocol.startsWith('http')` so `file://` still works.
-- **SW strategy:** Cache-first, versioned cache name (`nawyki-X.Y.Z`), `skipWaiting()` + `clients.claim()`.
+- **SW strategy:** Cache-first, versioned cache name (`habits-X.Y.Z`), `skipWaiting()` + `clients.claim()`.
 - **CSS:** Cascade Layers (`@layer reset, tokens, base, layout, components, view, utilities;`) + Custom Properties + `@import url(...) layer(...)`. No preprocessor.
 - **Scoring storage:** Persisted in a dedicated `score_snapshots` IDB store (write-time recompute via `state/apply.js`, never on-render).
 - **Export — JSON:** Full-fidelity backup of every IDB store; `Blob` + anchor download.

@@ -111,7 +111,7 @@ APP_VERSION = '0.1.0'
 ```
 
 - Per D-10: bump only on shell-asset changes (`index.html`, `desktop.html`, `manifest.json`, `sw.js`, `icon.svg`, anything under `css/`). Pure JS module changes do NOT bump the cache.
-- Plan 02's `sw.js` derives the cache name as `nawyki-${self.APP_VERSION}` → `nawyki-0.1.0` initially.
+- Plan 02's `sw.js` derives the cache name as `habits-${self.APP_VERSION}` → `habits-0.1.0` initially.
 - Plan 03's diagnostics panel reads the same constant to display the running version.
 
 ## Token Vocabulary Available to Downstream Plans

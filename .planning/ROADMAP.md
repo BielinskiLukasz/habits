@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Static scaffolding (APP_VERSION constant, CSS Cascade-Layers composer, locked token set, maskable icon, Web App Manifest)
-- [x] 01-02-PLAN.md — Classic service worker (versioned cache, activate cleanup, same-origin guard, cache-first shell + stale-while-revalidate for js/**)
+- [x] 01-02-PLAN.md — Module service worker (versioned cache, activate cleanup, same-origin guard, cache-first shell + stale-while-revalidate for js/**) — switched from classic to module SW post-execution to fix the `importScripts` + `export` SyntaxError; cache prefix renamed `nawyki-` → `habits-`
 - [x] 01-03-PLAN.md — Toast primitive + diagnostics panel (long-press, ?debug=1, Reset-shell handler with D-06 verbatim confirm)
 - [x] 01-04-PLAN.md — Wiring (sw-register.js, mobile shell with empty Today scaffold, desktop stub, entry points; Walking Skeleton acceptance steps 1-7)
 - [x] 01-05-PLAN.md — README + phase-gate device installs + GH Pages sub-path deploy verification

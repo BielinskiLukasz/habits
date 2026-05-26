@@ -51,7 +51,7 @@ export function registerServiceWorker() {
   // paint. The `./sw.js` path is relative (D-19); the silent `.catch()` is
   // Defense 3 in case anything still goes wrong at runtime.
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => { /* silent */ });
+    navigator.serviceWorker.register('./sw.js', { type: 'module' }).catch(() => { /* silent */ });
   });
 
   // Wire D-08 update toast onto controllerchange — only fire on real updates

@@ -114,7 +114,7 @@ export function mountDiagnostics() {
   const cacheDd = appendRow(dl, 'Cache name', 'loading…');
   if (typeof caches !== 'undefined' && caches && typeof caches.keys === 'function') {
     caches.keys().then(keys => {
-      const match = keys.find(k => /^nawyki-/.test(k));
+      const match = keys.find(k => /^habits-/.test(k));
       cacheDd.textContent = match || 'none';
     }).catch(() => {
       cacheDd.textContent = 'none';

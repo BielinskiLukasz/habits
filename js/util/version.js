@@ -16,15 +16,17 @@
  * See VERSIONING.md at the project root for the full policy.
  *
  * Bumping this string forces a new SW cache name (per D-10: cache name is
- * derived from APP_VERSION as `nawyki-${APP_VERSION}` — bump on any
+ * derived from APP_VERSION as `habits-${APP_VERSION}` — bump on any
  * shell-asset change: index.html, desktop.html, manifest.json, sw.js,
  * icon.svg, anything under css/).
  *
- * Dual-context loadable:
- *   1. Window context — ES module via `import { APP_VERSION } from './js/util/version.js'`.
- *   2. Service-worker context — `importScripts('./js/util/version.js')` in sw.js,
- *      where `export` is silently ignored but the side-effect assignment
- *      `self.APP_VERSION = APP_VERSION` keeps the value readable from the SW global.
+ * Loaded by BOTH the window context and the module service worker as a plain
+ * ES module — `import { APP_VERSION } from './js/util/version.js'` works
+ * verbatim in either. `sw.js` is registered with `{ type: 'module' }` by
+ * `js/platform/sw-register.js`, which is what makes this single-source
+ * arrangement possible (D-12). The earlier classic-SW + `importScripts(...)`
+ * approach was broken because `importScripts` evaluates as classic script
+ * and `export const` is a SyntaxError there.
  *
  * Bumping the version remains exactly one edit, in exactly one file.
  */
@@ -32,6 +34,7 @@
 /** @type {string} */
 export const APP_VERSION = '0.1.0';
 
-// Side-effect assignment so the classic SW context (which ignores `export`
-// under importScripts) can still read the global.
+// Convenience side-effect assignment — exposes APP_VERSION on `self` /
+// `globalThis` for ad-hoc DevTools probing in either context. Not relied on
+// by any code path (the module import is the canonical accessor).
 self.APP_VERSION = APP_VERSION;

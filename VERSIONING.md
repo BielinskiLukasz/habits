@@ -4,7 +4,7 @@ Nawyki uses [Semantic Versioning 2.0.0](https://semver.org/) for `APP_VERSION` (
 
 Format: `MAJOR.MINOR.PATCH` (with optional `-prerelease` and/or `+build` suffixes).
 
-The SW cache name derives directly: `` `nawyki-${APP_VERSION}` `` (no `v` literal prefix).
+The SW cache name derives directly: `` `habits-${APP_VERSION}` `` (no `v` literal prefix).
 
 ## Current Phase: Initial Development (`0.y.z`)
 
@@ -48,7 +48,7 @@ Every `schemaVersion` migration after v1.0 → MAJOR bump. The cache name change
 1. Edit `js/util/version.js`, change `APP_VERSION` literal.
 2. Commit. (Optional: tag the commit `git tag v0.1.1`.)
 3. Push to `main`. GitHub Pages serves the new bytes.
-4. On the user's next page load, `sw.js` `activate` handler deletes every cache whose name is not the current `` `nawyki-${APP_VERSION}` ``, then `clients.claim()` takes over.
+4. On the user's next page load, `sw.js` `activate` handler deletes every cache whose name is not the current `` `habits-${APP_VERSION}` ``, then `clients.claim()` takes over.
 5. Because `hadController` was true going into the new SW, `controllerchange` fires and the toast "New version ready — Reload" appears. The user clicks Reload at their leisure — no auto-reload (D-08 / D-09).
 
 See also:

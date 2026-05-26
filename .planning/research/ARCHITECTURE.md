@@ -96,7 +96,7 @@ habits/
 │       └── csv.js              # CSV row formatter (BOM, CRLF, escaping)
 │
 └── seed/
-    └── nawyki-0.1.0.seed.json
+    └── habits-0.1.0.seed.json
 ```
 
 ### Structure Rationale
@@ -338,7 +338,7 @@ Phase 1 ships **infrastructure with the thinnest possible feature on top** to pr
 2. **`js/db/idb.js`** — promise wrapper. Unlocks: schema, repo.
 3. **`js/db/schema.js`** — declare 6 stores + indexes + initial migration. Unlocks: any IDB read/write.
 4. **`js/db/repo.js`** — typed get/put per store. Unlocks: state store.
-5. **`js/io/seed.js`** — load `seed/nawyki-0.1.0.seed.json` into `habits` on first boot (idempotent via `meta.seedLoadedAt`). Unlocks: anything to render.
+5. **`js/io/seed.js`** — load `seed/habits-0.1.0.seed.json` into `habits` on first boot (idempotent via `meta.seedLoadedAt`). Unlocks: anything to render.
 6. **`js/state/store.js` + `state/apply.js`** — in-memory cache hydrated from IDB; `apply()` is the only mutator. Unlocks: views, undo, broadcast.
 7. **`js/platform/sync.js`** — BroadcastChannel wrapper, wired into `apply.js`. Unlocks: multi-tab safety from day one (don't bolt this on later).
 8. **`js/platform/lifecycle.js`** — `visibilitychange` flush hook. Unlocks: durability on mobile.

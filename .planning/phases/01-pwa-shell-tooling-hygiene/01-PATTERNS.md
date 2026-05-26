@@ -491,7 +491,7 @@ navigator.serviceWorker.addEventListener('controllerchange', () => {
 
 **Excerpt:**
 ```js
-const CACHE = `nawyki-${self.APP_VERSION}`;
+const CACHE = `habits-${self.APP_VERSION}`;
 // ...
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {

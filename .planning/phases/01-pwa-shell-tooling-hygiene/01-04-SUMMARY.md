@@ -199,7 +199,7 @@ Per-task automated verifies (all printed `OK`):
 Runtime gates (deferred to Task 5 checkpoint — see below):
 
 11. ⏳ Open `index.html` via `file://` → empty Today scaffold renders, console clean, `navigator.serviceWorker.controller === null`.
-12. ⏳ Open via `http://localhost:8000/` → DevTools → Application → Service Workers shows `sw.js` activated; Cache Storage shows `nawyki-0.1.0` with 17 entries.
+12. ⏳ Open via `http://localhost:8000/` → DevTools → Application → Service Workers shows `sw.js` activated; Cache Storage shows `habits-0.1.0` with 17 entries.
 13. ⏳ Offline reload → page renders identically.
 14. ⏳ `?debug=1` → diagnostics panel mounts with all six rows.
 15. ⏳ Long-press app title 1.5 s → diagnostics panel mounts; immediate drag cancels.

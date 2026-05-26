@@ -1,18 +1,24 @@
 /**
- * @file Classic service worker for Nawyki (file://-safe via sw-register.js guard).
+ * @file Module service worker for Habits (file://-safe via sw-register.js guard).
  *
- * Why CLASSIC service worker (not `type: "module"`):
- *   Module-form SWs are not yet Baseline on Firefox/Safari (Pitfall 4 in
- *   01-RESEARCH.md). A silent-failing SW is unacceptable for an offline-first
- *   app, so we use the classic form + `importScripts('./js/util/version.js')`
- *   to share the version constant with the window context (D-12, research §Q2).
+ * Why MODULE service worker (`type: "module"`):
+ *   The original Phase 1 plan chose a classic SW + `importScripts('./js/util/version.js')`
+ *   to share the version constant with the window context. That approach was
+ *   based on stale 2023 research suggesting module SWs were not yet Baseline
+ *   on Firefox/Safari. In practice the classic path was broken — classic-script
+ *   parsers hard-error on `export const`, so `importScripts(version.js)` threw
+ *   `SyntaxError: Unexpected token 'export'`, the install handler rejected, and
+ *   the SW never reached `activated`. Module SWs have been Baseline since
+ *   Firefox 114 (Jun 2023) and Safari 16 (Sep 2022); in 2026 every target
+ *   browser supports them. The module form lets `sw.js` and the window context
+ *   share `js/util/version.js` verbatim — single source of truth (D-12).
  *
  * Locked decisions implemented here:
  *   - D-09: `skipWaiting()` + `clients.claim()` are unconditional; new SWs
  *           take over immediately. The user-facing "New version ready" toast
  *           lives in sw-register.js (controllerchange listener); the SW
  *           never auto-reloads.
- *   - D-10: Cache name `nawyki-${APP_VERSION}`. Activate handler deletes
+ *   - D-10: Cache name `habits-${APP_VERSION}`. Activate handler deletes
  *           every cache whose name is not the current one. Bumping
  *           APP_VERSION in js/util/version.js is the only operation needed
  *           to invalidate.
@@ -22,8 +28,8 @@
  *           D-10 (JS module changes do NOT need a cache-name bump because
  *           SWR refreshes on every fetch) while still satisfying NFR-04
  *           (fully offline on cache fallback).
- *   - D-12: Single source of truth for the version constant.
- *           `self.APP_VERSION` is set by `importScripts(...)` below.
+ *   - D-12: Single source of truth for the version constant. Imported from
+ *           `js/util/version.js` as an ES module (same as the window context).
  *   - D-19: Every URL in this file is relative (`./…`); no absolute paths
  *           and no off-origin URLs (NFR-12 + T-01-NoNet).
  *
@@ -39,9 +45,9 @@
  *     destinations are same-origin GETs derived from `e.request.url`.
  */
 
-importScripts('./js/util/version.js');
+import { APP_VERSION } from './js/util/version.js';
 
-const CACHE = `nawyki-${self.APP_VERSION}`;
+const CACHE = `habits-${APP_VERSION}`;
 
 // The locked shell asset list (research §Pattern 1).
 // All 17 entries are relative-path (`./…`) per D-19.
