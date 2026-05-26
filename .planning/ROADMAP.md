@@ -54,7 +54,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 02-02-PLAN.md — js/db/schema.js (7-store v1 incl. score_snapshots per D-39, events UUID per D-42) + js/db/idb.js (~80-line promise wrapper, DB_NAME=habits per D-30) + js/db/repo.js (typed facade matching fake-IDB surface) + A7 contract test + repo surface driver test
+- [x] 02-02-PLAN.md — js/db/schema.js (7-store v1 incl. score_snapshots per D-39, events UUID per D-42) + js/db/idb.js (~80-line promise wrapper, DB_NAME=habits per D-30) + js/db/repo.js (typed facade matching fake-IDB surface) + A7 contract test + repo surface driver test
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
-| 2. Storage Foundation (The Spine) | 1/6 | In Progress|  |
+| 2. Storage Foundation (The Spine) | 2/6 | In Progress|  |
 | 3. Today View & Settings v1 | 0/TBD | Not started | - |
 | 4. Domain Model | 0/TBD | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
