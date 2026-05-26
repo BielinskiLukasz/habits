@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "seedVersion": 1,
+  "habits": [
+    {
+      "id": "015105be-fc0b-45b6-b939-4e8d395fcf13",
+      "name": "Morning walk",
+      "name_pl": "Spacer rano",
+      "wave": 1,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "daily" },
+      "logShape": "binary"
+    },
+    {
+      "id": "44403331-dbdf-4992-ac84-944dba8df6f1",
+      "name": "Drink water (1.5L)",
+      "name_pl": "Picie wody (1,5L)",
+      "wave": 1,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "daily" },
+      "logShape": "binary"
+    },
+    {
+      "id": "83c8b7c5-6c2b-4121-9395-2d7c1e0f99a5",
+      "name": "Weekly grocery run",
+      "name_pl": "Cotygodniowe zakupy",
+      "wave": 2,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "weekly" },
+      "logShape": "binary"
+    },
+    {
+      "id": "b80c7b07-8a37-471b-b9d1-110b6b90011c",
+      "name": "Shower (every 2 days)",
+      "name_pl": "Prysznic co 2 dni",
+      "wave": 1,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "every-n-days", "n": 2 },
+      "logShape": "binary"
+    },
+    {
+      "id": "c1eecb31-3b91-4a80-92e8-68435b5931f4",
+      "name": "Strength training (M/W/F)",
+      "name_pl": "Trening siłowy (pn/śr/pt)",
+      "wave": 3,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "day-of-week-subset", "days": ["mon", "wed", "fri"] },
+      "logShape": "binary"
+    },
+    {
+      "id": "eeef9945-6c8c-4440-9d93-baf6fd4ee312",
+      "name": "5 things grateful for",
+      "name_pl": "5 rzeczy za które wdzięczny",
+      "wave": 1,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "daily" },
+      "logShape": "numeric",
+      "target": 5
+    },
+    {
+      "id": "45e0f64f-b9c2-46ca-8b21-3ddbc4e9bf07",
+      "name": "7 meatless meals/week",
+      "name_pl": "7 posiłków bez mięsa/tydz",
+      "wave": 2,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "weekly" },
+      "logShape": "slot-checklist",
+      "slots": { "kind": "anonymous", "count": 7 }
+    },
+    {
+      "id": "2694072b-dfe0-4cb3-9ba2-b3aad89f85aa",
+      "name": "Daily learning (3 sources)",
+      "name_pl": "Codzienna nauka (3 źródła)",
+      "wave": 3,
+      "status": "active",
+      "cadence": { "cadence_v": 1, "type": "daily" },
+      "logShape": "slot-checklist",
+      "slots": { "kind": "labeled", "labels": ["read", "video", "practice"] }
+    }
+  ]
+}
