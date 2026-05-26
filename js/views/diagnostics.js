@@ -1,14 +1,14 @@
 /**
- * @file Diagnostics panel + long-press attach + Reset-shell handler
- * (D-02, D-03, D-05, D-06, SETTINGS-07 placeholder).
+ * @file Diagnostics panel + long-press attach + Reset-shell handler + Reset-data handler
+ * (D-02, D-03, D-05, D-06, D-44).
  *
  * Two exports:
  *   - `attachLongPress(el, onLongPress)` — Pointer Events long-press detector
  *     per RESEARCH.md §Pattern 4 + Pitfall 7. 1500 ms timer with 10 px
  *     movement-cancellation tolerance.
  *   - `mountDiagnostics()` — renders the six-row diagnostics panel and three
- *     action buttons (Reset shell wired, Reset data disabled placeholder per
- *     D-05, Check for update wired).
+ *     action buttons (Reset shell wired, Reset data button wired per D-44 —
+ *     deletes IndexedDB 'habits' DB, Check for update wired).
  *
  * Both `textContent` and `setAttribute` are used exclusively for any rendered
  * value (no unsafe-HTML setter). P1 has no user input, but the discipline
@@ -169,12 +169,31 @@ export function mountDiagnostics() {
   });
   actions.appendChild(resetShellBtn);
 
-  // Reset data — placeholder per D-05. Disabled + tooltip "available in P2".
+  // Reset data — wired (D-44). Verbatim D-06-style confirm phrasing for THIS button.
   const resetDataBtn = document.createElement('button');
   resetDataBtn.className = 'diagnostics-action';
   resetDataBtn.textContent = 'Reset data';
-  resetDataBtn.disabled = true;
-  resetDataBtn.setAttribute('title', 'available in P2');
+  resetDataBtn.addEventListener('click', async () => {
+    // Verbatim D-06-style phrasing for the data-reset variant (D-44 calls for D-06 style).
+    const confirmed = confirm('Reset data — delete the habits IndexedDB database. Service worker + caches NOT affected. Reload to re-seed.');
+    if (!confirmed) return;
+
+    try {
+      // `deleteDatabase` returns a request; await it via a small Promise wrapper.
+      // onblocked also resolves — close other tabs manually; the eventual reload
+      // (after the user closes them) still re-seeds.
+      await new Promise((resolve, reject) => {
+        const req = indexedDB.deleteDatabase('habits');
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+        req.onblocked = () => resolve();
+      });
+    } catch (_e) {
+      // Swallow — proceed with reload regardless.
+    }
+
+    location.reload();
+  });
   actions.appendChild(resetDataBtn);
 
   // Check for update — wired (D-03). Forces registration.update().

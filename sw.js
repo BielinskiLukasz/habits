@@ -50,15 +50,18 @@ import { APP_VERSION } from './js/util/version.js';
 const CACHE = `habits-${APP_VERSION}`;
 
 // The locked shell asset list (research §Pattern 1).
-// All 17 entries are relative-path (`./…`) per D-19.
+// All entries are relative-path (`./…`) per D-19.
 // The bare `./` entry caches the directory-root response (equivalent to
 // index.html on default-document servers).
 //
-// Note: Plans 03 + 04 ship the remaining JS files referenced here (sw-register.js,
-// diagnostics.js, toast.js, main.js, desktop.js) and the HTML shells. Until those
-// land, `cache.addAll(SHELL)` will fail because some entries are missing — that
-// is the EXPECTED behavior at this point in Phase 1 and is why Plan 04 is the
-// runtime-verification gate, not this plan.
+// Phase-1 plans 03 + 04 shipped the original 17 entries (sw-register.js,
+// diagnostics.js, toast.js, main.js, desktop.js + the HTML shells).
+// Phase-2 plans 04 (seed) + 05 (wiring) appended the storage-spine entries
+// below: the new `./js/util/*`, `./js/db/*`, `./js/state/*`, `./js/platform/*`,
+// `./js/io/*` modules plus the committed `./seed/habits.json` fixture.
+// `./seed/habits.json` MUST be present here because `bootSeed()` fetches it on
+// first run — without precaching it, offline first-run fails (RESEARCH Pitfall
+// 8 strategy (a) + Assumption A5).
 const SHELL = [
   './',
   './index.html',
@@ -77,6 +80,20 @@ const SHELL = [
   './js/platform/sw-register.js',
   './js/views/diagnostics.js',
   './js/views/toast.js',
+  // P2 storage spine — added in phase 02-storage-foundation-the-spine plan 04 (seed) / 05 (wiring).
+  './js/util/date.js',
+  './js/util/id.js',
+  './js/db/idb.js',
+  './js/db/schema.js',
+  './js/db/repo.js',
+  './js/state/store.js',
+  './js/state/apply.js',
+  './js/state/apply/markCompleted.js',
+  './js/state/undo.js',
+  './js/platform/sync.js',
+  './js/platform/lifecycle.js',
+  './js/io/seed.js',
+  './seed/habits.json',
 ];
 
 self.addEventListener('install', e => {
