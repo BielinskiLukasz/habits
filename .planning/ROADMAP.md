@@ -58,7 +58,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-03-PLAN.md — js/state/{store,apply,undo}.js + js/state/apply/markCompleted.js + js/platform/{sync,lifecycle}.js (BroadcastChannel(habits), visibilitychange flush, persistent undo via meta.undoToken)
+- [x] 02-03-PLAN.md — js/state/{store,apply,undo}.js + js/state/apply/markCompleted.js + js/platform/{sync,lifecycle}.js (BroadcastChannel(habits), visibilitychange flush, persistent undo via meta.undoToken)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
-| 2. Storage Foundation (The Spine) | 2/6 | In Progress|  |
+| 2. Storage Foundation (The Spine) | 3/6 | In Progress|  |
 | 3. Today View & Settings v1 | 0/TBD | Not started | - |
 | 4. Domain Model | 0/TBD | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
