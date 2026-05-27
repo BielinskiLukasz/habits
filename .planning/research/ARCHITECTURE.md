@@ -14,10 +14,10 @@
 |---|---|---|
 | 1 | Module layout | Extend STACK.md tree with `js/state/` (store + selectors + undo) and `js/router/` (one file). |
 | 2 | State pattern | **Snapshot-of-definitions + append-only log of events** ("event log + materialized views"). Definitions are versioned by `effectiveFrom`; logs reference `habitId + definitionVersion`. |
-| 3 | IDB schema | 6 stores: `habits`, `habit_versions`, `logs`, `events`, `settings`, `meta`. Logs keyed `[habitId, date]`; events keyed by autoincrement with index on `at`. |
+| 3 | IDB schema | 7 stores: `habits`, `habit_versions`, `logs`, `events`, `settings`, `meta`, `score_snapshots`. Logs keyed `[habitId, date]`; events keyed by UUID (`crypto.randomUUID()`) with index on `at`; `score_snapshots` keyed `[habitId, date]` (declared empty in v1, written from P6). <!-- Updated 2026-05-26 per Phase 2 D-39 + D-42 — score_snapshots added to v1 (D-39); events keypath switched from autoincrement to UUID for cross-device-import safety (D-42). --> |
 | 4 | Routing | **Hash router** (`#today`, `#history/2026-05-26`, `#habit/<id>`, etc.) in `js/router/router.js`. ~7 views total across both shells. |
 | 5 | Mobile vs desktop split | **Confirmed: two HTML shells** (`index.html` / `desktop.html`). Shared modules live under `js/{db,domain,state,io,platform,util}/`; only `js/views/` and `js/{main,desktop}.js` differ. |
-| 6 | Cross-tab + undo | BroadcastChannel `'nawyki'` in `js/platform/sync.js`; undo lives in `js/state/undo.js` as an in-memory stack of inverse-event functions, persisted across reload via a single-slot `undo_token` in `meta`. |
+| 6 | Cross-tab + undo | BroadcastChannel `'habits'` in `js/platform/sync.js`; undo lives in `js/state/undo.js` as an in-memory stack of inverse-event functions, persisted across reload via a single-slot `undo_token` in `meta`. <!-- Updated 2026-05-26 per Phase 2 D-30 — channel name aligned with cache prefix + DB name + manifest name. --> |
 | 7 | Build order | Phase 1 = "**the spine**": IDB wrapper → schema/migrations → state store → router → minimal Today view reading from seed. Everything else is feature work on this spine. |
 
 ---
@@ -85,14 +85,14 @@ habits/
 │   │   └── seed.js
 │   │
 │   ├── platform/               # As in STACK.md
-│   │   ├── sync.js             # BroadcastChannel('nawyki')
+│   │   ├── sync.js             # BroadcastChannel('habits') — D-30 (2026-05-26)
 │   │   ├── lifecycle.js        # visibilitychange flush
 │   │   ├── sw-register.js
 │   │   └── feature.js
 │   │
 │   └── util/
 │       ├── date.js             # ISO local-date utilities (NO timezone drift)
-│       ├── id.js               # crypto.randomUUID() with file:// fallback
+│       ├── id.js               # crypto.randomUUID() in secure contexts (HTTPS + localhost; usually file:// too); three-tier fallback for Safari-on-file:// edge case per Pitfall 13 (2026-05-26)
 │       └── csv.js              # CSV row formatter (BOM, CRLF, escaping)
 │
 └── seed/
@@ -171,21 +171,25 @@ The locked constraint says: **definition edits don't rewrite logs.** When a log 
 
 ## 3. IndexedDB Schema (sketch)
 
-Six object stores. Names, key paths, and indexes:
+Seven object stores. Names, key paths, and indexes:
+
+<!-- Updated 2026-05-26 per Phase 2 D-39 — added `score_snapshots` to v1 (declared empty in v1; P6 starts writing) so no v2 schema upgrade is needed when scoring lands. -->
+<!-- Updated 2026-05-26 per Phase 2 D-42 — `events` keypath switched from autoincrement to UUID via `crypto.randomUUID()`; chronological order still via the `at` index. -->
 
 | Store | Key Path | Indexes | Purpose |
 |---|---|---|---|
-| `habits` | `id` (UUID) | `wave`, `status` (active/mastered/archived) | Current definition per habit |
+| `habits` | `id` (UUID) | `wave`, `status` (active/mastered/archived) | Current definition per habit (carries `name` English primary + optional `name_pl` per D-40) |
 | `habit_versions` | `[habitId, effectiveFrom]` (effectiveFrom = ISO ts) | `habitId` | Snapshot history of definitions; never deleted |
 | `logs` | `[habitId, date]` (date = `YYYY-MM-DD`) | `date` (for "everything on day X"), `habitId` (for "history of habit Y") | Daily completion ledger |
-| `events` | autoincrement `id` | `at` (ISO ts), `type`, `habitId` (when applicable) | Append-only mutation log; powers undo + per-habit edit history |
+| `events` | `id` (UUID via `crypto.randomUUID()`) | `at` (ISO ts), `type`, `habitId` (when applicable) | Append-only mutation log; powers undo + per-habit edit history |
 | `settings` | `key` (string) | — | Singleton-style: `defaultThreshold`, `defaultWindowDays`, theme, last viewed date, seed version, schema version |
 | `meta` | `key` (string) | — | `undoToken` (last-undoable event id), `seedLoadedAt`, anything else housekeeping |
+| `score_snapshots` | `[habitId, date]` | `date` (daily totals, wave aggregates), `habitId` (rolling per-habit scores) | Precomputed score values per (habit, day). Declared empty in v1; first writes land in Phase 6. |
 
 **Notes on key choices:**
 
 - `logs` uses a **compound key `[habitId, date]`** so writes are idempotent (re-marking today's habit overwrites the same row; no duplicates). Compound key + `date` index gives us both "habit's history" and "everything done on day X" in one store.
-- `events` autoincrements because event order matters and we never delete. Index on `at` is for chronological scans (undo and per-habit history).
+- `events` uses a UUID keypath (D-42, 2026-05-26 — supersedes autoincrement). UUIDs make cross-device JSON-import merge-by-id safe; chronological order is preserved via the `at` index. Index on `at` is for chronological scans (undo and per-habit history).
 - `habit_versions` uses `[habitId, effectiveFrom]` so the natural query "give me the definition of habit X that was in effect on date D" is a bound cursor scan.
 - `settings` and `meta` are separated because `settings` is user-facing config (export/import should round-trip it) and `meta` is housekeeping (export should NOT include it).
 
@@ -281,7 +285,9 @@ There are **no shell-specific modules outside the entry files and the views actu
 
 ### Cross-Tab Sync
 
-**Mechanism:** `BroadcastChannel('nawyki')`. **Module:** `js/platform/sync.js`.
+**Mechanism:** `BroadcastChannel('habits')`. **Module:** `js/platform/sync.js`.
+
+<!-- Updated 2026-05-26 per Phase 2 D-30 — channel name aligned with cache prefix + DB name + manifest name. -->
 
 **Protocol:** Every successful `state/apply.js` write broadcasts a small message:
 
@@ -444,7 +450,7 @@ apply.js: open tx on [logs, events, meta]
     ↓
 apply.js: update in-memory cache in store.js
     ↓
-apply.js: broadcast { type: 'mutation', event: 'markCompleted', keys: { habitId, date } } on 'nawyki'
+apply.js: broadcast { type: 'mutation', event: 'markCompleted', keys: { habitId, date } } on 'habits' (D-30)
     ↓
 apply.js: push inverse onto state/undo.js stack
     ↓
