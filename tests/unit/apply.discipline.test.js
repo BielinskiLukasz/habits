@@ -1,7 +1,7 @@
 /**
- * @file Discipline tests — grep-based structural enforcement (T-02-13/T-02-14).
+ * @file Discipline tests — grep-based structural enforcement (T-02-13/T-02-14/T-02-AP1).
  *
- * Enforces three Anti-Pattern invariants that the whole P2+ architecture
+ * Enforces four Anti-Pattern invariants that the whole P2+ architecture
  * depends on:
  *   1. Views, IO modules, and undo.js NEVER call `js/db/repo.js` write
  *      helpers directly. Only `js/state/apply.js` and its `apply/*.js`
@@ -10,6 +10,9 @@
  *      in code (Pitfall 8, MDN, T-02-13).
  *   3. `js/state/apply.js` dispatches via a `HANDLERS` table and contains
  *      no `switch (` statement (ARCHITECTURE §Anti-Pattern 4 — no god switch).
+ *   4. Only `js/db/idb.js` may call `indexedDB.open(...)`. Every other
+ *      module under `js/` must reach the database through the wrapper
+ *      (ARCHITECTURE §Anti-Pattern 1 / T-02-AP1).
  *
  * Strips JSDoc + block + line comments before matching so the forbidden
  * tokens are allowed in commentary explaining the negative-space invariants.
@@ -108,5 +111,25 @@ describe('discipline: apply.js dispatches via HANDLERS (Anti-Pattern 4)', () => 
     const src = readStripped(path);
     assert.ok(src.includes('HANDLERS'), '`HANDLERS` table must be present');
     assert.equal(src.match(/\bswitch\s*\(/), null, '`switch (` is forbidden in apply.js (Anti-Pattern 4 — no god switch)');
+  });
+});
+
+describe('discipline: only js/db/idb.js may call indexedDB.open (Anti-Pattern 1, T-02-AP1)', () => {
+  test('zero matches for `indexedDB.open(` in js/ outside js/db/idb.js', () => {
+    const allowed = join(ROOT, 'js/db/idb.js');
+    const targets = jsFilesIn(join(ROOT, 'js')).filter(p => p !== allowed);
+
+    /** @type {string[]} */
+    const violations = [];
+    for (const path of targets) {
+      if (readStripped(path).match(/indexedDB\.open\s*\(/)) {
+        violations.push(path);
+      }
+    }
+    assert.deepEqual(
+      violations,
+      [],
+      `indexedDB.open() found outside js/db/idb.js:\n${violations.join('\n')}`,
+    );
   });
 });
