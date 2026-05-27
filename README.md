@@ -22,11 +22,14 @@ In short: `file://` is for visually checking the static HTML / CSS only. Everyth
 
 ### Localhost development
 
-```
-python -m http.server 8000
+```sh
+# Local development server (vanilla Node, zero npm deps — D-46)
+node scripts/serve.js
 ```
 
-Then visit `http://localhost:8000/`. The service worker registers, the `habits-0.1.0` cache populates with the 17-entry SHELL list, and the page is fully offline-reloadable. Use this for service-worker + cache behavior testing (DevTools → Application → Service Workers / Cache Storage). The desktop-Chrome "Install" UI requires HTTPS or `localhost`; on `localhost` the install affordance is available, but real installability + cross-device verification happens against the GitHub Pages deploy below.
+Then visit `http://localhost:8080/`. Override the port with `PORT=9000 node scripts/serve.js`. Node 20+ is the only runtime requirement; no `npm install` step.
+
+The service worker registers, the `habits-${APP_VERSION}` cache populates with the SHELL list, and the page is fully offline-reloadable. Use this for service-worker + cache behavior testing (DevTools → Application → Service Workers / Cache Storage). The desktop-Chrome "Install" UI requires HTTPS or `localhost`; on `localhost` the install affordance is available, but real installability + cross-device verification happens against the GitHub Pages deploy below.
 
 ### GitHub Pages deploy
 
