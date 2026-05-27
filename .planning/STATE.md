@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 02 complete (Wave 6 / plan 02-06 SUMMARY + PHASE-COMPLETION committed at HEAD b44e394) — ready for /gsd-verify-work 2 + Phase 3 start
-last_updated: "2026-05-27T12:00:00.000Z"
-last_activity: 2026-05-27 -- Phase 2 closed; APP_VERSION 0.2.0; docs aligned with D-30/D-35/D-39/D-40/D-42/D-46/Pitfall 13; 99/99 tests green
+stopped_at: Phase 02 verified — 10/10 UAT tests passed in Edge; security gate clear (threats_open=0); REQUIREMENTS.md DATA-01..08 + SEED-01..05 checkboxes flipped; ready for Phase 3 planning
+last_updated: "2026-05-27T15:05:00.000Z"
+last_activity: 2026-05-27 -- /gsd-verify-work 2 complete; 02-UAT.md committed (10/10 PASS, 1 docs drift logged); test suite 100/100 green
 progress:
   total_phases: 6
   completed_phases: 2
@@ -25,21 +25,25 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 02 (storage-foundation-the-spine) — COMPLETE (all 6 waves shipped)
-Plan: 6 of 6 complete (02-01..02-06)
-Status: Ready — Phase 2 closed; awaiting `/gsd-verify-work 2` then `/gsd-plan-phase 3`
-Last activity: 2026-05-27 -- Phase 2 close-out; APP_VERSION 0.2.0 + docs aligned across CLAUDE.md / PROJECT.md / README.md / ARCHITECTURE.md per D-30/D-35/D-39/D-40/D-42/D-46/Pitfall 13; 99/99 tests green at HEAD b44e394
+Phase: 03 (today-view-&-settings-v1) — NOT STARTED
+Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
+Plan: Not started — awaiting `/gsd-discuss-phase 3` or `/gsd-plan-phase 3`
+Status: Ready — Phase 2 verified end-to-end in Edge; ready for Phase 3 planning
+Last activity: 2026-05-27 -- /gsd-verify-work 2 complete (10/10 PASS); 100/100 tests green; REQUIREMENTS.md DATA-01..08 + SEED-01..05 closed
 
-Progress: [██████████] 100% of Phase 02 (Waves 1-6 closed); Phase 3 not started
+Progress: [██████████░░░░░░░░░░░░░░░░░░░░] 33% (2 of 6 phases complete; 6 of 6 Phase 2 plans done)
 
 ## Resume Instructions
 
-**Phase 02 is complete.** Cache name will be `habits-0.2.0` on next deploy; sw.js activate handler deletes the prior `habits-0.1.0` cache and the P1 update toast fires for users still on 0.1.0.
+**Phase 02 is complete + verified.** UAT 10/10 PASS (2026-05-27, Edge). All 13 DATA-* + SEED-* requirements checkbox-closed in REQUIREMENTS.md. Cache name will be `habits-0.2.0` on next deploy; sw.js activate handler deletes the prior `habits-0.1.0` cache and the P1 update toast fires for users still on 0.1.0.
 
 Next steps in order:
-1. `/gsd-verify-work 2` — runs verifier against `PHASE-COMPLETION.md` (the 13 DATA-* + SEED-* requirement coverage map) to confirm code matches declared coverage.
-2. `/gsd-code-review 2` — review the diff Phase 2 introduced (60+ commits across 6 plans).
-3. `/gsd-plan-phase 3` — start Phase 3 (Today View & Settings v1) once Phase 2 verification + review pass.
+1. `/gsd-code-review 2` — review the diff Phase 2 introduced (60+ commits across 6 plans). Optional but recommended before Phase 3.
+2. `/gsd-discuss-phase 3` — gather Phase 3 context (Today View & Settings v1).
+3. `/gsd-plan-phase 3` — plan Phase 3 in detail.
+
+Open follow-up (docs drift, non-blocking):
+- PHASE-COMPLETION.md DATA-03 row says `meta.seedLoadedAt`; actual gate is `meta.seededIds` + `meta.persistResult` per `js/io/seed.js:108`. Logged in `02-UAT.md` Docs Drift section.
 
 ### What's done so far (this session)
 
@@ -132,6 +136,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-26T11:57:36.904Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-storage-foundation-the-spine/02-CONTEXT.md
+Last session: 2026-05-27T15:05:00.000Z
+Stopped at: Phase 2 verified — 10/10 UAT passed, ready to plan Phase 3
+Resume file: None (transitions don't use resume files)

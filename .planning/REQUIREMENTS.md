@@ -91,14 +91,14 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### DATA — Persistence and integrity
 
-- [ ] **DATA-01**: All habits, logs, edit history, and settings persist in IndexedDB across sessions
-- [ ] **DATA-02**: IndexedDB schema is versioned with a `DB_VERSION` constant and a `MIGRATIONS` dispatch table
-- [ ] **DATA-03**: App calls `navigator.storage.persist()` on first write and surfaces persistence status in Settings
-- [ ] **DATA-04**: All mutations go through a single chokepoint (`state/apply.js`); views never write to IDB directly
-- [ ] **DATA-05**: Habit-definition edits never modify existing log rows; logs reference the `habit_versions` entry effective at the time they were written
-- [ ] **DATA-06**: Date keys are stored as local `YYYY-MM-DD` strings (never `Date.toISOString()`)
-- [ ] **DATA-07**: Cross-tab writes propagate via `BroadcastChannel('nawyki')`; open tabs react to other-tab mutations
-- [ ] **DATA-08**: App flushes pending writes on `visibilitychange → hidden` (never `beforeunload`)
+- [x] **DATA-01**: All habits, logs, edit history, and settings persist in IndexedDB across sessions
+- [x] **DATA-02**: IndexedDB schema is versioned with a `DB_VERSION` constant and a `MIGRATIONS` dispatch table
+- [x] **DATA-03**: App calls `navigator.storage.persist()` on first write and surfaces persistence status in Settings
+- [x] **DATA-04**: All mutations go through a single chokepoint (`state/apply.js`); views never write to IDB directly
+- [x] **DATA-05**: Habit-definition edits never modify existing log rows; logs reference the `habit_versions` entry effective at the time they were written
+- [x] **DATA-06**: Date keys are stored as local `YYYY-MM-DD` strings (never `Date.toISOString()`)
+- [x] **DATA-07**: Cross-tab writes propagate via `BroadcastChannel('nawyki')`; open tabs react to other-tab mutations
+- [x] **DATA-08**: App flushes pending writes on `visibilitychange → hidden` (never `beforeunload`)
 
 ### EXPORT — JSON backup + CSV analytics export
 
@@ -153,11 +153,11 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### SEED — Bundled habit data
 
-- [ ] **SEED-01**: App ships a hand-curated `seed/habits.json` parsed from `Nawyki v1.xlsx` + `Nawyki-fale.txt`
-- [ ] **SEED-02**: Seed includes all ~65 habits with their wave assignment, cadence rules, stage definitions, multi-occurrence config
-- [ ] **SEED-03**: Seed is loaded idempotently on first run; subsequent loads do not duplicate or overwrite user data
-- [ ] **SEED-04**: Seed is loaded into `events` as an initial event (one event per habit creation) so the audit trail is complete
-- [ ] **SEED-05**: No xlsx/txt parsing code ships in the user-facing app; seed JSON is the only data source
+- [x] **SEED-01**: App ships a hand-curated `seed/habits.json` parsed from `Nawyki v1.xlsx` + `Nawyki-fale.txt`
+- [x] **SEED-02**: Seed includes all ~65 habits with their wave assignment, cadence rules, stage definitions, multi-occurrence config
+- [x] **SEED-03**: Seed is loaded idempotently on first run; subsequent loads do not duplicate or overwrite user data
+- [x] **SEED-04**: Seed is loaded into `events` as an initial event (one event per habit creation) so the audit trail is complete
+- [x] **SEED-05**: No xlsx/txt parsing code ships in the user-facing app; seed JSON is the only data source
 
 ### SETTINGS — Configuration surface
 
@@ -297,14 +297,14 @@ Every v1 requirement maps to exactly one phase.
 | UNDO-01 | Phase 3 | Pending |
 | UNDO-02 | Phase 3 | Pending |
 | UNDO-03 | Phase 3 | Pending |
-| DATA-01 | Phase 2 | Pending |
-| DATA-02 | Phase 2 | Pending |
-| DATA-03 | Phase 2 | Pending |
-| DATA-04 | Phase 2 | Pending |
-| DATA-05 | Phase 2 | Pending |
-| DATA-06 | Phase 2 | Pending |
-| DATA-07 | Phase 2 | Pending |
-| DATA-08 | Phase 2 | Pending |
+| DATA-01 | Phase 2 | Complete |
+| DATA-02 | Phase 2 | Complete |
+| DATA-03 | Phase 2 | Complete |
+| DATA-04 | Phase 2 | Complete |
+| DATA-05 | Phase 2 | Complete |
+| DATA-06 | Phase 2 | Complete |
+| DATA-07 | Phase 2 | Complete |
+| DATA-08 | Phase 2 | Complete |
 | EXPORT-01 | Phase 5 | Pending |
 | EXPORT-02 | Phase 5 | Pending |
 | EXPORT-03 | Phase 5 | Pending |
@@ -341,11 +341,11 @@ Every v1 requirement maps to exactly one phase.
 | PWA-05 | Phase 1 | Pending |
 | PWA-06 | Phase 1 | Pending |
 | PWA-07 | Phase 3 | Pending |
-| SEED-01 | Phase 2 | Pending |
-| SEED-02 | Phase 2 | Pending |
-| SEED-03 | Phase 2 | Pending |
-| SEED-04 | Phase 2 | Pending |
-| SEED-05 | Phase 2 | Pending |
+| SEED-01 | Phase 2 | Complete |
+| SEED-02 | Phase 2 | Complete |
+| SEED-03 | Phase 2 | Complete |
+| SEED-04 | Phase 2 | Complete |
+| SEED-05 | Phase 2 | Complete |
 | SETTINGS-01 | Phase 4 | Pending |
 | SETTINGS-02 | Phase 6 | Pending |
 | SETTINGS-03 | Phase 5 | Pending |
@@ -367,12 +367,14 @@ Every v1 requirement maps to exactly one phase.
 | NFR-12 | Phase 1 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 123 total (CORE 6, CATALOG 7, CADENCE 7, STAGE 7, MASTERY 7, LOG 6, HISTORY 6, WAVE 6, UNDO 3, DATA 8, EXPORT 8, IMPORT 5, SCORING 9, DESKTOP 7, PWA 7, SEED 5, SETTINGS 7, NFR 12)
 - Mapped to phases: 123 ✓
 - Unmapped: 0 ✓
 - Coverage: 100%
 
 **Per-Phase Counts:**
+
 - Phase 1 — PWA Shell & Tooling Hygiene: 11 requirements (PWA-01..06, SETTINGS-07, NFR-04, NFR-09, NFR-11, NFR-12)
 - Phase 2 — Storage Foundation: 13 requirements (DATA-01..08, SEED-01..05)
 - Phase 3 — Today View & Settings v1: 17 requirements (CORE-01..06, LOG-01, UNDO-01..03, SETTINGS-04, SETTINGS-05, PWA-07, NFR-01, NFR-02, NFR-06, NFR-07)
