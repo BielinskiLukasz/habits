@@ -124,7 +124,7 @@ Run the checklist on the developer machine after every shell-asset change, and o
 - **Storage:** IndexedDB for primary data (Phase 2+) plus JSON export/import for backup (Phase 5). `localStorage` reserved for tiny UI preferences only.
 - **Hosting:** Static — must work via `file://` and over HTTP(S) (GitHub Pages-compatible). Service-worker registration is silent-fail-safe so `file://` keeps working.
 - **Offline:** Must function fully offline once installed (PWA).
-- **UI language:** English chrome; Polish habit names preserved verbatim (user data).
+- **UI language:** English UI chrome AND English habit names primary; Polish original optionally preserved as a per-habit `name_pl` field (D-35 + D-40, locked Phase 2).
 - **Layout split:** Mobile and desktop are truly different layouts (not one responsive layout) — mobile = check-in, desktop = analytics/planning.
 - **History integrity:** Habit-definition edits never rewrite historical logs; habit identity is preserved across edits.
 - **Privacy:** No telemetry, no analytics, no network calls except what the user explicitly triggers (export/import). Personal data; single-user app.
