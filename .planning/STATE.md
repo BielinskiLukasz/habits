@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 02 Wave 5 closed (plan 02-05 SUMMARY committed) — next is Wave 6 / plan 02-06 (APP_VERSION 0.2.0 + doc reversals)
-last_updated: "2026-05-27T10:00:00.000Z"
-last_activity: 2026-05-27 -- Smoke round 2 cleared items 1-7 + item 8 PASS-with-Chromium-caveat; 02-05 SUMMARY committed; ready to start Wave 6
+stopped_at: Phase 02 complete (Wave 6 / plan 02-06 SUMMARY + PHASE-COMPLETION committed at HEAD b44e394) — ready for /gsd-verify-work 2 + Phase 3 start
+last_updated: "2026-05-27T12:00:00.000Z"
+last_activity: 2026-05-27 -- Phase 2 closed; APP_VERSION 0.2.0; docs aligned with D-30/D-35/D-39/D-40/D-42/D-46/Pitfall 13; 99/99 tests green
 progress:
-  total_phases: 5
-  completed_phases: 0
+  total_phases: 6
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 0
+  completed_plans: 6
+  percent: 33
 ---
 
 # Project State
@@ -21,20 +21,25 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 02 — storage-foundation-the-spine (Wave 6 / plan 02-06 ready to start)
+**Current focus:** Phase 02 complete — ready for `/gsd-verify-work 2` then Phase 3 (Today View & Settings v1)
 
 ## Current Position
 
-Phase: 02 (storage-foundation-the-spine) — Wave 5 closed, Wave 6 ready
-Plan: 5 of 6 complete; plan 02-06 = next
-Status: Ready — re-invoke `/gsd-execute-phase 2` to start Wave 6
-Last activity: 2026-05-27 -- Smoke round 2 cleared items 1-7 + item 8 PASS-with-Chromium-caveat; 02-05 SUMMARY committed; CHECKPOINT-PENDING deleted
+Phase: 02 (storage-foundation-the-spine) — COMPLETE (all 6 waves shipped)
+Plan: 6 of 6 complete (02-01..02-06)
+Status: Ready — Phase 2 closed; awaiting `/gsd-verify-work 2` then `/gsd-plan-phase 3`
+Last activity: 2026-05-27 -- Phase 2 close-out; APP_VERSION 0.2.0 + docs aligned across CLAUDE.md / PROJECT.md / README.md / ARCHITECTURE.md per D-30/D-35/D-39/D-40/D-42/D-46/Pitfall 13; 99/99 tests green at HEAD b44e394
 
-Progress: [████████░░] 83% of Phase 02 (Waves 1-5 closed; Wave 6 remaining = plan 02-06: APP_VERSION 0.2.0 + doc reversals)
+Progress: [██████████] 100% of Phase 02 (Waves 1-6 closed); Phase 3 not started
 
 ## Resume Instructions
 
-**Phase 02 Wave 5 is closed. Plan 02-06 is the only remaining plan.** Re-invoking `/gsd-execute-phase 2` will dispatch Wave 6 (plan 02-06: APP_VERSION 0.2.0 bump, CLAUDE.md/PROJECT.md doc reversals, README node serve script, ARCHITECTURE.md edits), then run phase verification + code review + roadmap close-out.
+**Phase 02 is complete.** Cache name will be `habits-0.2.0` on next deploy; sw.js activate handler deletes the prior `habits-0.1.0` cache and the P1 update toast fires for users still on 0.1.0.
+
+Next steps in order:
+1. `/gsd-verify-work 2` — runs verifier against `PHASE-COMPLETION.md` (the 13 DATA-* + SEED-* requirement coverage map) to confirm code matches declared coverage.
+2. `/gsd-code-review 2` — review the diff Phase 2 introduced (60+ commits across 6 plans).
+3. `/gsd-plan-phase 3` — start Phase 3 (Today View & Settings v1) once Phase 2 verification + review pass.
 
 ### What's done so far (this session)
 
@@ -45,9 +50,9 @@ Progress: [████████░░] 83% of Phase 02 (Waves 1-5 closed; Wa
 | 3 | 02-03 | ✓ Complete | `apply.js` chokepoint + `markCompleted` + `undo.js` + `sync.js` + `lifecycle.js` + `store.js` (9 commits, merged) |
 | 4 | 02-04 | ✓ Complete | `seed/habits.json` 8-habit fixture + `js/io/seed.js` idempotent loader + persist() + D-45 defaults (5 commits, merged) |
 | 5 | 02-05 | ✓ Complete | Reset-data + boot wiring + sw.js SHELL + smoke (4 implementation commits + 1 smoke-fix commit `389b9d9` + SUMMARY); 7/8 smoke items full PASS + item 8 PASS-with-Chromium-caveat |
-| 6 | 02-06 | ☐ Not started | APP_VERSION 0.2.0 + doc reversals |
+| 6 | 02-06 | ✓ Complete | CLAUDE.md / PROJECT.md / README.md doc reversals + ARCHITECTURE.md forward-edits + APP_VERSION 0.1.0 → 0.2.0 + SUMMARY + PHASE-COMPLETION (7 commits, inline on main — worktree agent dropped connection mid-Task-1, see 02-06-SUMMARY.md deviations) |
 
-Test suite: **99/99 green** at HEAD `389b9d9`.
+Test suite: **99/99 green** at HEAD `b44e394`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 

@@ -14,7 +14,7 @@ A vanilla multi-file static PWA habit tracker delivered in 6 phases: P1 lays a t
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: PWA Shell & Tooling Hygiene** - Static-hostable, file://-safe, versioned-cache PWA chassis with reset-app debug (completed 2026-05-26)
-- [ ] **Phase 2: Storage Foundation (The Spine)** - Date utils, raw IDB, 7 stores + migrations, repo, single mutator, sync, lifecycle, seed
+- [x] **Phase 2: Storage Foundation (The Spine)** - Date utils, raw IDB, 7 stores + migrations, repo, single mutator, sync, lifecycle, seed (completed 2026-05-27)
 - [ ] **Phase 3: Today View & Settings v1 (First Usable Slice)** - Mobile shell rendering seed data, single-tap binary mark/unmark, persistent undo, install help, persistence status
 - [ ] **Phase 4: Domain Model (Cadence, Catalog, Stages, Mastery, Multi-occurrence, History, Waves)** - Full habit lifecycle honoring the versioned-edit invariant
 - [ ] **Phase 5: Backup & Restore (JSON + CSV Exports, JSON Import, Nag)** - Full-fidelity JSON round-trip + Polish-Excel-compatible CSV + weekly backup banner
@@ -66,11 +66,11 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 02-05-PLAN.md — Reset-data wiring (D-44) + main/desktop boot calls (top-level await per N1) + sw.js SHELL extension + checkpoint:human-verify (manual smoke checklist) (split per W2: wiring + checkpoint)
+- [x] 02-05-PLAN.md — Reset-data wiring (D-44) + main/desktop boot calls (top-level await per N1) + sw.js SHELL extension + checkpoint:human-verify (manual smoke checklist) (split per W2: wiring + checkpoint)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 02-06-PLAN.md — APP_VERSION bump 0.1.0 → 0.2.0 + docs edits for D-30 (BroadcastChannel name) + D-35 (English habit names primary) + D-46 (node scripts/serve.js) + ARCHITECTURE.md forward-edits
+- [x] 02-06-PLAN.md — APP_VERSION bump 0.1.0 → 0.2.0 + docs edits for D-30 (BroadcastChannel name) + D-35 (English habit names primary) + D-46 (node scripts/serve.js) + ARCHITECTURE.md forward-edits
 
 ### Phase 3: Today View & Settings v1 (First Usable Slice)
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
-| 2. Storage Foundation (The Spine) | 4/6 | In Progress|  |
+| 2. Storage Foundation (The Spine) | 6/6 | Complete | 2026-05-27 |
 | 3. Today View & Settings v1 | 0/TBD | Not started | - |
 | 4. Domain Model | 0/TBD | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
