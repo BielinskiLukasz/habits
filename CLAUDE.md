@@ -19,7 +19,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 - **Storage**: IndexedDB for primary data + JSON export/import for backup. — *Years of daily logs would strain localStorage; IndexedDB capacity is the safer floor. Cloud sync is a future option, not v1.*
 - **Hosting**: Static — must work via `file://` and over HTTP(S) (GitHub Pages-compatible). Service worker registration should be silent-fail-safe so `file://` keeps working. — *Same model as `mindful-breathing`.*
 - **Offline**: Must function fully offline (PWA). — *Daily check-in cannot depend on connectivity.*
-- **UI language**: English UI chrome; Polish habit names preserved verbatim (user data). — *Confirmed during questioning.*
+- **UI language**: English UI chrome AND English habit names primary; Polish original optionally preserved as a per-habit `name_pl` field (D-35 + D-40, locked Phase 2). — *D-35 reverses the prior Polish-names-as-user-data constraint: every user-facing string — UI chrome AND habit names — is English by default. The `habits` IDB store carries an optional `name_pl` string field (D-40), so the seed loader writes both for source-derived habits, e.g. `{name: "Morning walk", name_pl: "Spacer rano"}`; user-created habits default `name_pl: null`. The quick-check surface for `name_pl` on Today / catalog (always-visible muted secondary line vs long-press reveal vs ⓘ icon vs hover tooltip) is a P3 UI-SPEC decision, not a P2 storage decision.*
 - **Layout split**: Mobile and desktop are truly different layouts (not one responsive layout), because they serve different jobs — mobile = check-in, desktop = analytics/planning. — *Confirmed during questioning.*
 - **History integrity**: Habit-definition edits never rewrite historical logs; the habit identity is preserved across edits. — *Confirmed during questioning. Critical to data trustworthiness.*
 - **Privacy**: No telemetry, no analytics, no network calls except what the user explicitly triggers (export/import). — *Personal data; single-user app.*
@@ -38,7 +38,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 | **JS module system** | Native `<script type="module">` + relative `./` ES imports | Browsers support this natively; works on file:// in Firefox and Safari, fully on HTTP(S) everywhere |
 | **JS language** | ES2023 (matches `mindful-breathing` badge); avoid stage-2 proposals | Universally available in 2026 evergreen browsers |
 | **Storage** | Raw IndexedDB wrapped by a hand-written ~80-line promise helper (`db/idb.js`) | No npm; full control of schema/transactions; right-sized for ~65 habits × 365×N days |
-| **Cross-tab sync** | `BroadcastChannel('nawyki')` | Native, Baseline Widely Available; simpler than `storage` events |
+| **Cross-tab sync** | `BroadcastChannel('habits')` | Native, Baseline Widely Available; simpler than `storage` events (D-30, locked Phase 2 — aligns with manifest name + cache prefix + IDB DB name) |
 | **Persistence trigger** | `visibilitychange` → `hidden` (NOT `beforeunload`) | Only reliable hook on mobile / when PWA is backgrounded |
 | **Export — JSON** | Full-fidelity backup of every IDB store, `Blob` + anchor download | Round-trippable; works on file:// |
 | **Export — CSV** | Single wide matrix: rows = habits, columns = days, cells = `1` / `0` / `x` | Locked: human-readable in Excel, no separate file per entity |
@@ -78,7 +78,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 | IndexedDB | Habit catalog, daily logs, edit history, settings, score snapshots | Wrap manually; see `db/idb.js` pattern below |
 | Service Worker | Offline app shell | Same silent-`.catch()` pattern as `mindful-breathing/sw.js` |
 | Web App Manifest | Install + standalone display | `manifest.json` with maskable SVG icon |
-| BroadcastChannel | Cross-tab data sync after write | Single channel `'nawyki'` |
+| BroadcastChannel | Cross-tab data sync after write | Single channel `'habits'` (D-30, locked Phase 2) |
 | Page Visibility (`visibilitychange`) | Flush pending writes when PWA is backgrounded | Reliable on mobile; `beforeunload` is NOT |
 | File / Blob / URL | Export download (JSON + CSV) and import upload | Universal, file://-safe |
 | `<input type="file">` | Import JSON | Native picker; no File System Access API required |
@@ -212,7 +212,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 - Quote any field containing `,`, `"`, `\r`, `\n`, or leading/trailing whitespace; escape `"` as `""`.
 - Comma as the field separator (locale-portable; Excel on Polish Windows handles UTF-8 BOM CSVs with comma separator correctly when opened via "Data → From Text/CSV", or via Paste Special).
 - MIME `text/csv;charset=utf-8`.
-- Filename: `nawyki-completion-YYYY-MM-DD.csv`.
+- Filename: `habits-completion-YYYY-MM-DD.csv` (D-30, locked Phase 2 — `nawyki-` prefix renamed to `habits-` for namespace consistency).
 
 ### JSON Import — Merge-by-ID (Locked)
 
@@ -299,7 +299,15 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 # Option A: open directly
 
+Double-click `index.html` (works on `file://` in Firefox + Safari; Chromium refuses ES modules from `file://` by browser policy — use Option B for Chromium-family browsers).
+
 # Option B: serve locally if you want to test the service worker
+
+```sh
+node scripts/serve.js
+```
+
+Then open `http://localhost:8080/`. Override the port with `PORT=9000 node scripts/serve.js`. The vanilla-Node dev server is the canonical local-dev command (D-46, locked Phase 2 — replaces the previous `python -m http.server` recipe; Node 20+ is the only runtime requirement per D-47).
 
 # Option C: ship to GitHub Pages — push to main, enable Pages
 
