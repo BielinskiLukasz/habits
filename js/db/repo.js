@@ -39,6 +39,8 @@ import {
   runTx as idbRunTx,
   get,
   put,
+  getAll,
+  indexGetAll,
 } from './idb.js';
 
 /**
@@ -64,6 +66,18 @@ export async function putHabit(h) {
 }
 
 /**
+ * Get every habit row. Enables Slice 2's Today hydrate path to do a single
+ * bounded read on cold-paint per NFR-01 (D-52). Pair with `getLogsInRange`
+ * to cover the weekly + every-N-days cadence resolvers.
+ *
+ * @returns {Promise<object[]>}
+ */
+export async function getAllHabits() {
+  const db = await openDB();
+  return getAll(db, 'habits');
+}
+
+/**
  * Put a log row. Required: `habitId`, `date` (YYYY-MM-DD, local). Canonical
  * shape carries `definitionVersion` (null = "current") per DATA-05; rows
  * without that field are still accepted (forward-compat).
@@ -86,6 +100,20 @@ export async function putLog(l) {
 export async function getLog(habitId, date) {
   const db = await openDB();
   return get(db, 'logs', [habitId, date]);
+}
+
+/**
+ * Get every log row whose `date` falls in the inclusive `[startYMD, endYMD]`
+ * range, via the existing `date` index on the `logs` store (D-39). Today's
+ * hydrate path uses this for the weekly-cadence completion window.
+ *
+ * @param {string} startYMD YYYY-MM-DD, inclusive
+ * @param {string} endYMD YYYY-MM-DD, inclusive
+ * @returns {Promise<object[]>}
+ */
+export async function getLogsInRange(startYMD, endYMD) {
+  const db = await openDB();
+  return indexGetAll(db, 'logs', 'date', IDBKeyRange.bound(startYMD, endYMD));
 }
 
 /**

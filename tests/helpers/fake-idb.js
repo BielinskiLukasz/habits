@@ -42,18 +42,20 @@ function keyOf(storeName, value) {
  * Create an in-memory fake repo with the same surface as `js/db/repo.js`.
  *
  * @returns {{
- *   getHabit:   (id: string) => Promise<object|undefined>,
- *   putHabit:   (h: object) => Promise<void>,
- *   putLog:     (l: object) => Promise<void>,
- *   getLog:     (habitId: string, date: string) => Promise<object|undefined>,
- *   putEvent:   (e: object) => Promise<void>,
- *   getEvent:   (id: string) => Promise<object|undefined>,
- *   getMeta:    (key: string) => Promise<*>,
- *   putMeta:    (key: string, value: *) => Promise<void>,
- *   putSetting: (s: object) => Promise<void>,
- *   getSetting: (key: string) => Promise<object|undefined>,
- *   runTx:      (stores: string[], mode: 'readonly'|'readwrite', body: (tx: object) => *|Promise<*>) => Promise<*>,
- *   _stores:    Record<string, Map<string, object>>,
+ *   getHabit:        (id: string) => Promise<object|undefined>,
+ *   getAllHabits:    () => Promise<object[]>,
+ *   putHabit:        (h: object) => Promise<void>,
+ *   putLog:          (l: object) => Promise<void>,
+ *   getLog:          (habitId: string, date: string) => Promise<object|undefined>,
+ *   getLogsInRange:  (startYMD: string, endYMD: string) => Promise<object[]>,
+ *   putEvent:        (e: object) => Promise<void>,
+ *   getEvent:        (id: string) => Promise<object|undefined>,
+ *   getMeta:         (key: string) => Promise<*>,
+ *   putMeta:         (key: string, value: *) => Promise<void>,
+ *   putSetting:      (s: object) => Promise<void>,
+ *   getSetting:      (key: string) => Promise<object|undefined>,
+ *   runTx:           (stores: string[], mode: 'readonly'|'readwrite', body: (tx: object) => *|Promise<*>) => Promise<*>,
+ *   _stores:         Record<string, Map<string, object>>,
  * }}
  */
 export function createFakeRepo() {
@@ -85,6 +87,20 @@ export function createFakeRepo() {
     async putLog(l) { putters.logs(l); },
     async getLog(habitId, date) {
       return stores.logs.get(JSON.stringify([habitId, date]));
+    },
+    // Phase 03 plan 01 Task 5: bounded reads for Slice 2's Today hydrate path.
+    async getAllHabits() {
+      return Array.from(stores.habits.values());
+    },
+    async getLogsInRange(startYMD, endYMD) {
+      /** @type {object[]} */
+      const out = [];
+      for (const log of stores.logs.values()) {
+        if (log.date >= startYMD && log.date <= endYMD) {
+          out.push(log);
+        }
+      }
+      return out;
     },
     async putEvent(e) { putters.events(e); },
     async getEvent(id) { return stores.events.get(id); },

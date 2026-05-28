@@ -23,9 +23,11 @@ import { createFakeRepo } from '../helpers/fake-idb.js';
 /** The minimum surface every storage facade must provide. */
 const EXPECTED = [
   'getHabit',
+  'getAllHabits',
   'putHabit',
   'putLog',
   'getLog',
+  'getLogsInRange',
   'putEvent',
   'getEvent',
   'getMeta',
