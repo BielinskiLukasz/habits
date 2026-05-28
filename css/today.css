@@ -1,18 +1,29 @@
-/* css/today.css — Empty Today scaffold layout (Phase 1, Plan 1).
+/* css/today.css — Today panel layout + route-panel framework (Phase 1/3).
  *
- * Purely structural. Phase 3 fills in the habit-list rendering, the
- * mastery badges, and the footer-nav routing. Phase 1 only proves the
- * chrome and the SW are alive — see D-01.
- *
- * Footer-nav labels are NOT clickable yet per CONTEXT §Specific Ideas:
- *   "The empty Today scaffold's 'footer nav stub' shows three labels
- *    (today · history · settings) but they're not clickable yet — they're
- *    placeholders that prove the layout, removed/wired in later phases."
+ * Phase 1 shipped the empty Today scaffold: header / list / footer-nav.
+ * Phase 3 plan 02 extends it with:
+ *   - Route-panel framework (`.route-panel` + `[hidden]`) for the
+ *     three-section shell (today / settings / history).
+ *   - Today row states (.today-row, .today-row--completed, ✓ glyph,
+ *     strikethrough) — D-54 + NFR-07 (no color-only state).
+ *   - Tap targets ≥ 44 × 44 px — NFR-06.
+ *   - Footer-nav aria-current / aria-disabled visual treatment — D-79 / D-80.
+ *   - Empty state styling — D-58.
  *
  * All colors/spacings/radii reference tokens; zero literal hex codes.
  */
 
 @layer view {
+  .route-panel[hidden] {
+    display: none;
+  }
+
+  .route-panel {
+    /* Baseline route panel — actual layout lives on the inner content
+     * (the Today h1 + list, the Settings cards, etc.). Setting min-height
+     * here would interfere with the sticky footer-nav on short content. */
+  }
+
   .today-header {
     display: flex;
     align-items: center;
@@ -40,6 +51,77 @@
     min-height: 200px;
   }
 
+  /* Today rows — flex layout with name + optional ⓘ disclosure. The whole
+   * row (the button) is the tap target; the row <li> itself only carries
+   * the muted/strikethrough state class. */
+  .today-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Completed rows are muted (D-54). Opacity 0.55 + strikethrough on the
+   * name span is the load-bearing visual signal alongside the ✓ glyph;
+   * neither is color-only (NFR-07). */
+  .today-row--completed {
+    opacity: 0.55;
+  }
+
+  /* The whole-row tap target (D-53). Min 44 × 44 px per NFR-06; uses the
+   * surrounding row's full width so the tap area is generous. */
+  .today-row-tap {
+    background: transparent;
+    border: 0;
+    width: 100%;
+    text-align: left;
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 44px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  /* ✓ glyph — bold so the completion signal reads clearly at small sizes. */
+  .today-row-glyph {
+    font-weight: bold;
+  }
+
+  /* Strikethrough on the completed name — D-54 alongside the ✓ glyph. */
+  .today-row-name--completed {
+    text-decoration: line-through;
+  }
+
+  /* ⓘ disclosure button — sits at the row end (D-55). Min 44 × 44 px
+   * (NFR-06) so it's tappable without competing with the row-tap. */
+  .today-row-info {
+    background: transparent;
+    border: 0;
+    padding: var(--space-2);
+    min-width: 44px;
+    min-height: 44px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  /* Empty states (D-58). Centered + muted; the all-done variant adds a
+   * counter below the main message. */
+  .today-empty {
+    padding: var(--space-4);
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .today-counter {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-sm);
+    opacity: 0.8;
+  }
+
   .today-footer-nav {
     position: sticky;
     bottom: 0;
@@ -54,5 +136,20 @@
   .today-footer-nav > * {
     color: var(--color-fg-muted);
     font-size: var(--text-sm);
+  }
+
+  /* Active route link (D-79). Boldface signals current page non-color-only;
+   * a screen reader picks it up via aria-current="page". */
+  .today-footer-nav a[aria-current="page"] {
+    font-weight: bold;
+    color: var(--color-fg);
+  }
+
+  /* Disabled-but-visible link (D-80). Muted + pointer-events:none so it
+   * doesn't fire navigation on click while remaining keyboard-skippable
+   * via tabindex="-1". */
+  .today-footer-nav a[aria-disabled="true"] {
+    opacity: 0.4;
+    pointer-events: none;
   }
 }
