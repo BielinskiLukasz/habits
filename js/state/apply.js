@@ -42,6 +42,7 @@ import {
   handleMarkCompleted,
   handleRestoreLogRow,
 } from './apply/markCompleted.js';
+import { handleMarkUncompleted } from './apply/markUncompleted.js';
 import { notify } from './store.js';
 
 /**
@@ -54,6 +55,7 @@ import { notify } from './store.js';
 const HANDLERS = {
   markCompleted: handleMarkCompleted,
   restoreLogRow: handleRestoreLogRow,
+  markUncompleted: handleMarkUncompleted,
 };
 
 /** @type {object|null} */

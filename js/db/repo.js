@@ -117,6 +117,21 @@ export async function getLogsInRange(startYMD, endYMD) {
 }
 
 /**
+ * Get every log row for the given `habitId` via the `habitId` index on the
+ * `logs` store (D-39). Used by the D-52 invariant recompute in
+ * `js/state/apply/markUncompleted.js#_recomputeLastCompletedDate` — given a
+ * habit's full log history (plus the about-to-be-written row), the helper
+ * finds the max date where `completed === true`.
+ *
+ * @param {string} habitId
+ * @returns {Promise<object[]>}
+ */
+export async function getLogsByHabit(habitId) {
+  const db = await openDB();
+  return indexGetAll(db, 'logs', 'habitId', habitId);
+}
+
+/**
  * Put an event row. `e.id` is the UUID keypath (D-42) — caller MUST set it
  * (via `newId()` from `js/util/id.js`) before calling.
  *

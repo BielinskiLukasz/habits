@@ -48,6 +48,7 @@ function keyOf(storeName, value) {
  *   putLog:          (l: object) => Promise<void>,
  *   getLog:          (habitId: string, date: string) => Promise<object|undefined>,
  *   getLogsInRange:  (startYMD: string, endYMD: string) => Promise<object[]>,
+ *   getLogsByHabit:  (habitId: string) => Promise<object[]>,
  *   putEvent:        (e: object) => Promise<void>,
  *   getEvent:        (id: string) => Promise<object|undefined>,
  *   getMeta:         (key: string) => Promise<*>,
@@ -97,6 +98,19 @@ export function createFakeRepo() {
       const out = [];
       for (const log of stores.logs.values()) {
         if (log.date >= startYMD && log.date <= endYMD) {
+          out.push(log);
+        }
+      }
+      return out;
+    },
+    // Phase 03 plan 03 Task 1: per-habit log scan for the D-52
+    // `lastCompletedDate` invariant recompute. Mirrors repo.getLogsByHabit
+    // (A7 contract); real backing index is `habitId` per D-39 schema.
+    async getLogsByHabit(habitId) {
+      /** @type {object[]} */
+      const out = [];
+      for (const log of stores.logs.values()) {
+        if (log.habitId === habitId) {
           out.push(log);
         }
       }

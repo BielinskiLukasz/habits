@@ -28,6 +28,7 @@ const EXPECTED = [
   'putLog',
   'getLog',
   'getLogsInRange',
+  'getLogsByHabit',
   'putEvent',
   'getEvent',
   'getMeta',
