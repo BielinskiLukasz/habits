@@ -188,12 +188,18 @@ describe('buildTodayRow — completed row (D-54, D-79)', () => {
     assert.equal(out.attrs.class, 'today-row today-row--completed');
   });
 
-  test('button carries aria-pressed="true" + data-action="markUncomplete"', () => {
+  test('button carries aria-pressed="true" + data-action="markUncomplete" + data-habit-id', () => {
+    // Phase 03 plan 03 Task 3: the closure-lookup contract — Today view
+    // reads `data-habit-id` off the tap button on completed rows too so the
+    // markUncomplete handler can dispatch the right `apply({type, payload:
+    // {habitId, date}})`. The uncompleted variant of this test (above) already
+    // pinned `data-habit-id`; this is the symmetric guard for completed rows.
     const habit = { id: 'h1', name: 'Drink water' };
     const out = buildTodayRow({ habit, completed: true });
     const btn = out.children.find((c) => c.attrs?.class === 'today-row-tap');
     assert.equal(btn.attrs['aria-pressed'], 'true');
     assert.equal(btn.attrs['data-action'], 'markUncomplete');
+    assert.equal(btn.attrs['data-habit-id'], 'h1');
   });
 
   test('completed row emits the ✓ glyph span + strikethrough name class', () => {
