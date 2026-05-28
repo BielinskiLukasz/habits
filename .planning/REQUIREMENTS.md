@@ -149,7 +149,7 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 - [ ] **PWA-04**: Service worker registration silently fails (silent `.catch()`) when running over `file://`
 - [ ] **PWA-05**: App is installable on Android Chrome, iOS Safari (Add to Home Screen), and desktop Chrome/Edge
 - [ ] **PWA-06**: App functions fully offline once installed
-- [ ] **PWA-07**: Settings includes an install-help panel that platform-detects and shows the right instructions (iOS vs Android vs desktop)
+- [x] **PWA-07**: Settings includes an install-help panel that platform-detects and shows the right instructions (iOS vs Android vs desktop)
 
 ### SEED — Bundled habit data
 
@@ -164,8 +164,8 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 - [ ] **SETTINGS-01**: User can view and edit global mastery threshold (default 90%) and window (default 70 days)
 - [ ] **SETTINGS-02**: User can choose scoring model (S1 / S2 / S3)
 - [ ] **SETTINGS-03**: User can trigger JSON export, JSON import, CSV export from Settings
-- [ ] **SETTINGS-04**: User can see storage persistence status (persistent: yes/no) and last-backup timestamp
-- [ ] **SETTINGS-05**: User can see app version and schema version in an About panel
+- [x] **SETTINGS-04**: User can see storage persistence status (persistent: yes/no) and last-backup timestamp
+- [x] **SETTINGS-05**: User can see app version and schema version in an About panel
 - [ ] **SETTINGS-06**: User can perform "Recompute scores" action (re-runs scoring across all snapshots)
 - [ ] **SETTINGS-07**: User has a "Reset app" debug action that clears all IDB data (with explicit confirmation)
 
@@ -340,7 +340,7 @@ Every v1 requirement maps to exactly one phase.
 | PWA-04 | Phase 1 | Pending |
 | PWA-05 | Phase 1 | Pending |
 | PWA-06 | Phase 1 | Pending |
-| PWA-07 | Phase 3 | Pending |
+| PWA-07 | Phase 3 | Complete (03-05) |
 | SEED-01 | Phase 2 | Complete |
 | SEED-02 | Phase 2 | Complete |
 | SEED-03 | Phase 2 | Complete |
@@ -349,8 +349,8 @@ Every v1 requirement maps to exactly one phase.
 | SETTINGS-01 | Phase 4 | Pending |
 | SETTINGS-02 | Phase 6 | Pending |
 | SETTINGS-03 | Phase 5 | Pending |
-| SETTINGS-04 | Phase 3 | Pending |
-| SETTINGS-05 | Phase 3 | Pending |
+| SETTINGS-04 | Phase 3 | Complete (03-05) |
+| SETTINGS-05 | Phase 3 | Complete (03-05) |
 | SETTINGS-06 | Phase 6 | Pending |
 | SETTINGS-07 | Phase 1 | Pending |
 | NFR-01 | Phase 3 | Pending |

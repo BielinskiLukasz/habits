@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 03 plan 03-04 complete — undo toast surface live; 249 tests green
-last_updated: "2026-05-28T12:00:00Z"
-last_activity: 2026-05-28 -- Plan 03-04 complete (showUndoToast + showErrorToast wired into Today tap success/reject; D-08 regression-guarded)
+stopped_at: Phase 03 plan 03-05 complete — Settings v1 live with 5 cards + setSetting chokepoint + 2nd undo surface; 275 tests green
+last_updated: "2026-05-28T13:30:00Z"
+last_activity: 2026-05-28 -- Plan 03-05 complete (mountSettings + setSetting handler + 5 builders + cross-tab D-72 refresh; SETTINGS-04/05/PWA-07 done)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 10
-  percent: 38
+  completed_plans: 11
+  percent: 42
 ---
 
 # Project State
@@ -27,28 +27,30 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: 5 of 6 (03-01 + 03-02 + 03-03 + 03-04 complete; 03-05 Settings v1 next)
-Status: Executing Phase 03 — Slice 4 (undo toast surface) landed
-Last activity: 2026-05-28 -- Plan 03-04 complete (showUndoToast + showErrorToast wired into Today tap success/reject; D-08 regression-guarded)
+Plan: 6 of 6 (03-01..03-05 complete; 03-06 closeout next — APP_VERSION bump + SW SHELL append + docs)
+Status: Executing Phase 03 — Slice 5 (Settings v1) landed
+Last activity: 2026-05-28 -- Plan 03-05 complete (Settings v1 — 5 cards + setSetting chokepoint + cross-tab D-72 refresh; SETTINGS-04/05/PWA-07 done)
 
-Progress: [████████████████░░░░░░░░░░░░░░] 38% (10 of 26 phase+plan slots; Phase 3 plans 1+2+3+4 of 6 shipped)
+Progress: [██████████████████░░░░░░░░░░░░] 42% (11 of 26 phase+plan slots; Phase 3 plans 1+2+3+4+5 of 6 shipped)
 
 ## Resume Instructions
 
-**Plan 03-04 shipped** — undo toast surface is live on Today:
+**Plan 03-05 shipped** — Settings v1 is live with 5 cards + 2nd undo surface + setSetting through the chokepoint:
 
-- `js/views/toast.js` — extended with internal `_showToast` helper + `showUndoToast({message, undoFn, autoDismissMs=5000})` (D-69 + D-70 + D-71) + `showErrorToast(message)` (D-73 4s error variant) + `_resetToastForTest`. `showUpdateToast` STRUCTURALLY preserves D-08 no-auto-dismiss by delegating to `_showToast` without passing `autoDismissMs`.
-- `js/views/today.js` — imports `showUndoToast` + `showErrorToast` + `undo`; both tap success paths render the appropriate verb+habit toast (`Marked <name> complete` / `Marked <name> uncomplete`) per D-71; both catch paths replace the 03-03 `console.warn` placeholder with `showErrorToast("Couldn't mark — try again")` (D-53 + D-73). Habit-name lookup happens AFTER `await apply()` resolves so the toast reads canonical post-notify cache (Pitfall 2 alignment).
-- `tests/integration/today.tap.test.js` — Rule 1 fix for pre-existing 03-03 tests: ambient `globalThis.document` proxy + `.remove()` on fake elements + `toastMod._resetToastForTest()` in `freshAll()`. All 4 pre-existing tap tests still green.
-- 232 → 249 tests green (+17: 13 toast unit + 1 toast.undo integration + 3 today.undo integration).
+- `js/state/apply/setSetting.js` — `handleSetSetting` (D-75) writes a settings row through the chokepoint; inverse captures prior value (self-inverting per D-43); first-ever write captures `undefined` (acceptable — hydrate treats as "no override"); `broadcastKeys` returns `{key}` only (Pitfall 8). HANDLERS table extended with `setSetting: handleSetSetting`.
+- `js/views/settings/builders.js` — 5 pure builders (Pattern S8): `buildStorageCard` (D-62) / `buildScheduleCard` (D-63) / `buildInstallCard` (D-64, PWA-07) / `buildDataCard` (D-65) / `buildAboutCard` (D-66). Every card wrapper has `aria-labelledby` paired to an `<h2>` id (D-79).
+- `js/views/settings.js` — `mountSettings(parent, {repo, store})` + `_resetSettingsForTest`. Composes 5 cards in locked top-down order (D-61); subscribes to `store.notify` for D-72 live refresh of Schedule + Data cards via `replaceCardChildren` (clearChildren + mount loop, NO `.innerHTML`); wires action closures (requestPersistence / setWeekStart / undoLastAction / resetData). setWeekStart dispatches through `apply()` (D-75 chokepoint discipline — no `repo.putSetting`). Reset confirm uses D-67 SETTINGS-flavored prose, NOT D-06 diagnostics text.
+- `css/settings.css` — 5-card flat layout + destructive treatment (NFR-07 — color + text + button shape, never color alone). `@import` line added to `css/main.css`.
+- `index.html` — `<section data-route="settings">` gained pre-mounted `<h1 tabindex="-1">Settings</h1>` so router focus has a target before mountSettings finishes.
+- `js/main.js` — `#settings` route swaps the empty-panel stub for the real `mountSettings(settingsPanel, {repo, store})` call.
+- 249 → 275 tests green (+26: 6 setSetting integration + 15 builder unit + 4 mount integration + 1 cross-tab D-72 refresh).
 
-UNDO-01 / UNDO-02 / UNDO-03 functionally complete.
+SETTINGS-04 / SETTINGS-05 / PWA-07 functionally complete. UNDO-01 has its 2nd surface (Data card Undo).
 
 Next steps in order:
 
-1. `/gsd-execute-phase 3` (plan 03-05) — Settings v1 (5 cards: Storage / Schedule / Install / Data / About) + setSetting handler + History tab placeholder + SW SHELL precache update.
-2. Plan 03-06 (closeout: APP_VERSION 0.2.0 → 0.3.0 + docs) per `.planning/phases/03-.../`.
-3. `/gsd-verify-work 3` — UAT after the whole phase ships.
+1. `/gsd-execute-phase 3` (plan 03-06) — closeout: SW SHELL precache append per D-81 (`js/views/settings.js`, `js/views/settings/builders.js`, `js/state/apply/setSetting.js`, `css/settings.css`) + APP_VERSION bump 0.2.0 → 0.3.0 + docs.
+2. `/gsd-verify-work 3` — UAT after the whole phase ships.
 
 Open follow-up (docs drift, non-blocking):
 
@@ -68,8 +70,9 @@ Open follow-up (docs drift, non-blocking):
 | P3-2 | 03-02 | ✓ Complete | Today renders: `js/router.js` + `js/views/today.js` + `js/views/today/builders.js` + expanded `js/state/store.js` cache + `index.html` 3-section shell + `js/main.js` router wiring + `css/today.css` extensions; 6 atomic commits (2 test + 4 feat); 174 → 209 tests green |
 | P3-3 | 03-03 | ✓ Complete | Tap-to-log: `js/state/apply/markUncompleted.js` (D-74 handler + D-52 shared invariant) + `js/state/apply/markCompleted.js` rewired + `js/state/apply.js` (HANDLERS + notify DI) + `js/state/store.js` async notify w/ refresh + `js/db/repo.js` getLogsByHabit + `js/views/today.js` tap closures + optimisticFlip + revertRow; 6 atomic commits (3 test + 3 feat); 209 → 232 tests green |
 | P3-4 | 03-04 | ✓ Complete | Undo toast surface: `js/views/toast.js` extended (`_showToast` internal helper + `showUndoToast` D-69/D-70/D-71 + `showErrorToast` D-73 + `_resetToastForTest`; `showUpdateToast` STRUCTURALLY preserves D-08 by delegating WITHOUT autoDismissMs) + `js/views/today.js` wires both onto tap success/reject (console.warn placeholder REMOVED) + `tests/integration/today.tap.test.js` Rule 1 fix for ambient globalThis.document + `.remove()` on fake elements; 4 atomic commits (2 test + 2 feat); 232 → 249 tests green |
+| P3-5 | 03-05 | ✓ Complete | Settings v1: `js/state/apply/setSetting.js` (D-75 self-inverting chokepoint handler) + `js/state/apply.js` HANDLERS extension + `js/views/settings/builders.js` (5 pure builders) + `js/views/settings.js` (mountSettings composes 5 cards, subscribes to D-72 notify, wires action closures through apply/undo) + `css/settings.css` + `css/main.css` @import + `index.html` h1 slot + `js/main.js` route function; 6 atomic commits (3 test + 3 feat); 249 → 275 tests green |
 
-Test suite: **249/249 green** at HEAD `0f0b5e6`.
+Test suite: **275/275 green** at HEAD `656114e`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 
@@ -83,9 +86,9 @@ Phase 2 inherits the conventions locked during Phase 1:
 
 **Velocity:**
 
-- Total plans completed (since metric tracking began): 4
-- Average duration: 41.25 min
-- Total execution time: ~165 min
+- Total plans completed (since metric tracking began): 5
+- Average duration: 40 min
+- Total execution time: ~200 min
 
 **By Phase:**
 
@@ -93,18 +96,19 @@ Phase 2 inherits the conventions locked during Phase 1:
 |-------|-------|-------|----------|
 | 1. PWA Shell & Tooling Hygiene | 5 | — | — |
 | 2. Storage Foundation | 0 | — | — |
-| 3. Today View & Settings v1 | 4 | 165m | 41.25m |
+| 3. Today View & Settings v1 | 5 | 200m | 40m |
 | 4. Domain Model | 0 | — | — |
 | 5. Backup & Restore | 0 | — | — |
 | 6. Desktop Analytics & Scoring | 0 | — | — |
 
 **Recent Trend:**
 
-- Last plan: 03-04 — 40 min, 2 tasks, 5 files (2 modified code + 3 new tests), 17 new tests, 4 atomic commits. One Rule 1 deviation: ambient globalThis.document stub added to pre-existing 03-03 today.tap.test.js so toast.js could mount inside view-mount tests without DI seam.
+- Last plan: 03-05 — 35 min, 3 tasks, 11 files (3 new code + 1 new CSS + 3 new tests + 4 modified), 26 new tests, 6 atomic commits. One Rule 1 deviation: 2-microtask settle in settings.dataCard.test.js because store.notify doesn't await subscriber-returned Promises (production behavior unchanged).
+- Prior plan: 03-04 — 40 min, 2 tasks, 5 files, 17 new tests, 4 atomic commits.
 - Prior plan: 03-03 — 70 min, 3 tasks, 11 files, 23 new tests, 6 atomic commits (notify DI seam — Pitfall 9 variant)
 - Prior plan: 03-02 — 22 min, 4 tasks, 9 files, 35 new tests, 6 atomic commits
 - Prior plan: 03-01 — 33 min, 5 tasks, 12 files, 74 new tests, 10 atomic commits
-- Trend: TDD per-task (RED → GREEN) holding clean. 03-04 was the smallest plan of the phase so far — 2 tasks, narrow surface (one primitive extension + one wiring).
+- Trend: TDD per-task (RED → GREEN) holding clean across all 5 phase-3 plans.
 
 *Updated after each plan completion*
 
@@ -171,6 +175,17 @@ Locked during Phase 3 plan 03-04 execution (2026-05-28):
 - Graceful `(habit)` fallback on `getCachedHabits().find(...)` returning undefined (e.g. habit archived cross-tab during the tap). No throw; the success toast still renders.
 - `tests/integration/today.tap.test.js` gained an ambient `globalThis.document` proxy (per-test setter `setAmbientDoc(bundle)`) so toast.js's `document.body.appendChild` can mount into the test's fake-doc body. This pattern carries forward to Settings integration tests in 03-05 — view + toast pairs need it; pure-builder unit tests do not. The alternative (refactor toast.js to accept a `document` argument) would break the production single-import shape used by every other caller.
 
+Locked during Phase 3 plan 03-05 execution (2026-05-28):
+
+- `setSetting` is self-inverting given the prior value. The handler returns `inverse: {type:'setSetting', payload:{key, value: prior?.value}}`. First-ever write captures `value: undefined`. Undo of the first-ever weekStart write injects `{key:'weekStart', value: undefined}` which the cache hydrate path treats as "no override — fall back to default". Acceptable per D-75 `<specifics>` line 198; documented inline.
+- D-67 and D-06 confirm strings are NOT kept in sync. D-67 SETTINGS prose ("This will delete all your habits and history. Cannot be undone. Continue?") lives in `js/views/settings.js` as `RESET_CONFIRM_D67`. D-06 diagnostics prose ("Reset data — delete the habits IndexedDB database...") stays inline in `js/views/diagnostics.js`. They serve different audiences (user vs DevTools workflow) and a future refactor of either MUST NOT propagate to the other.
+- Storage card's `requestPersistence` button is suppressed when `persisted === 'loading…'` (initial render), NOT just when `persisted === true`. The mounter re-renders once the persisted Promise resolves and the button appears then if applicable. Prevents a flash of the button before its initial state is known.
+- Settings mounter uses cache-first habit-name lookup for the Data card preview (`store.getCachedHabits().find(...)` then `repo.getHabit` fallback). Mirrors today.js's post-tap toast composition (Pitfall 2 alignment — the notify-driven refresh keeps the cache canonical).
+- `replaceCardChildren(cardEl, newDesc, actions)` is the canonical live-refresh path for Settings cards — clearChildren + mount loop, no .innerHTML. Carries forward to any future per-card reactivity.
+- The cross-tab refresh integration test needs 2 microtask settles after `store.notify` because the subscriber's `readDataCardInputs` is fire-and-forget from notify's perspective (`for (const fn of subs) fn(payload)` — synchronous). Production behavior is unchanged (the user sees the refresh within one animation frame); only the test needs to settle the queue. A future architectural change (have notify await each subscriber Promise) is a P4+ consideration.
+- Settings panel mounts INSIDE `<section data-route="settings">` which carries a pre-mounted `<h1 tabindex="-1">Settings</h1>` for router focus per D-79. The h1 is OWNED by index.html (not the settings.js builder) so the router can `focusH1()` even before mountSettings finishes.
+- About card uses `'controlled'` / `'registered'` / `'unsupported'` for SW state. Diagnostics keeps the longer string `'registered, not yet controlled'` for the DevTools workflow; Settings uses the shorter form for the user-facing surface.
+
 ### Pending Todos
 
 None yet.
@@ -187,6 +202,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-28T12:00:00Z
-Stopped at: Plan 03-04 complete — undo toast surface is live on Today (showUndoToast with D-69 5s auto-dismiss + hover-pause + D-70 single-toast invariant + D-71 verb+habit copy; showErrorToast D-73 4s error variant; 03-03 console.warn placeholder REMOVED; D-08 SW-update no-auto-dismiss STRUCTURALLY guarded). 249 tests green at HEAD `0f0b5e6`. Next: plan 03-05 (Settings v1 — 5 cards + setSetting handler + History tab placeholder + SW SHELL precache).
-Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-05-PLAN.md
+Last session: 2026-05-28T13:30:00Z
+Stopped at: Plan 03-05 complete — Settings v1 is live with 5 cards (Storage / Schedule / Install / Data / About in D-61 locked order) + setSetting chokepoint handler (D-75) + cross-tab D-72 refresh on the Data card. SETTINGS-04 / SETTINGS-05 / PWA-07 functionally complete; UNDO-01 has its 2nd surface (Data card Undo button). 275 tests green at HEAD `656114e`. Next: plan 03-06 (closeout — SW SHELL precache append per D-81 for the new files + APP_VERSION bump 0.2.0 → 0.3.0 + docs).
+Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/ (06-PLAN.md when planner generates it)

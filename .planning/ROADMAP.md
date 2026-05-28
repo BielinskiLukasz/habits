@@ -92,7 +92,7 @@ Plans:
 - [x] 03-02-PLAN.md — Today renders: `js/router.js` (hash router with allowlist resolution, D-60/D-80) + `js/views/today/builders.js` (4 pure description-tree builders, D-54..D-58/D-76/D-79) + `js/views/today.js` (mountToday + mountFooterNav with subscribe/unsubscribe) + expanded `js/state/store.js` cache (habits + this-week logs + weekStart, D-52/NFR-01) + 3-section `<section data-route>` shell + 44×44 tap targets (NFR-06); 174 → 209 tests green
 - [x] 03-03-PLAN.md — tap-to-log: `js/state/apply/markUncompleted.js` (D-74 handler + `_recomputeLastCompletedDate` D-52 invariant) + `markCompleted.js` rewired through the shared helper + `apply.js` HANDLERS + notify DI seam + `store.js` notify-driven cache refresh (D-72) + `repo.getLogsByHabit` + `views/today.js` synchronous optimistic flip + revertRow on apply reject; 209 → 232 tests green (CORE-02, CORE-03, LOG-01, NFR-02 functionally complete)
 - [x] 03-04-PLAN.md — undo toast surface: `js/views/toast.js` extended with `_showToast` internal helper + `showUndoToast` (D-69 5s auto-dismiss + hover-pause + D-70 single-toast invariant + D-71 verb+habit copy) + `showErrorToast` (D-73 error variant); `js/views/today.js` wires both onto the tap success/reject paths so the 03-03 `console.warn` placeholder is GONE; D-08 SW-update no-auto-dismiss contract regression-guarded; 232 → 249 tests green (UNDO-01, UNDO-02, UNDO-03 functionally complete)
-- [ ] 03-05-PLAN.md — Settings v1 (5 cards) + setSetting handler + History tab placeholder + SW SHELL precache
+- [x] 03-05-PLAN.md — Settings v1: `js/state/apply/setSetting.js` (D-75 self-inverting chokepoint handler) + HANDLERS extension + `js/views/settings/builders.js` (5 pure builders for Storage/Schedule/Install/Data/About cards, D-61..D-66/D-79) + `js/views/settings.js` (mountSettings composes the 5 cards in locked order, subscribes to D-72 notify for Schedule + Data live refresh, wires action closures through apply/undo with D-67 SETTINGS-flavored Reset confirm distinct from D-06) + `css/settings.css` + `index.html` h1 slot + `js/main.js` route function; 249 → 275 tests green (SETTINGS-04, SETTINGS-05, PWA-07 functionally complete; UNDO-01 2nd surface complete)
 - [ ] 03-06-PLAN.md — closeout (APP_VERSION 0.2.0 → 0.3.0 + docs)
 
 **UI hint**: yes
@@ -159,7 +159,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
 | 2. Storage Foundation (The Spine) | 6/6 | Complete    | 2026-05-27 |
-| 3. Today View & Settings v1 | 1/6 | In progress | - |
+| 3. Today View & Settings v1 | 5/6 | In progress | - |
 | 4. Domain Model | 0/TBD | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
 | 6. Desktop Analytics & Scoring Trio | 0/TBD | Not started | - |
