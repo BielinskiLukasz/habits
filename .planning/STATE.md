@@ -51,9 +51,17 @@ Next steps in order:
 1. `/gsd-verify-work 3` — UAT against the 5 ROADMAP Phase 3 success criteria. Open `node scripts/serve.js` + `http://localhost:8080/`; verify tap → toast → undo → settings flow end-to-end.
 2. After UAT signs off: begin Phase 4 planning (Domain Model: cadence engine full surface, catalog CRUD, stages, mastery, multi-occurrence logging, history navigation, wave aggregates).
 
-Open follow-up (docs drift, non-blocking):
+Open follow-ups (non-blocking):
 
 - PHASE-COMPLETION.md DATA-03 row says `meta.seedLoadedAt`; actual gate is `meta.seededIds` + `meta.persistResult` per `js/io/seed.js:108`. Logged in `02-UAT.md` Docs Drift section.
+
+- **Phase 3 UAT — items deferred to next-phase UAT session** (logged 2026-05-29 in `03-UAT.md`). Re-run these when starting Phase 4 UAT:
+  - **T16 / NFR-01** — Cold-paint < 300 ms on a mid-range mobile device (requires physical phone + PWA install).
+  - **T17 / NFR-02** — First-tap latency < 100 ms on a real touch device (requires physical phone).
+  - **T18 / NFR-07 (screen-reader axis)** — Run NVDA / VoiceOver / TalkBack on Today and Settings; confirm completed rows announce "pressed" and active footer link announces "current page". (Visual + keyboard halves already passed; only the SR audible behavior is open. Edge "Read aloud this page" is TTS — does not consume ARIA attributes — and is the wrong tool.)
+  - **T19 Part B** — Offline reload with network disabled (DevTools → Network → Offline, or actually disconnect) — confirm Today still mounts from cached SHELL.
+
+- **Phase 3 UAT — 5 gaps logged in `03-UAT.md` Gaps section.** 2 major (Data card label staleness + disappearing weekly/every-n-days habits on same-day completion), 1 minor (diagnostics panel "n/a (P2)" placeholders), 2 cosmetic (Settings h1 padding mismatch + Undo/Reset button proximity). Awaiting triage / `/gsd-execute-phase 3 --gaps-only` after fix planning.
 
 ### What's done so far (this session)
 
