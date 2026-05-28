@@ -117,6 +117,14 @@ There is no automated test runner in Phase 1 — PROJECT.md forbids npm/build to
 
 Run the checklist on the developer machine after every shell-asset change, and on a real device (Android Chrome / iOS Safari / desktop Chrome or Edge) at every phase boundary.
 
+## Version history
+
+- v0.3.0 — Today view + Settings v1 (first usable slice — tap-to-log, undo toast, week-start toggle, install help, reset-data)
+- v0.2.0 — Storage Foundation (raw IDB, 7 stores, single-mutator chokepoint, BroadcastChannel sync, lifecycle flush, idempotent seed)
+- v0.1.0 — PWA shell chassis (versioned-cache SW, Web App Manifest, two HTML shells, Cascade-Layers CSS scaffold, diagnostics panel with Reset-shell)
+
+See [`VERSIONING.md`](./VERSIONING.md) § "Release history" for details and bump rationale.
+
 ## Constraints
 
 - **Tech stack:** Vanilla HTML + ES modules + CSS. No framework, no bundler, no npm, no CDN.

@@ -31,6 +31,25 @@ While the v1.0 milestone (Phases 1-6) is being built, the version stays in the `
 
 Patch bumps (`0.1.0` → `0.1.1`) land for any shell-asset-only change between phases.
 
+## Release history
+
+### v0.3.0 — Phase 3 closeout (2026-05-28)
+
+- **What shipped:** First user-visible surfaces. `index.html#today` renders cadence-filtered habits; tap toggles complete/uncomplete with optimistic flip; toast offers single-step Undo with a 5s auto-dismiss (D-69) that hover-pauses (D-69); `index.html#settings` lands the v1 panel (Storage / Schedule / Install / Data / About per D-61), and the second Undo surface lives in the Data card per D-65/D-72. Reset-data uses the Settings-flavored confirm per D-67; the diagnostics surface's D-06 verbatim text is unchanged.
+- **Bump rationale:** MINOR per SemVer §4 (the project is still in initial-development `0.y.z` per `js/util/version.js`'s file header). New user-facing surface on top of the Phase 2 storage spine.
+- **Cache invalidation:** `habits-0.3.0` replaces `habits-0.2.0`. The SW activate handler (D-10) deletes the prior cache via the `/^habits-/` regex; the P1 update-toast (D-08, no-auto-dismiss) fires for users still on `0.2.0`.
+- **D-decisions delivered in P3:** D-48..D-81 (see `.planning/phases/03-today-view-settings-v1-first-usable-slice/03-CONTEXT.md`).
+
+### v0.2.0 — Phase 2 closeout (2026-05-27)
+
+- **What shipped:** Storage spine. Raw IndexedDB with 7 stores (`habits`, `habit_versions`, `logs`, `events`, `settings`, `meta`, `score_snapshots`); single-mutator `apply()` chokepoint with `markCompleted` handler; `meta.undoToken` persistent undo; `BroadcastChannel('habits')` cross-tab sync; `visibilitychange` lifecycle flush; idempotent seed loader for `seed/habits.json`; `navigator.storage.persist()` on first write; D-44 Reset-data wired into diagnostics.
+- **Bump rationale:** MINOR per SemVer §4 (phase completion, additive storage surface).
+
+### v0.1.0 — Phase 1 closeout (2026-05-26)
+
+- **What shipped:** PWA chassis. Versioned-cache module service worker (`habits-${APP_VERSION}`, cache-first SHELL + SWR for `/js/`); Web App Manifest with maskable icon; two HTML shells (`index.html`, `desktop.html`); Cascade-Layers CSS scaffold; diagnostics panel reachable via `?debug=1` or long-press, with Reset-shell escape hatch.
+- **Bump rationale:** Initial development baseline.
+
 ## After v1.0 (`1.y.z` and beyond)
 
 Once `1.0.0` ships, the public API and storage shape are considered stable. Standard SemVer rules apply:
