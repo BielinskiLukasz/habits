@@ -1,0 +1,363 @@
+/**
+ * @file Pure description-tree builders for the Settings panel (D-26 Tier 1,
+ * D-61..D-66, D-67, D-71, D-76, D-79).
+ *
+ * Every builder returns `{tag, attrs?, text?, children?}` — the same shape
+ * the `mount()` helper (D-77) consumes. NO DOM access here; that lives in
+ * `js/views/settings.js`. Splitting the two halves keeps the builders
+ * trivially unit-testable in Node (Pattern S8) and pushes the XSS-safe DOM
+ * construction discipline (D-78 grep gate) to a single seam.
+ *
+ * Action attributes (`data-action="requestPersistence"` etc.) flow through
+ * to the `mount(desc, parent, actions)` helper, which binds the matching
+ * closure from the `actions` map as a click listener. Builders never own
+ * the closures — the mounter wires them.
+ *
+ * Card wrapper convention (every builder):
+ *   <section class="settings-card" aria-labelledby="<id>">
+ *     <h2 id="<id>">Title</h2>
+ *     ...body...
+ *   </section>
+ *
+ * The `aria-labelledby` ↔ `<h2>.id` pair satisfies D-79 (cards announce
+ * their title to screen readers). IDs are static per-card constants —
+ * builders are pure so they don't need to thread through state.
+ *
+ * Loading-state contract (Pattern S5 — async-loaded values from the
+ * mounter's perspective): when an input is the literal string `'loading…'`,
+ * the builder emits it verbatim into the matching `<dd>` — the mounter
+ * mutates `dd.textContent` directly after each Promise resolves so no full
+ * re-render is needed.
+ *
+ * The Reset-data confirm string (D-67) lives in the MOUNTER (it is a
+ * clickable behavior — the builder only emits the button).
+ *
+ * Forbidden constructs in this file:
+ *   - Any DOM access (createElement, document.*, etc.) — builders are pure.
+ *   - `.innerHTML` family — D-78 grep gate.
+ */
+
+/* Stable per-card heading IDs for `aria-labelledby`. */
+const STORAGE_LABEL_ID = 'settings-storage-h2';
+const SCHEDULE_LABEL_ID = 'settings-schedule-h2';
+const INSTALL_LABEL_ID = 'settings-install-h2';
+const DATA_LABEL_ID = 'settings-data-h2';
+const ABOUT_LABEL_ID = 'settings-about-h2';
+
+/**
+ * Build the Storage card description (D-62, PWA-07 partial).
+ *
+ * Inputs are plain values — the async resolution (`navigator.storage.persisted()`,
+ * `navigator.storage.estimate()`) happens in the mounter; the builder is
+ * tested with the post-await snapshot. When an input is the literal
+ * string `'loading…'`, the corresponding `<dd>` carries that text verbatim
+ * so the mounter can later mutate `dd.textContent` (Pattern S5).
+ *
+ * When `supported === false`, the card renders a single `<p>` line and no
+ * buttons or `<dl>` rows.
+ *
+ * @param {{ supported?: boolean, persisted?: boolean|string, estimateUsedMB?: string|number, estimateQuotaMB?: string|number }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildStorageCard({
+  supported = true,
+  persisted = 'loading…',
+  estimateUsedMB = 'loading…',
+  estimateQuotaMB = 'loading…',
+} = {}) {
+  /** @type {object[]} */
+  const body = [
+    { tag: 'h2', attrs: { id: STORAGE_LABEL_ID }, text: 'Storage' },
+  ];
+
+  if (!supported) {
+    body.push({
+      tag: 'p',
+      text: 'Storage status unsupported on this browser.',
+    });
+    return {
+      tag: 'section',
+      attrs: {
+        class: 'settings-card',
+        'aria-labelledby': STORAGE_LABEL_ID,
+      },
+      children: body,
+    };
+  }
+
+  // Status row.
+  const persistedText =
+    persisted === 'loading…' ? 'loading…' : persisted === true ? 'yes' : 'no';
+  body.push({
+    tag: 'dl',
+    children: [
+      { tag: 'dt', text: 'Persistent' },
+      { tag: 'dd', text: persistedText },
+    ],
+  });
+
+  // Request persistence button — only when persisted === false (NOT loading,
+  // NOT true). On `'loading…'` the button is suppressed too; the mounter
+  // re-renders after the persisted Promise resolves and the button appears
+  // then if applicable.
+  if (persisted === false) {
+    body.push({
+      tag: 'button',
+      attrs: {
+        class: 'settings-card--destructive',
+        'data-action': 'requestPersistence',
+      },
+      text: 'Request persistence',
+    });
+  }
+
+  // Estimate row.
+  const estimateText =
+    estimateUsedMB === 'loading…' || estimateQuotaMB === 'loading…'
+      ? 'loading…'
+      : `Using ${estimateUsedMB} MB of ~${estimateQuotaMB} MB`;
+  body.push({
+    tag: 'dl',
+    children: [
+      { tag: 'dt', text: 'Storage' },
+      { tag: 'dd', text: estimateText },
+    ],
+  });
+
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': STORAGE_LABEL_ID,
+    },
+    children: body,
+  };
+}
+
+/**
+ * Build the Schedule card description (D-63, D-51).
+ *
+ * Mon/Sun radios share `name="weekStart"` so native browser semantics enforce
+ * single-select. Each radio carries `data-action="setWeekStart"` so the
+ * mounter wires a single change-handler that reads `evt.target.value` and
+ * dispatches `apply({type:'setSetting', payload:{key:'weekStart', value}})`
+ * (D-75 chokepoint discipline — never call `repo.putSetting` directly).
+ *
+ * @param {{ weekStart: 'mon'|'sun' }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildScheduleCard({ weekStart }) {
+  /** @param {'mon'|'sun'} value */
+  function radio(value, label) {
+    /** @type {Record<string, string>} */
+    const attrs = {
+      type: 'radio',
+      name: 'weekStart',
+      value,
+      'data-action': 'setWeekStart',
+    };
+    if (weekStart === value) attrs.checked = '';
+    return {
+      tag: 'label',
+      children: [
+        { tag: 'input', attrs },
+        { tag: 'span', text: ` ${label}` },
+      ],
+    };
+  }
+
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': SCHEDULE_LABEL_ID,
+    },
+    children: [
+      { tag: 'h2', attrs: { id: SCHEDULE_LABEL_ID }, text: 'Schedule' },
+      {
+        tag: 'fieldset',
+        attrs: { class: 'settings-radio-group' },
+        children: [
+          { tag: 'legend', text: 'Week starts on' },
+          radio('mon', 'Monday'),
+          radio('sun', 'Sunday'),
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * Build the Install card description (D-64, PWA-07).
+ *
+ * Three labeled subsections. No JS platform detection — user picks the
+ * section that matches their device. Each subsection has its own `<h3>` so
+ * screen-reader users navigate by heading level.
+ *
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildInstallCard() {
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': INSTALL_LABEL_ID,
+    },
+    children: [
+      { tag: 'h2', attrs: { id: INSTALL_LABEL_ID }, text: 'Install' },
+      {
+        tag: 'section',
+        attrs: { 'aria-labelledby': 'settings-install-ios' },
+        children: [
+          { tag: 'h3', attrs: { id: 'settings-install-ios' }, text: 'iOS Safari' },
+          {
+            tag: 'p',
+            children: [
+              { tag: 'span', text: 'Tap the Share button, then ' },
+              { tag: 'strong', text: 'Add to Home Screen' },
+              { tag: 'span', text: '.' },
+            ],
+          },
+        ],
+      },
+      {
+        tag: 'section',
+        attrs: { 'aria-labelledby': 'settings-install-android' },
+        children: [
+          { tag: 'h3', attrs: { id: 'settings-install-android' }, text: 'Android Chrome' },
+          {
+            tag: 'p',
+            children: [
+              { tag: 'span', text: 'Open the menu, then ' },
+              { tag: 'strong', text: 'Install app' },
+              { tag: 'span', text: '.' },
+            ],
+          },
+        ],
+      },
+      {
+        tag: 'section',
+        attrs: { 'aria-labelledby': 'settings-install-desktop' },
+        children: [
+          { tag: 'h3', attrs: { id: 'settings-install-desktop' }, text: 'Desktop browsers' },
+          {
+            tag: 'p',
+            text: 'Look for the install icon in the URL bar, or use the browser menu.',
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * Build the Data card description (D-65, D-71).
+ *
+ * Two sub-blocks:
+ *   (a) Undo last action — button + preview text. When `hasUndoToken=false`
+ *       the button is disabled and preview reads `"Nothing to undo."`.
+ *       When `hasUndoToken=true` the button is enabled and preview reads
+ *       `"Last: <lastEvent> · <relativeTime>"` (D-71).
+ *   (b) Reset data — destructive-red button wrapped in
+ *       `.settings-card--destructive`. The Reset confirm string (D-67) lives
+ *       in the mounter, not the builder.
+ *
+ * Both buttons carry `aria-label` for the verb only (D-79); the visible
+ * text mirrors the label so sighted users see the same affordance.
+ *
+ * @param {{ lastEvent: string, hasUndoToken: boolean, relativeTime: string }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildDataCard({ lastEvent, hasUndoToken, relativeTime }) {
+  /** @type {object[]} */
+  const undoChildren = [];
+  if (hasUndoToken) {
+    undoChildren.push({
+      tag: 'p',
+      text: `Last: ${lastEvent} · ${relativeTime}`,
+    });
+    undoChildren.push({
+      tag: 'button',
+      attrs: {
+        'data-action': 'undoLastAction',
+        'aria-label': 'Undo last action',
+      },
+      text: 'Undo last action',
+    });
+  } else {
+    undoChildren.push({ tag: 'p', text: 'Nothing to undo.' });
+    undoChildren.push({
+      tag: 'button',
+      attrs: {
+        'data-action': 'undoLastAction',
+        'aria-label': 'Undo last action',
+        disabled: '',
+      },
+      text: 'Undo last action',
+    });
+  }
+
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': DATA_LABEL_ID,
+    },
+    children: [
+      { tag: 'h2', attrs: { id: DATA_LABEL_ID }, text: 'Data' },
+      { tag: 'div', attrs: { class: 'settings-data-undo' }, children: undoChildren },
+      {
+        tag: 'div',
+        attrs: { class: 'settings-card--destructive' },
+        children: [
+          {
+            tag: 'button',
+            attrs: {
+              'data-action': 'resetData',
+              'aria-label': 'Reset data',
+            },
+            text: 'Reset data',
+          },
+          { tag: 'p', text: 'This deletes everything stored on this device.' },
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * Build the About card description (D-66).
+ *
+ * 4 rows in locked order: App version → Schema version → Cache name →
+ * Service worker. Inputs accept the literal `'loading…'` for Pattern S5
+ * (the mounter mutates `dd.textContent` after async resolution).
+ *
+ * @param {{ appVersion: string, schemaVersion: string, cacheName: string, swState: string }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildAboutCard({ appVersion, schemaVersion, cacheName, swState }) {
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': ABOUT_LABEL_ID,
+    },
+    children: [
+      { tag: 'h2', attrs: { id: ABOUT_LABEL_ID }, text: 'About' },
+      {
+        tag: 'dl',
+        attrs: { class: 'settings-about' },
+        children: [
+          { tag: 'dt', text: 'App version' },
+          { tag: 'dd', text: String(appVersion) },
+          { tag: 'dt', text: 'Schema version' },
+          { tag: 'dd', text: String(schemaVersion) },
+          { tag: 'dt', text: 'Cache name' },
+          { tag: 'dd', text: String(cacheName) },
+          { tag: 'dt', text: 'Service worker' },
+          { tag: 'dd', text: String(swState) },
+        ],
+      },
+    ],
+  };
+}
