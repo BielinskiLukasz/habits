@@ -94,6 +94,23 @@ const SHELL = [
   './js/platform/lifecycle.js',
   './js/io/seed.js',
   './seed/habits.json',
+  // Phase-3 first-usable-slice — added in 03-today-view-settings-v1.
+  // - Router + view + domain + util modules introduced in 03-01..03-03.
+  // - Settings panel + builders + setSetting handler introduced in 03-05.
+  // - Toast extensions (showUndoToast / showErrorToast) live in js/views/toast.js,
+  //   which is already in the P1-locked entries above; no duplicate entry.
+  // - seed/waves.json is intentionally NOT here; it is SWR-cached per D-81.
+  './js/router.js',
+  './js/views/today.js',
+  './js/views/today/builders.js',
+  './js/views/settings.js',
+  './js/views/settings/builders.js',
+  './js/domain/cadence.js',
+  './js/domain/wave.js',
+  './js/util/mount.js',
+  './js/state/apply/markUncompleted.js',
+  './js/state/apply/setSetting.js',
+  './css/settings.css',
 ];
 
 self.addEventListener('install', e => {
