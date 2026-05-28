@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready
-stopped_at: Phase 02 verified — 10/10 UAT tests passed in Edge; security gate clear (threats_open=0); REQUIREMENTS.md DATA-01..08 + SEED-01..05 checkboxes flipped; ready for Phase 3 planning
-last_updated: "2026-05-27T15:05:00.000Z"
-last_activity: 2026-05-27 -- /gsd-verify-work 2 complete; 02-UAT.md committed (10/10 PASS, 1 docs drift logged); test suite 100/100 green
+status: planning
+stopped_at: Phase 3 context gathered — 11 areas discussed, 34 decisions locked (D-48..D-81); ready for /gsd-plan-phase 3
+last_updated: "2026-05-28T16:30:00.000Z"
+last_activity: 2026-05-28 -- /gsd-discuss-phase 3 complete; 03-CONTEXT.md + 03-DISCUSSION-LOG.md written and committed (a3aec87)
 progress:
   total_phases: 6
   completed_phases: 2
@@ -21,28 +21,32 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 02 complete — ready for `/gsd-verify-work 2` then Phase 3 (Today View & Settings v1)
+**Current focus:** Phase 03 context gathered — ready for `/gsd-plan-phase 3` (Today View & Settings v1)
 
 ## Current Position
 
-Phase: 03 (today-view-&-settings-v1) — NOT STARTED
+Phase: 03 (today-view-&-settings-v1) — CONTEXT GATHERED
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: Not started — awaiting `/gsd-discuss-phase 3` or `/gsd-plan-phase 3`
-Status: Ready — Phase 2 verified end-to-end in Edge; ready for Phase 3 planning
-Last activity: 2026-05-27 -- /gsd-verify-work 2 complete (10/10 PASS); 100/100 tests green; REQUIREMENTS.md DATA-01..08 + SEED-01..05 closed
+Plan: Not started — awaiting `/gsd-plan-phase 3`
+Status: Ready — 03-CONTEXT.md + 03-DISCUSSION-LOG.md written; 34 decisions locked (D-48..D-81) across 11 gray areas
+Last activity: 2026-05-28 -- /gsd-discuss-phase 3 complete; 03-CONTEXT.md + 03-DISCUSSION-LOG.md committed (a3aec87)
 
-Progress: [██████████░░░░░░░░░░░░░░░░░░░░] 33% (2 of 6 phases complete; 6 of 6 Phase 2 plans done)
+Progress: [██████████░░░░░░░░░░░░░░░░░░░░] 33% (2 of 6 phases complete; Phase 3 in context-capture state)
 
 ## Resume Instructions
 
-**Phase 02 is complete + verified.** UAT 10/10 PASS (2026-05-27, Edge). All 13 DATA-* + SEED-* requirements checkbox-closed in REQUIREMENTS.md. Cache name will be `habits-0.2.0` on next deploy; sw.js activate handler deletes the prior `habits-0.1.0` cache and the P1 update toast fires for users still on 0.1.0.
+**Phase 03 context is captured.** 34 implementation decisions (D-48..D-81) locked across 11 gray areas: cadence filtering scope, today row interaction model, settings shell + nav, undo surface + behavior, pure-view-builders + testing (D-26 Tier 1), accessibility specifics (NFR-06/07), history tab placeholder, SW SHELL precache, reset-data confirm copy, toast XSS safety, cross-tab Settings refresh.
+
+Notable scope borrowing from P4 into P3: a minimal `js/domain/cadence.js` resolver (4 cadence types) and an in-memory `js/domain/wave.js` backed by a new `seed/waves.json` — both shipped to honor CORE-04 + CORE-05 on the first usable slice. No DB_VERSION bump; waves stay in-memory until P4 wires user-extensibility.
 
 Next steps in order:
-1. `/gsd-code-review 2` — review the diff Phase 2 introduced (60+ commits across 6 plans). Optional but recommended before Phase 3.
-2. `/gsd-discuss-phase 3` — gather Phase 3 context (Today View & Settings v1).
-3. `/gsd-plan-phase 3` — plan Phase 3 in detail.
+
+1. `/gsd-plan-phase 3` — plan Phase 3 in detail based on 03-CONTEXT.md.
+2. `/gsd-execute-phase 3` — execute the plans.
+3. `/gsd-verify-work 3` — UAT after execution.
 
 Open follow-up (docs drift, non-blocking):
+
 - PHASE-COMPLETION.md DATA-03 row says `meta.seedLoadedAt`; actual gate is `meta.seededIds` + `meta.persistResult` per `js/io/seed.js:108`. Logged in `02-UAT.md` Docs Drift section.
 
 ### What's done so far (this session)
@@ -136,6 +140,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-27T15:05:00.000Z
+Last session: 2026-05-28T00:25:34.028Z
 Stopped at: Phase 2 verified — 10/10 UAT passed, ready to plan Phase 3
-Resume file: None (transitions don't use resume files)
+Resume file: None
