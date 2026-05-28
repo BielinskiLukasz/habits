@@ -10,8 +10,8 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 ### CORE — Today view (mobile primary)
 
 - [x] **CORE-01**: User can open `index.html` on mobile and see today's scheduled habits without delay (cold paint < 300 ms)
-- [ ] **CORE-02**: User can mark a habit complete with a single tap (binary habits)
-- [ ] **CORE-03**: User can unmark a previously-completed habit with a single tap
+- [x] **CORE-02**: User can mark a habit complete with a single tap (binary habits)
+- [x] **CORE-03**: User can unmark a previously-completed habit with a single tap
 - [x] **CORE-04**: User can see, on Today, only the habits whose cadence rules say they apply today
 - [x] **CORE-05**: User sees today's date and current wave context displayed on Today
 - [x] **CORE-06**: Today view renders synchronously from a cached snapshot (no spinner-blocked first paint)
@@ -58,7 +58,7 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### LOG — Multi-occurrence logging
 
-- [ ] **LOG-01**: User can configure a habit's logging UX as "binary" (single check)
+- [x] **LOG-01**: User can configure a habit's logging UX as "binary" (single check)
 - [ ] **LOG-02**: User can configure a habit's logging UX as "numeric +1 counter" (e.g., "5 things grateful for", "2L water")
 - [ ] **LOG-03**: User can configure a habit's logging UX as "slot-checklist" (e.g., "7 meatless meals/week")
 - [ ] **LOG-04**: For slot-checklist habits, user can choose anonymous slots OR user-labeled slots per habit
@@ -172,7 +172,7 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 ### NFR — Non-functional requirements
 
 - [ ] **NFR-01 (Performance)**: Cold paint on Today view < 300 ms on a mid-range Android phone with 1 year of data
-- [ ] **NFR-02 (Performance)**: First-tap latency on Today view < 100 ms
+- [x] **NFR-02 (Performance)**: First-tap latency on Today view < 100 ms
 - [ ] **NFR-03 (Performance)**: Desktop analytics view renders < 2 s with 5 years of synthetic data
 - [ ] **NFR-04 (Offline)**: App functions fully offline; no network calls except user-initiated export/import
 - [ ] **NFR-05 (Privacy)**: No telemetry, no analytics SDK, no error reporting service; the app never phones home
@@ -243,8 +243,8 @@ Every v1 requirement maps to exactly one phase.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CORE-01 | Phase 3 | Complete (03-02) |
-| CORE-02 | Phase 3 | Pending |
-| CORE-03 | Phase 3 | Pending |
+| CORE-02 | Phase 3 | Complete (03-03) |
+| CORE-03 | Phase 3 | Complete (03-03) |
 | CORE-04 | Phase 3 | Complete (03-02) |
 | CORE-05 | Phase 3 | Complete (03-02) |
 | CORE-06 | Phase 3 | Complete (03-02) |
@@ -276,7 +276,7 @@ Every v1 requirement maps to exactly one phase.
 | MASTERY-05 | Phase 4 | Pending |
 | MASTERY-06 | Phase 4 | Pending |
 | MASTERY-07 | Phase 4 | Pending |
-| LOG-01 | Phase 3 | Pending |
+| LOG-01 | Phase 3 | Complete (03-03) |
 | LOG-02 | Phase 4 | Pending |
 | LOG-03 | Phase 4 | Pending |
 | LOG-04 | Phase 4 | Pending |
@@ -354,7 +354,7 @@ Every v1 requirement maps to exactly one phase.
 | SETTINGS-06 | Phase 6 | Pending |
 | SETTINGS-07 | Phase 1 | Pending |
 | NFR-01 | Phase 3 | Pending |
-| NFR-02 | Phase 3 | Pending |
+| NFR-02 | Phase 3 | Complete (03-03) |
 | NFR-03 | Phase 6 | Pending |
 | NFR-04 | Phase 1 | Pending |
 | NFR-05 | Phase 6 | Pending |

@@ -90,7 +90,7 @@ Plans:
 
 - [x] 03-01-PLAN.md — pure-domain foundations: `js/domain/cadence.js` (4-cadence resolver, D-48..D-51) + `js/domain/wave.js` + `seed/waves.json` (D-56/D-57) + `js/util/mount.js` (D-77) + D-78 grep-gate + 4 new util/date.js helpers + 2 new repo bounded-reads (NFR-01 enabler); 100 → 174 tests green
 - [x] 03-02-PLAN.md — Today renders: `js/router.js` (hash router with allowlist resolution, D-60/D-80) + `js/views/today/builders.js` (4 pure description-tree builders, D-54..D-58/D-76/D-79) + `js/views/today.js` (mountToday + mountFooterNav with subscribe/unsubscribe) + expanded `js/state/store.js` cache (habits + this-week logs + weekStart, D-52/NFR-01) + 3-section `<section data-route>` shell + 44×44 tap targets (NFR-06); 174 → 209 tests green
-- [ ] 03-03-PLAN.md — tap-to-log (markUncompleted handler + denormalized lastCompletedDate invariant)
+- [x] 03-03-PLAN.md — tap-to-log: `js/state/apply/markUncompleted.js` (D-74 handler + `_recomputeLastCompletedDate` D-52 invariant) + `markCompleted.js` rewired through the shared helper + `apply.js` HANDLERS + notify DI seam + `store.js` notify-driven cache refresh (D-72) + `repo.getLogsByHabit` + `views/today.js` synchronous optimistic flip + revertRow on apply reject; 209 → 232 tests green (CORE-02, CORE-03, LOG-01, NFR-02 functionally complete)
 - [ ] 03-04-PLAN.md — undo toast surface (autoDismiss + showErrorToast)
 - [ ] 03-05-PLAN.md — Settings v1 (5 cards) + setSetting handler + History tab placeholder + SW SHELL precache
 - [ ] 03-06-PLAN.md — closeout (APP_VERSION 0.2.0 → 0.3.0 + docs)
