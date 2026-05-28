@@ -1,6 +1,6 @@
 /**
  * @file Today view mounter — subscribe + render + return unmount
- * (CORE-01..06, D-52, D-53, D-79).
+ * (CORE-01..06, D-52, D-53, D-71, D-73, D-79).
  *
  * Wires the pure description builders (`js/views/today/builders.js`) into
  * real DOM via `mount()` (D-77). `mountToday(parent)` performs the initial
@@ -35,8 +35,13 @@
  *       4. On `apply()` reject → `revertRow(rowEl, priorState)` synchronously
  *          restores the prior DOM (the next `store.subscribe` re-render
  *          rebuilds the row from cache, but revertRow is the immediate
- *          rollback). Error toast lands in Slice 4 — Slice 3 logs via
- *          `console.warn` (see in-code comment).
+ *          rollback) AND `showErrorToast("Couldn't mark — try again")` is
+ *          rendered as user-visible feedback (D-53 + D-73). The 03-03
+ *          console.warn placeholder is GONE.
+ *       5. On `apply()` resolve → look up the cached habit's `.name`
+ *          (post-notify, so the read is canonical per Pitfall 2) and
+ *          render `showUndoToast({message: "Marked <name> complete",
+ *          undoFn: () => undo()})` (UNDO-01, UNDO-02, D-71).
  *
  * Polish-toggle (`togglePolish`) tap wiring also lands in a future slice —
  * builders emit the `data-action` attribute but the action map omits it
@@ -64,6 +69,8 @@ import { currentWave } from '../domain/wave.js';
 import { appliesToday } from '../domain/cadence.js';
 import { todayLocal } from '../util/date.js';
 import { apply } from '../state/apply.js';
+import { undo } from '../state/undo.js';
+import { showUndoToast, showErrorToast } from './toast.js';
 import {
   subscribe,
   getCachedHabits,
@@ -176,11 +183,18 @@ async function handleMarkCompleteTap(evt) {
   optimisticFlip(rowEl, 'completed');
   try {
     await apply({ type: 'markCompleted', payload: { habitId, date } });
-  } catch (err) {
+    // D-71: read habit.name from the post-notify cache (canonical post-write
+    // state per Pitfall 2) and render the verb+habit Undo toast. Graceful
+    // fallback to '(habit)' when the row was archived cross-tab mid-tap.
+    const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+    showUndoToast({
+      message: `Marked ${habitName} complete`,
+      undoFn: () => undo(),
+    });
+  } catch (_err) {
+    // D-53 + D-73: user-visible error feedback on apply() reject.
     revertRow(rowEl, priorState);
-    // 03-04: replace with showErrorToast("Couldn't mark — try again").
-    // eslint-disable-next-line no-console
-    console.warn('[today] markCompleted failed', err);
+    showErrorToast("Couldn't mark — try again");
   }
 }
 
@@ -200,11 +214,16 @@ async function handleMarkUncompleteTap(evt) {
   optimisticFlip(rowEl, 'uncompleted');
   try {
     await apply({ type: 'markUncompleted', payload: { habitId, date } });
-  } catch (err) {
+    // D-71: verb+habit Undo toast (mirrors markComplete branch).
+    const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+    showUndoToast({
+      message: `Marked ${habitName} uncomplete`,
+      undoFn: () => undo(),
+    });
+  } catch (_err) {
+    // D-53 + D-73: user-visible error feedback on apply() reject.
     revertRow(rowEl, priorState);
-    // 03-04: replace with showErrorToast("Couldn't unmark — try again").
-    // eslint-disable-next-line no-console
-    console.warn('[today] markUncompleted failed', err);
+    showErrorToast("Couldn't mark — try again");
   }
 }
 

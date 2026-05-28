@@ -26,10 +26,69 @@
  * via `_listeners.get('click')`.
  */
 
-import { test, describe } from 'node:test';
+import { test, describe, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createFakeRepo } from '../helpers/fake-idb.js';
 import { todayLocal } from '../../js/util/date.js';
+
+/**
+ * Phase 03 plan 04 added showUndoToast / showErrorToast calls inside
+ * today.js's tap handlers. Those write into `globalThis.document.body`
+ * via `js/views/toast.js` (which uses the global `document` reference).
+ * We stub `globalThis.document` with the test's fake-document body so
+ * the toast can mount without a ReferenceError.
+ */
+const origDocument = globalThis.document;
+const origLocation = globalThis.location;
+/** @type {{ document: object, body: object }|null} */
+let _ambientDoc = null;
+
+beforeEach(() => {
+  // Lazy stub — the per-test `createFakeDocument()` creates its own body
+  // and `globalThis.document` here just needs `body` + `createElement` +
+  // `createTextNode` so toast.js can mount. We expose those via a setter
+  // each test calls inline (`setAmbientDoc(body, document)`).
+  _ambientDoc = null;
+  globalThis.document = {
+    get body() { return _ambientDoc?.body; },
+    createElement(tag) { return _ambientDoc?.document.createElement(tag); },
+    createTextNode(t) { return _ambientDoc?.document.createTextNode(t); },
+  };
+  try {
+    globalThis.location = { reload: () => {} };
+  } catch (_e) {
+    Object.defineProperty(globalThis, 'location', {
+      value: { reload: () => {} },
+      configurable: true,
+      writable: true,
+    });
+  }
+});
+
+afterEach(() => {
+  globalThis.document = origDocument;
+  if (origLocation) {
+    try {
+      globalThis.location = origLocation;
+    } catch (_e) {
+      Object.defineProperty(globalThis, 'location', {
+        value: origLocation,
+        configurable: true,
+        writable: true,
+      });
+    }
+  }
+  _ambientDoc = null;
+});
+
+/**
+ * Each test calls this with the fake-doc bundle it just built so the
+ * ambient `globalThis.document` proxy resolves to the correct fake body.
+ * @param {{ document: object, body: object }} bundle
+ */
+function setAmbientDoc(bundle) {
+  _ambientDoc = bundle;
+}
 
 /**
  * Hand-rolled fake DOM with the subset of the DOM API consumed by
@@ -88,6 +147,11 @@ function createFakeDocument() {
         if (idx >= 0) children.splice(idx, 1);
         if (node && typeof node._setParent === 'function') node._setParent(null);
         return node;
+      },
+      remove() {
+        if (parentNode && typeof parentNode.removeChild === 'function') {
+          parentNode.removeChild(el);
+        }
       },
       setAttribute(k, v) {
         attributes[k] = String(v);
@@ -193,16 +257,20 @@ function createFakeDocument() {
  * is the simplest correct path.
  */
 async function freshAll() {
-  const [store, applyMod, undoMod, todayMod] = await Promise.all([
+  const [store, applyMod, undoMod, todayMod, toastMod] = await Promise.all([
     import('../../js/state/store.js'),
     import('../../js/state/apply.js'),
     import('../../js/state/undo.js'),
     import('../../js/views/today.js'),
+    import('../../js/views/toast.js'),
   ]);
-  // Reset module-level state so each test starts fresh.
+  // Reset module-level state so each test starts fresh. toast.js gained
+  // module-level singletons in 03-04 — clear them too (otherwise a prior
+  // test's mounted toast leaks into the next test's `_dismissToast` path).
   store._resetStoreForTest();
   todayMod._resetTodayForTest();
-  return { store, applyMod, undoMod, todayMod };
+  toastMod._resetToastForTest();
+  return { store, applyMod, undoMod, todayMod, toastMod };
 }
 
 /**
@@ -234,7 +302,9 @@ describe('Today tap — optimistic flip happens BEFORE apply() resolves (NFR-02,
     });
     await store.hydrate();
 
-    const { body } = createFakeDocument();
+    const fakeDoc = createFakeDocument();
+    const { body } = fakeDoc;
+    setAmbientDoc(fakeDoc);
     todayMod.mountToday(body);
 
     // The Today list is rendered into `body`. Find the first tap button.
@@ -306,7 +376,9 @@ describe('Today tap — tap a completed row → flip back + write {completed: fa
     await repo.putLog({ habitId: 'h1', date: today, completed: true, definitionVersion: null });
     await store.hydrate();
 
-    const { body } = createFakeDocument();
+    const fakeDoc = createFakeDocument();
+    const { body } = fakeDoc;
+    setAmbientDoc(fakeDoc);
     todayMod.mountToday(body);
 
     // Find the h1 tap button specifically — completed rows sort LAST per
@@ -357,7 +429,9 @@ describe('Today tap — apply() reject triggers revertRow (D-53)', () => {
     });
     await store.hydrate();
 
-    const { body } = createFakeDocument();
+    const fakeDoc = createFakeDocument();
+    const { body } = fakeDoc;
+    setAmbientDoc(fakeDoc);
     todayMod.mountToday(body);
 
     const tapBtn = body.querySelector('.today-row-tap');
@@ -416,7 +490,9 @@ describe('Today tap — post-tap re-render reconciles via store.subscribe()', ()
     });
     await store.hydrate();
 
-    const { body } = createFakeDocument();
+    const fakeDoc = createFakeDocument();
+    const { body } = fakeDoc;
+    setAmbientDoc(fakeDoc);
     todayMod.mountToday(body);
 
     // Find h1's tap button specifically (BFS picks the first match — both
