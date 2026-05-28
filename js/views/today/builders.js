@@ -1,0 +1,230 @@
+/**
+ * @file Pure description-tree builders for the Today view (D-26 Tier 1,
+ * D-54, D-55, D-56, D-58, D-76, D-79, D-80).
+ *
+ * Every builder returns `{tag, attrs?, text?, children?}` — the same shape
+ * the `mount()` helper (D-77) consumes. NO DOM access here; that lives in
+ * `js/views/today.js`. Splitting the two halves keeps the builders trivially
+ * unit-testable in Node (Pattern S8) and pushes the XSS-safe DOM
+ * construction discipline (D-78 grep gate) to a single seam.
+ *
+ * Date formatting is locale-deterministic via fixed `WEEKDAY_SHORT` /
+ * `MONTH_SHORT` arrays — NOT `Intl.DateTimeFormat`. Predictable output
+ * across users and a stable test fixture (D-56).
+ *
+ * Action attributes (`data-action="markComplete"` etc.) flow through to the
+ * `mount(desc, parent, actions)` helper, which binds the matching closure
+ * from the `actions` map as a click listener. Tap wiring lands in Slice 3;
+ * this slice emits the attributes but does NOT wire the closures.
+ *
+ * Forbidden constructs in this file:
+ *   - Any DOM access (createElement, document.*, etc.) — builders are pure.
+ *   - `.innerHTML` family — D-78 grep gate.
+ */
+
+import { parseLocalYMD } from '../../util/date.js';
+
+/** Locale-deterministic short weekday names indexed by `Date#getDay()` (0=Sun). */
+const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** Locale-deterministic short month names indexed by `Date#getMonth()` (0=Jan). */
+const MONTH_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/**
+ * Format a YYYY-MM-DD as `'Wed 27 May'` — short weekday + day-of-month
+ * (no zero-padding) + 3-letter month. Locale-deterministic; exposes as
+ * `_` so unit tests can assert the format directly (D-56).
+ *
+ * @param {string} ymd YYYY-MM-DD
+ * @returns {string}
+ */
+export function _formatTodayDate(ymd) {
+  const d = parseLocalYMD(ymd);
+  return `${WEEKDAY_SHORT[d.getDay()]} ${d.getDate()} ${MONTH_SHORT[d.getMonth()]}`;
+}
+
+/**
+ * Build the Today header description: `<header class="today-header">` containing
+ * the `<h1 data-app-title>Habits</h1>`, a `<span class="today-date">` carrying
+ * the formatted date (D-56), and a `<span class="today-wave">` carrying the
+ * wave name (or empty when `wave` is null for layout stability).
+ *
+ * The `data-app-title` attribute on the h1 preserves the long-press
+ * diagnostics hook (D-02) so the title remains the gesture target after
+ * the header is rebuilt on every Today render.
+ *
+ * @param {{ date: string, wave: { number: number, name: string, startDate: string, theme?: string } | null }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildTodayHeader({ date, wave }) {
+  return {
+    tag: 'header',
+    attrs: { class: 'today-header' },
+    children: [
+      { tag: 'h1', attrs: { 'data-app-title': '' }, text: 'Habits' },
+      { tag: 'span', attrs: { class: 'today-date' }, text: _formatTodayDate(date) },
+      { tag: 'span', attrs: { class: 'today-wave' }, text: wave?.name ?? '' },
+    ],
+  };
+}
+
+/**
+ * Build the footer-nav description: a `<nav>` with three anchors —
+ * `#today`, `#history`, `#settings` (in that visual order).
+ *
+ * The active link (matching `activeHash`) carries `aria-current="page"`.
+ * The history link is ALWAYS visible-but-disabled (D-80) — carries
+ * `aria-disabled="true"`, `tabindex="-1"`, and a `title="Coming in Phase 4"`
+ * tooltip.
+ *
+ * @param {{ activeHash: string }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildFooterNav({ activeHash }) {
+  const linkDefs = [
+    { href: '#today', text: 'today' },
+    { href: '#history', text: 'history', disabled: true },
+    { href: '#settings', text: 'settings' },
+  ];
+
+  return {
+    tag: 'nav',
+    attrs: { class: 'today-footer-nav', 'aria-label': 'Primary navigation' },
+    children: linkDefs.map((link) => {
+      /** @type {Record<string, string>} */
+      const attrs = { href: link.href };
+      if (link.href === activeHash) attrs['aria-current'] = 'page';
+      if (link.disabled) {
+        attrs['aria-disabled'] = 'true';
+        attrs['tabindex'] = '-1';
+        attrs['title'] = 'Coming in Phase 4';
+      }
+      return { tag: 'a', attrs, text: link.text };
+    }),
+  };
+}
+
+/**
+ * Build a single Today row description: `<li class="today-row[ today-row--completed]">`
+ * containing a tap `<button class="today-row-tap" aria-pressed=... data-action=...>`
+ * plus an optional ⓘ disclosure `<button>` when `habit.name_pl` is truthy.
+ *
+ * - Uncompleted: button has `aria-pressed="false"`, `data-action="markComplete"`,
+ *   and a `<span class="today-row-name">` with `habit.name`.
+ * - Completed: button has `aria-pressed="true"`, `data-action="markUncomplete"`,
+ *   a `<span class="today-row-glyph">✓</span>`, and a `<span class="today-row-name today-row-name--completed">`
+ *   with `habit.name` (strikethrough class) per D-54.
+ *
+ * The ⓘ disclosure button (D-55, D-79) — `aria-label="Show original Polish name"`,
+ * `aria-expanded="false"`, `data-action="togglePolish"` — is omitted entirely
+ * when `name_pl` is null/undefined; the slot is not reserved.
+ *
+ * Tap wiring (closures bound to `data-action`) lands in Slice 3; this slice
+ * emits the attributes but the action map at mount time is empty.
+ *
+ * @param {{ habit: { id: string, name: string, name_pl?: string | null }, completed: boolean }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildTodayRow({ habit, completed }) {
+  /** @type {object[]} */
+  const tapChildren = [];
+  if (completed) {
+    tapChildren.push({
+      tag: 'span',
+      attrs: { class: 'today-row-glyph' },
+      text: '✓',
+    });
+    tapChildren.push({
+      tag: 'span',
+      attrs: { class: 'today-row-name today-row-name--completed' },
+      text: habit.name,
+    });
+  } else {
+    tapChildren.push({
+      tag: 'span',
+      attrs: { class: 'today-row-name' },
+      text: habit.name,
+    });
+  }
+
+  const tapBtn = {
+    tag: 'button',
+    attrs: {
+      class: 'today-row-tap',
+      'aria-pressed': completed ? 'true' : 'false',
+      'data-action': completed ? 'markUncomplete' : 'markComplete',
+      'data-habit-id': habit.id,
+    },
+    children: tapChildren,
+  };
+
+  /** @type {object[]} */
+  const rowChildren = [tapBtn];
+
+  if (habit.name_pl) {
+    rowChildren.push({
+      tag: 'button',
+      attrs: {
+        class: 'today-row-info',
+        'aria-label': 'Show original Polish name',
+        'aria-expanded': 'false',
+        'data-action': 'togglePolish',
+        'data-habit-id': habit.id,
+      },
+      text: 'ⓘ',
+    });
+  }
+
+  return {
+    tag: 'li',
+    attrs: { class: completed ? 'today-row today-row--completed' : 'today-row' },
+    children: rowChildren,
+  };
+}
+
+/**
+ * Build the Today list description. Three branches per D-58:
+ *
+ *   1. Zero applicable habits → `<div class="today-empty">No habits scheduled today.</div>`
+ *   2. All applicable habits completed → `<div class="today-empty today-empty--done">`
+ *      with "All done today — see you tomorrow." + "N of N" counter.
+ *   3. Otherwise → `<ul class="today-list" aria-label="Today's habits">` with one
+ *      `buildTodayRow` per habit.
+ *
+ * `habits` for the list branch is `Array<{habit, completed}>`. The empty /
+ * all-done branches use `totalApplicable` for the counter copy.
+ *
+ * @param {{ habits: Array<{habit: object, completed: boolean}>, allCompleted?: boolean, totalApplicable?: number }} args
+ * @returns {{ tag: string, attrs: object, text?: string, children?: object[] }}
+ */
+export function buildTodayList({ habits, allCompleted = false, totalApplicable = 0 }) {
+  if (habits.length === 0 && !allCompleted) {
+    return {
+      tag: 'div',
+      attrs: { class: 'today-empty' },
+      text: 'No habits scheduled today.',
+    };
+  }
+  if (habits.length === 0 && allCompleted) {
+    return {
+      tag: 'div',
+      attrs: { class: 'today-empty today-empty--done' },
+      children: [
+        { tag: 'p', text: 'All done today — see you tomorrow.' },
+        {
+          tag: 'p',
+          attrs: { class: 'today-counter' },
+          text: `${totalApplicable} of ${totalApplicable}`,
+        },
+      ],
+    };
+  }
+  return {
+    tag: 'ul',
+    attrs: { class: 'today-list', 'aria-label': "Today's habits" },
+    children: habits.map(({ habit, completed }) => buildTodayRow({ habit, completed })),
+  };
+}
