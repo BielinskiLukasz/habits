@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 03 plan 03-05 complete — Settings v1 live with 5 cards + setSetting chokepoint + 2nd undo surface; 275 tests green
-last_updated: "2026-05-28T13:30:00Z"
-last_activity: 2026-05-28 -- Plan 03-05 complete (mountSettings + setSetting handler + 5 builders + cross-tab D-72 refresh; SETTINGS-04/05/PWA-07 done)
+stopped_at: Phase 03 plan 03-06 complete — Phase 3 shippable; SW SHELL extended with 11 P3 files, APP_VERSION 0.2.0 → 0.3.0, README + VERSIONING release notes; 279 tests green; ready for /gsd-verify-work 3
+last_updated: "2026-05-28T14:00:00Z"
+last_activity: 2026-05-28 -- Plan 03-06 complete (SHELL coverage regression guard + APP_VERSION bump + docs; Phase 3 closeout)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 11
-  percent: 42
+  completed_plans: 12
+  percent: 46
 ---
 
 # Project State
@@ -25,32 +25,31 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING
+Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING (closeout shipped — ready for UAT)
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: 6 of 6 (03-01..03-05 complete; 03-06 closeout next — APP_VERSION bump + SW SHELL append + docs)
-Status: Executing Phase 03 — Slice 5 (Settings v1) landed
-Last activity: 2026-05-28 -- Plan 03-05 complete (Settings v1 — 5 cards + setSetting chokepoint + cross-tab D-72 refresh; SETTINGS-04/05/PWA-07 done)
+Plan: 6 of 6 — ALL P3 plans shipped; awaiting `/gsd-verify-work 3` UAT
+Status: Phase 3 implementation complete; closeout done; APP_VERSION = 0.3.0
+Last activity: 2026-05-28 -- Plan 03-06 complete (SHELL coverage regression guard + APP_VERSION bump + docs; Phase 3 closeout)
 
-Progress: [██████████████████░░░░░░░░░░░░] 42% (11 of 26 phase+plan slots; Phase 3 plans 1+2+3+4+5 of 6 shipped)
+Progress: [████████████████████░░░░░░░░░░] 46% (12 of 26 phase+plan slots; Phase 3 plans 1+2+3+4+5+6 of 6 shipped)
 
 ## Resume Instructions
 
-**Plan 03-05 shipped** — Settings v1 is live with 5 cards + 2nd undo surface + setSetting through the chokepoint:
+**Plan 03-06 shipped** — Phase 3 is shippable end-to-end:
 
-- `js/state/apply/setSetting.js` — `handleSetSetting` (D-75) writes a settings row through the chokepoint; inverse captures prior value (self-inverting per D-43); first-ever write captures `undefined` (acceptable — hydrate treats as "no override"); `broadcastKeys` returns `{key}` only (Pitfall 8). HANDLERS table extended with `setSetting: handleSetSetting`.
-- `js/views/settings/builders.js` — 5 pure builders (Pattern S8): `buildStorageCard` (D-62) / `buildScheduleCard` (D-63) / `buildInstallCard` (D-64, PWA-07) / `buildDataCard` (D-65) / `buildAboutCard` (D-66). Every card wrapper has `aria-labelledby` paired to an `<h2>` id (D-79).
-- `js/views/settings.js` — `mountSettings(parent, {repo, store})` + `_resetSettingsForTest`. Composes 5 cards in locked top-down order (D-61); subscribes to `store.notify` for D-72 live refresh of Schedule + Data cards via `replaceCardChildren` (clearChildren + mount loop, NO `.innerHTML`); wires action closures (requestPersistence / setWeekStart / undoLastAction / resetData). setWeekStart dispatches through `apply()` (D-75 chokepoint discipline — no `repo.putSetting`). Reset confirm uses D-67 SETTINGS-flavored prose, NOT D-06 diagnostics text.
-- `css/settings.css` — 5-card flat layout + destructive treatment (NFR-07 — color + text + button shape, never color alone). `@import` line added to `css/main.css`.
-- `index.html` — `<section data-route="settings">` gained pre-mounted `<h1 tabindex="-1">Settings</h1>` so router focus has a target before mountSettings finishes.
-- `js/main.js` — `#settings` route swaps the empty-panel stub for the real `mountSettings(settingsPanel, {repo, store})` call.
-- 249 → 275 tests green (+26: 6 setSetting integration + 15 builder unit + 4 mount integration + 1 cross-tab D-72 refresh).
+- `sw.js` SHELL extended by 11 P3 files per D-81: `./js/router.js`, `./js/views/today.js`, `./js/views/today/builders.js`, `./js/views/settings.js`, `./js/views/settings/builders.js`, `./js/domain/cadence.js`, `./js/domain/wave.js`, `./js/util/mount.js`, `./js/state/apply/markUncompleted.js`, `./js/state/apply/setSetting.js`, `./css/settings.css`. `seed/waves.json` stays out of SHELL (SWR exception).
+- `APP_VERSION` bumped `0.2.0` → `0.3.0` in `js/util/version.js` (D-28 MINOR-on-phase-completion). Cache auto-derives to `habits-0.3.0`; activate handler deletes the prior cache; existing D-08 update-toast fires for users still on 0.2.0.
+- `tests/integration/sw.shell.test.js` — 4 regression-guard tests: P2 baseline preserved, P3 required present, `seed/waves.json` NOT in SHELL (SWR exception), every SHELL entry resolves to a real file on disk (T-03-41).
+- `README.md` — new "Version history" section listing v0.1.0 / v0.2.0 / v0.3.0 with one-line summaries.
+- `VERSIONING.md` — new "Release history" section with v0.3.0 entry (what shipped + bump rationale + cache invalidation + D-decision range D-48..D-81); back-filled v0.1.0 and v0.2.0 entries.
+- 275 → 279 tests green (+4 new SHELL coverage tests).
 
-SETTINGS-04 / SETTINGS-05 / PWA-07 functionally complete. UNDO-01 has its 2nd surface (Data card Undo).
+All 17 in-scope P3 requirements (CORE-01..06, LOG-01, UNDO-01..03, SETTINGS-04, SETTINGS-05, PWA-07, NFR-01, NFR-02, NFR-06, NFR-07) are functionally complete.
 
 Next steps in order:
 
-1. `/gsd-execute-phase 3` (plan 03-06) — closeout: SW SHELL precache append per D-81 (`js/views/settings.js`, `js/views/settings/builders.js`, `js/state/apply/setSetting.js`, `css/settings.css`) + APP_VERSION bump 0.2.0 → 0.3.0 + docs.
-2. `/gsd-verify-work 3` — UAT after the whole phase ships.
+1. `/gsd-verify-work 3` — UAT against the 5 ROADMAP Phase 3 success criteria. Open `node scripts/serve.js` + `http://localhost:8080/`; verify tap → toast → undo → settings flow end-to-end.
+2. After UAT signs off: begin Phase 4 planning (Domain Model: cadence engine full surface, catalog CRUD, stages, mastery, multi-occurrence logging, history navigation, wave aggregates).
 
 Open follow-up (docs drift, non-blocking):
 
@@ -71,8 +70,9 @@ Open follow-up (docs drift, non-blocking):
 | P3-3 | 03-03 | ✓ Complete | Tap-to-log: `js/state/apply/markUncompleted.js` (D-74 handler + D-52 shared invariant) + `js/state/apply/markCompleted.js` rewired + `js/state/apply.js` (HANDLERS + notify DI) + `js/state/store.js` async notify w/ refresh + `js/db/repo.js` getLogsByHabit + `js/views/today.js` tap closures + optimisticFlip + revertRow; 6 atomic commits (3 test + 3 feat); 209 → 232 tests green |
 | P3-4 | 03-04 | ✓ Complete | Undo toast surface: `js/views/toast.js` extended (`_showToast` internal helper + `showUndoToast` D-69/D-70/D-71 + `showErrorToast` D-73 + `_resetToastForTest`; `showUpdateToast` STRUCTURALLY preserves D-08 by delegating WITHOUT autoDismissMs) + `js/views/today.js` wires both onto tap success/reject (console.warn placeholder REMOVED) + `tests/integration/today.tap.test.js` Rule 1 fix for ambient globalThis.document + `.remove()` on fake elements; 4 atomic commits (2 test + 2 feat); 232 → 249 tests green |
 | P3-5 | 03-05 | ✓ Complete | Settings v1: `js/state/apply/setSetting.js` (D-75 self-inverting chokepoint handler) + `js/state/apply.js` HANDLERS extension + `js/views/settings/builders.js` (5 pure builders) + `js/views/settings.js` (mountSettings composes 5 cards, subscribes to D-72 notify, wires action closures through apply/undo) + `css/settings.css` + `css/main.css` @import + `index.html` h1 slot + `js/main.js` route function; 6 atomic commits (3 test + 3 feat); 249 → 275 tests green |
+| P3-6 | 03-06 | ✓ Complete | Phase 3 closeout: `tests/integration/sw.shell.test.js` (D-81 SHELL coverage regression guard — P2 baseline + P3 required + SWR exception + on-disk existence) + `sw.js` SHELL +11 entries + `js/util/version.js` APP_VERSION 0.2.0 → 0.3.0 (D-28) + `README.md` Version history section + `VERSIONING.md` Release history section (v0.3.0 + back-filled v0.1.0/v0.2.0); 3 atomic commits (1 test + 1 feat + 1 docs); 275 → 279 tests green |
 
-Test suite: **275/275 green** at HEAD `656114e`.
+Test suite: **279/279 green** at HEAD `75a3638`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 
@@ -86,9 +86,9 @@ Phase 2 inherits the conventions locked during Phase 1:
 
 **Velocity:**
 
-- Total plans completed (since metric tracking began): 5
-- Average duration: 40 min
-- Total execution time: ~200 min
+- Total plans completed (since metric tracking began): 6
+- Average duration: ~36 min
+- Total execution time: ~215 min
 
 **By Phase:**
 
@@ -96,19 +96,20 @@ Phase 2 inherits the conventions locked during Phase 1:
 |-------|-------|-------|----------|
 | 1. PWA Shell & Tooling Hygiene | 5 | — | — |
 | 2. Storage Foundation | 0 | — | — |
-| 3. Today View & Settings v1 | 5 | 200m | 40m |
+| 3. Today View & Settings v1 | 6 | 215m | ~36m |
 | 4. Domain Model | 0 | — | — |
 | 5. Backup & Restore | 0 | — | — |
 | 6. Desktop Analytics & Scoring | 0 | — | — |
 
 **Recent Trend:**
 
-- Last plan: 03-05 — 35 min, 3 tasks, 11 files (3 new code + 1 new CSS + 3 new tests + 4 modified), 26 new tests, 6 atomic commits. One Rule 1 deviation: 2-microtask settle in settings.dataCard.test.js because store.notify doesn't await subscriber-returned Promises (production behavior unchanged).
+- Last plan: 03-06 — 15 min, 3 tasks, 5 files (1 new test + 1 SW edit + 1 version edit + 2 docs), 4 new tests, 3 atomic commits (T1 TDD + T2 GREEN/feat + T3 docs). No deviations.
+- Prior plan: 03-05 — 35 min, 3 tasks, 11 files, 26 new tests, 6 atomic commits.
 - Prior plan: 03-04 — 40 min, 2 tasks, 5 files, 17 new tests, 4 atomic commits.
 - Prior plan: 03-03 — 70 min, 3 tasks, 11 files, 23 new tests, 6 atomic commits (notify DI seam — Pitfall 9 variant)
 - Prior plan: 03-02 — 22 min, 4 tasks, 9 files, 35 new tests, 6 atomic commits
 - Prior plan: 03-01 — 33 min, 5 tasks, 12 files, 74 new tests, 10 atomic commits
-- Trend: TDD per-task (RED → GREEN) holding clean across all 5 phase-3 plans.
+- Trend: TDD per-task (RED → GREEN) holding clean across all 6 phase-3 plans. Closeout (03-06) was the lightest plan of the phase at 15 min.
 
 *Updated after each plan completion*
 
@@ -175,6 +176,13 @@ Locked during Phase 3 plan 03-04 execution (2026-05-28):
 - Graceful `(habit)` fallback on `getCachedHabits().find(...)` returning undefined (e.g. habit archived cross-tab during the tap). No throw; the success toast still renders.
 - `tests/integration/today.tap.test.js` gained an ambient `globalThis.document` proxy (per-test setter `setAmbientDoc(bundle)`) so toast.js's `document.body.appendChild` can mount into the test's fake-doc body. This pattern carries forward to Settings integration tests in 03-05 — view + toast pairs need it; pure-builder unit tests do not. The alternative (refactor toast.js to accept a `document` argument) would break the production single-import shape used by every other caller.
 
+Locked during Phase 3 plan 03-06 execution (2026-05-28):
+
+- `tests/integration/sw.shell.test.js`'s `P3_REQUIRED` list is HARD-CODED, not auto-derived. The planner explicitly accepts the maintenance burden of extending the list each phase. Auto-derivation from a `git diff` against the prior phase HEAD would lose the value of the test — which is to catch the *human* slip of forgetting to register a file in SHELL. The locked list IS the discipline. P4 closeout MUST add a `P4_REQUIRED` list (or extend `P3_REQUIRED` — naming TBD) when it introduces new shell-asset files.
+- The SHELL extraction regex inside `sw.shell.test.js` does NOT support block comments (`/* … */`) inside the SHELL array — only line-style comments. The current `sw.js` SHELL uses only line comments, so this is acceptable. Documented in the parser's JSDoc inside the test file.
+- VERSIONING.md gains a centralized "Release history" section in this plan. Prior phases mentioned bumps in their SUMMARY.md and ROADMAP.md but no central release log existed. Back-filled v0.1.0 and v0.2.0 entries at the same time as adding v0.3.0 to keep the timeline coherent.
+- README.md's new "Version history" section is intentionally 3 lines + a pointer to VERSIONING.md. Detailed prose lives in VERSIONING.md; README stays a quick reference.
+
 Locked during Phase 3 plan 03-05 execution (2026-05-28):
 
 - `setSetting` is self-inverting given the prior value. The handler returns `inverse: {type:'setSetting', payload:{key, value: prior?.value}}`. First-ever write captures `value: undefined`. Undo of the first-ever weekStart write injects `{key:'weekStart', value: undefined}` which the cache hydrate path treats as "no override — fall back to default". Acceptable per D-75 `<specifics>` line 198; documented inline.
@@ -202,6 +210,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-28T13:30:00Z
-Stopped at: Plan 03-05 complete — Settings v1 is live with 5 cards (Storage / Schedule / Install / Data / About in D-61 locked order) + setSetting chokepoint handler (D-75) + cross-tab D-72 refresh on the Data card. SETTINGS-04 / SETTINGS-05 / PWA-07 functionally complete; UNDO-01 has its 2nd surface (Data card Undo button). 275 tests green at HEAD `656114e`. Next: plan 03-06 (closeout — SW SHELL precache append per D-81 for the new files + APP_VERSION bump 0.2.0 → 0.3.0 + docs).
-Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/ (06-PLAN.md when planner generates it)
+Last session: 2026-05-28T14:00:00Z
+Stopped at: Plan 03-06 complete — Phase 3 closeout shipped. SW SHELL list extended with 11 P3 files (D-81); APP_VERSION bumped 0.2.0 → 0.3.0 (D-28); README + VERSIONING.md release notes added; new `tests/integration/sw.shell.test.js` regression-guard test added (4 tests: P2 baseline + P3 required + SWR exception + on-disk existence). 279 tests green at HEAD `75a3638`. All 6 Phase 3 plans complete. Next: `/gsd-verify-work 3` UAT against the 5 ROADMAP Phase 3 success criteria.
+Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-06-SUMMARY.md
