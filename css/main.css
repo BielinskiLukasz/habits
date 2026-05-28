@@ -24,3 +24,4 @@
 @import url("./base.css")       layer(base);
 @import url("./components.css") layer(components);
 @import url("./today.css")      layer(view);
+@import url("./settings.css")   layer(view);

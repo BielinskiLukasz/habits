@@ -59,6 +59,8 @@ import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 // P3 router + Today view wiring (D-60, CORE-01..06).
 import { mountRoutes } from './router.js';
 import { mountToday, mountFooterNav } from './views/today.js';
+import { mountSettings } from './views/settings.js';
+import * as store from './state/store.js';
 import { configureWave, bootWaves } from './domain/wave.js';
 
 registerServiceWorker();
@@ -132,8 +134,11 @@ mountRoutes({
       focusH1(todayPanel);
     },
     '#settings': () => {
-      // Settings view ships in Slice 4 (plan 03-05). For now, show the empty
-      // panel so the route is reachable + the focus management is exercised.
+      // Settings v1 (Phase 03 plan 05) — 5 cards: Storage / Schedule /
+      // Install / Data / About (D-61). mountSettings appends the panel into
+      // the existing <section data-route="settings"> (which carries the
+      // pre-mounted <h1 tabindex="-1">Settings</h1> for router focus per D-79).
+      mountSettings(settingsPanel, { repo, store });
       show(settingsPanel);
       focusH1(settingsPanel);
     },

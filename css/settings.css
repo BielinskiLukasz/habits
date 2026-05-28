@@ -1,0 +1,87 @@
+/* css/settings.css — Settings panel flat-card layout (D-61, Phase 3 plan 05).
+ *
+ * Five cards top-down by importance: Storage → Schedule → Install → Data →
+ * About (D-61). No collapsible / sub-tabs in v1.
+ *
+ * Reuses existing `.panel` / `.toast` primitives from `components.css`; the
+ * card-specific tokens (border, surface, radius) come from `tokens.css`.
+ *
+ * Destructive treatment (NFR-07): `.settings-card--destructive` pairs color
+ * with a glyph + text label — never color alone. The button still reads
+ * "Request persistence" / "Reset data" so a screen reader picks up the
+ * semantic affordance.
+ */
+
+@layer view {
+  .settings-panel {
+    padding: var(--space-4);
+  }
+
+  .settings-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+
+  .settings-card h2 {
+    margin: 0 0 var(--space-3);
+    font-size: 1.05rem;
+  }
+
+  .settings-card h3 {
+    margin: var(--space-3) 0 var(--space-2);
+    font-size: 0.95rem;
+  }
+
+  .settings-card dl {
+    margin: 0 0 var(--space-2);
+  }
+
+  .settings-card dt {
+    font-weight: 500;
+    margin-top: var(--space-2);
+  }
+
+  .settings-card dd {
+    margin: 0 0 var(--space-2) 0;
+  }
+
+  .settings-radio-group {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .settings-radio-group legend {
+    font-weight: 500;
+    margin-bottom: var(--space-2);
+  }
+
+  .settings-radio-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-right: var(--space-3);
+    min-height: 44px;
+  }
+
+  .settings-data-undo {
+    margin-bottom: var(--space-3);
+  }
+
+  /* Destructive affordance (NFR-07). Color + text + button shape — never
+   * color alone. The Reset button reads "Reset data" so screen-reader users
+   * get the same affordance sighted users get. */
+  .settings-card--destructive button {
+    color: var(--color-danger, #c0392b);
+    border: 1px solid var(--color-danger, #c0392b);
+    background: transparent;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md, 0.25rem);
+    min-height: 44px;
+    cursor: pointer;
+    font: inherit;
+  }
+}

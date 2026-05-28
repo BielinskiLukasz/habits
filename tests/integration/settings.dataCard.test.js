@@ -287,6 +287,11 @@ describe('Settings Data card — live refresh on cross-tab broadcast (D-72)', ()
 
     // Fire the same notify shape that sync.js's broadcast-receive path uses.
     await store.notify({ event: 'markCompleted', keys: { habitId: 'h1', date: today } });
+    // The Settings subscriber kicks off an async readDataCardInputs() that
+    // is fire-and-forget from notify's perspective. Settle the microtask
+    // queue so the inner repo lookups + DOM swap complete before assertions.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // After the notify-driven refresh + subscribe fan-out, the Data card
     // preview should reflect the new undoToken — verb+habit copy via D-71.
