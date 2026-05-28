@@ -18,10 +18,30 @@
  *   - Completed habits sort LAST per D-54 (muted treatment).
  *   - Three list branches per D-58: empty / all-done / normal.
  *
- * Tap wiring (markComplete / markUncomplete / togglePolish) is intentionally
- * NOT wired in Slice 2 — `data-action` attributes are emitted by builders
- * and the `mount()` actions map is empty here. Slice 3 (plan 03-03) binds
- * the closures.
+ * Tap wiring (Phase 03 plan 03, D-53, NFR-02):
+ *   - `markComplete` / `markUncomplete` closures are passed to `mount()`'s
+ *     `actions` map. When the user taps a row, the corresponding closure:
+ *       1. Captures the row's prior `aria-pressed` / `className` /
+ *          `data-action` (closure-bound, NOT global) for the revert path.
+ *       2. Calls `optimisticFlip(rowEl, 'completed'|'uncompleted')` —
+ *          mutates the DOM SYNCHRONOUSLY so the user sees the flip in one
+ *          animation frame (NFR-02 <100 ms).
+ *       3. `await apply({type: 'markCompleted'|'markUncompleted',
+ *          payload: {habitId, date}})`. The chokepoint writes the log row
+ *          + D-52 invariant inside one tx, then `notify({event, keys})`
+ *          re-hydrates the cache and fans out to subscribers — our
+ *          `store.subscribe(render)` closure re-renders against canonical
+ *          state.
+ *       4. On `apply()` reject → `revertRow(rowEl, priorState)` synchronously
+ *          restores the prior DOM (the next `store.subscribe` re-render
+ *          rebuilds the row from cache, but revertRow is the immediate
+ *          rollback). Error toast lands in Slice 4 — Slice 3 logs via
+ *          `console.warn` (see in-code comment).
+ *
+ * Polish-toggle (`togglePolish`) tap wiring also lands in a future slice —
+ * builders emit the `data-action` attribute but the action map omits it
+ * here (mount() simply doesn't wire the listener when the closure is
+ * absent).
  *
  * `clearChildren` loops `removeChild` instead of `parent.innerHTML = ''`
  * to honor D-78 (the discipline grep gate). The same loop is the only safe
@@ -43,6 +63,7 @@ import { mount } from '../util/mount.js';
 import { currentWave } from '../domain/wave.js';
 import { appliesToday } from '../domain/cadence.js';
 import { todayLocal } from '../util/date.js';
+import { apply } from '../state/apply.js';
 import {
   subscribe,
   getCachedHabits,
@@ -65,8 +86,132 @@ function clearChildren(parent) {
 }
 
 /**
+ * Capture the prior state of a row before the optimistic flip. Used by
+ * `revertRow` on `apply()` reject (D-53).
+ *
+ * @param {object} rowEl
+ * @returns {{ className: string, ariaPressed: string|null, dataAction: string|null }}
+ */
+function captureRowPriorState(rowEl) {
+  const tapBtn = rowEl.querySelector('.today-row-tap');
+  return {
+    className: rowEl.className,
+    ariaPressed: tapBtn ? tapBtn.getAttribute('aria-pressed') : null,
+    dataAction: tapBtn ? tapBtn.getAttribute('data-action') : null,
+  };
+}
+
+/**
+ * Mutate a row's DOM synchronously to reflect the post-tap state, BEFORE
+ * `apply()` resolves (NFR-02 <100 ms; D-53).
+ *
+ * - `'completed'` → add `today-row--completed` class, set `aria-pressed=true`,
+ *   set `data-action="markUncomplete"`.
+ * - `'uncompleted'` → remove the class, set `aria-pressed=false`, set
+ *   `data-action="markComplete"`.
+ *
+ * The glyph + strikethrough DOM structure is NOT precisely tracked here —
+ * `store.subscribe(render)` will rebuild the row from canonical state after
+ * `notify()` fires. The aria + class + data-action changes are what carry
+ * the visible state until then.
+ *
+ * @param {object} rowEl
+ * @param {'completed'|'uncompleted'} to
+ * @returns {void}
+ */
+function optimisticFlip(rowEl, to) {
+  const tapBtn = rowEl.querySelector('.today-row-tap');
+  if (!tapBtn) return;
+  if (to === 'completed') {
+    rowEl.classList.add('today-row--completed');
+    tapBtn.setAttribute('aria-pressed', 'true');
+    tapBtn.setAttribute('data-action', 'markUncomplete');
+  } else {
+    rowEl.classList.remove('today-row--completed');
+    tapBtn.setAttribute('aria-pressed', 'false');
+    tapBtn.setAttribute('data-action', 'markComplete');
+  }
+}
+
+/**
+ * Restore the row to its prior state after `apply()` rejects (D-53). The
+ * subsequent `store.subscribe(render)` re-render — which has no fresh
+ * mutation to react to in this error path — does NOT fire on its own, so
+ * `revertRow` is the only thing that returns the DOM to a sane state.
+ *
+ * @param {object} rowEl
+ * @param {{ className: string, ariaPressed: string|null, dataAction: string|null }} priorState
+ * @returns {void}
+ */
+function revertRow(rowEl, priorState) {
+  rowEl.className = priorState.className;
+  const tapBtn = rowEl.querySelector('.today-row-tap');
+  if (!tapBtn) return;
+  if (priorState.ariaPressed !== null) {
+    tapBtn.setAttribute('aria-pressed', priorState.ariaPressed);
+  }
+  if (priorState.dataAction !== null) {
+    tapBtn.setAttribute('data-action', priorState.dataAction);
+  }
+}
+
+/**
+ * `markComplete` tap closure — the row's data-action="markComplete" → click
+ * listener that mount() wires onto the tap button.
+ *
+ * Synchronous portion (NFR-02): capture prior + optimisticFlip BEFORE the
+ * first `await`. The async portion (await apply) dispatches through the
+ * chokepoint; on reject we revertRow.
+ *
+ * @param {object} evt — fake/real click event carrying `currentTarget`
+ * @returns {Promise<void>}
+ */
+async function handleMarkCompleteTap(evt) {
+  const tapBtn = evt.currentTarget;
+  const rowEl = tapBtn.closest('.today-row');
+  if (!rowEl) return;
+  const habitId = tapBtn.getAttribute('data-habit-id');
+  const date = todayLocal();
+  const priorState = captureRowPriorState(rowEl);
+  optimisticFlip(rowEl, 'completed');
+  try {
+    await apply({ type: 'markCompleted', payload: { habitId, date } });
+  } catch (err) {
+    revertRow(rowEl, priorState);
+    // 03-04: replace with showErrorToast("Couldn't mark — try again").
+    // eslint-disable-next-line no-console
+    console.warn('[today] markCompleted failed', err);
+  }
+}
+
+/**
+ * `markUncomplete` tap closure — symmetric inverse of handleMarkCompleteTap.
+ *
+ * @param {object} evt
+ * @returns {Promise<void>}
+ */
+async function handleMarkUncompleteTap(evt) {
+  const tapBtn = evt.currentTarget;
+  const rowEl = tapBtn.closest('.today-row');
+  if (!rowEl) return;
+  const habitId = tapBtn.getAttribute('data-habit-id');
+  const date = todayLocal();
+  const priorState = captureRowPriorState(rowEl);
+  optimisticFlip(rowEl, 'uncompleted');
+  try {
+    await apply({ type: 'markUncompleted', payload: { habitId, date } });
+  } catch (err) {
+    revertRow(rowEl, priorState);
+    // 03-04: replace with showErrorToast("Couldn't unmark — try again").
+    // eslint-disable-next-line no-console
+    console.warn('[today] markUncompleted failed', err);
+  }
+}
+
+/**
  * Render the Today panel into `parent`. Pure-ish: reads cache via store
- * selectors, builds the description tree, and walks it via `mount()`.
+ * selectors, builds the description tree, and walks it via `mount()` with
+ * the tap-action closures bound.
  *
  * @param {object} parent
  * @returns {void}
@@ -77,8 +222,15 @@ function renderTodayInto(parent) {
   const date = todayLocal();
   const wave = currentWave(date);
 
+  /** @type {Record<string, (e: object) => void>} */
+  const actions = {
+    markComplete: handleMarkCompleteTap,
+    markUncomplete: handleMarkUncompleteTap,
+    // togglePolish: bound in a future slice (D-55 inline popover lives there).
+  };
+
   // Header — date + wave.
-  mount(buildTodayHeader({ date, wave }), parent, {});
+  mount(buildTodayHeader({ date, wave }), parent, actions);
 
   // Cadence-filter the active habits.
   const weekStart = getCachedWeekStart();
@@ -105,7 +257,7 @@ function renderTodayInto(parent) {
     mount(
       buildTodayList({ habits: [], allCompleted: false, totalApplicable: 0 }),
       parent,
-      {},
+      actions,
     );
   } else if (uncompleted.length === 0) {
     mount(
@@ -115,10 +267,10 @@ function renderTodayInto(parent) {
         totalApplicable: applicable.length,
       }),
       parent,
-      {},
+      actions,
     );
   } else {
-    mount(buildTodayList({ habits: ordered }), parent, {});
+    mount(buildTodayList({ habits: ordered }), parent, actions);
   }
 }
 
@@ -195,3 +347,13 @@ export function mountFooterNav(navEl, activeHash) {
 export function _resetTodayForTest() {
   _unsub = null;
 }
+
+/**
+ * Test-only handles for the tap helpers. Production NEVER imports these —
+ * they're spliced through `mount()` via the actions map.
+ *
+ * @type {(rowEl: object, priorState: object) => void}
+ */
+export const _revertRowForTest = revertRow;
+/** @type {(rowEl: object, to: 'completed'|'uncompleted') => void} */
+export const _optimisticFlipForTest = optimisticFlip;

@@ -288,28 +288,41 @@ describe('Today tap — tap a completed row → flip back + write {completed: fa
     wire({ store, applyMod, undoMod, repo });
 
     const today = todayLocal();
+    // Seed two habits so the all-done branch does not hide our row when h1
+    // renders as completed (D-58).
     await repo.putHabit({
       id: 'h1',
       name: 'Drink water',
       status: 'active',
       cadence: { type: 'daily' },
     });
-    // Pre-seed a completed log so the row renders as completed.
+    await repo.putHabit({
+      id: 'h2',
+      name: 'Stretch',
+      status: 'active',
+      cadence: { type: 'daily' },
+    });
+    // Pre-seed a completed log on h1 so its row renders as completed.
     await repo.putLog({ habitId: 'h1', date: today, completed: true, definitionVersion: null });
     await store.hydrate();
 
     const { body } = createFakeDocument();
     todayMod.mountToday(body);
 
-    const tapBtn = body.querySelector('.today-row-tap');
-    assert.ok(tapBtn, 'tap button rendered');
-    assert.equal(tapBtn.getAttribute('aria-pressed'), 'true', 'starts completed');
-    assert.equal(tapBtn.getAttribute('data-action'), 'markUncomplete');
+    // Find the h1 tap button specifically — completed rows sort LAST per
+    // D-54 so a generic `querySelector('.today-row-tap')` returns h2 (the
+    // uncompleted one).
+    const allTaps = collectAllTapButtons(body);
+    assert.equal(allTaps.length, 2, 'two rows rendered');
+    const h1Tap = allTaps.find((b) => b.getAttribute('data-habit-id') === 'h1');
+    assert.ok(h1Tap, 'h1 tap button rendered');
+    assert.equal(h1Tap.getAttribute('aria-pressed'), 'true', 'h1 starts completed');
+    assert.equal(h1Tap.getAttribute('data-action'), 'markUncomplete');
 
-    tapBtn.click();
+    h1Tap.click();
     // Synchronous optimistic flip back to uncompleted.
-    assert.equal(tapBtn.getAttribute('aria-pressed'), 'false');
-    assert.equal(tapBtn.getAttribute('data-action'), 'markComplete');
+    assert.equal(h1Tap.getAttribute('aria-pressed'), 'false');
+    assert.equal(h1Tap.getAttribute('data-action'), 'markComplete');
 
     // Settle the tx.
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -386,10 +399,18 @@ describe('Today tap — post-tap re-render reconciles via store.subscribe()', ()
     const repo = createFakeRepo();
     wire({ store, applyMod, undoMod, repo });
 
-    const today = todayLocal();
+    // Seed TWO habits so completing one does not trigger the "All done"
+    // empty state (D-58) — we need a row to remain visible so the post-
+    // render reconcile can be observed against canonical state.
     await repo.putHabit({
       id: 'h1',
       name: 'Drink water',
+      status: 'active',
+      cadence: { type: 'daily' },
+    });
+    await repo.putHabit({
+      id: 'h2',
+      name: 'Stretch',
       status: 'active',
       cadence: { type: 'daily' },
     });
@@ -398,24 +419,59 @@ describe('Today tap — post-tap re-render reconciles via store.subscribe()', ()
     const { body } = createFakeDocument();
     todayMod.mountToday(body);
 
-    const tapBtn = body.querySelector('.today-row-tap');
-    tapBtn.click();
+    // Find h1's tap button specifically (BFS picks the first match — both
+    // habits have a tap button; we want the deterministic one).
+    const allTaps = collectAllTapButtons(body);
+    assert.equal(allTaps.length, 2, 'two rows rendered before tap');
+    const h1Tap = allTaps.find((b) => b.getAttribute('data-habit-id') === 'h1');
+    assert.ok(h1Tap, 'h1 tap button found');
+
+    h1Tap.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // After the apply tx + the post-notify re-render fires, the row STILL
+    // After the apply tx + the post-notify re-render fires, h1's row STILL
     // shows the completed treatment because notify() refreshed cache.logs
-    // with the new {completed: true} row.
-    const tapBtnAfter = body.querySelector('.today-row-tap');
-    assert.ok(tapBtnAfter, 'still has a tap button after re-render');
+    // with the new {completed: true} row, and the canonical render places
+    // completed rows last (D-54 sort).
+    const allTapsAfter = collectAllTapButtons(body);
+    assert.equal(allTapsAfter.length, 2, 'two rows still rendered after re-render');
+    const h1TapAfter = allTapsAfter.find((b) => b.getAttribute('data-habit-id') === 'h1');
+    assert.ok(h1TapAfter, 'h1 still has a tap button after re-render');
     assert.equal(
-      tapBtnAfter.getAttribute('aria-pressed'),
+      h1TapAfter.getAttribute('aria-pressed'),
       'true',
-      'post-render row reflects canonical IDB state (completed)',
+      'post-render h1 row reflects canonical IDB state (completed)',
     );
     assert.equal(
-      tapBtnAfter.getAttribute('data-action'),
+      h1TapAfter.getAttribute('data-action'),
       'markUncomplete',
-      'post-render data-action reflects canonical IDB state',
+      'post-render h1 data-action reflects canonical IDB state',
     );
+    // h2 stayed uncompleted.
+    const h2TapAfter = allTapsAfter.find((b) => b.getAttribute('data-habit-id') === 'h2');
+    assert.equal(h2TapAfter.getAttribute('aria-pressed'), 'false');
   });
 });
+
+/**
+ * BFS the fake DOM tree and return every `.today-row-tap` button (not just
+ * the first one). Used to assert per-habit row state when multiple rows
+ * are rendered.
+ */
+function collectAllTapButtons(root) {
+  /** @type {object[]} */
+  const out = [];
+  /** @type {object[]} */
+  const queue = [...(root.children || [])];
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    if (!cur) continue;
+    if (cur.classList && cur.classList.contains && cur.classList.contains('today-row-tap')) {
+      out.push(cur);
+    }
+    if (cur.children) {
+      for (const c of cur.children) queue.push(c);
+    }
+  }
+  return out;
+}
