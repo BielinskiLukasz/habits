@@ -89,7 +89,7 @@ Plans:
 **Plans**: 6 (03-01 .. 03-06; cadence/today/tap-to-log/undo-toast/settings-v1/closeout)
 
 - [x] 03-01-PLAN.md — pure-domain foundations: `js/domain/cadence.js` (4-cadence resolver, D-48..D-51) + `js/domain/wave.js` + `seed/waves.json` (D-56/D-57) + `js/util/mount.js` (D-77) + D-78 grep-gate + 4 new util/date.js helpers + 2 new repo bounded-reads (NFR-01 enabler); 100 → 174 tests green
-- [ ] 03-02-PLAN.md — Today renders (router + view + builders + mount)
+- [x] 03-02-PLAN.md — Today renders: `js/router.js` (hash router with allowlist resolution, D-60/D-80) + `js/views/today/builders.js` (4 pure description-tree builders, D-54..D-58/D-76/D-79) + `js/views/today.js` (mountToday + mountFooterNav with subscribe/unsubscribe) + expanded `js/state/store.js` cache (habits + this-week logs + weekStart, D-52/NFR-01) + 3-section `<section data-route>` shell + 44×44 tap targets (NFR-06); 174 → 209 tests green
 - [ ] 03-03-PLAN.md — tap-to-log (markUncompleted handler + denormalized lastCompletedDate invariant)
 - [ ] 03-04-PLAN.md — undo toast surface (autoDismiss + showErrorToast)
 - [ ] 03-05-PLAN.md — Settings v1 (5 cards) + setSetting handler + History tab placeholder + SW SHELL precache

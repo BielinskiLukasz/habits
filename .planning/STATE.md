@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 03 plan 03-01 complete — cadence + wave + mount + date + repo foundations landed; 174 tests green
-last_updated: "2026-05-28T09:15:28Z"
-last_activity: 2026-05-28 -- Plan 03-01 complete (cadence/wave/mount/date/repo foundations)
+stopped_at: Phase 03 plan 03-02 complete — Today view renders end-to-end; 209 tests green
+last_updated: "2026-05-28T09:46:38Z"
+last_activity: 2026-05-28 -- Plan 03-02 complete (Today view + hash router + builders + store cache)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 7
-  percent: 27
+  completed_plans: 8
+  percent: 31
 ---
 
 # Project State
@@ -27,29 +27,31 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: 2 of 6 (03-01 complete; 03-02 Today renders next)
-Status: Executing Phase 03 — Slice 1 (pure-domain foundations) landed
-Last activity: 2026-05-28 -- Plan 03-01 complete (cadence/wave/mount/date/repo foundations)
+Plan: 3 of 6 (03-01 + 03-02 complete; 03-03 tap-to-log next)
+Status: Executing Phase 03 — Slice 2 (Today renders) landed
+Last activity: 2026-05-28 -- Plan 03-02 complete (Today view + hash router + builders + store cache)
 
-Progress: [████████████░░░░░░░░░░░░░░░░░░] 27% (7 of 26 phase+plan slots; Phase 3 plan 1 of 6 shipped)
+Progress: [█████████████░░░░░░░░░░░░░░░░░] 31% (8 of 26 phase+plan slots; Phase 3 plans 1+2 of 6 shipped)
 
 ## Resume Instructions
 
-**Plan 03-01 shipped** — pure-domain foundations Slice 2 depends on are landed:
+**Plan 03-02 shipped** — Today view renders end-to-end:
 
-- `js/domain/cadence.js` — `appliesToday(habit, date, ctx)` across all 4 cadence types in `seed/habits.json` (D-48/D-49/D-50/D-51)
-- `js/domain/wave.js` + `seed/waves.json` — `currentWave('2026-05-28') === Wave 4` (D-56/D-57)
-- `js/util/mount.js` — single trusted DOM-construction helper (D-77) with D-78 grep-gate lock-in
-- `js/util/date.js` — 4 new helpers (isoWeekStart, isoWeekEnd, daysBetween, formatRelative)
-- `js/db/repo.js` — `getAllHabits` + `getLogsInRange` (NFR-01 single-bounded-read enabler)
-- A7 contract preserved; 174 tests green (was 100).
+- `js/router.js` — hash router with allowlist resolution + idempotent re-mount (D-60, D-80)
+- `js/views/today/builders.js` — 4 pure description-tree builders + `_formatTodayDate` (D-54..D-58, D-79)
+- `js/views/today.js` — `mountToday` (subscribe + render + unmount) + `mountFooterNav`
+- `js/state/store.js` — expanded cache (habits + this-week logs + weekStart) + 4 new selectors (D-52, NFR-01)
+- `index.html` — three `<section data-route>` panels + empty footer-nav
+- `js/main.js` — boot order extended: configureWave + configureStore + bootWaves + mountRoutes
+- `css/today.css` — route-panel framework + today-row states + 44×44 tap targets + aria-current/aria-disabled treatment
+- 174 → 209 tests green (+35 new: 8 router + 19 builders + 8 store-hydrate).
 
-Notable scope borrowing from P4 into P3 already realized: minimal cadence resolver + in-memory wave catalog shipped without a DB_VERSION bump.
+Read-only render in this slice — tap wiring (markComplete / markUncomplete / togglePolish) ships in Slice 3.
 
 Next steps in order:
 
-1. `/gsd-execute-phase 3` (plan 03-02) — Today renders: router + `js/views/today.js` + builder + mount + tests.
-2. Plans 03-03 .. 03-06 per `.planning/phases/03-.../`.
+1. `/gsd-execute-phase 3` (plan 03-03) — tap-to-mark/unmark wiring + `markUncompleted` chokepoint handler.
+2. Plans 03-04 .. 03-06 per `.planning/phases/03-.../`.
 3. `/gsd-verify-work 3` — UAT after the whole phase ships.
 
 Open follow-up (docs drift, non-blocking):
@@ -67,8 +69,9 @@ Open follow-up (docs drift, non-blocking):
 | 5 | 02-05 | ✓ Complete | Reset-data + boot wiring + sw.js SHELL + smoke (4 implementation commits + 1 smoke-fix commit `389b9d9` + SUMMARY); 7/8 smoke items full PASS + item 8 PASS-with-Chromium-caveat |
 | 6 | 02-06 | ✓ Complete | CLAUDE.md / PROJECT.md / README.md doc reversals + ARCHITECTURE.md forward-edits + APP_VERSION 0.1.0 → 0.2.0 + SUMMARY + PHASE-COMPLETION (7 commits, inline on main — worktree agent dropped connection mid-Task-1, see 02-06-SUMMARY.md deviations) |
 | P3-1 | 03-01 | ✓ Complete | Pure-domain foundations: `js/domain/cadence.js` + `js/domain/wave.js` + `seed/waves.json` + `js/util/mount.js` + 4 new util/date.js helpers + 2 new repo methods (`getAllHabits` / `getLogsInRange`) + D-78 grep-gate; 10 atomic commits (5 test + 5 feat); 100 → 174 tests green |
+| P3-2 | 03-02 | ✓ Complete | Today renders: `js/router.js` + `js/views/today.js` + `js/views/today/builders.js` + expanded `js/state/store.js` cache + `index.html` 3-section shell + `js/main.js` router wiring + `css/today.css` extensions; 6 atomic commits (2 test + 4 feat); 174 → 209 tests green |
 
-Test suite: **174/174 green** at HEAD `7a8053b`.
+Test suite: **209/209 green** at HEAD `0c70e5b`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 
@@ -82,9 +85,9 @@ Phase 2 inherits the conventions locked during Phase 1:
 
 **Velocity:**
 
-- Total plans completed (since metric tracking began): 1
-- Average duration: 33 min
-- Total execution time: ~33 min
+- Total plans completed (since metric tracking began): 2
+- Average duration: 27.5 min
+- Total execution time: ~55 min
 
 **By Phase:**
 
@@ -92,15 +95,16 @@ Phase 2 inherits the conventions locked during Phase 1:
 |-------|-------|-------|----------|
 | 1. PWA Shell & Tooling Hygiene | 5 | — | — |
 | 2. Storage Foundation | 0 | — | — |
-| 3. Today View & Settings v1 | 1 | 33m | 33m |
+| 3. Today View & Settings v1 | 2 | 55m | 27.5m |
 | 4. Domain Model | 0 | — | — |
 | 5. Backup & Restore | 0 | — | — |
 | 6. Desktop Analytics & Scoring | 0 | — | — |
 
 **Recent Trend:**
 
-- Last plan: 03-01 — 33 min, 5 tasks, 12 files, 74 new tests, 10 atomic commits
-- Trend: TDD per-task (RED → GREEN) holding clean; no deviations
+- Last plan: 03-02 — 22 min, 4 tasks, 9 files, 35 new tests, 6 atomic commits
+- Prior plan: 03-01 — 33 min, 5 tasks, 12 files, 74 new tests, 10 atomic commits
+- Trend: TDD per-task (RED → GREEN) holding clean; no deviations across both P3 plans.
 
 *Updated after each plan completion*
 
@@ -140,6 +144,16 @@ Locked during Phase 3 plan 03-01 execution (2026-05-28):
 - `appliesToday`'s every-n-days branch returns true when BOTH lastCompletedDate AND createdAt are absent — safe default "never hide for missing anchor."
 - `configureWave({fetch})` uses `hasOwnProperty('fetch')` (presence-overrides-with-value, including null) so test `beforeEach` can reset the prior fetch injection cleanly.
 
+Locked during Phase 3 plan 03-02 execution (2026-05-28):
+
+- Hash router uses allowlist resolution (`routes[hash] ? hash : '#today'`) so spoofed URLs cannot navigate to unsanctioned panels (T-03-06). Unknown hashes fall back to `#today`. file://-safe: `hashchange` instead of `history.pushState`.
+- `mountToday` is idempotent-by-rerender: second call without unmount re-renders against the live parent without registering a duplicate `store.subscribe` listener.
+- `mountFooterNav` writes attributes onto the existing `<nav>` element and mounts only the children of the `buildFooterNav` description, avoiding `<nav>` inside `<nav>`. Builders consistently return a complete description for Tier 1 testability; mounters peel when the outer element pre-exists.
+- Long-press diagnostics attach lives INSIDE the `#today` route function (NOT at module-load). The h1 is rebuilt by `buildTodayHeader` on every Today mount, so re-binding the long-press detector on every route fire is the correct lifecycle.
+- Route panel shell uses HTML `hidden` attribute (NOT a CSS-class toggle). Browsers treat `hidden` as removed from the a11y tree, matching D-79 intent.
+- Store cache extension keeps the compound-key string `"habitId::date"` for `cache.logs` (matches the fake-IDB key shape). New `cache.settings` Map carries `weekStart` and friends.
+- `createFakeWindow` helper co-located in `tests/helpers/fake-document.js` (NOT a sibling `fake-window.js`). Test-DOM helpers stay in one file.
+
 ### Pending Todos
 
 None yet.
@@ -156,6 +170,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-28T09:15:28Z
-Stopped at: Plan 03-01 complete — pure-domain foundations landed (cadence/wave/mount/date/repo); 174 tests green at HEAD `7a8053b`. Next: plan 03-02 (Today renders).
-Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-02-PLAN.md
+Last session: 2026-05-28T09:46:38Z
+Stopped at: Plan 03-02 complete — Today view renders end-to-end (hash router + builders + view mounter + store cache expansion); 209 tests green at HEAD `0c70e5b`. Next: plan 03-03 (tap-to-mark/unmark + markUncompleted handler).
+Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-03-PLAN.md

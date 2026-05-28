@@ -9,12 +9,12 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### CORE — Today view (mobile primary)
 
-- [ ] **CORE-01**: User can open `index.html` on mobile and see today's scheduled habits without delay (cold paint < 300 ms)
+- [x] **CORE-01**: User can open `index.html` on mobile and see today's scheduled habits without delay (cold paint < 300 ms)
 - [ ] **CORE-02**: User can mark a habit complete with a single tap (binary habits)
 - [ ] **CORE-03**: User can unmark a previously-completed habit with a single tap
-- [ ] **CORE-04**: User can see, on Today, only the habits whose cadence rules say they apply today
-- [ ] **CORE-05**: User sees today's date and current wave context displayed on Today
-- [ ] **CORE-06**: Today view renders synchronously from a cached snapshot (no spinner-blocked first paint)
+- [x] **CORE-04**: User can see, on Today, only the habits whose cadence rules say they apply today
+- [x] **CORE-05**: User sees today's date and current wave context displayed on Today
+- [x] **CORE-06**: Today view renders synchronously from a cached snapshot (no spinner-blocked first paint)
 
 ### CATALOG — Habit definitions (desktop primary)
 
@@ -242,12 +242,12 @@ Every v1 requirement maps to exactly one phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01 | Phase 3 | Pending |
+| CORE-01 | Phase 3 | Complete (03-02) |
 | CORE-02 | Phase 3 | Pending |
 | CORE-03 | Phase 3 | Pending |
-| CORE-04 | Phase 3 | Pending |
-| CORE-05 | Phase 3 | Pending |
-| CORE-06 | Phase 3 | Pending |
+| CORE-04 | Phase 3 | Complete (03-02) |
+| CORE-05 | Phase 3 | Complete (03-02) |
+| CORE-06 | Phase 3 | Complete (03-02) |
 | CATALOG-01 | Phase 4 | Pending |
 | CATALOG-02 | Phase 4 | Pending |
 | CATALOG-03 | Phase 4 | Pending |
