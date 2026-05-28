@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 verified — 10/10 UAT passed, ready to plan Phase 3
-last_updated: "2026-05-28T08:27:29.827Z"
-last_activity: 2026-05-28 -- Phase 03 planning complete
+stopped_at: Phase 03 plan 03-01 complete — cadence + wave + mount + date + repo foundations landed; 174 tests green
+last_updated: "2026-05-28T09:15:28Z"
+last_activity: 2026-05-28 -- Plan 03-01 complete (cadence/wave/mount/date/repo foundations)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 6
-  percent: 20
+  completed_plans: 7
+  percent: 27
 ---
 
 # Project State
@@ -21,29 +21,36 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 03 context gathered — ready for `/gsd-plan-phase 3` (Today View & Settings v1)
+**Current focus:** Phase 03 — today-view-settings-v1-first-usable-slice
 
 ## Current Position
 
-Phase: 03 (today-view-&-settings-v1) — CONTEXT GATHERED
+Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: Not started — awaiting `/gsd-plan-phase 3`
-Status: Ready to execute
-Last activity: 2026-05-28 -- Phase 03 planning complete
+Plan: 2 of 6 (03-01 complete; 03-02 Today renders next)
+Status: Executing Phase 03 — Slice 1 (pure-domain foundations) landed
+Last activity: 2026-05-28 -- Plan 03-01 complete (cadence/wave/mount/date/repo foundations)
 
-Progress: [██████████░░░░░░░░░░░░░░░░░░░░] 33% (2 of 6 phases complete; Phase 3 in context-capture state)
+Progress: [████████████░░░░░░░░░░░░░░░░░░] 27% (7 of 26 phase+plan slots; Phase 3 plan 1 of 6 shipped)
 
 ## Resume Instructions
 
-**Phase 03 context is captured.** 34 implementation decisions (D-48..D-81) locked across 11 gray areas: cadence filtering scope, today row interaction model, settings shell + nav, undo surface + behavior, pure-view-builders + testing (D-26 Tier 1), accessibility specifics (NFR-06/07), history tab placeholder, SW SHELL precache, reset-data confirm copy, toast XSS safety, cross-tab Settings refresh.
+**Plan 03-01 shipped** — pure-domain foundations Slice 2 depends on are landed:
 
-Notable scope borrowing from P4 into P3: a minimal `js/domain/cadence.js` resolver (4 cadence types) and an in-memory `js/domain/wave.js` backed by a new `seed/waves.json` — both shipped to honor CORE-04 + CORE-05 on the first usable slice. No DB_VERSION bump; waves stay in-memory until P4 wires user-extensibility.
+- `js/domain/cadence.js` — `appliesToday(habit, date, ctx)` across all 4 cadence types in `seed/habits.json` (D-48/D-49/D-50/D-51)
+- `js/domain/wave.js` + `seed/waves.json` — `currentWave('2026-05-28') === Wave 4` (D-56/D-57)
+- `js/util/mount.js` — single trusted DOM-construction helper (D-77) with D-78 grep-gate lock-in
+- `js/util/date.js` — 4 new helpers (isoWeekStart, isoWeekEnd, daysBetween, formatRelative)
+- `js/db/repo.js` — `getAllHabits` + `getLogsInRange` (NFR-01 single-bounded-read enabler)
+- A7 contract preserved; 174 tests green (was 100).
+
+Notable scope borrowing from P4 into P3 already realized: minimal cadence resolver + in-memory wave catalog shipped without a DB_VERSION bump.
 
 Next steps in order:
 
-1. `/gsd-plan-phase 3` — plan Phase 3 in detail based on 03-CONTEXT.md.
-2. `/gsd-execute-phase 3` — execute the plans.
-3. `/gsd-verify-work 3` — UAT after execution.
+1. `/gsd-execute-phase 3` (plan 03-02) — Today renders: router + `js/views/today.js` + builder + mount + tests.
+2. Plans 03-03 .. 03-06 per `.planning/phases/03-.../`.
+3. `/gsd-verify-work 3` — UAT after the whole phase ships.
 
 Open follow-up (docs drift, non-blocking):
 
@@ -59,8 +66,9 @@ Open follow-up (docs drift, non-blocking):
 | 4 | 02-04 | ✓ Complete | `seed/habits.json` 8-habit fixture + `js/io/seed.js` idempotent loader + persist() + D-45 defaults (5 commits, merged) |
 | 5 | 02-05 | ✓ Complete | Reset-data + boot wiring + sw.js SHELL + smoke (4 implementation commits + 1 smoke-fix commit `389b9d9` + SUMMARY); 7/8 smoke items full PASS + item 8 PASS-with-Chromium-caveat |
 | 6 | 02-06 | ✓ Complete | CLAUDE.md / PROJECT.md / README.md doc reversals + ARCHITECTURE.md forward-edits + APP_VERSION 0.1.0 → 0.2.0 + SUMMARY + PHASE-COMPLETION (7 commits, inline on main — worktree agent dropped connection mid-Task-1, see 02-06-SUMMARY.md deviations) |
+| P3-1 | 03-01 | ✓ Complete | Pure-domain foundations: `js/domain/cadence.js` + `js/domain/wave.js` + `seed/waves.json` + `js/util/mount.js` + 4 new util/date.js helpers + 2 new repo methods (`getAllHabits` / `getLogsInRange`) + D-78 grep-gate; 10 atomic commits (5 test + 5 feat); 100 → 174 tests green |
 
-Test suite: **99/99 green** at HEAD `b44e394`.
+Test suite: **174/174 green** at HEAD `7a8053b`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 
@@ -74,9 +82,9 @@ Phase 2 inherits the conventions locked during Phase 1:
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: 0 hours
+- Total plans completed (since metric tracking began): 1
+- Average duration: 33 min
+- Total execution time: ~33 min
 
 **By Phase:**
 
@@ -84,15 +92,15 @@ Phase 2 inherits the conventions locked during Phase 1:
 |-------|-------|-------|----------|
 | 1. PWA Shell & Tooling Hygiene | 5 | — | — |
 | 2. Storage Foundation | 0 | — | — |
-| 3. Today View & Settings v1 | 0 | — | — |
+| 3. Today View & Settings v1 | 1 | 33m | 33m |
 | 4. Domain Model | 0 | — | — |
 | 5. Backup & Restore | 0 | — | — |
 | 6. Desktop Analytics & Scoring | 0 | — | — |
 
 **Recent Trend:**
 
-- Last 5 plans: —
-- Trend: —
+- Last plan: 03-01 — 33 min, 5 tasks, 12 files, 74 new tests, 10 atomic commits
+- Trend: TDD per-task (RED → GREEN) holding clean; no deviations
 
 *Updated after each plan completion*
 
@@ -124,6 +132,14 @@ Locked during Phase 1 execution (2026-05-26):
 - D-29: Module SW (`register('./sw.js', { type: 'module' })`) + ES `import { APP_VERSION }` — supersedes the original classic-SW + importScripts plan which threw SyntaxError on `export const` (caught by Phase 1 human-verify); cache prefix renamed `nawyki-` → `habits-`
 - TDD mode flipped on (`workflow.tdd_mode: true`) — Phase 2+ MVP+TDD gate is blocking
 
+Locked during Phase 3 plan 03-01 execution (2026-05-28):
+
+- Wave 4 startDate fixed at 2026-04-27 in `seed/waves.json` (NOT the Pattern doc's illustrative 2026-01-26) so `currentWave('2026-05-28') === Wave 4` matches `<specifics>` line 201. Seven-week spacing anchored at Wave 0 = 2025-12-29.
+- `daysBetween` uses `Math.round`, NEVER `Math.floor` — file header bans Math.floor inside daysBetween. The 1-hour DST gain/loss in the ms delta would silently truncate to N-1 with floor, corrupting every-n-days math.
+- `mount(desc, parent, actions)` resolves its document via `parent.ownerDocument`, NOT a `configureMount({document})` seam. Pure function of parent; tests inject a fake DOM via the parent's fake ownerDocument.
+- `appliesToday`'s every-n-days branch returns true when BOTH lastCompletedDate AND createdAt are absent — safe default "never hide for missing anchor."
+- `configureWave({fetch})` uses `hasOwnProperty('fetch')` (presence-overrides-with-value, including null) so test `beforeEach` can reset the prior fetch injection cleanly.
+
 ### Pending Todos
 
 None yet.
@@ -140,6 +156,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-28T00:25:34.028Z
-Stopped at: Phase 2 verified — 10/10 UAT passed, ready to plan Phase 3
-Resume file: None
+Last session: 2026-05-28T09:15:28Z
+Stopped at: Plan 03-01 complete — pure-domain foundations landed (cadence/wave/mount/date/repo); 174 tests green at HEAD `7a8053b`. Next: plan 03-02 (Today renders).
+Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-02-PLAN.md
