@@ -43,7 +43,7 @@ import {
   handleRestoreLogRow,
 } from './apply/markCompleted.js';
 import { handleMarkUncompleted } from './apply/markUncompleted.js';
-import { notify } from './store.js';
+import { notify as defaultNotify } from './store.js';
 
 /**
  * Event-type dispatch table. P3+ events plug in by adding a file in
@@ -68,18 +68,33 @@ let _broadcast = () => {};
 let _trackTx = () => {};
 
 /**
+ * Notify handle — defaults to the statically-imported `store.notify` so
+ * production needs no DI seam beyond `configure({repo, broadcast, trackTx})`.
+ * Tests that cache-bust both `apply.js` and `store.js` separately MUST inject
+ * the cache-busted `notify` here so apply.js's subscriber fan-out targets
+ * the SAME store instance the test inspects (otherwise Node ESM resolves
+ * apply.js's static `./store.js` import to the un-tagged store, splitting
+ * the cache + subscriber set across two module instances — Pitfall 9
+ * variant).
+ *
+ * @type {(payload: { event?: string, keys?: object }) => Promise<void> | void}
+ */
+let _notify = defaultNotify;
+
+/**
  * Inject dependencies. Truthy fields overwrite the module-level mutables; this
  * lets a test re-configure only the broadcast spy without re-injecting the
  * repo. Production calls this once at boot (plan 02-05) with the real repo +
  * the real broadcast + the real trackTx.
  *
- * @param {{ repo?: object, broadcast?: (msg: object) => void, trackTx?: (p: Promise<unknown>) => void }} deps
+ * @param {{ repo?: object, broadcast?: (msg: object) => void, trackTx?: (p: Promise<unknown>) => void, notify?: (payload: { event?: string, keys?: object }) => Promise<void>|void }} deps
  * @returns {void}
  */
 export function configure(deps) {
   if (deps.repo) _repo = deps.repo;
   if (deps.broadcast) _broadcast = deps.broadcast;
   if (deps.trackTx) _trackTx = deps.trackTx;
+  if (deps.notify) _notify = deps.notify;
 }
 
 /**
@@ -145,7 +160,13 @@ export async function apply(event) {
     keys,
     at: eventRow.at,
   });
-  notify({ event: event.type, keys });
+  // P3 plan 03 Task 2: notify is now async — it refreshes `store.cache`
+  // BEFORE fanning out to subscribers (Pitfall 2, D-72). We await so the
+  // caller of `apply()` observes a cache that's already reconciled with
+  // the canonical post-tx state. Uses the DI-injected `_notify` so tests
+  // that cache-bust apply.js + store.js separately can route through the
+  // store instance they actually inspect.
+  await _notify({ event: event.type, keys });
 
   return eventRow.id;
 }

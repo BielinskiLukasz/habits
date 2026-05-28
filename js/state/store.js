@@ -1,6 +1,8 @@
 /**
  * @file In-memory cache + subscribe/notify (Open Question 4 — minimal in P2,
- * expanded in P3 plan 02 Task 3 for Today's hydrate path — D-52, NFR-01).
+ * expanded in P3 plan 02 Task 3 for Today's hydrate path — D-52, NFR-01;
+ * extended in P3 plan 03 Task 2 with notify-driven cache refresh — D-72,
+ * Pitfall 2).
  *
  * The state-cache half of the controller chokepoint (`js/state/apply.js`).
  * P2 shipped a deliberately small surface: a pub-sub set + an idempotent
@@ -18,6 +20,23 @@
  * directly (D-52). A single bounded `repo.getLogsInRange(weekStart, weekEnd)`
  * pre-warms the cache for the whole render path.
  *
+ * P3 plan 03 Task 2 — notify-driven cache refresh (Pitfall 2):
+ *
+ *   `notify({event, keys})` now `await refreshHydratedKeys(keys)` BEFORE
+ *   fanning out to subscribers. Subscribers therefore observe the post-write
+ *   cache state, not the pre-tap snapshot. Without this, a `store.subscribe(render)`
+ *   would re-render the pre-tap state and the optimistic flip would briefly
+ *   disagree with the cache.
+ *
+ *   `refreshHydratedKeys(keys)`:
+ *     - `keys.habitId` present                 → re-read habit row
+ *     - `keys.habitId` AND `keys.date` present → re-read log row (and delete
+ *                                                 cache entry when row is
+ *                                                 gone — handles restoreLogRow
+ *                                                 deletes)
+ *     - `keys.key` present                     → re-read settings value
+ *                                                 (Slice 4 will use this)
+ *
  * Configure-based DI (RESEARCH §Open Question 2):
  *   `configureStore({repo})` injects the repo handle. Production calls this
  *   once at boot in `js/main.js`; tests inject `createFakeRepo()`.
@@ -29,11 +48,13 @@
  *   - Idempotent re-entry guard (Pattern S4): `hydrate()` short-circuits on
  *     second call.
  *   - Subscribe-returns-unsubscribe (toast.js / sw-register.js-style closure).
+ *   - D-72: notify-driven refresh keeps Today + Settings + cross-tab in sync.
  *
  * Forbidden constructs in this file:
  *   - Direct `indexedDB.*` reference (Anti-Pattern 1 — only js/db/idb.js).
  *   - Calls to `js/db/repo.js` write helpers (DATA-04 — only apply.js writes).
  *     Reads are fine; hydrate() walks `getAllHabits` / `getLogsInRange` /
+ *     `getSetting`; refreshHydratedKeys() walks `getHabit` / `getLog` /
  *     `getSetting`.
  *   - `.innerHTML` family — D-78 grep gate.
  */
@@ -119,6 +140,56 @@ export async function hydrate(_legacyRepo) {
 }
 
 /**
+ * Re-read the rows identified by `keys` from the repo and update the in-
+ * process cache accordingly (Pitfall 2 — no stale reads after a chokepoint
+ * mutation).
+ *
+ * `keys` may carry any subset of `{habitId, date, key}` — only the relevant
+ * branches fire:
+ *
+ *   - `habitId` (without `date`)   → refresh `cache.habits` for that id
+ *   - `habitId` AND `date`         → refresh both the habit row AND the
+ *                                     log row at `(habitId, date)`.
+ *                                     Log row absence means delete from cache.
+ *   - `key`                        → refresh `cache.settings.get(key)`
+ *
+ * Defensive when no repo is configured (legacy/test callers) — returns
+ * silently.
+ *
+ * @param {{ habitId?: string, date?: string, key?: string }} keys
+ * @returns {Promise<void>}
+ */
+async function refreshHydratedKeys(keys) {
+  if (!_repo) return;
+  if (keys.habitId) {
+    const habit = await _repo.getHabit(keys.habitId);
+    if (habit) cache.habits.set(keys.habitId, habit);
+    else cache.habits.delete(keys.habitId);
+
+    if (keys.date) {
+      const log = await _repo.getLog(keys.habitId, keys.date);
+      const cacheKey = `${keys.habitId}::${keys.date}`;
+      if (log) cache.logs.set(cacheKey, log);
+      else cache.logs.delete(cacheKey);
+    }
+  }
+  if (keys.key) {
+    const row = await _repo.getSetting(keys.key);
+    if (row) cache.settings.set(keys.key, row.value);
+    else cache.settings.delete(keys.key);
+  }
+}
+
+/**
+ * Test-only handle on `refreshHydratedKeys` — exposed under an underscore
+ * so test code can drive the refresh directly without going through
+ * `notify()`. Production never imports this.
+ *
+ * @type {(keys: { habitId?: string, date?: string, key?: string }) => Promise<void>}
+ */
+export const _refreshHydratedKeysForTest = refreshHydratedKeys;
+
+/**
  * Subscribe to mutation notifications. Returns an unsubscribe closure (matches
  * the BroadcastChannel.onMessage shape so the two pubsubs compose cleanly).
  *
@@ -134,11 +205,20 @@ export function subscribe(fn) {
  * Fan a notification out to subscribers. Called by `apply.js` after a
  * successful tx + broadcast.
  *
- * @param {{ event: string, keys: object }} slice
- * @returns {void}
+ * When `payload.keys` is present, the affected cache entries are refreshed
+ * from the repo BEFORE subscribers fire — subscribers therefore observe the
+ * canonical post-write state (Pitfall 2 / D-72). Legacy callers that pass
+ * no payload (or a payload without `keys`) skip the refresh and fall straight
+ * through to the fan-out.
+ *
+ * @param {{ event?: string, keys?: object }} [payload]
+ * @returns {Promise<void>}
  */
-export function notify(slice) {
-  for (const fn of subs) fn(slice);
+export async function notify(payload) {
+  if (payload && payload.keys) {
+    await refreshHydratedKeys(payload.keys);
+  }
+  for (const fn of subs) fn(payload ?? {});
 }
 
 /**

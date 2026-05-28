@@ -212,12 +212,15 @@ describe('store: hydrate / subscribe / notify (Open Question 4 minimal P2)', () 
 
     let calls = 0;
     const unsub = store.subscribe(() => { calls++; });
-    store.notify({ event: 'test', keys: {} });
+    // Phase 03 plan 03 Task 2: notify is async (refreshes cache before
+    // fanning out). Callers MUST await — synchronous-after-call assertions
+    // would race the internal `await refreshHydratedKeys(...)` microtask.
+    await store.notify({ event: 'test', keys: {} });
     assert.equal(calls, 1);
-    store.notify({ event: 'test', keys: {} });
+    await store.notify({ event: 'test', keys: {} });
     assert.equal(calls, 2);
     unsub();
-    store.notify({ event: 'test', keys: {} });
+    await store.notify({ event: 'test', keys: {} });
     assert.equal(calls, 2, 'unsubscribed listener must not fire');
 
     // hydrate is idempotent (P2 minimum — hydrate from empty repo is fine).
