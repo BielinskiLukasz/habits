@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "seedVersion": 1,
+  "waves": [
+    { "number": 0, "name": "Wave 0", "startDate": "2025-12-29", "theme": "Pre-start onboarding" },
+    { "number": 1, "name": "Wave 1", "startDate": "2026-01-05", "theme": "Energy & regulation" },
+    { "number": 2, "name": "Wave 2", "startDate": "2026-01-19", "theme": "Daily rhythm & eating" },
+    { "number": 3, "name": "Wave 3", "startDate": "2026-02-02", "theme": "Movement & body" },
+    { "number": 4, "name": "Wave 4", "startDate": "2026-04-27", "theme": "Relationships & emotions" },
+    { "number": 5, "name": "Wave 5", "startDate": "2026-06-15", "theme": "Focus & deep work" },
+    { "number": 6, "name": "Wave 6", "startDate": "2026-08-03", "theme": "Health & recovery" },
+    { "number": 7, "name": "Wave 7", "startDate": "2026-09-21", "theme": "Creativity & expression" },
+    { "number": 8, "name": "Wave 8", "startDate": "2026-11-09", "theme": "Stewardship & purpose" },
+    { "number": 9, "name": "Wave 9", "startDate": "2026-12-28", "theme": "Integration & rest" }
+  ]
+}
