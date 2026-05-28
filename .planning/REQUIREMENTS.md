@@ -85,9 +85,9 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### UNDO — Single-step undo
 
-- [ ] **UNDO-01**: User can undo the last mutating action (mark complete, mark uncomplete, edit habit, advance stage, …) within one tap from a toast OR from a Settings shortcut
-- [ ] **UNDO-02**: Undo state persists across page reload (via `meta.undoToken` in IndexedDB)
-- [ ] **UNDO-03**: Undo is single-step (one action back); deeper history is via per-habit edit history (CATALOG-04) and the events journal
+- [x] **UNDO-01**: User can undo the last mutating action (mark complete, mark uncomplete, edit habit, advance stage, …) within one tap from a toast OR from a Settings shortcut
+- [x] **UNDO-02**: Undo state persists across page reload (via `meta.undoToken` in IndexedDB)
+- [x] **UNDO-03**: Undo is single-step (one action back); deeper history is via per-habit edit history (CATALOG-04) and the events journal
 
 ### DATA — Persistence and integrity
 
@@ -294,9 +294,9 @@ Every v1 requirement maps to exactly one phase.
 | WAVE-04 | Phase 4 | Pending |
 | WAVE-05 | Phase 4 | Pending |
 | WAVE-06 | Phase 4 | Pending |
-| UNDO-01 | Phase 3 | Pending |
-| UNDO-02 | Phase 3 | Pending |
-| UNDO-03 | Phase 3 | Pending |
+| UNDO-01 | Phase 3 | Complete (03-04) |
+| UNDO-02 | Phase 3 | Complete (03-04) |
+| UNDO-03 | Phase 3 | Complete (03-04) |
 | DATA-01 | Phase 2 | Complete |
 | DATA-02 | Phase 2 | Complete |
 | DATA-03 | Phase 2 | Complete |

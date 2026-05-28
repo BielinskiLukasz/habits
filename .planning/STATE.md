@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 03 plan 03-03 complete — tap-to-log live; 232 tests green
-last_updated: "2026-05-28T11:12:47Z"
-last_activity: 2026-05-28 -- Plan 03-03 complete (markUncompleted + lastCompletedDate invariant + notify refresh + Today tap wiring)
+stopped_at: Phase 03 plan 03-04 complete — undo toast surface live; 249 tests green
+last_updated: "2026-05-28T12:00:00Z"
+last_activity: 2026-05-28 -- Plan 03-04 complete (showUndoToast + showErrorToast wired into Today tap success/reject; D-08 regression-guarded)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 9
-  percent: 35
+  completed_plans: 10
+  percent: 38
 ---
 
 # Project State
@@ -27,30 +27,27 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: 4 of 6 (03-01 + 03-02 + 03-03 complete; 03-04 undo-toast next)
-Status: Executing Phase 03 — Slice 3 (tap-to-log) landed
-Last activity: 2026-05-28 -- Plan 03-03 complete (markUncompleted + lastCompletedDate invariant + notify refresh + Today tap wiring)
+Plan: 5 of 6 (03-01 + 03-02 + 03-03 + 03-04 complete; 03-05 Settings v1 next)
+Status: Executing Phase 03 — Slice 4 (undo toast surface) landed
+Last activity: 2026-05-28 -- Plan 03-04 complete (showUndoToast + showErrorToast wired into Today tap success/reject; D-08 regression-guarded)
 
-Progress: [██████████████░░░░░░░░░░░░░░░░] 35% (9 of 26 phase+plan slots; Phase 3 plans 1+2+3 of 6 shipped)
+Progress: [████████████████░░░░░░░░░░░░░░] 38% (10 of 26 phase+plan slots; Phase 3 plans 1+2+3+4 of 6 shipped)
 
 ## Resume Instructions
 
-**Plan 03-03 shipped** — tap-to-log is live:
+**Plan 03-04 shipped** — undo toast surface is live on Today:
 
-- `js/state/apply/markUncompleted.js` — new chokepoint handler (D-74 writes `{completed:false}`, NOT delete) + shared `_recomputeLastCompletedDate` (D-52 invariant, imported by markCompleted + markUncompleted + restoreLogRow)
-- `js/state/apply.js` — HANDLERS extended with `markUncompleted`; new `notify` DI seam; `await notify(...)` so subscribers fire before `await apply(...)` returns
-- `js/state/apply/markCompleted.js` — both `handleMarkCompleted` and `handleRestoreLogRow` rewired through `_recomputeLastCompletedDate`
-- `js/state/store.js` — `notify(payload)` is async; refreshes affected habit + log + setting rows BEFORE fanning out to subscribers (D-72, Pitfall 2)
-- `js/db/repo.js` — `getLogsByHabit(habitId)` via the `habitId` index (D-39); fake-idb mirror; A7 contract test extended
-- `js/views/today.js` — synchronous optimistic flip + `revertRow` on apply() reject; tap closures threaded through `mount(desc, parent, actions)`
-- 209 → 232 tests green (+23: 5 markUncompleted + 7 lastCompletedDate + 7 notify-refresh + 4 today.tap).
+- `js/views/toast.js` — extended with internal `_showToast` helper + `showUndoToast({message, undoFn, autoDismissMs=5000})` (D-69 + D-70 + D-71) + `showErrorToast(message)` (D-73 4s error variant) + `_resetToastForTest`. `showUpdateToast` STRUCTURALLY preserves D-08 no-auto-dismiss by delegating to `_showToast` without passing `autoDismissMs`.
+- `js/views/today.js` — imports `showUndoToast` + `showErrorToast` + `undo`; both tap success paths render the appropriate verb+habit toast (`Marked <name> complete` / `Marked <name> uncomplete`) per D-71; both catch paths replace the 03-03 `console.warn` placeholder with `showErrorToast("Couldn't mark — try again")` (D-53 + D-73). Habit-name lookup happens AFTER `await apply()` resolves so the toast reads canonical post-notify cache (Pitfall 2 alignment).
+- `tests/integration/today.tap.test.js` — Rule 1 fix for pre-existing 03-03 tests: ambient `globalThis.document` proxy + `.remove()` on fake elements + `toastMod._resetToastForTest()` in `freshAll()`. All 4 pre-existing tap tests still green.
+- 232 → 249 tests green (+17: 13 toast unit + 1 toast.undo integration + 3 today.undo integration).
 
-CORE-02 / CORE-03 / LOG-01 / NFR-02 functionally complete. Real-world wall-clock NFR-02 measurement waits for phase closeout UAT.
+UNDO-01 / UNDO-02 / UNDO-03 functionally complete.
 
 Next steps in order:
 
-1. `/gsd-execute-phase 3` (plan 03-04) — Undo toast surface (autoDismiss + showErrorToast variant).
-2. Plans 03-05 (Settings v1) + 03-06 (closeout) per `.planning/phases/03-.../`.
+1. `/gsd-execute-phase 3` (plan 03-05) — Settings v1 (5 cards: Storage / Schedule / Install / Data / About) + setSetting handler + History tab placeholder + SW SHELL precache update.
+2. Plan 03-06 (closeout: APP_VERSION 0.2.0 → 0.3.0 + docs) per `.planning/phases/03-.../`.
 3. `/gsd-verify-work 3` — UAT after the whole phase ships.
 
 Open follow-up (docs drift, non-blocking):
@@ -70,8 +67,9 @@ Open follow-up (docs drift, non-blocking):
 | P3-1 | 03-01 | ✓ Complete | Pure-domain foundations: `js/domain/cadence.js` + `js/domain/wave.js` + `seed/waves.json` + `js/util/mount.js` + 4 new util/date.js helpers + 2 new repo methods (`getAllHabits` / `getLogsInRange`) + D-78 grep-gate; 10 atomic commits (5 test + 5 feat); 100 → 174 tests green |
 | P3-2 | 03-02 | ✓ Complete | Today renders: `js/router.js` + `js/views/today.js` + `js/views/today/builders.js` + expanded `js/state/store.js` cache + `index.html` 3-section shell + `js/main.js` router wiring + `css/today.css` extensions; 6 atomic commits (2 test + 4 feat); 174 → 209 tests green |
 | P3-3 | 03-03 | ✓ Complete | Tap-to-log: `js/state/apply/markUncompleted.js` (D-74 handler + D-52 shared invariant) + `js/state/apply/markCompleted.js` rewired + `js/state/apply.js` (HANDLERS + notify DI) + `js/state/store.js` async notify w/ refresh + `js/db/repo.js` getLogsByHabit + `js/views/today.js` tap closures + optimisticFlip + revertRow; 6 atomic commits (3 test + 3 feat); 209 → 232 tests green |
+| P3-4 | 03-04 | ✓ Complete | Undo toast surface: `js/views/toast.js` extended (`_showToast` internal helper + `showUndoToast` D-69/D-70/D-71 + `showErrorToast` D-73 + `_resetToastForTest`; `showUpdateToast` STRUCTURALLY preserves D-08 by delegating WITHOUT autoDismissMs) + `js/views/today.js` wires both onto tap success/reject (console.warn placeholder REMOVED) + `tests/integration/today.tap.test.js` Rule 1 fix for ambient globalThis.document + `.remove()` on fake elements; 4 atomic commits (2 test + 2 feat); 232 → 249 tests green |
 
-Test suite: **232/232 green** at HEAD `33835f6`.
+Test suite: **249/249 green** at HEAD `0f0b5e6`.
 
 Phase 2 inherits the conventions locked during Phase 1:
 
@@ -85,9 +83,9 @@ Phase 2 inherits the conventions locked during Phase 1:
 
 **Velocity:**
 
-- Total plans completed (since metric tracking began): 3
-- Average duration: 41.7 min
-- Total execution time: ~125 min
+- Total plans completed (since metric tracking began): 4
+- Average duration: 41.25 min
+- Total execution time: ~165 min
 
 **By Phase:**
 
@@ -95,17 +93,18 @@ Phase 2 inherits the conventions locked during Phase 1:
 |-------|-------|-------|----------|
 | 1. PWA Shell & Tooling Hygiene | 5 | — | — |
 | 2. Storage Foundation | 0 | — | — |
-| 3. Today View & Settings v1 | 3 | 125m | 41.7m |
+| 3. Today View & Settings v1 | 4 | 165m | 41.25m |
 | 4. Domain Model | 0 | — | — |
 | 5. Backup & Restore | 0 | — | — |
 | 6. Desktop Analytics & Scoring | 0 | — | — |
 
 **Recent Trend:**
 
-- Last plan: 03-03 — 70 min, 3 tasks, 11 files (1 new code + 3 new tests + 7 modified), 23 new tests, 6 atomic commits. Includes one architectural deviation (the notify DI seam in apply.configure to solve Node ESM static-import cache-bust limitation — Pitfall 9 variant).
+- Last plan: 03-04 — 40 min, 2 tasks, 5 files (2 modified code + 3 new tests), 17 new tests, 4 atomic commits. One Rule 1 deviation: ambient globalThis.document stub added to pre-existing 03-03 today.tap.test.js so toast.js could mount inside view-mount tests without DI seam.
+- Prior plan: 03-03 — 70 min, 3 tasks, 11 files, 23 new tests, 6 atomic commits (notify DI seam — Pitfall 9 variant)
 - Prior plan: 03-02 — 22 min, 4 tasks, 9 files, 35 new tests, 6 atomic commits
 - Prior plan: 03-01 — 33 min, 5 tasks, 12 files, 74 new tests, 10 atomic commits
-- Trend: TDD per-task (RED → GREEN) holding clean. 03-03 ran longer because of the Node ESM static-import problem (Pitfall 9 variant) requiring a DI seam adjustment in apply.js.
+- Trend: TDD per-task (RED → GREEN) holding clean. 03-04 was the smallest plan of the phase so far — 2 tasks, narrow surface (one primitive extension + one wiring).
 
 *Updated after each plan completion*
 
@@ -163,6 +162,15 @@ Locked during Phase 3 plan 03-03 execution (2026-05-28):
 - `revertRow(rowEl, priorState)` restores className + aria-pressed + data-action only. Does NOT precisely rebuild the ✓ glyph DOM — the next `store.subscribe(render)` re-render rebuilds the row from cache. Slice 3's apply error path uses `console.warn` with a `// 03-04: replace with showErrorToast` TODO; the toast lands in Slice 4.
 - Today integration tests use UN-TAGGED modules + `_resetStoreForTest()` / `_resetTodayForTest()` between tests. Cache-busting today.js would still bind to the un-tagged store via Node ESM static-import behavior — resetting state on the un-tagged singletons is the simplest correct approach for view-mount tests.
 
+Locked during Phase 3 plan 03-04 execution (2026-05-28):
+
+- `_showToast` is an internal (non-exported) helper inside `js/views/toast.js`. The three public surfaces (`showUpdateToast` / `showUndoToast` / `showErrorToast`) all delegate to it. XSS-safe DOM construction (`createElement` + `textContent` + `setAttribute`) is localized in one place.
+- `showUpdateToast` rewritten to delegate to `_showToast({message, action})` WITHOUT passing `autoDismissMs`. D-08 no-auto-dismiss is STRUCTURALLY guaranteed (no setTimeout is registered on the update path), not just behaviorally. The idempotent re-entry guard `if (toastEl) return;` is preserved.
+- Action-button click handler captures the `fn` closure into a local BEFORE calling `_dismissToast()`. Without this capture, a re-entrant timer tick between dismiss and invoke could null out `toastEl` AND the closure, leaving `fn()` unreachable. Capturing makes the handler race-free against the auto-dismiss timer.
+- Habit-name lookup happens AFTER `await apply()` resolves, NOT before the tap. The post-notify cache is canonical (per 03-03 Pitfall 2 alignment), so a cross-tab habit-rename between the tap and the toast render still renders the latest name.
+- Graceful `(habit)` fallback on `getCachedHabits().find(...)` returning undefined (e.g. habit archived cross-tab during the tap). No throw; the success toast still renders.
+- `tests/integration/today.tap.test.js` gained an ambient `globalThis.document` proxy (per-test setter `setAmbientDoc(bundle)`) so toast.js's `document.body.appendChild` can mount into the test's fake-doc body. This pattern carries forward to Settings integration tests in 03-05 — view + toast pairs need it; pure-builder unit tests do not. The alternative (refactor toast.js to accept a `document` argument) would break the production single-import shape used by every other caller.
+
 ### Pending Todos
 
 None yet.
@@ -179,6 +187,6 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-05-28T11:12:47Z
-Stopped at: Plan 03-03 complete — tap-to-log is live (markUncompleted handler + D-52 lastCompletedDate invariant + notify-driven cache refresh + Today tap wiring with synchronous optimistic flip + revertRow). 232 tests green at HEAD `33835f6`. Next: plan 03-04 (undo toast surface).
-Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-04-PLAN.md
+Last session: 2026-05-28T12:00:00Z
+Stopped at: Plan 03-04 complete — undo toast surface is live on Today (showUndoToast with D-69 5s auto-dismiss + hover-pause + D-70 single-toast invariant + D-71 verb+habit copy; showErrorToast D-73 4s error variant; 03-03 console.warn placeholder REMOVED; D-08 SW-update no-auto-dismiss STRUCTURALLY guarded). 249 tests green at HEAD `0f0b5e6`. Next: plan 03-05 (Settings v1 — 5 cards + setSetting handler + History tab placeholder + SW SHELL precache).
+Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-05-PLAN.md
