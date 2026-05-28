@@ -43,6 +43,7 @@ import {
   handleRestoreLogRow,
 } from './apply/markCompleted.js';
 import { handleMarkUncompleted } from './apply/markUncompleted.js';
+import { handleSetSetting } from './apply/setSetting.js';
 import { notify as defaultNotify } from './store.js';
 
 /**
@@ -56,6 +57,7 @@ const HANDLERS = {
   markCompleted: handleMarkCompleted,
   restoreLogRow: handleRestoreLogRow,
   markUncompleted: handleMarkUncompleted,
+  setSetting: handleSetSetting,
 };
 
 /** @type {object|null} */
