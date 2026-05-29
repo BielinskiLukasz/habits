@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 03 plan 03-06 complete — Phase 3 shippable; SW SHELL extended with 11 P3 files, APP_VERSION 0.2.0 → 0.3.0, README + VERSIONING release notes; 279 tests green; ready for /gsd-verify-work 3
-last_updated: "2026-05-28T14:00:00Z"
-last_activity: 2026-05-28 -- Plan 03-06 complete (SHELL coverage regression guard + APP_VERSION bump + docs; Phase 3 closeout)
+stopped_at: "Plan 03-06 complete — Phase 3 closeout shipped. SW SHELL list extended with 11 P3 files (D-81); APP_VERSION bumped 0.2.0 → 0.3.0 (D-28); README + VERSIONING.md release notes added; new `tests/integration/sw.shell.test.js` regression-guard test added (4 tests: P2 baseline + P3 required + SWR exception + on-disk existence). 279 tests green at HEAD `75a3638`. All 6 Phase 3 plans complete. Next: `/gsd-verify-work 3` UAT against the 5 ROADMAP Phase 3 success criteria."
+last_updated: "2026-05-29T14:37:41.731Z"
+last_activity: 2026-05-29 -- Phase 03 planning complete
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 13
+  total_plans: 14
   completed_plans: 12
-  percent: 46
+  percent: 20
 ---
 
 # Project State
@@ -28,8 +28,8 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING (closeout shipped — ready for UAT)
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
 Plan: 6 of 6 — ALL P3 plans shipped; awaiting `/gsd-verify-work 3` UAT
-Status: Phase 3 implementation complete; closeout done; APP_VERSION = 0.3.0
-Last activity: 2026-05-28 -- Plan 03-06 complete (SHELL coverage regression guard + APP_VERSION bump + docs; Phase 3 closeout)
+Status: Ready to execute
+Last activity: 2026-05-29 -- Phase 03 planning complete
 
 Progress: [████████████████████░░░░░░░░░░] 46% (12 of 26 phase+plan slots; Phase 3 plans 1+2+3+4+5+6 of 6 shipped)
 
