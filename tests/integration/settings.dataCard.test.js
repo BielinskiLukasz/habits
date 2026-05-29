@@ -321,6 +321,43 @@ describe('Settings Data card — live refresh on cross-tab broadcast (D-72)', ()
   });
 });
 
+describe('Settings Data card — setSetting event label (Gap 1 fix)', () => {
+  test('setSetting event renders "changed <key> to <value>" not "marked (habit) complete"', async () => {
+    const { store, applyMod, undoMod, settingsMod } = await freshAll();
+    const repo = createFakeRepo();
+    wire({ store, applyMod, undoMod, repo });
+
+    await store.hydrate();
+
+    const fakeDoc = createFakeDocument();
+    const { body } = fakeDoc;
+    setAmbientDoc(fakeDoc);
+    settingsMod.mountSettings(body, { repo, store });
+
+    // Seed a setSetting event + matching undoToken (no habitId in payload).
+    const eventRow = {
+      id: 'evt-set-1',
+      at: new Date().toISOString(),
+      type: 'setSetting',
+      payload: { key: 'weekStart', value: 'mon' },
+      inverse: { type: 'setSetting', payload: { key: 'weekStart', value: 'sun' } },
+    };
+    await repo.putEvent(eventRow);
+    await repo.putMeta('undoToken', 'evt-set-1');
+
+    await store.notify({ event: 'setSetting', keys: { key: 'weekStart' } });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const preview = body.querySelector('.settings-data-undo');
+    assert.ok(preview, 'preview container present');
+    const previewText = collectAllText(preview);
+    assert.match(previewText, /changed weekStart to mon/, 'preview shows setSetting label');
+    assert.doesNotMatch(previewText, /\(habit\)/, 'no stray "(habit)" in preview');
+    assert.doesNotMatch(previewText, /^marked /, 'does not start with "marked"');
+  });
+});
+
 /**
  * Helper: collect all textContent + text descriptions from a fake-DOM
  * subtree. Walks recursively appending element text and text-node values.

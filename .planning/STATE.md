@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Plan 03-06 complete — Phase 3 closeout shipped. SW SHELL list extended with 11 P3 files (D-81); APP_VERSION bumped 0.2.0 → 0.3.0 (D-28); README + VERSIONING.md release notes added; new `tests/integration/sw.shell.test.js` regression-guard test added (4 tests: P2 baseline + P3 required + SWR exception + on-disk existence). 279 tests green at HEAD `75a3638`. All 6 Phase 3 plans complete. Next: `/gsd-verify-work 3` UAT against the 5 ROADMAP Phase 3 success criteria."
-last_updated: "2026-05-29T14:37:41.731Z"
-last_activity: 2026-05-29 -- Phase 03 planning complete
+stopped_at: "Plan 03-07 complete — 5 Phase 3 UAT gaps closed (2 MAJOR + 1 minor + 2 cosmetic). buildDataCardFromState now branches on eventRow.type for setSetting ('changed <key> to <value>'). Today applicable filter retains habits completed today via OR-clause. Diagnostics shows live DB_VERSION + navigator.storage.persisted(). CSS: Settings h1 padding + Reset/Undo border-top separator. 2 new integration tests. 281 tests green."
+last_updated: "2026-05-29T00:00:00.000Z"
+last_activity: 2026-05-29 -- Phase 03 plan 07 gap closure complete
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
   percent: 20
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING (closeout shipped — ready for UAT)
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: 6 of 6 — ALL P3 plans shipped; awaiting `/gsd-verify-work 3` UAT
+Plan: 7 of 7 — ALL P3 plans shipped (including 03-07 gap closure); awaiting `/gsd-verify-work 3` UAT
 Status: Ready to execute
 Last activity: 2026-05-29 -- Phase 03 planning complete
 
@@ -79,8 +79,9 @@ Open follow-ups (non-blocking):
 | P3-4 | 03-04 | ✓ Complete | Undo toast surface: `js/views/toast.js` extended (`_showToast` internal helper + `showUndoToast` D-69/D-70/D-71 + `showErrorToast` D-73 + `_resetToastForTest`; `showUpdateToast` STRUCTURALLY preserves D-08 by delegating WITHOUT autoDismissMs) + `js/views/today.js` wires both onto tap success/reject (console.warn placeholder REMOVED) + `tests/integration/today.tap.test.js` Rule 1 fix for ambient globalThis.document + `.remove()` on fake elements; 4 atomic commits (2 test + 2 feat); 232 → 249 tests green |
 | P3-5 | 03-05 | ✓ Complete | Settings v1: `js/state/apply/setSetting.js` (D-75 self-inverting chokepoint handler) + `js/state/apply.js` HANDLERS extension + `js/views/settings/builders.js` (5 pure builders) + `js/views/settings.js` (mountSettings composes 5 cards, subscribes to D-72 notify, wires action closures through apply/undo) + `css/settings.css` + `css/main.css` @import + `index.html` h1 slot + `js/main.js` route function; 6 atomic commits (3 test + 3 feat); 249 → 275 tests green |
 | P3-6 | 03-06 | ✓ Complete | Phase 3 closeout: `tests/integration/sw.shell.test.js` (D-81 SHELL coverage regression guard — P2 baseline + P3 required + SWR exception + on-disk existence) + `sw.js` SHELL +11 entries + `js/util/version.js` APP_VERSION 0.2.0 → 0.3.0 (D-28) + `README.md` Version history section + `VERSIONING.md` Release history section (v0.3.0 + back-filled v0.1.0/v0.2.0); 3 atomic commits (1 test + 1 feat + 1 docs); 275 → 279 tests green |
+| P3-7 | 03-07 | ✓ Complete | UAT gap closure: `js/views/settings.js` (buildDataCardFromState 4-branch on eventRow.type — setSetting path) + `js/views/today.js` (applicable OR-clause retains habits completed today) + `js/views/diagnostics.js` (live DB_VERSION + navigator.storage.persisted()) + `css/settings.css` (h1 padding + Reset/Undo border separator) + 2 new integration tests (settings.dataCard + today.completedToday); 279 → 281 tests green |
 
-Test suite: **279/279 green** at HEAD `75a3638`.
+Test suite: **281/281 green**.
 
 Phase 2 inherits the conventions locked during Phase 1:
 

@@ -244,6 +244,12 @@ function loadAboutStateAsync(cardEl, repo) {
  * Build the Data card description from current repo state. Synchronous —
  * the caller awaits the repo lookups outside this function.
  *
+ * Branches on `eventRow.type` (D-72 notify-driven re-render):
+ *   - 'markCompleted'   → "marked <name> complete"
+ *   - 'markUncompleted' → "marked <name> uncomplete"
+ *   - 'setSetting'      → "changed <key> to <value>"
+ *   - fallback          → raw event type slug (never reaches the "(habit)" path)
+ *
  * @param {object|undefined} eventRow
  * @param {string|undefined} habitName
  * @returns {object} description
@@ -252,12 +258,17 @@ function buildDataCardFromState(eventRow, habitName) {
   if (!eventRow) {
     return buildDataCard({ lastEvent: '', hasUndoToken: false, relativeTime: '' });
   }
-  // Format: "marked <habit> <verb>" — verb is complete / uncomplete.
-  let verb = 'complete';
-  if (eventRow.type === 'markUncompleted') verb = 'uncomplete';
-  const name = habitName ?? '(habit)';
-  const lastEvent = `marked ${name} ${verb}`;
   const relativeTime = formatRelative(eventRow.at);
+  let lastEvent;
+  if (eventRow.type === 'markCompleted') {
+    lastEvent = 'marked ' + (habitName ?? '(habit)') + ' complete';
+  } else if (eventRow.type === 'markUncompleted') {
+    lastEvent = 'marked ' + (habitName ?? '(habit)') + ' uncomplete';
+  } else if (eventRow.type === 'setSetting') {
+    lastEvent = 'changed ' + eventRow.payload.key + ' to ' + eventRow.payload.value;
+  } else {
+    lastEvent = eventRow.type;
+  }
   return buildDataCard({
     lastEvent,
     hasUndoToken: true,

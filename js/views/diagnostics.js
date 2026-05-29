@@ -18,6 +18,7 @@
  */
 
 import { APP_VERSION } from '../util/version.js';
+import { DB_VERSION } from '../db/schema.js';
 
 // Long-press constants — locked per D-02 + RESEARCH.md §Pattern 4.
 const LONG_PRESS_MS = 1500;
@@ -104,8 +105,8 @@ export function mountDiagnostics() {
   // Row 1 — App version (from APP_VERSION).
   appendRow(dl, 'App version', APP_VERSION);
 
-  // Row 2 — Schema version (D-03: deferred to P2; IDB lands then).
-  appendRow(dl, 'Schema version', 'n/a (P2)');
+  // Row 2 — Schema version (D-03: DB_VERSION from schema.js (live value)).
+  appendRow(dl, 'Schema version', String(DB_VERSION));
 
   // Row 3 — Service worker state.
   appendRow(dl, 'Service worker', computeSwState());
@@ -127,8 +128,13 @@ export function mountDiagnostics() {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
   appendRow(dl, 'Install state', isStandalone ? 'standalone' : 'browser');
 
-  // Row 6 — Persistence (D-03: deferred to P2; navigator.storage.persist lands then).
-  appendRow(dl, 'Persistence', 'n/a (P2)');
+  // Row 6 — Persistence (D-03: navigator.storage.persisted() (live value)).
+  const persistDd = appendRow(dl, 'Persistence', 'loading…');
+  if (navigator.storage && typeof navigator.storage.persisted === 'function') {
+    navigator.storage.persisted().then(p => { persistDd.textContent = p ? 'yes' : 'no'; }).catch(() => { persistDd.textContent = 'n/a'; });
+  } else {
+    persistDd.textContent = 'n/a';
+  }
 
   panelEl.appendChild(dl);
 

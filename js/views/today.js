@@ -258,7 +258,11 @@ function renderTodayInto(parent) {
     weekCompletions: (habitId, s, e) => getCachedWeekCompletions(habitId, s, e),
   };
   const allActive = getCachedHabits().filter((h) => h.status === 'active');
-  const applicable = allActive.filter((h) => appliesToday(h, date, ctx));
+  // Habits completed today remain visible (sorted last per D-54) even when cadence returns false
+  // — provides visual confirmation of same-day completions.
+  const applicable = allActive.filter(
+    (h) => appliesToday(h, date, ctx) || getCachedLog(h.id, date)?.completed === true
+  );
 
   // Pair each applicable habit with its completion state, then sort completed
   // rows last (D-54 muted treatment).
