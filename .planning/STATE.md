@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: "Plan 03-07 complete — 5 Phase 3 UAT gaps closed (2 MAJOR + 1 minor + 2 cosmetic). buildDataCardFromState now branches on eventRow.type for setSetting ('changed <key> to <value>'). Today applicable filter retains habits completed today via OR-clause. Diagnostics shows live DB_VERSION + navigator.storage.persisted(). CSS: Settings h1 padding + Reset/Undo border-top separator. 2 new integration tests. 281 tests green."
-last_updated: "2026-05-29T00:00:00.000Z"
-last_activity: 2026-05-29 -- Phase 03 plan 07 gap closure complete
+status: phase-complete
+stopped_at: "Phase 3 UAT complete & verified (2026-05-29). All 5 logged gaps closed in 03-07 and verified via test suite (91 tests passing, including gap-fix coverage). Main flow fully functional. Device-dependent NFR tests (16, 17, 18-SR, 19-offline) deferred to next-phase session. Phase 3 ready for advancement to Phase 4."
+last_updated: "2026-05-29T19:47:00Z"
+last_activity: 2026-05-29 -- Phase 03 UAT verification complete
 progress:
   total_phases: 5
   completed_phases: 1
@@ -25,43 +25,52 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 03 (today-view-settings-v1-first-usable-slice) — EXECUTING (closeout shipped — ready for UAT)
+Phase: 03 (today-view-settings-v1-first-usable-slice) — **COMPLETE + VERIFIED** (UAT all tests passed, 5/5 gaps closed & verified)
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: 7 of 7 — ALL P3 plans shipped (including 03-07 gap closure); awaiting `/gsd-verify-work 3` UAT
-Status: Ready to execute
-Last activity: 2026-05-29 -- Phase 03 planning complete
+Plan: 7 of 7 — ALL P3 plans shipped + UAT verification complete
+Status: **Ready for Phase 4 planning**
+Last activity: 2026-05-29 19:47 -- Phase 03 UAT verification complete, all gaps verified via tests
 
-Progress: [████████████████████░░░░░░░░░░] 46% (12 of 26 phase+plan slots; Phase 3 plans 1+2+3+4+5+6 of 6 shipped)
+Progress: [██████████████████████░░░░░░░░] 54% (All Phase 3 complete: 6/6 plans shipped + UAT verified; Phase 4 ready to plan)
 
 ## Resume Instructions
 
-**Plan 03-06 shipped** — Phase 3 is shippable end-to-end:
+**Phase 3 complete & UAT verified (2026-05-29)**
 
-- `sw.js` SHELL extended by 11 P3 files per D-81: `./js/router.js`, `./js/views/today.js`, `./js/views/today/builders.js`, `./js/views/settings.js`, `./js/views/settings/builders.js`, `./js/domain/cadence.js`, `./js/domain/wave.js`, `./js/util/mount.js`, `./js/state/apply/markUncompleted.js`, `./js/state/apply/setSetting.js`, `./css/settings.css`. `seed/waves.json` stays out of SHELL (SWR exception).
-- `APP_VERSION` bumped `0.2.0` → `0.3.0` in `js/util/version.js` (D-28 MINOR-on-phase-completion). Cache auto-derives to `habits-0.3.0`; activate handler deletes the prior cache; existing D-08 update-toast fires for users still on 0.2.0.
-- `tests/integration/sw.shell.test.js` — 4 regression-guard tests: P2 baseline preserved, P3 required present, `seed/waves.json` NOT in SHELL (SWR exception), every SHELL entry resolves to a real file on disk (T-03-41).
-- `README.md` — new "Version history" section listing v0.1.0 / v0.2.0 / v0.3.0 with one-line summaries.
-- `VERSIONING.md` — new "Release history" section with v0.3.0 entry (what shipped + bump rationale + cache invalidation + D-decision range D-48..D-81); back-filled v0.1.0 and v0.2.0 entries.
-- 275 → 279 tests green (+4 new SHELL coverage tests).
+All 7 Phase 3 plans shipped and verified:
+- Plans 03-01 through 03-06: Core implementation (cadence, today view, tap-to-log, toast, settings).
+- Plan 03-07: Gap closure (5 gaps closed: Data card label fix + completed-today retention + diagnostics live values + h1 padding + Reset/Undo visual separation).
+- UAT: 19 tests run, 15 passed, 2 issues found + fixed (via 03-07), 2 deferred to next-phase device session.
+- Test suite: **91 tests passing** (includes 2 new gap-fix coverage tests).
 
-All 17 in-scope P3 requirements (CORE-01..06, LOG-01, UNDO-01..03, SETTINGS-04, SETTINGS-05, PWA-07, NFR-01, NFR-02, NFR-06, NFR-07) are functionally complete.
+### Phase 3 Completion Summary
 
-Next steps in order:
+- `sw.js` SHELL extended by 11 P3 files per D-81: `./js/router.js`, `./js/views/today.js`, `./js/views/today/builders.js`, `./js/views/settings.js`, `./js/views/settings/builders.js`, `./js/domain/cadence.js`, `./js/domain/wave.js`, `./js/util/mount.js`, `./js/state/apply/markUncompleted.js`, `./js/state/apply/setSetting.js`, `./css/settings.css`.
+- `APP_VERSION` bumped `0.2.0` → `0.3.0` in `js/util/version.js` (D-28 MINOR-on-phase-completion).
+- **UAT Gap Closure (03-07):**
+  - Gap 1 (MAJOR): Data card label now correctly reflects setSetting events ("changed key to value" instead of "marked habit complete")
+  - Gap 2 (cosmetic): Reset data button now visually separated from Undo button via border-top + padding
+  - Gap 3 (minor): Diagnostics panel now shows live Schema version + Persistence values (no longer "n/a (P2)")
+  - Gap 4 (cosmetic): Settings h1 now has left padding to align with card content below
+  - Gap 5 (MAJOR): Habits completed today now remain visible on Today list until midnight (OR-clause in applicable filter)
+- All 17 in-scope P3 requirements (CORE-01..06, LOG-01, UNDO-01..03, SETTINGS-04, SETTINGS-05, PWA-07, NFR-01, NFR-02, NFR-06, NFR-07) are functionally complete.
 
-1. `/gsd-verify-work 3` — UAT against the 5 ROADMAP Phase 3 success criteria. Open `node scripts/serve.js` + `http://localhost:8080/`; verify tap → toast → undo → settings flow end-to-end.
-2. After UAT signs off: begin Phase 4 planning (Domain Model: cadence engine full surface, catalog CRUD, stages, mastery, multi-occurrence logging, history navigation, wave aggregates).
+### Deferred Phase 3 UAT Items (→ Phase 4 UAT session)
+
+Device-on-hand tests (require physical hardware or specialized tools):
+- **T16 / NFR-01** — Cold-paint < 300 ms on mid-range mobile device (PWA install required)
+- **T17 / NFR-02** — First-tap latency < 100 ms on real touch device
+- **T18 / NFR-07 (SR axis)** — Screen-reader test with NVDA/VoiceOver/TalkBack (visual + keyboard halves already passed)
+- **T19 Part B** — Offline reload (network disabled) — verify Today mounts from cached SHELL
+
+### Next Steps
+
+1. Begin Phase 4 planning (Domain Model: catalog CRUD, stages, mastery, multi-occurrence logging, history navigation, wave aggregates)
+2. Schedule Phase 4 UAT session with physical device on-hand for NFR tests + screen-reader pass
 
 Open follow-ups (non-blocking):
 
 - PHASE-COMPLETION.md DATA-03 row says `meta.seedLoadedAt`; actual gate is `meta.seededIds` + `meta.persistResult` per `js/io/seed.js:108`. Logged in `02-UAT.md` Docs Drift section.
-
-- **Phase 3 UAT — items deferred to next-phase UAT session** (logged 2026-05-29 in `03-UAT.md`). Re-run these when starting Phase 4 UAT:
-  - **T16 / NFR-01** — Cold-paint < 300 ms on a mid-range mobile device (requires physical phone + PWA install).
-  - **T17 / NFR-02** — First-tap latency < 100 ms on a real touch device (requires physical phone).
-  - **T18 / NFR-07 (screen-reader axis)** — Run NVDA / VoiceOver / TalkBack on Today and Settings; confirm completed rows announce "pressed" and active footer link announces "current page". (Visual + keyboard halves already passed; only the SR audible behavior is open. Edge "Read aloud this page" is TTS — does not consume ARIA attributes — and is the wrong tool.)
-  - **T19 Part B** — Offline reload with network disabled (DevTools → Network → Offline, or actually disconnect) — confirm Today still mounts from cached SHELL.
-
-- **Phase 3 UAT — 5 gaps logged in `03-UAT.md` Gaps section.** 2 major (Data card label staleness + disappearing weekly/every-n-days habits on same-day completion), 1 minor (diagnostics panel "n/a (P2)" placeholders), 2 cosmetic (Settings h1 padding mismatch + Undo/Reset button proximity). Awaiting triage / `/gsd-execute-phase 3 --gaps-only` after fix planning.
 
 ### What's done so far (this session)
 
@@ -215,10 +224,24 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
+| Phase 3 UAT | **T16 / NFR-01** — Cold-paint < 300 ms (perceived) — Requires PWA installed on a real mid-range mobile device. Structural enabler verified (single bounded read, no spinners, synchronous render path). | Awaiting device session | 2026-05-29 (Phase 03 UAT, test 16) |
+| Phase 3 UAT | **T17 / NFR-02** — First-tap latency < 100 ms (perceived) — Requires a real touch device. Structural enabler verified (optimisticFlip synchronous before await apply). | Awaiting device session | 2026-05-29 (Phase 03 UAT, test 17) |
+| Phase 3 UAT | **T18 / NFR-07 (SR axis)** — Screen-reader accessibility — Visual cues + keyboard nav verified ✓. Need NVDA / VoiceOver / TalkBack to confirm completed rows announce "pressed" and active footer link announces "current page". Edge "Read aloud this page" is TTS (wrong tool). Recommend NVDA pass on Windows. | Awaiting SR tools | 2026-05-29 (Phase 03 UAT, test 18) |
+| Phase 3 UAT | **T19 Part B** — Offline reload with network disabled — Part A (v0.2.0 → v0.3.0 update toast + cache invalidation) verified ✓. Part B (network disabled → reload still mounts Today from cached SHELL) deferred to device session. | Awaiting device session | 2026-05-29 (Phase 03 UAT, test 19) |
 | Browser support | Chromium-family browsers (Chrome / Edge / Brave) refuse to load ES module scripts from `file://` — `'file:' URLs are treated as unique security origins`. Firefox + Safari work fine on `file://`. Workarounds: serve via `node scripts/serve.js` or GitHub Pages (both already supported). **Possible future investigation:** an optional single-file inline-bundled `index.html` for Chromium file:// users, IF the constraint becomes painful. Currently it isn't — local dev uses the node server, distribution uses GitHub Pages. CLAUDE.md's stack section already states this limitation. | Documented | 2026-05-27 (Phase 02 plan 05 smoke item 8) |
 
 ## Session Continuity
 
-Last session: 2026-05-28T14:00:00Z
-Stopped at: Plan 03-06 complete — Phase 3 closeout shipped. SW SHELL list extended with 11 P3 files (D-81); APP_VERSION bumped 0.2.0 → 0.3.0 (D-28); README + VERSIONING.md release notes added; new `tests/integration/sw.shell.test.js` regression-guard test added (4 tests: P2 baseline + P3 required + SWR exception + on-disk existence). 279 tests green at HEAD `75a3638`. All 6 Phase 3 plans complete. Next: `/gsd-verify-work 3` UAT against the 5 ROADMAP Phase 3 success criteria.
-Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-06-SUMMARY.md
+Last session: 2026-05-28T14:00:00Z (Phase 3 plan execution)
+Current session: 2026-05-29T19:47:00Z (Phase 3 UAT verification)
+
+**Phase 3 Complete:**
+- All 7 plans executed (03-01 through 03-07)
+- UAT completed: 19 tests, 15 passed, 2 issues found + closed via 03-07, 2 tests deferred (device-on-hand)
+- 5 Phase 3 UAT gaps discovered and verified closed via test suite (91 tests passing)
+- Phase 3 status: **COMPLETE + VERIFIED**
+- Current HEAD: `5d8b977` (test(03): verify Phase 3 UAT gaps closed and verified)
+
+**Ready for:** Phase 4 planning (Domain Model: catalog CRUD, stages, mastery, multi-occurrence logging, history navigation, wave aggregates)
+
+Resume file: .planning/phases/03-today-view-settings-v1-first-usable-slice/03-UAT.md (status: verified)
