@@ -171,13 +171,13 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### NFR — Non-functional requirements
 
-- [ ] **NFR-01 (Performance)**: Cold paint on Today view < 300 ms on a mid-range Android phone with 1 year of data
+- [x] **NFR-01 (Performance)**: Cold paint on Today view < 300 ms on a mid-range Android phone with 1 year of data
 - [x] **NFR-02 (Performance)**: First-tap latency on Today view < 100 ms
 - [ ] **NFR-03 (Performance)**: Desktop analytics view renders < 2 s with 5 years of synthetic data
 - [ ] **NFR-04 (Offline)**: App functions fully offline; no network calls except user-initiated export/import
 - [ ] **NFR-05 (Privacy)**: No telemetry, no analytics SDK, no error reporting service; the app never phones home
-- [ ] **NFR-06 (Accessibility)**: Today view operable with keyboard only on desktop; touch targets ≥ 44×44 px on mobile
-- [ ] **NFR-07 (Accessibility)**: All interactive elements have accessible names; no color-only state encoding
+- [x] **NFR-06 (Accessibility)**: Today view operable with keyboard only on desktop; touch targets ≥ 44×44 px on mobile
+- [x] **NFR-07 (Accessibility)**: All interactive elements have accessible names; no color-only state encoding
 - [ ] **NFR-08 (Browser support)**: Latest 2 versions of Chrome, Edge, Firefox, Safari (desktop + mobile)
 - [ ] **NFR-09 (File-protocol compatibility)**: App loads and functions when opened via `file://` (service worker silent-fail; data persists in IDB scoped to origin)
 - [ ] **NFR-10 (Data trust)**: No mutation path can corrupt prior history; every test case verifies historical logs survive edits intact
@@ -353,13 +353,13 @@ Every v1 requirement maps to exactly one phase.
 | SETTINGS-05 | Phase 3 | Complete (03-05) |
 | SETTINGS-06 | Phase 6 | Pending |
 | SETTINGS-07 | Phase 1 | Pending |
-| NFR-01 | Phase 3 | Pending |
+| NFR-01 | Phase 3 | Complete (03-02) |
 | NFR-02 | Phase 3 | Complete (03-03) |
 | NFR-03 | Phase 6 | Pending |
 | NFR-04 | Phase 1 | Pending |
 | NFR-05 | Phase 6 | Pending |
-| NFR-06 | Phase 3 | Pending |
-| NFR-07 | Phase 3 | Pending |
+| NFR-06 | Phase 3 | Complete (03-02) |
+| NFR-07 | Phase 3 | Complete (03-02) |
 | NFR-08 | Phase 6 | Pending |
 | NFR-09 | Phase 1 | Pending |
 | NFR-10 | Phase 4 | Pending |

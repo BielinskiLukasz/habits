@@ -86,7 +86,7 @@ Plans:
   4. User undoes the last mark/unmark from a toast or Settings shortcut; the undo still works after a full page reload (persisted via `meta.undoToken`)
   5. User opens Settings and sees persistence status (Persistent: yes/no), app + schema versions, and platform-detected install instructions (iOS Share / Android Install / desktop URL-bar icon)
 
-**Plans**: 6 (03-01 .. 03-06; cadence/today/tap-to-log/undo-toast/settings-v1/closeout)
+**Plans**: 7 (03-01 .. 03-07; cadence/today/tap-to-log/undo-toast/settings-v1/closeout/uat-gap-closure)
 
 - [x] 03-01-PLAN.md — pure-domain foundations: `js/domain/cadence.js` (4-cadence resolver, D-48..D-51) + `js/domain/wave.js` + `seed/waves.json` (D-56/D-57) + `js/util/mount.js` (D-77) + D-78 grep-gate + 4 new util/date.js helpers + 2 new repo bounded-reads (NFR-01 enabler); 100 → 174 tests green
 - [x] 03-02-PLAN.md — Today renders: `js/router.js` (hash router with allowlist resolution, D-60/D-80) + `js/views/today/builders.js` (4 pure description-tree builders, D-54..D-58/D-76/D-79) + `js/views/today.js` (mountToday + mountFooterNav with subscribe/unsubscribe) + expanded `js/state/store.js` cache (habits + this-week logs + weekStart, D-52/NFR-01) + 3-section `<section data-route>` shell + 44×44 tap targets (NFR-06); 174 → 209 tests green
@@ -159,7 +159,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
 | 2. Storage Foundation (The Spine) | 6/6 | Complete    | 2026-05-27 |
-| 3. Today View & Settings v1 | 5/6 | In progress | - |
+| 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
 | 4. Domain Model | 0/TBD | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
 | 6. Desktop Analytics & Scoring Trio | 0/TBD | Not started | - |
