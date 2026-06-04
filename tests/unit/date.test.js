@@ -18,6 +18,10 @@ import {
   formatLocalYMD,
   parseLocalYMD,
   daysFrom,
+  daysBetween,
+  isInGracePeriod,
+  getMonthStart,
+  getMonthEnd,
 } from '../../js/util/date.js';
 
 describe('todayLocal', () => {
@@ -94,5 +98,98 @@ describe('daysFrom — leap day 2028-02-29', () => {
 describe('round-trip parseLocalYMD ∘ formatLocalYMD', () => {
   test('2026-05-26 round-trips identically', () => {
     assert.equal(formatLocalYMD(parseLocalYMD('2026-05-26')), '2026-05-26');
+  });
+});
+
+describe('daysBetween', () => {
+  test('same day returns 0', () => {
+    assert.equal(daysBetween('2026-06-04', '2026-06-04'), 0);
+  });
+
+  test('1 day forward returns 1', () => {
+    assert.equal(daysBetween('2026-06-04', '2026-06-05'), 1);
+  });
+
+  test('1 day backward returns -1', () => {
+    assert.equal(daysBetween('2026-06-05', '2026-06-04'), -1);
+  });
+
+  test('DST spring-forward (2026-03-28 to 2026-03-30) crosses DST jump, returns 2 (not 1)', () => {
+    // 2026-03-29 02:00 → 03:00 loses an hour. daysBetween uses Math.round to avoid truncation.
+    assert.equal(daysBetween('2026-03-28', '2026-03-30'), 2);
+  });
+
+  test('DST fall-back (2026-10-24 to 2026-10-26) crosses DST repeat, returns 2 (not 1)', () => {
+    // 2026-10-25 03:00 → 02:00 gains an hour. Math.round avoids truncation.
+    assert.equal(daysBetween('2026-10-24', '2026-10-26'), 2);
+  });
+});
+
+describe('isInGracePeriod', () => {
+  test('same day (day 0) is in grace period', () => {
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-04', 7), true);
+  });
+
+  test('day 6 (within 7-day grace) is in grace period', () => {
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-10', 7), true);
+  });
+
+  test('day 7 (on grace boundary, grace STRICTLY less than graceDays) is NOT in grace period', () => {
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-11', 7), false);
+  });
+
+  test('day 8 is not in grace period', () => {
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-12', 7), false);
+  });
+
+  test('default graceDays is 7', () => {
+    // If graceDays defaults to 7, then day 6 from createdAt should be true.
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-10'), true);
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-11'), false);
+  });
+
+  test('custom graceDays=3 works correctly', () => {
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-06', 3), true); // day 2
+    assert.equal(isInGracePeriod('2026-06-04', '2026-06-07', 3), false); // day 3
+  });
+});
+
+describe('getMonthStart', () => {
+  test('2026-03-15 returns 2026-03-01', () => {
+    assert.equal(getMonthStart('2026-03-15'), '2026-03-01');
+  });
+
+  test('2026-03-01 returns 2026-03-01 (already at start)', () => {
+    assert.equal(getMonthStart('2026-03-01'), '2026-03-01');
+  });
+
+  test('2026-01-31 returns 2026-01-01', () => {
+    assert.equal(getMonthStart('2026-01-31'), '2026-01-01');
+  });
+
+  test('leap day 2028-02-29 returns 2028-02-01', () => {
+    assert.equal(getMonthStart('2028-02-29'), '2028-02-01');
+  });
+});
+
+describe('getMonthEnd', () => {
+  test('2026-02-15 returns 2026-02-28 (non-leap year)', () => {
+    assert.equal(getMonthEnd('2026-02-15'), '2026-02-28');
+  });
+
+  test('2028-02-15 returns 2028-02-29 (leap year)', () => {
+    assert.equal(getMonthEnd('2028-02-15'), '2028-02-29');
+  });
+
+  test('2026-01-15 returns 2026-01-31', () => {
+    assert.equal(getMonthEnd('2026-01-15'), '2026-01-31');
+  });
+
+  test('2026-12-01 returns 2026-12-31', () => {
+    assert.equal(getMonthEnd('2026-12-01'), '2026-12-31');
+  });
+
+  test('2026-04-15 returns 2026-04-30', () => {
+    assert.equal(getMonthEnd('2026-04-15'), '2026-04-30');
   });
 });

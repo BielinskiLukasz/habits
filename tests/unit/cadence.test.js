@@ -21,11 +21,12 @@ import { appliesToday } from '../../js/domain/cadence.js';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 
-// Helper: a ctx that always reports zero weekly completions (most tests don't
-// exercise the weekly log-aware branch).
+// Helper: a ctx that always reports zero completions (most tests don't
+// exercise the log-aware branches).
 const zeroCtx = (weekStart = 'mon') => ({
   weekStart,
   weekCompletions: () => 0,
+  monthCompletions: () => 0,
 });
 
 describe('appliesToday — daily', () => {
@@ -207,6 +208,148 @@ describe('appliesToday — DST + leap-day fixtures', () => {
       cadence: { type: 'day-of-week-subset', days: ['sun'] },
     };
     assert.equal(appliesToday(habit, '2026-10-25', zeroCtx()), true);
+  });
+});
+
+describe('appliesToday — monthly (D-48 extended CADENCE-03)', () => {
+  test('returns true when monthCompletions returns 0 (not yet completed this month)', () => {
+    const habit = { id: 'h', cadence: { type: 'monthly' } };
+    assert.equal(appliesToday(habit, '2026-05-28', zeroCtx()), true);
+  });
+
+  test('returns false when monthCompletions >= 1 (already completed this month)', () => {
+    const habit = { id: 'h', cadence: { type: 'monthly' } };
+    const ctx = { weekStart: 'mon', weekCompletions: () => 0, monthCompletions: () => 1 };
+    assert.equal(appliesToday(habit, '2026-05-28', ctx), false);
+  });
+
+  test('returns false when monthCompletions returns 5 (any positive count)', () => {
+    const habit = { id: 'h', cadence: { type: 'monthly' } };
+    const ctx = { weekStart: 'mon', weekCompletions: () => 0, monthCompletions: () => 5 };
+    assert.equal(appliesToday(habit, '2026-05-28', ctx), false);
+  });
+
+  test('monthCompletions is called with (habitId, monthStart, monthEnd) for current month', () => {
+    /** @type {Array<[string, string, string]>} */
+    const calls = [];
+    const ctx = {
+      weekStart: 'mon',
+      weekCompletions: () => 0,
+      monthCompletions: (hid, start, end) => {
+        calls.push([hid, start, end]);
+        return 0;
+      },
+    };
+    const habit = { id: 'h-monthly', cadence: { type: 'monthly' } };
+    appliesToday(habit, '2026-05-28', ctx);
+    // May 2026: start should be 2026-05-01, end should be 2026-05-31
+    assert.deepEqual(calls, [['h-monthly', '2026-05-01', '2026-05-31']]);
+  });
+
+  test('monthly on DST spring-forward (2026-03-29) returns true with zero completions', () => {
+    const habit = { id: 'h', cadence: { type: 'monthly' } };
+    assert.equal(appliesToday(habit, '2026-03-29', zeroCtx()), true);
+  });
+
+  test('monthly on leap day 2028-02-29 calls monthCompletions with 2028-02-01 to 2028-02-29', () => {
+    /** @type {Array<[string, string, string]>} */
+    const calls = [];
+    const ctx = {
+      weekStart: 'mon',
+      weekCompletions: () => 0,
+      monthCompletions: (hid, start, end) => {
+        calls.push([hid, start, end]);
+        return 0;
+      },
+    };
+    const habit = { id: 'h', cadence: { type: 'monthly' } };
+    appliesToday(habit, '2028-02-29', ctx);
+    assert.deepEqual(calls, [['h', '2028-02-01', '2028-02-29']]);
+  });
+});
+
+describe('appliesToday — startDate guard (CATALOG-07 future-scheduled habits)', () => {
+  test('returns false when startDate is in the future', () => {
+    const habit = {
+      id: 'h',
+      cadence: { type: 'daily' },
+      startDate: '2026-07-01',
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), false);
+  });
+
+  test('returns true when startDate equals today (habit starts today)', () => {
+    const habit = {
+      id: 'h',
+      cadence: { type: 'daily' },
+      startDate: '2026-06-15',
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), true);
+  });
+
+  test('returns true when startDate is in the past', () => {
+    const habit = {
+      id: 'h',
+      cadence: { type: 'daily' },
+      startDate: '2026-06-10',
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), true);
+  });
+
+  test('returns true when startDate is undefined (habit has no future start)', () => {
+    const habit = {
+      id: 'h',
+      cadence: { type: 'daily' },
+      startDate: undefined,
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), true);
+  });
+
+  test('returns true when startDate is null (habit has no future start)', () => {
+    const habit = {
+      id: 'h',
+      cadence: { type: 'daily' },
+      startDate: null,
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), true);
+  });
+
+  test('startDate guard works with weekly cadence — returns false if startDate is future', () => {
+    const habit = {
+      id: 'h',
+      cadence: { type: 'weekly' },
+      startDate: '2026-07-15',
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), false);
+  });
+
+  test('startDate guard works with every-n-days — returns false if startDate is future', () => {
+    const habit = {
+      id: 'h',
+      cadence: { type: 'every-n-days', n: 3 },
+      lastCompletedDate: null,
+      createdAt: '2026-05-01',
+      startDate: '2026-07-01',
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), false);
+  });
+
+  test('startDate guard runs BEFORE resolver dispatch (short-circuits)', () => {
+    // This test verifies that if startDate is future, the resolver is not called.
+    let resolverCalls = 0;
+    const ctx = {
+      weekStart: 'mon',
+      weekCompletions: () => { resolverCalls++; return 0; },
+      monthCompletions: () => 0,
+    };
+    const habit = {
+      id: 'h',
+      cadence: { type: 'weekly' },
+      startDate: '2026-07-15',
+    };
+    appliesToday(habit, '2026-06-15', ctx);
+    // The resolver should NOT be called because startDate > today returns false immediately.
+    assert.equal(resolverCalls, 0);
   });
 });
 
