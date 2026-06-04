@@ -153,3 +153,41 @@ export function formatRelative(atISO, nowMs = Date.now()) {
   if (ms < 86_400_000) return `${Math.floor(ms / 3_600_000)} hours ago`;
   return `${Math.floor(ms / 86_400_000)} days ago`;
 }
+
+/**
+ * Check if a habit is within its grace period (first N days after creation).
+ * Returns true if days between createdAt and today is strictly less than graceDays.
+ *
+ * @param {string} createdAtYMD YYYY-MM-DD
+ * @param {string} todayYMD YYYY-MM-DD
+ * @param {number} [graceDays] days (defaults to 7)
+ * @returns {boolean}
+ */
+export function isInGracePeriod(createdAtYMD, todayYMD, graceDays = 7) {
+  return daysBetween(createdAtYMD, todayYMD) < graceDays;
+}
+
+/**
+ * Return the first day of the month containing `ymd`, as YYYY-MM-DD.
+ * Uses local-calendar constructor `new Date(y, m-1, 1)` — DST-safe.
+ *
+ * @param {string} ymd YYYY-MM-DD
+ * @returns {string}
+ */
+export function getMonthStart(ymd) {
+  const [y, m] = ymd.split('-').map(Number);
+  return formatLocalYMD(new Date(y, m - 1, 1));
+}
+
+/**
+ * Return the last day of the month containing `ymd`, as YYYY-MM-DD.
+ * Uses the idiom `new Date(y, m, 0)` (day 0 of next month = last day of current month).
+ * Handles leap days correctly — DST-safe.
+ *
+ * @param {string} ymd YYYY-MM-DD
+ * @returns {string}
+ */
+export function getMonthEnd(ymd) {
+  const [y, m] = ymd.split('-').map(Number);
+  return formatLocalYMD(new Date(y, m, 0));
+}

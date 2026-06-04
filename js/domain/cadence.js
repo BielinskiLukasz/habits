@@ -1,11 +1,10 @@
 /**
- * @file Pure cadence resolver for the 4 cadence types in the seed (D-48,
- * D-49, D-50, D-51).
+ * @file Pure cadence resolver for the 5 cadence types (D-48, D-49, D-50, D-51, CADENCE-03).
  *
  * Signature: `appliesToday(habit, date, ctx)` where
- *   - `habit` is an IDB row (`{id, cadence, lastCompletedDate?, createdAt?}`)
+ *   - `habit` is an IDB row (`{id, cadence, lastCompletedDate?, createdAt?, startDate?}`)
  *   - `date` is YYYY-MM-DD (local calendar)
- *   - `ctx = {weekStart: 'mon'|'sun', weekCompletions: (habitId, startYMD, endYMD) => number}`
+ *   - `ctx = {weekStart: 'mon'|'sun', weekCompletions: (habitId, startYMD, endYMD) => number, monthCompletions: (habitId, startYMD, endYMD) => number}`
  *
  * Dispatch via the `RESOLVERS` table (Anti-Pattern 4 extended: NO `switch
  * (habit.cadence.type)`). Each resolver is a pure function — no IDB / repo
@@ -25,6 +24,14 @@
  *     is `daysBetween(anchor, date) >= cadence.n`.
  *   - day-of-week-subset: `cadence.days` is an array of lowercase 3-letter
  *     day codes ('sun'|'mon'|...). Uses LOCAL `getDay()` (NOT UTC).
+ *   - monthly (CADENCE-03): log-aware, once per calendar month. The habit hides
+ *     for the rest of the month as soon as ANY completed log lands within the
+ *     current month. Resolver queries `ctx.monthCompletions(habitId, monthStart, monthEnd) === 0`.
+ *
+ * Future-scheduled habits (CATALOG-07 startDate guard):
+ *   - If `habit.startDate` is defined AND `habit.startDate > date`, `appliesToday`
+ *     returns false immediately without consulting the resolver (habit is not yet active).
+ *   - The guard runs BEFORE resolver dispatch, short-circuiting the resolver call.
  *
  * Unknown cadence type → throws `Error('cadence: unknown type <X>')` so a
  * mis-loaded fixture is a loud failure on first render, not a silent
@@ -41,6 +48,8 @@ import {
   isoWeekStart,
   isoWeekEnd,
   daysBetween,
+  getMonthStart,
+  getMonthEnd,
 } from '../util/date.js';
 
 /** Lowercase 3-letter day codes matching the LOCAL `Date#getDay()` index. */
@@ -71,17 +80,28 @@ const RESOLVERS = {
     const code = DOW[parseLocalYMD(d).getDay()];
     return h.cadence.days.includes(code);
   },
+
+  monthly: (h, d, ctx) => {
+    const start = getMonthStart(d);
+    const end = getMonthEnd(d);
+    return ctx.monthCompletions(h.id, start, end) === 0;
+  },
 };
 
 /**
  * Whether a habit applies on the given local calendar day.
  *
- * @param {{ id: string, cadence: { type: string, n?: number, days?: string[] }, lastCompletedDate?: string|null, createdAt?: string }} habit
+ * @param {{ id: string, cadence: { type: string, n?: number, days?: string[] }, lastCompletedDate?: string|null, createdAt?: string, startDate?: string|null }} habit
  * @param {string} date YYYY-MM-DD (local)
- * @param {{ weekStart: 'mon'|'sun', weekCompletions: (habitId: string, startYMD: string, endYMD: string) => number }} ctx
+ * @param {{ weekStart: 'mon'|'sun', weekCompletions: (habitId: string, startYMD: string, endYMD: string) => number, monthCompletions: (habitId: string, startYMD: string, endYMD: string) => number }} ctx
  * @returns {boolean}
  */
 export function appliesToday(habit, date, ctx) {
+  // startDate guard: if habit is future-scheduled, return false immediately (CATALOG-07).
+  if (habit.startDate && habit.startDate > date) {
+    return false;
+  }
+
   const resolver = RESOLVERS[habit.cadence.type];
   if (!resolver) {
     throw new Error(`cadence: unknown type ${habit.cadence.type}`);
