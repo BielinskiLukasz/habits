@@ -121,15 +121,19 @@ export function get(db, store, key) {
 }
 
 /**
- * Read every row in `store` in a fresh readonly tx.
+ * Read rows in `store` in a fresh readonly tx. Optionally pass an
+ * `IDBKeyRange` (or key) as `query` to restrict by the store's primary key.
+ * Used by `repo.getHabitVersionAtDate` to bound the compound `[habitId,
+ * effectiveFrom]` keypath range (Phase 04 plan 05).
  *
  * @param {IDBDatabase} db
  * @param {string} store
+ * @param {IDBValidKey|IDBKeyRange|null} [query] primary-key range or null for all
  * @returns {Promise<object[]>}
  */
-export function getAll(db, store) {
+export function getAll(db, store, query) {
   const tx = db.transaction(store, 'readonly');
-  return promisify(tx.objectStore(store).getAll());
+  return promisify(query == null ? tx.objectStore(store).getAll() : tx.objectStore(store).getAll(query));
 }
 
 /**

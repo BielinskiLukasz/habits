@@ -18,6 +18,9 @@
  * sequential method calls within `body` are sufficient for unit/integration
  * assertions; real-IDB durability is verified manually via tests-browser.html
  * (D-26).
+ *
+ * Phase 04 plan 05 (Task 1): adds `getLogsForDate` and `getHabitVersionAtDate`
+ * to match the new methods added to `js/db/repo.js` (A7 contract preserved).
  */
 
 const COMPOUND_KEY_STORES = new Set(['logs', 'habit_versions', 'score_snapshots']);
@@ -42,21 +45,23 @@ function keyOf(storeName, value) {
  * Create an in-memory fake repo with the same surface as `js/db/repo.js`.
  *
  * @returns {{
- *   getHabit:        (id: string) => Promise<object|undefined>,
- *   getAllHabits:    () => Promise<object[]>,
- *   putHabit:        (h: object) => Promise<void>,
- *   putLog:          (l: object) => Promise<void>,
- *   getLog:          (habitId: string, date: string) => Promise<object|undefined>,
- *   getLogsInRange:  (startYMD: string, endYMD: string) => Promise<object[]>,
- *   getLogsByHabit:  (habitId: string) => Promise<object[]>,
- *   putEvent:        (e: object) => Promise<void>,
- *   getEvent:        (id: string) => Promise<object|undefined>,
- *   getMeta:         (key: string) => Promise<*>,
- *   putMeta:         (key: string, value: *) => Promise<void>,
- *   putSetting:      (s: object) => Promise<void>,
- *   getSetting:      (key: string) => Promise<object|undefined>,
- *   runTx:           (stores: string[], mode: 'readonly'|'readwrite', body: (tx: object) => *|Promise<*>) => Promise<*>,
- *   _stores:         Record<string, Map<string, object>>,
+ *   getHabit:                 (id: string) => Promise<object|undefined>,
+ *   getAllHabits:              () => Promise<object[]>,
+ *   putHabit:                 (h: object) => Promise<void>,
+ *   putLog:                   (l: object) => Promise<void>,
+ *   getLog:                   (habitId: string, date: string) => Promise<object|undefined>,
+ *   getLogsInRange:           (startYMD: string, endYMD: string) => Promise<object[]>,
+ *   getLogsByHabit:           (habitId: string) => Promise<object[]>,
+ *   getLogsForDate:           (date: string) => Promise<object[]>,
+ *   getHabitVersionAtDate:    (habitId: string, date: string) => Promise<object|undefined>,
+ *   putEvent:                 (e: object) => Promise<void>,
+ *   getEvent:                 (id: string) => Promise<object|undefined>,
+ *   getMeta:                  (key: string) => Promise<*>,
+ *   putMeta:                  (key: string, value: *) => Promise<void>,
+ *   putSetting:               (s: object) => Promise<void>,
+ *   getSetting:               (key: string) => Promise<object|undefined>,
+ *   runTx:                    (stores: string[], mode: 'readonly'|'readwrite', body: (tx: object) => *|Promise<*>) => Promise<*>,
+ *   _stores:                  Record<string, Map<string, object>>,
  * }}
  */
 export function createFakeRepo() {
@@ -115,6 +120,34 @@ export function createFakeRepo() {
         }
       }
       return out;
+    },
+    // Phase 04 plan 05 Task 1: all logs for a single date (all habitIds).
+    // Mirrors repo.getLogsForDate; real backing index is `date` per D-39 schema.
+    async getLogsForDate(date) {
+      /** @type {object[]} */
+      const out = [];
+      for (const log of stores.logs.values()) {
+        if (log.date === date) {
+          out.push(log);
+        }
+      }
+      return out;
+    },
+    // Phase 04 plan 05 Task 1: most-recent habit_versions row effectiveFrom <= date.
+    // Mirrors repo.getHabitVersionAtDate; real uses IDBKeyRange.bound on compound
+    // keypath [habitId, effectiveFrom] per D-39 schema.
+    async getHabitVersionAtDate(habitId, date) {
+      /** @type {object[]} */
+      const candidates = [];
+      for (const v of stores.habit_versions.values()) {
+        if (v.habitId === habitId && v.effectiveFrom <= date) {
+          candidates.push(v);
+        }
+      }
+      if (candidates.length === 0) return undefined;
+      // Return the most recent version (largest effectiveFrom <= date).
+      candidates.sort((a, b) => a.effectiveFrom < b.effectiveFrom ? -1 : a.effectiveFrom > b.effectiveFrom ? 1 : 0);
+      return candidates[candidates.length - 1];
     },
     async putEvent(e) { putters.events(e); },
     async getEvent(id) { return stores.events.get(id); },

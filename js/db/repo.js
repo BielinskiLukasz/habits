@@ -132,6 +132,38 @@ export async function getLogsByHabit(habitId) {
 }
 
 /**
+ * Get every log row whose `date` exactly equals `date` (all habitIds) via the
+ * `date` index on the `logs` store (D-39, Phase 04 plan 05). Used by the
+ * Today view to bulk-read all completion state for a single calendar day.
+ *
+ * @param {string} date YYYY-MM-DD, local
+ * @returns {Promise<object[]>}
+ */
+export async function getLogsForDate(date) {
+  const db = await openDB();
+  return indexGetAll(db, 'logs', 'date', IDBKeyRange.only(date));
+}
+
+/**
+ * Get the most recent `habit_versions` row for `habitId` whose `effectiveFrom`
+ * is <= `date` (Phase 04 plan 05, NFR-10). Uses the compound keypath
+ * `[habitId, effectiveFrom]` on the `habit_versions` store (D-39) with an
+ * `IDBKeyRange.bound` from `[habitId, '0000-01-01']` to `[habitId, date]` so
+ * all versions in the store are lexicographically bounded by habitId first.
+ * Returns the LAST entry (largest effectiveFrom in the range) or `undefined`.
+ *
+ * @param {string} habitId
+ * @param {string} date YYYY-MM-DD, inclusive upper bound
+ * @returns {Promise<object|undefined>}
+ */
+export async function getHabitVersionAtDate(habitId, date) {
+  const db = await openDB();
+  const range = IDBKeyRange.bound([habitId, '0000-01-01'], [habitId, date]);
+  const results = await getAll(db, 'habit_versions', range);
+  return results.length > 0 ? results[results.length - 1] : undefined;
+}
+
+/**
  * Put an event row. `e.id` is the UUID keypath (D-42) — caller MUST set it
  * (via `newId()` from `js/util/id.js`) before calling.
  *

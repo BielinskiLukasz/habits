@@ -29,6 +29,8 @@ const EXPECTED = [
   'getLog',
   'getLogsInRange',
   'getLogsByHabit',
+  'getLogsForDate',
+  'getHabitVersionAtDate',
   'putEvent',
   'getEvent',
   'getMeta',
