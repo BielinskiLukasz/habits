@@ -32,6 +32,14 @@ Last activity: 2026-05-29 19:47 -- Phase 03 UAT verification complete, all gaps 
 
 Progress: [██████████████████████░░░░░░░░] 54% (All Phase 3 complete: 6/6 plans shipped + UAT verified; Phase 4 ready to plan)
 
+## Temp Branch Work Available
+
+⚠️ **Note (2026-06-05):** A `temp` branch exists (commit `c449c5b`) containing Phase 4 implementation work (3500+ insertions across mastery, stage, waveAggregates, date utilities, and 40+ tests). 
+
+**For execute-phase:** The executor should read the temp branch code via `git show temp:js/domain/mastery.js` etc., understand the logic and design decisions, and reuse it while creating fresh Phase 4 commits. This gives clean commit history without re-implementing from scratch.
+
+**See:** `.planning/TEMP-BRANCH-REFERENCE.md` (module inventory + executor instructions) and `.planning/TEMP-BRANCH-USAGE-GUIDE.md` (integration options).
+
 ## Resume Instructions
 
 **Phase 3 complete & UAT verified (2026-05-29)**
