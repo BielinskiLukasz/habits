@@ -113,7 +113,32 @@ Plans:
   6. User navigates to any past day, sees the habits that applied that day (per their cadence at that time), and can mark not-completed individually or bulk-mark all not-yet-completed
   7. User views wave-level aggregates (completion %, status counts, longest active streak, "wave at risk" indicator) and can define a future wave plan (e.g., 2027)
 
-**Plans**: TBD
+**Plans**: 10 plans
+
+Plans:
+
+**Wave 1** *(pure domain — parallel)*
+
+- [ ] 04-01-PLAN.md — Cadence extension: monthly resolver + startDate guard + date helpers (isInGracePeriod, getMonthStart, getMonthEnd) — CADENCE-01..07, CATALOG-07
+- [ ] 04-02-PLAN.md — Mastery domain: `js/domain/mastery.js` evaluateMastery (rolling window, cadence-aware denominator, grace period, per-habit override, multi-log-type dispatch) — MASTERY-01..07
+- [ ] 04-03-PLAN.md — Stage domain: `js/domain/stage.js` evaluateStageTriggers (OR-composed manual/scheduled/N-days/threshold triggers) + demoteStage — STAGE-01..07
+- [ ] 04-04-PLAN.md — Wave aggregates: `js/domain/waveAggregates.js` computeWaveAggregates (completion%, status counts, streak, at-risk) — WAVE-01..06
+
+**Wave 2** *(infrastructure + handlers — parallel)*
+
+- [ ] 04-05-PLAN.md — Repo extensions (getLogsForDate, getHabitVersionAtDate) + createHabit + editHabit apply handlers + fake-idb extension + integration tests — CATALOG-01..04, CATALOG-07, NFR-10
+- [ ] 04-06-PLAN.md — archiveHabit + restoreHabit + advanceStage + demoteStage + logNumeric + logSlot apply handlers — CATALOG-05..06, STAGE-03..07, LOG-02..06, HISTORY-05
+- [ ] 04-07-PLAN.md — setMasteryThreshold + setMasteryWindow apply handlers + Settings Mastery card (SETTINGS-01) — MASTERY-01..02, SETTINGS-01
+
+**Wave 3** *(UI — parallel)*
+
+- [ ] 04-08-PLAN.md — Catalog view: `js/views/catalog.js` + `js/views/catalog/builders.js` + `css/catalog.css` + #catalog route in router/main/HTML — CATALOG-01..07, STAGE-01..03, MASTERY-02..03
+- [ ] 04-09-PLAN.md — History view: `js/views/history.js` + builders + CSS + Today multi-occurrence renderers (numeric +/- buttons, slot disclosure) — HISTORY-01..06, LOG-02..06
+
+**Wave 4** *(closeout)*
+
+- [ ] 04-10-PLAN.md — Phase closeout: seed.json enrichment (stages, targetType), sw.js SHELL P4 extension, sw.shell.test.js P4_REQUIRED list, APP_VERSION 0.3.0 → 0.4.0, VERSIONING.md — CADENCE-01..05, NFR-10
+
 **UI hint**: yes
 
 ### Phase 5: Backup & Restore (JSON + CSV Exports, JSON Import, Nag)
@@ -160,6 +185,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
 | 2. Storage Foundation (The Spine) | 6/6 | Complete    | 2026-05-27 |
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
-| 4. Domain Model | 0/TBD | Not started | - |
+| 4. Domain Model | 0/10 | Not started | - |
 | 5. Backup & Restore | 0/TBD | Not started | - |
 | 6. Desktop Analytics & Scoring Trio | 0/TBD | Not started | - |
