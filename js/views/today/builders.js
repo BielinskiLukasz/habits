@@ -187,6 +187,148 @@ export function buildTodayRow({ habit, completed }) {
 }
 
 /**
+ * Build a numeric counter row description for Today: progress display "X / Y"
+ * with + (increment) and − (decrement) buttons (D-88, LOG-05).
+ *
+ * Row carries `habit-row--complete` class when `count >= habit.target`.
+ * The decrement handler (wired at mount time) uses `Math.max(0, count-1)`
+ * to prevent underflow to negatives (T-04-09d).
+ *
+ * @param {{ id: string, name: string, target: number }} habit
+ * @param {{ count?: number } | null} log — current log row, or null
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildNumericRow(habit, log) {
+  const count = log?.count ?? 0;
+  const target = habit.target ?? 1;
+  const isComplete = count >= target;
+
+  return {
+    tag: 'li',
+    attrs: { class: isComplete ? 'today-row today-row--numeric habit-row--complete' : 'today-row today-row--numeric' },
+    children: [
+      {
+        tag: 'span',
+        attrs: { class: 'today-row-name' },
+        text: habit.name,
+      },
+      {
+        tag: 'span',
+        attrs: { class: 'today-row-progress', 'data-progress': '' },
+        text: `${count} / ${target}`,
+      },
+      {
+        tag: 'button',
+        attrs: {
+          class: 'today-numeric-btn today-numeric-btn--decrement',
+          'data-action': 'log-decrement',
+          'data-habit-id': habit.id,
+          'aria-label': `Decrease count for ${habit.name}`,
+        },
+        text: '−',
+      },
+      {
+        tag: 'button',
+        attrs: {
+          class: 'today-numeric-btn today-numeric-btn--increment',
+          'data-action': 'log-increment',
+          'data-habit-id': habit.id,
+          'aria-label': `Increase count for ${habit.name}`,
+        },
+        text: '+',
+      },
+    ],
+  };
+}
+
+/**
+ * Build a slot-checklist row description for Today (D-89, LOG-03).
+ *
+ * Collapsed state shows "X / Y slots" + a ▼ toggle button. The slot list
+ * is a hidden `<div class="slot-list">` with one toggle per slot — revealed
+ * via `data-action="toggle-slots"` in the mounter's action map.
+ *
+ * Row carries `habit-row--complete` class when all slots are checked.
+ * Slot names rendered via `text:` (NEVER innerHTML) per T-04-09c XSS guard.
+ *
+ * @param {{ id: string, name: string, target?: number, slots?: Array<{name: string}> }} habit
+ * @param {{ slots?: Array<{name: string, checked: boolean}> } | null} log
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildSlotRow(habit, log) {
+  const habitSlots = habit.slots ?? [];
+  const logSlots = log?.slots ?? [];
+  const total = habit.target ?? habitSlots.length;
+
+  // Build effective slot state: merge habit slot definitions with log state.
+  // Use logSlots when available; fall back to unchecked for each habit slot.
+  const effectiveSlots = habitSlots.map((hSlot, i) => {
+    const lSlot = logSlots[i];
+    return { name: hSlot.name, checked: lSlot?.checked === true };
+  });
+
+  const checkedCount = effectiveSlots.filter((s) => s.checked).length;
+  const isComplete = checkedCount >= total && total > 0;
+
+  /** @type {object[]} */
+  const slotItems = effectiveSlots.map((slot, i) => ({
+    tag: 'label',
+    attrs: { class: 'slot-item' },
+    children: [
+      {
+        tag: 'input',
+        attrs: {
+          type: 'checkbox',
+          class: 'slot-toggle',
+          'data-action': 'toggle-slot',
+          'data-slot-index': String(i),
+          'data-habit-id': habit.id,
+          ...(slot.checked ? { checked: '' } : {}),
+        },
+      },
+      {
+        tag: 'span',
+        attrs: { class: 'slot-label' },
+        text: slot.name,
+      },
+    ],
+  }));
+
+  return {
+    tag: 'li',
+    attrs: { class: isComplete ? 'today-row today-row--slot habit-row--complete' : 'today-row today-row--slot' },
+    children: [
+      {
+        tag: 'span',
+        attrs: { class: 'today-row-name' },
+        text: habit.name,
+      },
+      {
+        tag: 'span',
+        attrs: { class: 'today-row-progress', 'data-progress': '' },
+        text: `${checkedCount} / ${total} slots`,
+      },
+      {
+        tag: 'button',
+        attrs: {
+          class: 'today-slot-toggle',
+          'data-action': 'toggle-slots',
+          'data-habit-id': habit.id,
+          'aria-expanded': 'false',
+          'aria-label': `Toggle slots for ${habit.name}`,
+        },
+        text: '▼',
+      },
+      {
+        tag: 'div',
+        attrs: { class: 'slot-list', hidden: '' },
+        children: slotItems,
+      },
+    ],
+  };
+}
+
+/**
  * Build the Today list description. Three branches per D-58:
  *
  *   1. Zero applicable habits → `<div class="today-empty">No habits scheduled today.</div>`
