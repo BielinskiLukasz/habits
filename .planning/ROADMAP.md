@@ -185,6 +185,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. PWA Shell & Tooling Hygiene | 5/5 | Complete | 2026-05-26 |
 | 2. Storage Foundation (The Spine) | 6/6 | Complete    | 2026-05-27 |
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
-| 4. Domain Model | 11/11 | Complete   | 2026-06-05 |
+| 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
 | 5. Backup & Restore | 0/TBD | Not started | - |
 | 6. Desktop Analytics & Scoring Trio | 0/TBD | Not started | - |

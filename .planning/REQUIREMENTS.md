@@ -18,70 +18,70 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### CATALOG — Habit definitions (desktop primary)
 
-- [ ] **CATALOG-01**: User can create a new habit with: name, wave, cadence rule, target type (binary / numeric / slot-checklist), stage definitions
-- [ ] **CATALOG-02**: User can edit an existing habit's definition (name, target, cadence, stages)
-- [ ] **CATALOG-03**: Editing a habit creates a new `habit_versions` entry; the prior version remains accessible to historical log evaluation
-- [ ] **CATALOG-04**: User can view the full edit history of any habit (when it changed, what changed)
-- [ ] **CATALOG-05**: User can archive a habit (stops appearing on Today; history preserved)
-- [ ] **CATALOG-06**: User can restore an archived habit
-- [ ] **CATALOG-07**: User can plan a new habit with a future `startDate` (e.g., "starts in 3 weeks") — habit only appears on Today from `startDate` forward
+- [x] **CATALOG-01**: User can create a new habit with: name, wave, cadence rule, target type (binary / numeric / slot-checklist), stage definitions
+- [x] **CATALOG-02**: User can edit an existing habit's definition (name, target, cadence, stages)
+- [x] **CATALOG-03**: Editing a habit creates a new `habit_versions` entry; the prior version remains accessible to historical log evaluation
+- [x] **CATALOG-04**: User can view the full edit history of any habit (when it changed, what changed)
+- [x] **CATALOG-05**: User can archive a habit (stops appearing on Today; history preserved)
+- [x] **CATALOG-06**: User can restore an archived habit
+- [x] **CATALOG-07**: User can plan a new habit with a future `startDate` (e.g., "starts in 3 weeks") — habit only appears on Today from `startDate` forward
 
 ### CADENCE — Schedule rules
 
-- [ ] **CADENCE-01**: User can set a habit to daily cadence
-- [ ] **CADENCE-02**: User can set a habit to weekly cadence (1 occurrence required per week)
-- [ ] **CADENCE-03**: User can set a habit to monthly cadence
-- [ ] **CADENCE-04**: User can set a habit to "every N days" cadence (e.g., "Prysznic co 2 dni")
-- [ ] **CADENCE-05**: User can restrict a habit to specific days of the week (Mon-Fri, weekends-only, single day, arbitrary subset)
-- [ ] **CADENCE-06**: Cadence engine correctly identifies "is this habit applicable today?" given any combination of rules
-- [ ] **CADENCE-07**: Cadence engine handles DST transitions, leap days, and month-end edge cases correctly
+- [x] **CADENCE-01**: User can set a habit to daily cadence
+- [x] **CADENCE-02**: User can set a habit to weekly cadence (1 occurrence required per week)
+- [x] **CADENCE-03**: User can set a habit to monthly cadence
+- [x] **CADENCE-04**: User can set a habit to "every N days" cadence (e.g., "Prysznic co 2 dni")
+- [x] **CADENCE-05**: User can restrict a habit to specific days of the week (Mon-Fri, weekends-only, single day, arbitrary subset)
+- [x] **CADENCE-06**: Cadence engine correctly identifies "is this habit applicable today?" given any combination of rules
+- [x] **CADENCE-07**: Cadence engine handles DST transitions, leap days, and month-end edge cases correctly
 
 ### STAGE — Progressive targets
 
-- [ ] **STAGE-01**: A habit can declare ordered stages (etap 1, etap 2, etap 3), each with its own target value
-- [ ] **STAGE-02**: User can view the current stage of any habit
-- [ ] **STAGE-03**: Stage advancement supports a "manual button" trigger (user presses "Advance stage" when ready)
-- [ ] **STAGE-04**: Stage advancement supports a "scheduled by week" trigger (auto-advance when calendar week N reached)
-- [ ] **STAGE-05**: Stage advancement supports an "after N days at current stage" trigger (user-defined N per habit)
-- [ ] **STAGE-06**: A single habit can compose multiple stage triggers — any one firing advances the stage
-- [ ] **STAGE-07**: Manual stage demotion is supported (user can step back to a prior stage)
+- [x] **STAGE-01**: A habit can declare ordered stages (etap 1, etap 2, etap 3), each with its own target value
+- [x] **STAGE-02**: User can view the current stage of any habit
+- [x] **STAGE-03**: Stage advancement supports a "manual button" trigger (user presses "Advance stage" when ready)
+- [x] **STAGE-04**: Stage advancement supports a "scheduled by week" trigger (auto-advance when calendar week N reached)
+- [x] **STAGE-05**: Stage advancement supports an "after N days at current stage" trigger (user-defined N per habit)
+- [x] **STAGE-06**: A single habit can compose multiple stage triggers — any one firing advances the stage
+- [x] **STAGE-07**: Manual stage demotion is supported (user can step back to a prior stage)
 
 ### MASTERY — Threshold-based graduation
 
-- [ ] **MASTERY-01**: Default mastery threshold is 90% completion over rolling 70 days, configurable globally in Settings
-- [ ] **MASTERY-02**: Per-habit threshold and window can override the global defaults
-- [ ] **MASTERY-03**: A habit that meets its threshold over its window is displayed with a "mastered" visual treatment (muted style + badge), still visible on Today
-- [ ] **MASTERY-04**: A mastered habit that drops below its threshold reverts visual treatment (loses badge); no destructive state change
-- [ ] **MASTERY-05**: Mastery is evaluated using cadence-aware denominator (non-applicable days don't count)
-- [ ] **MASTERY-06**: New habits enter a 7-day grace period during which rolling stats are not surfaced
-- [ ] **MASTERY-07**: Mastery is recomputed write-time (when a log change affects the rolling window), not on every render
+- [x] **MASTERY-01**: Default mastery threshold is 90% completion over rolling 70 days, configurable globally in Settings
+- [x] **MASTERY-02**: Per-habit threshold and window can override the global defaults
+- [x] **MASTERY-03**: A habit that meets its threshold over its window is displayed with a "mastered" visual treatment (muted style + badge), still visible on Today
+- [x] **MASTERY-04**: A mastered habit that drops below its threshold reverts visual treatment (loses badge); no destructive state change
+- [x] **MASTERY-05**: Mastery is evaluated using cadence-aware denominator (non-applicable days don't count)
+- [x] **MASTERY-06**: New habits enter a 7-day grace period during which rolling stats are not surfaced
+- [x] **MASTERY-07**: Mastery is recomputed write-time (when a log change affects the rolling window), not on every render
 
 ### LOG — Multi-occurrence logging
 
 - [x] **LOG-01**: User can configure a habit's logging UX as "binary" (single check)
-- [ ] **LOG-02**: User can configure a habit's logging UX as "numeric +1 counter" (e.g., "5 things grateful for", "2L water")
-- [ ] **LOG-03**: User can configure a habit's logging UX as "slot-checklist" (e.g., "7 meatless meals/week")
-- [ ] **LOG-04**: For slot-checklist habits, user can choose anonymous slots OR user-labeled slots per habit
-- [ ] **LOG-05**: Multi-occurrence habits show progress toward target (e.g., "3 / 7 meals")
-- [ ] **LOG-06**: Multi-occurrence habits count as "completed for the period" only when target is reached
+- [x] **LOG-02**: User can configure a habit's logging UX as "numeric +1 counter" (e.g., "5 things grateful for", "2L water")
+- [x] **LOG-03**: User can configure a habit's logging UX as "slot-checklist" (e.g., "7 meatless meals/week")
+- [x] **LOG-04**: For slot-checklist habits, user can choose anonymous slots OR user-labeled slots per habit
+- [x] **LOG-05**: Multi-occurrence habits show progress toward target (e.g., "3 / 7 meals")
+- [x] **LOG-06**: Multi-occurrence habits count as "completed for the period" only when target is reached
 
 ### HISTORY — Past-day navigation and edits
 
-- [ ] **HISTORY-01**: User can navigate to any past day from a history view
-- [ ] **HISTORY-02**: User can see, for any past day, the full list of habits that applied that day (per their cadence at that time)
-- [ ] **HISTORY-03**: User can mark a habit as not-completed on a past day
-- [ ] **HISTORY-04**: User can bulk-action "mark all not-yet-completed habits as uncompleted" on a given past day
-- [ ] **HISTORY-05**: Partial multi-occurrence completions are preserved as logged counts; rolling-window math treats "below target" as "not completed for the period"
-- [ ] **HISTORY-06**: Logs for any past day are interpreted against the `habit_versions` entry that was effective on that day (not the current definition)
+- [x] **HISTORY-01**: User can navigate to any past day from a history view
+- [x] **HISTORY-02**: User can see, for any past day, the full list of habits that applied that day (per their cadence at that time)
+- [x] **HISTORY-03**: User can mark a habit as not-completed on a past day
+- [x] **HISTORY-04**: User can bulk-action "mark all not-yet-completed habits as uncompleted" on a given past day
+- [x] **HISTORY-05**: Partial multi-occurrence completions are preserved as logged counts; rolling-window math treats "below target" as "not completed for the period"
+- [x] **HISTORY-06**: Logs for any past day are interpreted against the `habit_versions` entry that was effective on that day (not the current definition)
 
 ### WAVE — Fala model and aggregates
 
-- [ ] **WAVE-01**: Each habit belongs to exactly one wave (Fala 0–9 seeded, future waves user-extendable)
-- [ ] **WAVE-02**: Waves have a name, a date range (start week, end week), and a theme description
-- [ ] **WAVE-03**: User can view aggregate metrics per wave: completion %, count of habits by status (active / mastered / archived)
-- [ ] **WAVE-04**: User can view "longest active wave streak" (consecutive days where ≥ X% of the wave's applicable habits were completed)
-- [ ] **WAVE-05**: User can see a "wave at risk" indicator when a configurable fraction of habits in a wave is slipping
-- [ ] **WAVE-06**: User can extend the wave model beyond 2026 (define a 2027 wave plan)
+- [x] **WAVE-01**: Each habit belongs to exactly one wave (Fala 0–9 seeded, future waves user-extendable)
+- [x] **WAVE-02**: Waves have a name, a date range (start week, end week), and a theme description
+- [x] **WAVE-03**: User can view aggregate metrics per wave: completion %, count of habits by status (active / mastered / archived)
+- [x] **WAVE-04**: User can view "longest active wave streak" (consecutive days where ≥ X% of the wave's applicable habits were completed)
+- [x] **WAVE-05**: User can see a "wave at risk" indicator when a configurable fraction of habits in a wave is slipping
+- [x] **WAVE-06**: User can extend the wave model beyond 2026 (define a 2027 wave plan)
 
 ### UNDO — Single-step undo
 
@@ -161,7 +161,7 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### SETTINGS — Configuration surface
 
-- [ ] **SETTINGS-01**: User can view and edit global mastery threshold (default 90%) and window (default 70 days)
+- [x] **SETTINGS-01**: User can view and edit global mastery threshold (default 90%) and window (default 70 days)
 - [ ] **SETTINGS-02**: User can choose scoring model (S1 / S2 / S3)
 - [ ] **SETTINGS-03**: User can trigger JSON export, JSON import, CSV export from Settings
 - [x] **SETTINGS-04**: User can see storage persistence status (persistent: yes/no) and last-backup timestamp
@@ -248,52 +248,52 @@ Every v1 requirement maps to exactly one phase.
 | CORE-04 | Phase 3 | Complete (03-02) |
 | CORE-05 | Phase 3 | Complete (03-02) |
 | CORE-06 | Phase 3 | Complete (03-02) |
-| CATALOG-01 | Phase 4 | Pending |
-| CATALOG-02 | Phase 4 | Pending |
-| CATALOG-03 | Phase 4 | Pending |
-| CATALOG-04 | Phase 4 | Pending |
-| CATALOG-05 | Phase 4 | Pending |
-| CATALOG-06 | Phase 4 | Pending |
-| CATALOG-07 | Phase 4 | Pending |
-| CADENCE-01 | Phase 4 | Pending |
-| CADENCE-02 | Phase 4 | Pending |
-| CADENCE-03 | Phase 4 | Pending |
-| CADENCE-04 | Phase 4 | Pending |
-| CADENCE-05 | Phase 4 | Pending |
-| CADENCE-06 | Phase 4 | Pending |
-| CADENCE-07 | Phase 4 | Pending |
-| STAGE-01 | Phase 4 | Pending |
-| STAGE-02 | Phase 4 | Pending |
-| STAGE-03 | Phase 4 | Pending |
-| STAGE-04 | Phase 4 | Pending |
-| STAGE-05 | Phase 4 | Pending |
-| STAGE-06 | Phase 4 | Pending |
-| STAGE-07 | Phase 4 | Pending |
-| MASTERY-01 | Phase 4 | Pending |
-| MASTERY-02 | Phase 4 | Pending |
-| MASTERY-03 | Phase 4 | Pending |
-| MASTERY-04 | Phase 4 | Pending |
-| MASTERY-05 | Phase 4 | Pending |
-| MASTERY-06 | Phase 4 | Pending |
-| MASTERY-07 | Phase 4 | Pending |
+| CATALOG-01 | Phase 4 | Complete |
+| CATALOG-02 | Phase 4 | Complete |
+| CATALOG-03 | Phase 4 | Complete |
+| CATALOG-04 | Phase 4 | Complete |
+| CATALOG-05 | Phase 4 | Complete |
+| CATALOG-06 | Phase 4 | Complete |
+| CATALOG-07 | Phase 4 | Complete |
+| CADENCE-01 | Phase 4 | Complete |
+| CADENCE-02 | Phase 4 | Complete |
+| CADENCE-03 | Phase 4 | Complete |
+| CADENCE-04 | Phase 4 | Complete |
+| CADENCE-05 | Phase 4 | Complete |
+| CADENCE-06 | Phase 4 | Complete |
+| CADENCE-07 | Phase 4 | Complete |
+| STAGE-01 | Phase 4 | Complete |
+| STAGE-02 | Phase 4 | Complete |
+| STAGE-03 | Phase 4 | Complete |
+| STAGE-04 | Phase 4 | Complete |
+| STAGE-05 | Phase 4 | Complete |
+| STAGE-06 | Phase 4 | Complete |
+| STAGE-07 | Phase 4 | Complete |
+| MASTERY-01 | Phase 4 | Complete |
+| MASTERY-02 | Phase 4 | Complete |
+| MASTERY-03 | Phase 4 | Complete |
+| MASTERY-04 | Phase 4 | Complete |
+| MASTERY-05 | Phase 4 | Complete |
+| MASTERY-06 | Phase 4 | Complete |
+| MASTERY-07 | Phase 4 | Complete |
 | LOG-01 | Phase 3 | Complete (03-03) |
-| LOG-02 | Phase 4 | Pending |
-| LOG-03 | Phase 4 | Pending |
-| LOG-04 | Phase 4 | Pending |
-| LOG-05 | Phase 4 | Pending |
-| LOG-06 | Phase 4 | Pending |
-| HISTORY-01 | Phase 4 | Pending |
-| HISTORY-02 | Phase 4 | Pending |
-| HISTORY-03 | Phase 4 | Pending |
-| HISTORY-04 | Phase 4 | Pending |
-| HISTORY-05 | Phase 4 | Pending |
-| HISTORY-06 | Phase 4 | Pending |
-| WAVE-01 | Phase 4 | Pending |
-| WAVE-02 | Phase 4 | Pending |
-| WAVE-03 | Phase 4 | Pending |
-| WAVE-04 | Phase 4 | Pending |
-| WAVE-05 | Phase 4 | Pending |
-| WAVE-06 | Phase 4 | Pending |
+| LOG-02 | Phase 4 | Complete |
+| LOG-03 | Phase 4 | Complete |
+| LOG-04 | Phase 4 | Complete |
+| LOG-05 | Phase 4 | Complete |
+| LOG-06 | Phase 4 | Complete |
+| HISTORY-01 | Phase 4 | Complete |
+| HISTORY-02 | Phase 4 | Complete |
+| HISTORY-03 | Phase 4 | Complete |
+| HISTORY-04 | Phase 4 | Complete |
+| HISTORY-05 | Phase 4 | Complete |
+| HISTORY-06 | Phase 4 | Complete |
+| WAVE-01 | Phase 4 | Complete |
+| WAVE-02 | Phase 4 | Complete |
+| WAVE-03 | Phase 4 | Complete |
+| WAVE-04 | Phase 4 | Complete |
+| WAVE-05 | Phase 4 | Complete |
+| WAVE-06 | Phase 4 | Complete |
 | UNDO-01 | Phase 3 | Complete (03-04) |
 | UNDO-02 | Phase 3 | Complete (03-04) |
 | UNDO-03 | Phase 3 | Complete (03-04) |
@@ -346,7 +346,7 @@ Every v1 requirement maps to exactly one phase.
 | SEED-03 | Phase 2 | Complete |
 | SEED-04 | Phase 2 | Complete |
 | SEED-05 | Phase 2 | Complete |
-| SETTINGS-01 | Phase 4 | Pending |
+| SETTINGS-01 | Phase 4 | Complete |
 | SETTINGS-02 | Phase 6 | Pending |
 | SETTINGS-03 | Phase 5 | Pending |
 | SETTINGS-04 | Phase 3 | Complete (03-05) |
@@ -362,7 +362,7 @@ Every v1 requirement maps to exactly one phase.
 | NFR-07 | Phase 3 | Complete (03-02) |
 | NFR-08 | Phase 6 | Pending |
 | NFR-09 | Phase 1 | Pending |
-| NFR-10 | Phase 4 | Pending |
+| NFR-10 | Phase 4 | Complete |
 | NFR-11 | Phase 1 | Pending |
 | NFR-12 | Phase 1 | Pending |
 
