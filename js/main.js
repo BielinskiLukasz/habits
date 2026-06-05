@@ -61,6 +61,7 @@ import { mountRoutes } from './router.js';
 import { mountToday, mountFooterNav } from './views/today.js';
 import { mountSettings } from './views/settings.js';
 import { mountCatalog } from './views/catalog.js';
+import { mountHistory } from './views/history.js';
 import * as store from './state/store.js';
 import { configureWave, bootWaves } from './domain/wave.js';
 
@@ -145,16 +146,8 @@ mountRoutes({
       focusH1(settingsPanel);
     },
     '#history': () => {
-      // D-80: visible-but-disabled history tab. The panel itself renders a
-      // placeholder so deep-linking to `#history` lands on something useful.
-      if (!historyPanel.firstChild) {
-        const h1 = document.createElement('h1');
-        h1.textContent = 'History';
-        historyPanel.appendChild(h1);
-        const p = document.createElement('p');
-        p.textContent = 'History view ships in Phase 4.';
-        historyPanel.appendChild(p);
-      }
+      // Phase 4 plan 09: full History view replacing Phase 3 stub (HISTORY-01..06).
+      mountHistory(historyPanel, { repo, store });
       show(historyPanel);
       focusH1(historyPanel);
     },

@@ -62,7 +62,10 @@
 import {
   buildTodayHeader,
   buildTodayList,
+  buildTodayRow,
   buildFooterNav,
+  buildNumericRow,
+  buildSlotRow,
 } from './today/builders.js';
 import { mount } from '../util/mount.js';
 import { currentWave } from '../domain/wave.js';
@@ -228,9 +231,118 @@ async function handleMarkUncompleteTap(evt) {
 }
 
 /**
+ * RENDERERS dispatch table (Pitfall 5 — no if-else chain).
+ * Maps `habit.targetType` to the pure builder for that row variant.
+ * Binary row builder has a different signature ({habit, completed}) so it is
+ * wrapped to match the (habit, log) signature used by the dispatch loop.
+ *
+ * @type {Record<string, (habit: object, log: object|null) => object>}
+ */
+const RENDERERS = {
+  binary: (habit, log) => buildTodayRow({ habit, completed: log?.completed === true }),
+  numeric: buildNumericRow,
+  'slot-checklist': buildSlotRow,
+};
+
+/**
+ * Handle log-increment tap: increment count by 1 and call logNumeric.
+ *
+ * T-04-09d: decrement uses Math.max(0, count-1) to prevent negative counts.
+ *
+ * @param {object} evt
+ * @returns {Promise<void>}
+ */
+async function handleLogIncrementTap(evt) {
+  const btn = evt.currentTarget;
+  const habitId = btn.getAttribute('data-habit-id');
+  const date = todayLocal();
+  const log = getCachedLog(habitId, date);
+  const currentCount = log?.count ?? 0;
+  try {
+    await apply({ type: 'logNumeric', payload: { habitId, date, count: currentCount + 1 } });
+  } catch (_err) {
+    showErrorToast("Couldn't update count — try again");
+  }
+}
+
+/**
+ * Handle log-decrement tap: decrement count (floor at 0) and call logNumeric.
+ *
+ * @param {object} evt
+ * @returns {Promise<void>}
+ */
+async function handleLogDecrementTap(evt) {
+  const btn = evt.currentTarget;
+  const habitId = btn.getAttribute('data-habit-id');
+  const date = todayLocal();
+  const log = getCachedLog(habitId, date);
+  const currentCount = log?.count ?? 0;
+  // T-04-09d: Math.max(0, ...) prevents underflow to negatives
+  const newCount = Math.max(0, currentCount - 1);
+  try {
+    await apply({ type: 'logNumeric', payload: { habitId, date, count: newCount } });
+  } catch (_err) {
+    showErrorToast("Couldn't update count — try again");
+  }
+}
+
+/**
+ * Handle toggle-slots tap: show/hide the slot-list div inside the row.
+ *
+ * @param {object} evt
+ * @returns {void}
+ */
+function handleToggleSlotsTap(evt) {
+  const btn = evt.currentTarget;
+  const rowEl = btn.closest('.today-row--slot');
+  if (!rowEl) return;
+  const slotList = rowEl.querySelector('.slot-list');
+  if (!slotList) return;
+  const isHidden = slotList.hasAttribute('hidden');
+  if (isHidden) {
+    slotList.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+  } else {
+    slotList.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+}
+
+/**
+ * Handle toggle-slot tap: toggle one slot's checked state and call logSlot.
+ *
+ * @param {object} evt
+ * @returns {Promise<void>}
+ */
+async function handleToggleSlotTap(evt) {
+  const input = evt.currentTarget;
+  const habitId = input.getAttribute('data-habit-id');
+  const slotIndex = Number(input.getAttribute('data-slot-index'));
+  const date = todayLocal();
+  const log = getCachedLog(habitId, date);
+  const habit = getCachedHabits().find((h) => h.id === habitId);
+  if (!habit) return;
+
+  // Build the full slots array, toggling the targeted slot.
+  const habitSlots = habit.slots ?? [];
+  const existingSlots = log?.slots ?? habitSlots.map((s) => ({ name: s.name, checked: false }));
+  const newSlots = existingSlots.map((s, i) =>
+    i === slotIndex ? { ...s, checked: !s.checked } : s,
+  );
+  try {
+    await apply({ type: 'logSlot', payload: { habitId, date, slots: newSlots } });
+  } catch (_err) {
+    showErrorToast("Couldn't update slot — try again");
+  }
+}
+
+/**
  * Render the Today panel into `parent`. Pure-ish: reads cache via store
  * selectors, builds the description tree, and walks it via `mount()` with
  * the tap-action closures bound.
+ *
+ * Uses the RENDERERS dispatch table to select the correct row builder per
+ * `habit.targetType` (binary / numeric / slot-checklist).
  *
  * @param {object} parent
  * @returns {void}
@@ -245,6 +357,10 @@ function renderTodayInto(parent) {
   const actions = {
     markComplete: handleMarkCompleteTap,
     markUncomplete: handleMarkUncompleteTap,
+    'log-increment': handleLogIncrementTap,
+    'log-decrement': handleLogDecrementTap,
+    'toggle-slots': handleToggleSlotsTap,
+    'toggle-slot': handleToggleSlotTap,
     // togglePolish: bound in a future slice (D-55 inline popover lives there).
   };
 
@@ -264,10 +380,11 @@ function renderTodayInto(parent) {
     (h) => appliesToday(h, date, ctx) || getCachedLog(h.id, date)?.completed === true
   );
 
-  // Pair each applicable habit with its completion state, then sort completed
-  // rows last (D-54 muted treatment).
+  // Pair each applicable habit with its completion state and log, then sort
+  // completed rows last (D-54 muted treatment).
   const pairs = applicable.map((habit) => ({
     habit,
+    log: getCachedLog(habit.id, date) ?? null,
     completed: getCachedLog(habit.id, date)?.completed === true,
   }));
   // Stable partition: uncompleted first, completed last; preserve order within each group.
@@ -283,6 +400,7 @@ function renderTodayInto(parent) {
       actions,
     );
   } else if (uncompleted.length === 0) {
+    // All applicable habits completed — show done state.
     mount(
       buildTodayList({
         habits: [],
@@ -293,7 +411,16 @@ function renderTodayInto(parent) {
       actions,
     );
   } else {
-    mount(buildTodayList({ habits: ordered }), parent, actions);
+    // Render a mixed-type list using the RENDERERS dispatch table.
+    // All habits (binary, numeric, slot-checklist) are rendered via RENDERERS.
+    const listEl = parent.ownerDocument.createElement('ul');
+    listEl.className = 'today-list';
+    listEl.setAttribute('aria-label', "Today's habits");
+    parent.appendChild(listEl);
+    for (const { habit, log } of ordered) {
+      const renderer = RENDERERS[habit.targetType] ?? RENDERERS.binary;
+      mount(renderer(habit, log), listEl, actions);
+    }
   }
 }
 

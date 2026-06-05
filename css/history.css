@@ -1,0 +1,239 @@
+/* css/history.css — History view styles (HISTORY-01..06, D-90).
+ *
+ * Imported by css/main.css into the `view` cascade layer.
+ * Follows the same token-based pattern as today.css and settings.css.
+ *
+ * NFR-06: all interactive targets are at least 44×44px via min-height/min-width.
+ */
+
+@layer history {
+
+/* ============================================================
+   History header: date stepper + calendar toggle
+   ============================================================ */
+
+.history-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.history-date {
+  font-size: var(--font-size-base, 1rem);
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+
+/* Stepper buttons (← →) + calendar toggle — NFR-06 44px touch targets */
+.stepper-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-btn, 6px);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  font-size: var(--font-size-base, 1rem);
+  color: var(--color-fg, #111827);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper-btn:not(:disabled):hover {
+  background: var(--color-surface-hover, #f3f4f6);
+}
+
+/* ============================================================
+   Calendar picker (collapsible)
+   ============================================================ */
+
+.history-calendar {
+  width: 100%;
+  padding: var(--space-3, 0.75rem) 0;
+}
+
+.history-calendar input[type="date"] {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-btn, 6px);
+  font-size: var(--font-size-base, 1rem);
+  background: var(--color-surface, #fff);
+  color: var(--color-fg, #111827);
+}
+
+/* ============================================================
+   Bulk action bar
+   ============================================================ */
+
+.bulk-action-bar {
+  padding: var(--space-2, 0.5rem) var(--space-4, 1rem);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.bulk-action-btn {
+  min-height: 44px;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-btn, 6px);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-fg-muted, #6b7280);
+}
+
+.bulk-action-btn:hover {
+  background: var(--color-surface-hover, #f3f4f6);
+}
+
+/* ============================================================
+   History list
+   ============================================================ */
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-habit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.history-habit-name {
+  flex: 1;
+  font-size: var(--font-size-base, 1rem);
+  color: var(--color-fg, #111827);
+}
+
+.history-habit-status {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-fg-muted, #6b7280);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.history-toggle-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-btn, 6px);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-fg-muted, #6b7280);
+}
+
+.history-toggle-btn:hover {
+  background: var(--color-surface-hover, #f3f4f6);
+}
+
+.history-empty {
+  padding: var(--space-4, 1rem);
+  color: var(--color-fg-muted, #6b7280);
+  text-align: center;
+}
+
+/* ============================================================
+   Numeric row styles (shared with Today extension, D-88)
+   ============================================================ */
+
+.today-row--numeric {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+}
+
+.today-numeric-btn {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-btn, 6px);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-fg, #111827);
+}
+
+.today-numeric-btn:hover {
+  background: var(--color-surface-hover, #f3f4f6);
+}
+
+/* ============================================================
+   Slot-checklist row styles (D-89)
+   ============================================================ */
+
+.today-row--slot {
+  flex-wrap: wrap;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+}
+
+.today-slot-toggle {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-btn, 6px);
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  font-size: var(--font-size-base, 1rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-fg-muted, #6b7280);
+}
+
+.slot-list {
+  width: 100%;
+  padding-top: var(--space-2, 0.5rem);
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-2, 0.5rem) 0;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.slot-toggle {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.slot-label {
+  font-size: var(--font-size-base, 1rem);
+  color: var(--color-fg, #111827);
+}
+
+/* Complete state treatment (shared with today.css patterns) */
+.habit-row--complete .today-row-progress,
+.habit-row--complete .history-habit-status {
+  color: var(--color-success, #16a34a);
+  font-weight: 600;
+}
+
+}
