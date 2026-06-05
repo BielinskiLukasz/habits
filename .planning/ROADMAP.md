@@ -188,3 +188,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
 | 5. Backup & Restore | 0/TBD | Not started | - |
 | 6. Desktop Analytics & Scoring Trio | 0/TBD | Not started | - |
+
+## Backlog
+See [BACKLOG.md](BACKLOG.md) for captured ideas and issues.

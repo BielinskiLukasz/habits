@@ -1,6 +1,6 @@
 # Backlog
 
-Ideas captured during phase work for consideration in future milestones. Not commitments.
+Ideas and issues captured during phase work for consideration in future milestones. Not commitments.
 
 ---
 
@@ -75,6 +75,44 @@ Ideas captured during phase work for consideration in future milestones. Not com
 **Expected:** Wave management panel (add, edit, delete waves).
 
 **Effort:** High — requires new IDB schema (waves store), CRUD handlers, UI (catalog subsection or settings panel).
+
+---
+
+## Unscheduled features
+
+### Slot collapse behavior after selection
+
+**Goal:** Captured for future planning.
+
+**Description:** When a user selects slots in a slot-checklist habit and reaches the target, define whether the slot row collapses or remains open.
+
+**Requirements:** TBD
+
+**Status:** Needs scoping before planning.
+
+---
+
+### Override global mastery settings not working in custom mastery
+
+**Goal:** Captured for future planning.
+
+**Description:** Custom per-habit mastery threshold/window settings may not properly override global defaults in some edge cases. Needs investigation and fix.
+
+**Requirements:** TBD
+
+**Status:** Needs scoping before planning.
+
+---
+
+### Add edit history capability for numeric and slot habits
+
+**Goal:** Captured for future planning.
+
+**Description:** Numeric and slot-checklist habit logs should support edit history (correct a previously-logged value) similar to the undo capability for binary habits.
+
+**Requirements:** TBD
+
+**Status:** Needs scoping before planning.
 
 ---
 
