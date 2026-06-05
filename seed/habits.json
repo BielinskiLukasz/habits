@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "seedVersion": 1,
+  "seedVersion": 2,
   "habits": [
     {
       "id": "015105be-fc0b-45b6-b939-4e8d395fcf13",
@@ -9,7 +9,17 @@
       "wave": 1,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "daily" },
-      "logShape": "binary"
+      "targetType": "binary",
+      "stages": [
+        { "label": "Stage 1", "target": 1, "allowManual": true, "advanceAfterDays": 30 },
+        { "label": "Stage 2", "target": 1, "allowManual": true, "advanceAfterDays": 30 },
+        { "label": "Stage 3", "target": 1, "allowManual": true }
+      ],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     },
     {
       "id": "44403331-dbdf-4992-ac84-944dba8df6f1",
@@ -18,7 +28,13 @@
       "wave": 1,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "daily" },
-      "logShape": "binary"
+      "targetType": "binary",
+      "stages": [],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     },
     {
       "id": "83c8b7c5-6c2b-4121-9395-2d7c1e0f99a5",
@@ -27,7 +43,13 @@
       "wave": 2,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "weekly" },
-      "logShape": "binary"
+      "targetType": "binary",
+      "stages": [],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     },
     {
       "id": "b80c7b07-8a37-471b-b9d1-110b6b90011c",
@@ -36,7 +58,13 @@
       "wave": 1,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "every-n-days", "n": 2 },
-      "logShape": "binary"
+      "targetType": "binary",
+      "stages": [],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     },
     {
       "id": "c1eecb31-3b91-4a80-92e8-68435b5931f4",
@@ -45,7 +73,13 @@
       "wave": 3,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "day-of-week-subset", "days": ["mon", "wed", "fri"] },
-      "logShape": "binary"
+      "targetType": "binary",
+      "stages": [],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     },
     {
       "id": "eeef9945-6c8c-4440-9d93-baf6fd4ee312",
@@ -54,8 +88,14 @@
       "wave": 1,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "daily" },
-      "logShape": "numeric",
-      "target": 5
+      "targetType": "numeric",
+      "target": 5,
+      "stages": [],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     },
     {
       "id": "45e0f64f-b9c2-46ca-8b21-3ddbc4e9bf07",
@@ -64,8 +104,14 @@
       "wave": 2,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "weekly" },
-      "logShape": "slot-checklist",
-      "slots": { "kind": "anonymous", "count": 7 }
+      "targetType": "slot-checklist",
+      "slots": { "kind": "anonymous", "count": 7 },
+      "stages": [],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     },
     {
       "id": "2694072b-dfe0-4cb3-9ba2-b3aad89f85aa",
@@ -74,8 +120,14 @@
       "wave": 3,
       "status": "active",
       "cadence": { "cadence_v": 1, "type": "daily" },
-      "logShape": "slot-checklist",
-      "slots": { "kind": "labeled", "labels": ["read", "video", "practice"] }
+      "targetType": "slot-checklist",
+      "slots": { "kind": "labeled", "labels": ["read", "video", "practice"] },
+      "stages": [],
+      "currentStageIndex": 0,
+      "stageStartedAt": null,
+      "masteryThresholdOverride": null,
+      "masteryWindowOverride": null,
+      "startDate": null
     }
   ]
 }
