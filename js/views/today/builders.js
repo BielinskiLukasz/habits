@@ -86,7 +86,8 @@ export function buildTodayHeader({ date, wave }) {
 export function buildFooterNav({ activeHash }) {
   const linkDefs = [
     { href: '#today', text: 'today' },
-    { href: '#history', text: 'history', disabled: true },
+    { href: '#history', text: 'history' },
+    { href: '#catalog', text: 'catalog' },
     { href: '#settings', text: 'settings' },
   ];
 

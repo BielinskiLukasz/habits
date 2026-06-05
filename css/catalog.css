@@ -1,0 +1,270 @@
+/* css/catalog.css — Catalog view styles (CATALOG-01..07, D-82, D-85, D-87).
+ *
+ * Consumed via @import in css/main.css (layer: view), following the same
+ * cascade-layer pattern as today.css and settings.css.
+ *
+ * Key rules:
+ *   .catalog-habit-row--mastered — D-85: muted opacity 0.55 for mastered habits
+ *   .catalog-btn — 44×44px minimum touch target (NFR-06, D-79)
+ *   .catalog-edit-panel — inline edit/create panel within the catalog list
+ */
+
+@layer view {
+  /* ── Catalog header ──────────────────────────────────────────────────── */
+
+  .catalog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .catalog-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  /* ── Catalog habit list ──────────────────────────────────────────────── */
+
+  .catalog-habit-list {
+    list-style: none;
+    margin: 0;
+    padding: var(--space-2) 0;
+  }
+
+  .catalog-habit-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+    transition: opacity 0.2s ease;
+  }
+
+  /* D-85: muted treatment for mastered habits */
+  .catalog-habit-row.habit-row--mastered,
+  .catalog-habit-row--mastered {
+    opacity: 0.55;
+  }
+
+  .catalog-habit-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .catalog-habit-name {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    word-break: break-word;
+  }
+
+  .catalog-habit-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+  }
+
+  .catalog-habit-wave,
+  .catalog-habit-status,
+  .catalog-habit-stage,
+  .catalog-habit-mastered-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--radius-badge, 12px);
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--color-surface-raised, #f3f4f6);
+    color: var(--color-fg-muted, #6b7280);
+  }
+
+  .catalog-habit-mastered-badge {
+    background: var(--color-mastery-badge-bg, #d1fae5);
+    color: var(--color-mastery-badge-fg, #065f46);
+  }
+
+  .catalog-habit-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex-shrink: 0;
+  }
+
+  .catalog-empty {
+    padding: var(--space-4);
+    text-align: center;
+    color: var(--color-fg-muted, #6b7280);
+    font-style: italic;
+    list-style: none;
+  }
+
+  /* ── Catalog buttons (NFR-06 touch targets >= 44×44px) ───────────────── */
+
+  .catalog-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: var(--radius-btn, 6px);
+    background: var(--color-bg, #fff);
+    color: var(--color-fg, #111827);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  .catalog-btn:hover,
+  .catalog-btn:focus-visible {
+    background: var(--color-surface-raised, #f9fafb);
+    outline: 2px solid var(--color-focus, #3b82f6);
+    outline-offset: 2px;
+  }
+
+  .catalog-btn--create {
+    background: var(--color-accent, #f5a623);
+    color: #fff;
+    border-color: var(--color-accent, #f5a623);
+  }
+
+  .catalog-btn--archive,
+  .catalog-btn--restore {
+    font-size: 0.8rem;
+  }
+
+  .catalog-btn--advance {
+    font-size: 0.8rem;
+    background: var(--color-surface-raised, #f3f4f6);
+  }
+
+  /* ── Edit / Create panel ─────────────────────────────────────────────── */
+
+  .catalog-edit-panel {
+    margin: var(--space-3) var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-card, 8px);
+    background: var(--color-surface-raised, #f9fafb);
+  }
+
+  .catalog-edit-panel h2 {
+    margin: 0 0 var(--space-3) 0;
+    font-size: 1.125rem;
+  }
+
+  .catalog-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
+  }
+
+  .catalog-form-row label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-fg-muted, #6b7280);
+  }
+
+  .catalog-form-row input[type="text"],
+  .catalog-form-row input[type="number"],
+  .catalog-form-row input[type="date"],
+  .catalog-form-row select {
+    width: 100%;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: var(--radius-input, 4px);
+    font-size: 1rem;
+    background: var(--color-bg, #fff);
+    color: var(--color-fg, #111827);
+    box-sizing: border-box;
+  }
+
+  .catalog-form-row--checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+  }
+
+  .catalog-form-row--checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  /* ── Stages section ──────────────────────────────────────────────────── */
+
+  .catalog-stages-section h3 {
+    margin: 0 0 var(--space-2) 0;
+    font-size: 1rem;
+  }
+
+  .catalog-stages-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-2) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .catalog-stage-row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+  }
+
+  .catalog-stage-row input {
+    flex: 1;
+    min-height: 40px;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border, #d1d5db);
+    border-radius: var(--radius-input, 4px);
+    font-size: 0.875rem;
+  }
+
+  /* ── Mastery override section ────────────────────────────────────────── */
+
+  .catalog-mastery-override {
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border, #e5e7eb);
+  }
+
+  .catalog-mastery-override h3 {
+    margin: 0 0 var(--space-2) 0;
+    font-size: 1rem;
+  }
+
+  .catalog-mastery-override-fields[hidden] {
+    display: none;
+  }
+
+  /* ── Panel action row ────────────────────────────────────────────────── */
+
+  .catalog-panel-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border, #e5e7eb);
+  }
+
+  .catalog-btn--save {
+    background: var(--color-accent, #f5a623);
+    color: #fff;
+    border-color: var(--color-accent, #f5a623);
+  }
+
+  .catalog-btn--cancel {
+    background: var(--color-bg, #fff);
+    color: var(--color-fg-muted, #6b7280);
+  }
+}

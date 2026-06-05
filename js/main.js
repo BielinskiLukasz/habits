@@ -60,6 +60,7 @@ import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 import { mountRoutes } from './router.js';
 import { mountToday, mountFooterNav } from './views/today.js';
 import { mountSettings } from './views/settings.js';
+import { mountCatalog } from './views/catalog.js';
 import * as store from './state/store.js';
 import { configureWave, bootWaves } from './domain/wave.js';
 
@@ -90,6 +91,7 @@ try { await bootWaves(); } catch (_e) { /* swallow — wave display degrades to 
 const todayPanel = document.querySelector('section[data-route="today"]');
 const settingsPanel = document.querySelector('section[data-route="settings"]');
 const historyPanel = document.querySelector('section[data-route="history"]');
+const catalogPanel = document.querySelector('section[data-route="catalog"]');
 const footerNavEl = document.querySelector('nav.today-footer-nav');
 
 /**
@@ -101,7 +103,7 @@ const footerNavEl = document.querySelector('nav.today-footer-nav');
  * @param {Element} panel
  */
 function show(panel) {
-  for (const p of [todayPanel, settingsPanel, historyPanel]) {
+  for (const p of [todayPanel, settingsPanel, historyPanel, catalogPanel]) {
     if (p === panel) p.hidden = false; else p.hidden = true;
   }
 }
@@ -155,6 +157,15 @@ mountRoutes({
       }
       show(historyPanel);
       focusH1(historyPanel);
+    },
+    '#catalog': () => {
+      // D-82: Catalog route — habit lifecycle management surface.
+      // mountCatalog is async; we fire-and-forget here because the router
+      // callback is synchronous. The panel renders progressively as the
+      // async load completes.
+      mountCatalog(catalogPanel, { repo, store });
+      show(catalogPanel);
+      focusH1(catalogPanel);
     },
   },
   onChange: (hash) => {
