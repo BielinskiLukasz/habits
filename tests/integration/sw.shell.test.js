@@ -113,6 +113,34 @@ const P3_REQUIRED = [
   './css/settings.css',
 ];
 
+// P4-required entries — files introduced during Phase 4 plans 04-01..04-09
+// that are part of the app shell at startup and therefore must be precached.
+//
+// Intentional SWR exceptions (NOT in this list):
+//   - `seed/waves.json` — runtime-fetched via stale-while-revalidate (D-81)
+// All JS files under /js/ are technically SWR-eligible too, but new view/
+// domain/apply modules are precached here to guarantee they are available
+// on the very first offline load (boot path requires them synchronously).
+const P4_REQUIRED = [
+  './js/views/catalog.js',
+  './js/views/catalog/builders.js',
+  './js/views/history.js',
+  './js/views/history/builders.js',
+  './js/state/apply/createHabit.js',
+  './js/state/apply/editHabit.js',
+  './js/state/apply/archiveHabit.js',
+  './js/state/apply/advanceStage.js',
+  './js/state/apply/logNumeric.js',
+  './js/state/apply/logSlot.js',
+  './js/state/apply/setMasteryThreshold.js',
+  './js/state/apply/setMasteryWindow.js',
+  './js/domain/mastery.js',
+  './js/domain/stage.js',
+  './js/domain/waveAggregates.js',
+  './css/catalog.css',
+  './css/history.css',
+];
+
 describe('D-81 SHELL coverage', () => {
   const src = readFileSync(join(ROOT, 'sw.js'), 'utf8');
   const shell = extractShell(src);
@@ -132,6 +160,15 @@ describe('D-81 SHELL coverage', () => {
       missing,
       [],
       `D-81 SHELL coverage gap: ${missing.join(', ')} not present in sw.js SHELL — add them or document the SWR exception in this test.`,
+    );
+  });
+
+  test('P4 required entries are all present', () => {
+    const missing = P4_REQUIRED.filter((e) => !shell.has(e));
+    assert.deepEqual(
+      missing,
+      [],
+      `D-81 SHELL coverage gap (P4): ${missing.join(', ')} not present in sw.js SHELL — add them or document the SWR exception in this test.`,
     );
   });
 
