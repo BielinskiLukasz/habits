@@ -26,4 +26,4 @@
 @import url("./today.css")      layer(view);
 @import url("./settings.css")   layer(view);
 @import url("./catalog.css")    layer(view);
-@import url("./history.css")    layer(history);
+@import url("./history.css")    layer(view);
