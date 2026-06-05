@@ -70,7 +70,9 @@ export function buildHabitListItem(habit, masteryState) {
     ? 'catalog-habit-row habit-row--mastered'
     : 'catalog-habit-row';
 
-  const currentStage = habit.stages[habit.currentStageIndex];
+  const stages = habit.stages ?? [];
+  const stageIndex = habit.currentStageIndex ?? 0;
+  const currentStage = stages[stageIndex];
   const stageLabel = currentStage?.label ?? '';
 
   /** @type {object[]} */

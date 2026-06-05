@@ -22,6 +22,7 @@
     --color-accent: #f5a623;
     --color-accent-soft: rgba(245, 166, 35, 0.18);
     --color-surface: #18181a;
+    --color-surface-raised: #27272a;
     --color-border: rgba(255, 255, 255, 0.08);
 
     /* Spacing scale */

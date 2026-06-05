@@ -102,6 +102,11 @@ export function appliesToday(habit, date, ctx) {
     return false;
   }
 
+  // Defensive check: if cadence is missing, throw a loud error (data corruption).
+  if (!habit.cadence || !habit.cadence.type) {
+    throw new Error(`cadence: habit ${habit.id} has no cadence.type — data corruption`);
+  }
+
   const resolver = RESOLVERS[habit.cadence.type];
   if (!resolver) {
     throw new Error(`cadence: unknown type ${habit.cadence.type}`);

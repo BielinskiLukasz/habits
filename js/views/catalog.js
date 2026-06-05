@@ -268,6 +268,25 @@ async function renderCatalogInto(parent, deps) {
 }
 
 /**
+ * Convert cadenceType string to cadence object. For types without sub-properties,
+ * returns {type}. For every-n-days, defaults n=2. For day-of-week-subset, defaults
+ * to weekdays (mon-fri).
+ *
+ * @param {string} cadenceType
+ * @returns {{ type: string, n?: number, days?: string[] }}
+ */
+function buildCadenceFromType(cadenceType) {
+  const type = cadenceType ?? 'daily';
+  if (type === 'every-n-days') {
+    return { type, n: 2 };
+  }
+  if (type === 'day-of-week-subset') {
+    return { type, days: ['mon', 'tue', 'wed', 'thu', 'fri'] };
+  }
+  return { type };
+}
+
+/**
  * Build the shared actions map for the catalog view. Closures capture
  * `parent` and `deps` for re-renders.
  *
@@ -369,7 +388,7 @@ function buildActions(parent, deps) {
             name: fields.name,
             name_pl: fields.name_pl || null,
             wave: fields.wave,
-            cadenceType: fields['cadence-type'],
+            cadence: buildCadenceFromType(fields['cadence-type']),
             targetType: fields.targetType,
             target: fields.target,
             startDate: fields.startDate || null,
@@ -399,7 +418,7 @@ function buildActions(parent, deps) {
             name: fields.name,
             name_pl: fields.name_pl || null,
             wave: fields.wave ?? 1,
-            cadenceType: fields['cadence-type'] ?? 'daily',
+            cadence: buildCadenceFromType(fields['cadence-type']),
             targetType: fields.targetType ?? 'binary',
             target: fields.target,
             startDate: fields.startDate || todayLocal(),
