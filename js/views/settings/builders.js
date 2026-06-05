@@ -43,6 +43,7 @@ const SCHEDULE_LABEL_ID = 'settings-schedule-h2';
 const INSTALL_LABEL_ID = 'settings-install-h2';
 const DATA_LABEL_ID = 'settings-data-h2';
 const ABOUT_LABEL_ID = 'settings-about-h2';
+const MASTERY_LABEL_ID = 'settings-mastery-h2';
 
 /**
  * Build the Storage card description (D-62, PWA-07 partial).
@@ -356,6 +357,103 @@ export function buildAboutCard({ appVersion, schemaVersion, cacheName, swState }
           { tag: 'dd', text: String(cacheName) },
           { tag: 'dt', text: 'Service worker' },
           { tag: 'dd', text: String(swState) },
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * Build the Mastery card description (SETTINGS-01, MASTERY-01, D-86).
+ *
+ * Two rows:
+ *   - Completion threshold: number input (min=1, max=100, default 90%) with
+ *     `data-key="masteryThreshold"` and `data-action="setMasteryThreshold"`.
+ *   - Rolling window: number input (min=1, max=365, default 70 days) with
+ *     `data-key="masteryWindow"` and `data-action="setMasteryWindow"`.
+ *
+ * HTML input min/max attributes restrict invalid range per T-04-07 threat
+ * mitigation. The builder is pure (no DOM access, no imports from apply.js).
+ * Change events are wired by the mounter.
+ *
+ * @param {{ masteryThreshold?: number|null, masteryWindow?: number|null }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildMasteryCard({ masteryThreshold, masteryWindow } = {}) {
+  const thresholdValue = masteryThreshold != null ? masteryThreshold : 90;
+  const windowValue = masteryWindow != null ? masteryWindow : 70;
+
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': MASTERY_LABEL_ID,
+      'data-card': 'mastery',
+    },
+    children: [
+      { tag: 'h2', attrs: { id: MASTERY_LABEL_ID }, text: 'Mastery' },
+      {
+        tag: 'div',
+        attrs: { class: 'mastery-row' },
+        children: [
+          {
+            tag: 'label',
+            attrs: { for: 'mastery-threshold-input' },
+            text: 'Completion threshold',
+          },
+          {
+            tag: 'div',
+            attrs: { class: 'mastery-input-group' },
+            children: [
+              {
+                tag: 'input',
+                attrs: {
+                  id: 'mastery-threshold-input',
+                  type: 'number',
+                  min: '1',
+                  max: '100',
+                  step: '1',
+                  value: String(thresholdValue),
+                  'data-key': 'masteryThreshold',
+                  'data-action': 'setMasteryThreshold',
+                  'aria-label': 'Mastery completion threshold %',
+                },
+              },
+              { tag: 'span', text: '%' },
+            ],
+          },
+        ],
+      },
+      {
+        tag: 'div',
+        attrs: { class: 'mastery-row' },
+        children: [
+          {
+            tag: 'label',
+            attrs: { for: 'mastery-window-input' },
+            text: 'Rolling window',
+          },
+          {
+            tag: 'div',
+            attrs: { class: 'mastery-input-group' },
+            children: [
+              {
+                tag: 'input',
+                attrs: {
+                  id: 'mastery-window-input',
+                  type: 'number',
+                  min: '1',
+                  max: '365',
+                  step: '1',
+                  value: String(windowValue),
+                  'data-key': 'masteryWindow',
+                  'data-action': 'setMasteryWindow',
+                  'aria-label': 'Mastery rolling window days',
+                },
+              },
+              { tag: 'span', text: 'days' },
+            ],
+          },
         ],
       },
     ],

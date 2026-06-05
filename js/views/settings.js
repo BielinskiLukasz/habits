@@ -59,6 +59,7 @@ import { formatRelative } from '../util/date.js';
 import {
   subscribe,
   getCachedWeekStart,
+  getCachedSettings,
 } from '../state/store.js';
 import {
   buildStorageCard,
@@ -66,6 +67,7 @@ import {
   buildInstallCard,
   buildDataCard,
   buildAboutCard,
+  buildMasteryCard,
 } from './settings/builders.js';
 
 /* D-67 SETTINGS-flavored Reset-data confirm prose — INTENTIONALLY distinct
@@ -389,7 +391,58 @@ function buildActions() {
         globalThis.location.reload();
       }
     },
+
+    /**
+     * Mastery threshold number input change (SETTINGS-01, D-86). Reads the
+     * integer value from the input and dispatches through apply().
+     * Wired as a `change` listener by `wireMasteryInputs()` after mount.
+     */
+    setMasteryThreshold: (evt) => {
+      const raw = evt?.currentTarget?.value ?? evt?.target?.value;
+      const value = parseInt(raw, 10);
+      if (isNaN(value)) return;
+      apply({ type: 'setMasteryThreshold', payload: { value } }).catch(() => {
+        showErrorToast("Couldn't change mastery threshold — try again");
+      });
+    },
+
+    /**
+     * Mastery window number input change (SETTINGS-01, D-86). Reads the
+     * integer value from the input and dispatches through apply().
+     * Wired as a `change` listener by `wireMasteryInputs()` after mount.
+     */
+    setMasteryWindow: (evt) => {
+      const raw = evt?.currentTarget?.value ?? evt?.target?.value;
+      const value = parseInt(raw, 10);
+      if (isNaN(value)) return;
+      apply({ type: 'setMasteryWindow', payload: { value } }).catch(() => {
+        showErrorToast("Couldn't change mastery window — try again");
+      });
+    },
   };
+}
+
+/**
+ * Wire `change` event listeners on the mastery threshold + window number
+ * inputs. Called after the mastery card is mounted — mount.js wires only
+ * `click` via `data-action`; number inputs need `change` (SETTINGS-01).
+ *
+ * Finds inputs by `data-key` attribute within `cardEl`, so this function
+ * is safe to call on re-renders by passing the fresh card element.
+ *
+ * @param {object} cardEl — the mastery card element (section[data-card="mastery"])
+ * @param {Record<string, Function>} actions — the shared actions map
+ */
+function wireMasteryInputs(cardEl, actions) {
+  if (!cardEl) return;
+  const thresholdInput = cardEl.querySelector('[data-key="masteryThreshold"]');
+  if (thresholdInput && typeof actions.setMasteryThreshold === 'function') {
+    thresholdInput.addEventListener('change', actions.setMasteryThreshold);
+  }
+  const windowInput = cardEl.querySelector('[data-key="masteryWindow"]');
+  if (windowInput && typeof actions.setMasteryWindow === 'function') {
+    windowInput.addEventListener('change', actions.setMasteryWindow);
+  }
 }
 
 /**
@@ -492,7 +545,22 @@ export function mountSettings(parent, deps) {
   });
   const aboutCardEl = mount(aboutDesc, _panelEl, actions);
 
+  // Mastery card (SETTINGS-01, D-86) — reads threshold + window from cache;
+  // falls back to defaults (90%, 70 days) when no override has been set.
+  const cachedSettings = store.getCachedSettings ? store.getCachedSettings() : {};
+  const masteryDesc = buildMasteryCard({
+    masteryThreshold: cachedSettings.masteryThreshold ?? null,
+    masteryWindow: cachedSettings.masteryWindow ?? null,
+  });
+  const masteryCardEl = mount(masteryDesc, _panelEl, actions);
+
   parent.appendChild(_panelEl);
+
+  // Wire change listeners on mastery inputs (mount.js wires only click;
+  // number inputs fire change, not click).
+  if (masteryCardEl) {
+    wireMasteryInputs(masteryCardEl, actions);
+  }
 
   // Pattern S5 async-loaders (mutate dd.textContent after Promise resolves).
   if (storageInputs.supported && storageCardEl) {

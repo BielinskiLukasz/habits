@@ -123,6 +123,18 @@ export async function hydrate(_legacyRepo) {
   const weekStart = wsRow?.value ?? 'mon';
   cache.settings.set('weekStart', weekStart);
 
+  // Load mastery settings (SETTINGS-01, D-86). Defaults applied at read-time
+  // by consumers (threshold=90, window=70); we store undefined when absent so
+  // the consumer's null-coalesce to default is the canonical path.
+  const masteryThresholdRow = await repo.getSetting('masteryThreshold');
+  if (masteryThresholdRow !== undefined) {
+    cache.settings.set('masteryThreshold', masteryThresholdRow.value);
+  }
+  const masteryWindowRow = await repo.getSetting('masteryWindow');
+  if (masteryWindowRow !== undefined) {
+    cache.settings.set('masteryWindow', masteryWindowRow.value);
+  }
+
   // 2. Single bounded log read for this ISO week (NFR-01 cold-paint budget).
   const wkStart = isoWeekStart(today, weekStart);
   const wkEnd = isoWeekEnd(today, weekStart);
@@ -258,6 +270,22 @@ export function getCachedLog(habitId, date) {
  */
 export function getCachedWeekStart() {
   return cache.settings.get('weekStart') ?? 'mon';
+}
+
+/**
+ * Read all cached settings as a plain object. Used by the Settings mastery card
+ * to read `masteryThreshold` and `masteryWindow` (SETTINGS-01, D-86).
+ *
+ * Returns `undefined` for keys that have never been set (consumers apply defaults).
+ *
+ * @returns {{ weekStart: string, masteryThreshold: number|undefined, masteryWindow: number|undefined }}
+ */
+export function getCachedSettings() {
+  return {
+    weekStart: cache.settings.get('weekStart') ?? 'mon',
+    masteryThreshold: cache.settings.get('masteryThreshold'),
+    masteryWindow: cache.settings.get('masteryWindow'),
+  };
 }
 
 /**
