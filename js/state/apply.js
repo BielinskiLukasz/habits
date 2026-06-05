@@ -47,6 +47,7 @@ import { handleSetSetting } from './apply/setSetting.js';
 import { handleCreateHabit } from './apply/createHabit.js';
 import { handleEditHabit } from './apply/editHabit.js';
 import { handleArchiveHabit, handleRestoreHabit } from './apply/archiveHabit.js';
+import { handleAdvanceStage, handleDemoteStage } from './apply/advanceStage.js';
 import { notify as defaultNotify } from './store.js';
 
 /**
@@ -65,6 +66,8 @@ const HANDLERS = {
   editHabit: handleEditHabit,
   archiveHabit: handleArchiveHabit,
   restoreHabit: handleRestoreHabit,
+  advanceStage: handleAdvanceStage,
+  demoteStage: handleDemoteStage,
 };
 
 /** @type {object|null} */
