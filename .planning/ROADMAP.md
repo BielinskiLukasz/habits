@@ -155,7 +155,23 @@ Plans:
   4. Import rejects files from a newer `schemaVersion` with a clear error and broadcasts a reload signal to other tabs after a successful merge
   5. Settings shows "Last backup: N days ago" and a nag appears weekly to remind the user to export
 
-**Plans**: TBD
+
+**Plans**: 6 plans
+
+Plans:
+
+**Wave 1** *(TDD: CSV, JSON export, import, nag logic — parallel)*
+
+- [ ] 05-01-PLAN.md — CSV cell encoding (TDD): csvCellValue (1/0/x/numeric), escapeCSVField (RFC 4180 quoting), cadence-aware denominators, multi-occurrence handling — EXPORT-03, EXPORT-06
+- [ ] 05-02-PLAN.md — JSON export (TDD): exportJSON (all 7 stores), schemaVersion embedding, configureExport DI — EXPORT-01, EXPORT-02
+- [ ] 05-03-PLAN.md — JSON import (TDD): mergeImportedStores (merge-by-id), schema validation (reject newer), atomic tx — IMPORT-01, IMPORT-02, IMPORT-03
+- [ ] 05-04-PLAN.md — Backup nag (TDD): daysSinceLastBackup, shouldShowNag (7-day threshold + dismissal), dismissNag (localStorage) — EXPORT-08 calculation
+
+**Wave 2** *(execute: file I/O, UI wiring, nag banner — parallel)*
+
+- [ ] 05-05-PLAN.md — Export/import file I/O + Settings Data card: exportCSV full generation (BOM/CRLF), Blob download, file picker, lastBackupDate update, broadcast on import — EXPORT-04, EXPORT-05, EXPORT-07, IMPORT-04, SETTINGS-03
+- [ ] 05-06-PLAN.md — Nag banner UI + dismissal: buildDataCard with conditional banner, Settings mount logic, live refresh, dismiss action, localStorage reset on Reset-data — EXPORT-08 UI
+
 **UI hint**: yes
 
 ### Phase 6: Desktop Analytics & Scoring Trio
