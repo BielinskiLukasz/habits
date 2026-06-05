@@ -234,7 +234,7 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260605-fix-p4-uat | Fix three critical Phase 4 UAT issues (slot collapse, mastery override persistence, history numeric/slot read-only) | 2026-06-05 | TBD | [260605-fix-p4-uat](./quick/260605-fix-p4-uat/) |
+| 260605-fix-p4-uat | Fix three critical Phase 4 UAT issues (slot collapse, mastery override persistence, history numeric/slot read-only) | 2026-06-05 | 87da6ef | [260605-fix-p4-uat](./quick/260605-fix-p4-uat/) |
 
 ## Deferred Items
 
