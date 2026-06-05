@@ -59,6 +59,7 @@
  */
 
 import { newId } from '../util/id.js';
+import { normalizeSlotsToArray } from '../util/slots.js';
 
 /** @type {object|null} */
 let _repo = null;
@@ -160,7 +161,7 @@ export async function bootSeed() {
       'readwrite',
       async (tx) => {
         for (const h of toInsert) {
-          tx.objectStore('habits').put(h);
+          tx.objectStore('habits').put({ ...h, slots: normalizeSlotsToArray(h.slots) });
           tx.objectStore('events').put({
             id: newId(),
             // events.at uses ISO timestamp (DATA-06 only constrains date KEYS

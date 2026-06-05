@@ -60,6 +60,7 @@
  */
 
 import { todayLocal, isoWeekStart, isoWeekEnd } from '../util/date.js';
+import { normalizeSlotsToArray } from '../util/slots.js';
 
 /** @type {{ habits: Map<string, object>, logs: Map<string, object>, settings: Map<string, *> }} */
 const cache = {
@@ -147,7 +148,7 @@ export async function hydrate(_legacyRepo) {
   //    of the habits store is well inside NFR-01 budget.
   const habits = await repo.getAllHabits();
   for (const habit of habits) {
-    cache.habits.set(habit.id, habit);
+    cache.habits.set(habit.id, { ...habit, slots: normalizeSlotsToArray(habit.slots) });
   }
 }
 
@@ -175,7 +176,7 @@ async function refreshHydratedKeys(keys) {
   if (!_repo) return;
   if (keys.habitId) {
     const habit = await _repo.getHabit(keys.habitId);
-    if (habit) cache.habits.set(keys.habitId, habit);
+    if (habit) cache.habits.set(keys.habitId, { ...habit, slots: normalizeSlotsToArray(habit.slots) });
     else cache.habits.delete(keys.habitId);
 
     if (keys.date) {

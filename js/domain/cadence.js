@@ -102,9 +102,10 @@ export function appliesToday(habit, date, ctx) {
     return false;
   }
 
-  // Defensive check: if cadence is missing, throw a loud error (data corruption).
+  // Defensive check: if cadence is missing, default to daily (safe fallback for corrupted data).
   if (!habit.cadence || !habit.cadence.type) {
-    throw new Error(`cadence: habit ${habit.id} has no cadence.type — data corruption`);
+    console.warn(`cadence: habit ${habit.id} missing cadence.type, defaulting to daily`);
+    return true; // Safe default: show the habit as if it were daily.
   }
 
   const resolver = RESOLVERS[habit.cadence.type];
