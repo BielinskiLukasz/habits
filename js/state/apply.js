@@ -50,6 +50,8 @@ import { handleArchiveHabit, handleRestoreHabit } from './apply/archiveHabit.js'
 import { handleAdvanceStage, handleDemoteStage } from './apply/advanceStage.js';
 import { handleLogNumeric } from './apply/logNumeric.js';
 import { handleLogSlot } from './apply/logSlot.js';
+import { handleSetMasteryThreshold } from './apply/setMasteryThreshold.js';
+import { handleSetMasteryWindow } from './apply/setMasteryWindow.js';
 import { notify as defaultNotify } from './store.js';
 
 /**
@@ -72,6 +74,8 @@ const HANDLERS = {
   demoteStage: handleDemoteStage,
   logNumeric: handleLogNumeric,
   logSlot: handleLogSlot,
+  setMasteryThreshold: handleSetMasteryThreshold,
+  setMasteryWindow: handleSetMasteryWindow,
 };
 
 /** @type {object|null} */
