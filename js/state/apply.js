@@ -48,6 +48,8 @@ import { handleCreateHabit } from './apply/createHabit.js';
 import { handleEditHabit } from './apply/editHabit.js';
 import { handleArchiveHabit, handleRestoreHabit } from './apply/archiveHabit.js';
 import { handleAdvanceStage, handleDemoteStage } from './apply/advanceStage.js';
+import { handleLogNumeric } from './apply/logNumeric.js';
+import { handleLogSlot } from './apply/logSlot.js';
 import { notify as defaultNotify } from './store.js';
 
 /**
@@ -68,6 +70,8 @@ const HANDLERS = {
   restoreHabit: handleRestoreHabit,
   advanceStage: handleAdvanceStage,
   demoteStage: handleDemoteStage,
+  logNumeric: handleLogNumeric,
+  logSlot: handleLogSlot,
 };
 
 /** @type {object|null} */
