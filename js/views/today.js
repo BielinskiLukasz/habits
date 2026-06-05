@@ -316,12 +316,19 @@ function handleToggleSlotsTap(evt) {
  */
 async function handleToggleSlotTap(evt) {
   const input = evt.currentTarget;
+  const rowEl = input.closest('.today-row--slot');
+  if (!rowEl) return;
+
   const habitId = input.getAttribute('data-habit-id');
   const slotIndex = Number(input.getAttribute('data-slot-index'));
   const date = todayLocal();
   const log = getCachedLog(habitId, date);
   const habit = getCachedHabits().find((h) => h.id === habitId);
   if (!habit) return;
+
+  // Capture slot list open state BEFORE the toggle
+  const slotList = rowEl.querySelector('.slot-list');
+  const wasOpen = slotList && !slotList.hasAttribute('hidden');
 
   // Build the full slots array, toggling the targeted slot.
   const habitSlots = habit.slots ?? [];
@@ -331,6 +338,13 @@ async function handleToggleSlotTap(evt) {
   );
   try {
     await apply({ type: 'logSlot', payload: { habitId, date, slots: newSlots } });
+    // Restore open state if it was open before the toggle
+    if (wasOpen && slotList) {
+      slotList.removeAttribute('hidden');
+      // Also restore the toggle button's aria-expanded
+      const toggleBtn = rowEl.querySelector('.today-slot-toggle');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+    }
   } catch (_err) {
     showErrorToast("Couldn't update slot — try again");
   }

@@ -393,8 +393,8 @@ function buildActions(parent, deps) {
             target: fields.target,
             startDate: fields.startDate || null,
             stages: fields.stages,
-            masteryThresholdOverride: fields.customMastery ? fields.masteryThresholdOverride : null,
-            masteryWindowOverride: fields.customMastery ? fields.masteryWindowOverride : null,
+            masteryThresholdOverride: fields.masteryThresholdOverride || null,
+            masteryWindowOverride: fields.masteryWindowOverride || null,
           },
         });
         _closeOpenPanel(parent);

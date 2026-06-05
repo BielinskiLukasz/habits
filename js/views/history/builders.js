@@ -162,6 +162,55 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
 }
 
 /**
+ * Build a read-only history row for numeric/slot habits.
+ * Shows the habit name and count/slot display without a toggle button.
+ *
+ * @param {{ id: string, name: string, wave?: number }} habit — current habit row
+ * @param {{ completed?: boolean, count?: number, slots?: Array<{name: string, checked: boolean}> } | null} log — log row for this date, or null
+ * @param {{ name: string, targetType?: 'binary'|'numeric'|'slot-checklist', target?: number }} version — habit_versions entry effective on the selected date
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildHistoryReadOnly(habit, log, version) {
+  const targetType = version.targetType ?? 'binary';
+  const displayName = version.name ?? habit.name;
+
+  // Compute completion display text for the status indicator.
+  let statusText;
+  if (log === null || log === undefined) {
+    statusText = '–';
+  } else if (targetType === 'numeric') {
+    const count = log.count ?? 0;
+    const target = version.target ?? 0;
+    statusText = `${count} / ${target}`;
+  } else if (targetType === 'slot-checklist') {
+    const slots = log.slots ?? [];
+    const checked = slots.filter((s) => s.checked).length;
+    const total = version.target ?? slots.length;
+    statusText = `${checked} / ${total} slots`;
+  } else {
+    // binary
+    statusText = log.completed === true ? '✓' : '–';
+  }
+
+  return {
+    tag: 'li',
+    attrs: { class: 'history-habit-row history-habit-row--read-only' },
+    children: [
+      {
+        tag: 'span',
+        attrs: { class: 'history-habit-name' },
+        text: displayName,
+      },
+      {
+        tag: 'span',
+        attrs: { class: 'history-habit-status' },
+        text: statusText,
+      },
+    ],
+  };
+}
+
+/**
  * Build the bulk action bar for the History view: a single "Mark all
  * not-completed" button (HISTORY-04) that writes completed:false for all
  * applicable but un-logged habits on the selected date.

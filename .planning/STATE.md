@@ -230,6 +230,12 @@ None yet.
 
 None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precise spec (denominator handling, S2 stage-weight curve, S3 load-curve calibration) needs deeper work during Phase 6 planning.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260605-fix-p4-uat | Fix three critical Phase 4 UAT issues (slot collapse, mastery override persistence, history numeric/slot read-only) | 2026-06-05 | TBD | [260605-fix-p4-uat](./quick/260605-fix-p4-uat/) |
+
 ## Deferred Items
 
 | Category | Item | Status | Deferred At |

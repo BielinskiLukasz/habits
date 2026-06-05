@@ -27,7 +27,7 @@
  *   - Mutating builders' return values — they're pure descriptions.
  */
 
-import { buildHistoryHeader, buildHistoryHabitRow, buildBulkActionBar } from './history/builders.js';
+import { buildHistoryHeader, buildHistoryHabitRow, buildHistoryReadOnly, buildBulkActionBar } from './history/builders.js';
 import { apply } from '../state/apply.js';
 import { mount } from '../util/mount.js';
 import { appliesToday } from '../domain/cadence.js';
@@ -196,6 +196,14 @@ export function mountHistory(parent, { repo, store }) {
       parent.appendChild(listEl);
 
       for (const { habit, log, version } of rows) {
+        const targetType = version.targetType ?? 'binary';
+        // History view: only binary habits support toggle. Numeric/slot are read-only.
+        if (targetType !== 'binary') {
+          const readOnlyDesc = buildHistoryReadOnly(habit, log, version);
+          mount(readOnlyDesc, listEl, {});
+          continue;
+        }
+
         const rowDesc = buildHistoryHabitRow(habit, log, version, date);
         mount(rowDesc, listEl, {
           'toggle-log': async (evt) => {
