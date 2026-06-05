@@ -4,14 +4,17 @@
  * Three discrete responsibilities:
  *
  *   1. **Top-level shape (SEED-01, RESEARCH §Open Question 3 RESOLVED)** —
- *      seed file parses as `{schemaVersion: 1, seedVersion: 1, habits: [...]}`.
+ *      seed file parses as `{schemaVersion: 1, seedVersion: 2, habits: [...]}`.
  *      The wrapped-object shape is locked so future fields (e.g. `wavesMeta`)
  *      ride on the same top-level without breaking the loader.
  *
  *   2. **8-habit D-32 coverage matrix (SEED-02, D-32)** — exact distribution
- *      across cadence × log-shape combos. Spans Wave 1 + Wave 2 + Wave 3.
+ *      across cadence × targetType combos. Spans Wave 1 + Wave 2 + Wave 3.
  *      Every habit has a v4 UUID `id`, English `name`, Polish `name_pl` (D-40),
  *      `cadence.cadence_v: 1` (Pitfall 12 — forward-compat versioning).
+ *      Phase 4 enrichment: every habit carries `targetType` (renamed from
+ *      `logShape`), `stages` array, `currentStageIndex`, `stageStartedAt`,
+ *      `masteryThresholdOverride`, `masteryWindowOverride`, `startDate`.
  *
  *   3. **No xlsx/txt parsing code in js/ (SEED-05)** — the seed is a static
  *      JSON fixture; the app must NOT ship runtime parsers for the source
@@ -64,10 +67,10 @@ describe('seed/habits.json — shape (SEED-01, Open Question 3 RESOLVED)', () =>
     assert.ok(parsed !== null, 'parsed seed must not be null');
   });
 
-  test('top-level shape is {schemaVersion: 1, seedVersion: 1, habits: [...]}', async () => {
+  test('top-level shape is {schemaVersion: 1, seedVersion: 2, habits: [...]}', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
     assert.equal(seed.schemaVersion, 1, 'schemaVersion must equal 1');
-    assert.equal(seed.seedVersion, 1, 'seedVersion must equal 1');
+    assert.equal(seed.seedVersion, 2, 'seedVersion must equal 2 (P4 enrichment bump)');
     assert.ok(Array.isArray(seed.habits), 'seed.habits must be an array');
   });
 });
@@ -78,9 +81,9 @@ describe('seed: 8 habits covering D-32 matrix (SEED-02)', () => {
     assert.equal(seed.habits.length, 8, `expected exactly 8 habits, got ${seed.habits.length}`);
   });
 
-  test('every habit has v4 UUID id, name, name_pl, wave 1-3, cadence_v:1, valid logShape', async () => {
+  test('every habit has v4 UUID id, name, name_pl, wave 1-3, cadence_v:1, valid targetType', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
-    const validShapes = new Set(['binary', 'numeric', 'slot-checklist']);
+    const validTypes = new Set(['binary', 'numeric', 'slot-checklist']);
     for (const h of seed.habits) {
       assert.match(h.id, UUID_V4, `habit ${h.name}: id must be a v4 UUID; got ${h.id}`);
       assert.equal(typeof h.name, 'string', `habit ${h.id}: name must be a string`);
@@ -96,9 +99,17 @@ describe('seed: 8 habits covering D-32 matrix (SEED-02)', () => {
       assert.ok(h.cadence && typeof h.cadence === 'object', `habit ${h.id}: cadence must be an object`);
       assert.equal(h.cadence.cadence_v, 1, `habit ${h.id}: cadence.cadence_v must be 1 (Pitfall 12)`);
       assert.ok(
-        validShapes.has(h.logShape),
-        `habit ${h.id}: logShape must be one of binary|numeric|slot-checklist; got ${h.logShape}`,
+        validTypes.has(h.targetType),
+        `habit ${h.id}: targetType must be one of binary|numeric|slot-checklist; got ${h.targetType}`,
       );
+      // P4 enrichment fields (D-83, CATALOG-01..07)
+      assert.ok(Array.isArray(h.stages), `habit ${h.id}: stages must be an array (P4 D-83)`);
+      assert.equal(typeof h.currentStageIndex, 'number', `habit ${h.id}: currentStageIndex must be a number`);
+      assert.ok(h.stageStartedAt === null || typeof h.stageStartedAt === 'string', `habit ${h.id}: stageStartedAt must be null or string`);
+      assert.ok(h.masteryThresholdOverride === null || typeof h.masteryThresholdOverride === 'number', `habit ${h.id}: masteryThresholdOverride must be null or number`);
+      assert.ok(h.masteryWindowOverride === null || typeof h.masteryWindowOverride === 'number', `habit ${h.id}: masteryWindowOverride must be null or number`);
+      assert.ok('startDate' in h, `habit ${h.id}: startDate field must be present (P4 CATALOG-07)`);
+      assert.ok(h.startDate === null || typeof h.startDate === 'string', `habit ${h.id}: startDate must be null or string`);
     }
   });
 
@@ -109,57 +120,57 @@ describe('seed: 8 habits covering D-32 matrix (SEED-02)', () => {
     assert.equal(uniq.size, ids.length, `habit ids must be unique; got ${ids.length} habits but ${uniq.size} unique ids`);
   });
 
-  test('distribution: exactly 2 habits with cadence.type=daily + logShape=binary', async () => {
+  test('distribution: exactly 2 habits with cadence.type=daily + targetType=binary', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
-    const matches = seed.habits.filter((h) => h.cadence.type === 'daily' && h.logShape === 'binary');
+    const matches = seed.habits.filter((h) => h.cadence.type === 'daily' && h.targetType === 'binary');
     assert.equal(matches.length, 2, `D-32: expected 2 daily-binary habits; got ${matches.length}`);
   });
 
-  test('distribution: exactly 1 habit with cadence.type=weekly + logShape=binary', async () => {
+  test('distribution: exactly 1 habit with cadence.type=weekly + targetType=binary', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
-    const matches = seed.habits.filter((h) => h.cadence.type === 'weekly' && h.logShape === 'binary');
+    const matches = seed.habits.filter((h) => h.cadence.type === 'weekly' && h.targetType === 'binary');
     assert.equal(matches.length, 1, `D-32: expected 1 weekly-binary habit; got ${matches.length}`);
   });
 
-  test('distribution: exactly 1 habit with cadence.type=every-n-days (n=2) + logShape=binary', async () => {
+  test('distribution: exactly 1 habit with cadence.type=every-n-days (n=2) + targetType=binary', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
     const matches = seed.habits.filter(
-      (h) => h.cadence.type === 'every-n-days' && h.cadence.n === 2 && h.logShape === 'binary',
+      (h) => h.cadence.type === 'every-n-days' && h.cadence.n === 2 && h.targetType === 'binary',
     );
     assert.equal(matches.length, 1, `D-32: expected 1 every-2-days binary habit; got ${matches.length}`);
   });
 
-  test('distribution: exactly 1 habit with cadence.type=day-of-week-subset + logShape=binary', async () => {
+  test('distribution: exactly 1 habit with cadence.type=day-of-week-subset + targetType=binary', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
     const matches = seed.habits.filter(
-      (h) => h.cadence.type === 'day-of-week-subset' && h.logShape === 'binary',
+      (h) => h.cadence.type === 'day-of-week-subset' && h.targetType === 'binary',
     );
     assert.equal(matches.length, 1, `D-32: expected 1 day-of-week-subset binary habit; got ${matches.length}`);
     assert.ok(Array.isArray(matches[0].cadence.days), 'day-of-week-subset must carry a days[] array');
     assert.ok(matches[0].cadence.days.length > 0, 'day-of-week-subset must have at least one day');
   });
 
-  test('distribution: exactly 1 habit with logShape=numeric (carrying target)', async () => {
+  test('distribution: exactly 1 habit with targetType=numeric (carrying target)', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
-    const matches = seed.habits.filter((h) => h.logShape === 'numeric');
+    const matches = seed.habits.filter((h) => h.targetType === 'numeric');
     assert.equal(matches.length, 1, `D-32: expected 1 numeric habit; got ${matches.length}`);
     assert.equal(typeof matches[0].target, 'number', 'numeric habit must carry a `target` field');
     assert.ok(matches[0].target > 0, 'numeric `target` must be > 0');
   });
 
-  test('distribution: exactly 1 habit with logShape=slot-checklist + slots.kind=anonymous', async () => {
+  test('distribution: exactly 1 habit with targetType=slot-checklist + slots.kind=anonymous', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
     const matches = seed.habits.filter(
-      (h) => h.logShape === 'slot-checklist' && h.slots && h.slots.kind === 'anonymous',
+      (h) => h.targetType === 'slot-checklist' && h.slots && h.slots.kind === 'anonymous',
     );
     assert.equal(matches.length, 1, `D-32: expected 1 anonymous slot-checklist habit; got ${matches.length}`);
     assert.equal(typeof matches[0].slots.count, 'number', 'anonymous slots must carry a `count` field');
   });
 
-  test('distribution: exactly 1 habit with logShape=slot-checklist + slots.kind=labeled', async () => {
+  test('distribution: exactly 1 habit with targetType=slot-checklist + slots.kind=labeled', async () => {
     const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
     const matches = seed.habits.filter(
-      (h) => h.logShape === 'slot-checklist' && h.slots && h.slots.kind === 'labeled',
+      (h) => h.targetType === 'slot-checklist' && h.slots && h.slots.kind === 'labeled',
     );
     assert.equal(matches.length, 1, `D-32: expected 1 labeled slot-checklist habit; got ${matches.length}`);
     assert.ok(
@@ -177,6 +188,19 @@ describe('seed: 8 habits covering D-32 matrix (SEED-02)', () => {
     assert.ok(waves.has(1), 'D-32: at least one habit must be in Wave 1');
     assert.ok(waves.has(2), 'D-32: at least one habit must be in Wave 2');
     assert.ok(waves.has(3), 'D-32: at least one habit must be in Wave 3');
+  });
+
+  test('Morning walk has 3-stage array (P4 D-83 UAT fixture)', async () => {
+    const seed = JSON.parse(await readFile(SEED_PATH, 'utf8'));
+    const morningWalk = seed.habits.find((h) => h.name === 'Morning walk');
+    assert.ok(morningWalk, '"Morning walk" habit must exist in seed');
+    assert.ok(Array.isArray(morningWalk.stages), '"Morning walk" stages must be an array');
+    assert.equal(morningWalk.stages.length, 3, '"Morning walk" must have exactly 3 stages (P4 D-83 UAT)');
+    for (const stage of morningWalk.stages) {
+      assert.equal(typeof stage.label, 'string', 'each stage must have a label string');
+      assert.equal(typeof stage.target, 'number', 'each stage must have a numeric target');
+      assert.equal(typeof stage.allowManual, 'boolean', 'each stage must have allowManual boolean');
+    }
   });
 });
 
