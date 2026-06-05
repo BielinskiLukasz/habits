@@ -171,9 +171,14 @@ export function mountHistory(parent, { repo, store }) {
       mount(bulkDesc, parent, {
         'bulk-mark-uncompleted': async () => {
           // HISTORY-04: mark all applicable-but-uncompleted habits as completed:false.
-          const notYetCompleted = rows.filter(
-            (r) => r.log === null || r.log.completed !== true,
-          );
+          // Re-fetch logs to avoid stale closure — `rows` reflects applicability
+          // (stable for the same date) but log completion state may have changed
+          // since this render pass.
+          const freshLogsForBulk = await repo.getLogsForDate(selectedDate);
+          const notYetCompleted = rows.filter((r) => {
+            const freshLog = freshLogsForBulk.find((l) => l.habitId === r.habit.id) ?? null;
+            return freshLog === null || freshLog.completed !== true;
+          });
           for (const { habit } of notYetCompleted) {
             try {
               await apply({ type: 'markUncompleted', payload: { habitId: habit.id, date: selectedDate } });
@@ -197,7 +202,10 @@ export function mountHistory(parent, { repo, store }) {
             const btn = evt.currentTarget;
             const habitId = btn.getAttribute('data-habit-id');
             const logDate = btn.getAttribute('data-date') || selectedDate;
-            const currentLog = logsForDate.find((l) => l.habitId === habitId) ?? null;
+            // Re-fetch logs to avoid stale closure — logsForDate was captured at
+            // render time and is invalidated by any previous toggle in this session.
+            const freshLogs = await repo.getLogsForDate(logDate);
+            const currentLog = freshLogs.find((l) => l.habitId === habitId) ?? null;
             try {
               if (currentLog?.completed === true) {
                 await apply({ type: 'markUncompleted', payload: { habitId, date: logDate } });
