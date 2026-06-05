@@ -116,6 +116,18 @@ Ideas and issues captured during phase work for consideration in future mileston
 
 ---
 
+### Every-N-days cadence: reset on both completion AND undone
+
+**Goal:** Captured for future planning.
+
+**Description:** For habits with "every N days" cadence, the habit should be considered unfinished/undone if N days have passed since either the last completion OR the last time it was explicitly marked undone. Currently the logic may only track the last completion timestamp, causing habits to incorrectly show as not-yet-due when they should re-appear because they've exceeded the N-day threshold from their last undone state.
+
+**Requirements:** TBD
+
+**Status:** Needs scoping before planning.
+
+---
+
 ## Post-v1 explorations
 
 ### Install card: predict-and-override platform switch
