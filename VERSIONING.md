@@ -33,6 +33,13 @@ Patch bumps (`0.1.0` → `0.1.1`) land for any shell-asset-only change between p
 
 ## Release history
 
+### v0.4.0 — Phase 4 closeout (2026-06-05)
+
+- **What shipped:** Full habit lifecycle domain model. Catalog CRUD (create, edit, archive, restore, future-schedule habits with versioned `habit_versions` entries); stage progression with manual button and auto-advance triggers (after-N-days, composable OR logic); mastery threshold evaluation with global defaults (90% / 70 days) and per-habit overrides; multi-occurrence logging (numeric +1 counter with `logNumeric`, slot-checklist with `logSlot`); history navigation (past-day lookup, mark not-completed on historical days, bulk uncomplete); wave aggregate metrics (completion %, status counts, longest streak, at-risk indicator). Settings panel extended with mastery threshold and window fields (SETTINGS-01, D-86). `seed/habits.json` enriched with `targetType`, `stages`, `currentStageIndex`, `stageStartedAt`, `masteryThresholdOverride`, `masteryWindowOverride`, `startDate` (seedVersion bumped to 2).
+- **Bump rationale:** MINOR per SemVer §4 (phase completion, substantial new domain capability — catalog, stages, mastery, multi-occurrence, history, wave aggregates).
+- **Cache invalidation:** `habits-0.4.0` replaces `habits-0.3.0`. The SW activate handler (D-10) deletes the prior cache; the P1 update-toast (D-08, no-auto-dismiss) fires for users still on `0.3.0`.
+- **D-decisions delivered in P4:** D-82..D-90 (see `.planning/phases/04-domain-model-cadence-catalog-stages-mastery-multi-occurrence/04-CONTEXT.md`). SW SHELL extended by 17 new P4 entries.
+
 ### v0.3.0 — Phase 3 closeout (2026-05-28)
 
 - **What shipped:** First user-visible surfaces. `index.html#today` renders cadence-filtered habits; tap toggles complete/uncomplete with optimistic flip; toast offers single-step Undo with a 5s auto-dismiss (D-69) that hover-pauses (D-69); `index.html#settings` lands the v1 panel (Storage / Schedule / Install / Data / About per D-61), and the second Undo surface lives in the Data card per D-65/D-72. Reset-data uses the Settings-flavored confirm per D-67; the diagnostics surface's D-06 verbatim text is unchanged.

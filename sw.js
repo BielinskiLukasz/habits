@@ -111,6 +111,30 @@ const SHELL = [
   './js/state/apply/markUncompleted.js',
   './js/state/apply/setSetting.js',
   './css/settings.css',
+  // Phase-4 domain model — added in 04-domain-model-cadence-catalog-stages-mastery.
+  // - Catalog view + builders (04-01/04-02), history view + builders (04-05/04-06).
+  // - Apply handlers: createHabit, editHabit, archiveHabit (04-01), advanceStage (04-03),
+  //   logNumeric, logSlot (04-04), setMasteryThreshold, setMasteryWindow (04-07).
+  // - Domain modules: mastery (04-04), stage (04-03), waveAggregates (04-06).
+  // - CSS: catalog.css (04-02), history.css (04-05).
+  // - seed/waves.json is intentionally NOT here; it is SWR-cached per D-81.
+  './js/views/catalog.js',
+  './js/views/catalog/builders.js',
+  './js/views/history.js',
+  './js/views/history/builders.js',
+  './js/state/apply/createHabit.js',
+  './js/state/apply/editHabit.js',
+  './js/state/apply/archiveHabit.js',
+  './js/state/apply/advanceStage.js',
+  './js/state/apply/logNumeric.js',
+  './js/state/apply/logSlot.js',
+  './js/state/apply/setMasteryThreshold.js',
+  './js/state/apply/setMasteryWindow.js',
+  './js/domain/mastery.js',
+  './js/domain/stage.js',
+  './js/domain/waveAggregates.js',
+  './css/catalog.css',
+  './css/history.css',
 ];
 
 self.addEventListener('install', e => {

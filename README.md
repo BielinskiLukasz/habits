@@ -119,6 +119,7 @@ Run the checklist on the developer machine after every shell-asset change, and o
 
 ## Version history
 
+- v0.4.0 — Domain Model (catalog CRUD, stages, mastery, multi-occurrence logging, history navigation, wave aggregates, seed enrichment with P4 fields)
 - v0.3.0 — Today view + Settings v1 (first usable slice — tap-to-log, undo toast, week-start toggle, install help, reset-data)
 - v0.2.0 — Storage Foundation (raw IDB, 7 stores, single-mutator chokepoint, BroadcastChannel sync, lifecycle flush, idempotent seed)
 - v0.1.0 — PWA shell chassis (versioned-cache SW, Web App Manifest, two HTML shells, Cascade-Layers CSS scaffold, diagnostics panel with Reset-shell)
