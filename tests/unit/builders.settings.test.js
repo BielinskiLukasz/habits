@@ -30,6 +30,7 @@ import {
   buildInstallCard,
   buildDataCard,
   buildAboutCard,
+  buildMasteryCard,
 } from '../../js/views/settings/builders.js';
 
 /**
@@ -354,6 +355,7 @@ describe('Settings builders — A11y baseline (D-79)', () => {
       buildInstallCard(),
       buildDataCard({ lastEvent: '', hasUndoToken: false, relativeTime: '' }),
       buildAboutCard({ appVersion: '0', schemaVersion: '0', cacheName: 'n', swState: 'n' }),
+      buildMasteryCard({ masteryThreshold: 90, masteryWindow: 70 }),
     ];
     for (const card of cards) {
       const labelId = card.attrs?.['aria-labelledby'];
@@ -362,5 +364,49 @@ describe('Settings builders — A11y baseline (D-79)', () => {
       assert.ok(h2, '<h2> present');
       assert.equal(h2.attrs?.id, labelId, '<h2> id matches aria-labelledby');
     }
+  });
+});
+
+describe('buildMasteryCard — SETTINGS-01 (D-86)', () => {
+  test('returns section with data-card="mastery"', () => {
+    const card = buildMasteryCard({ masteryThreshold: 90, masteryWindow: 70 });
+    assert.equal(card.tag, 'section');
+    assert.equal(card.attrs['data-card'], 'mastery');
+  });
+
+  test('threshold input has data-key="masteryThreshold", type="number", value="90"', () => {
+    const card = buildMasteryCard({ masteryThreshold: 90, masteryWindow: 70 });
+    const input = findDesc(card, (d) => d.tag === 'input' && d.attrs?.['data-key'] === 'masteryThreshold');
+    assert.ok(input, 'masteryThreshold input present');
+    assert.equal(input.attrs['type'], 'number');
+    assert.equal(input.attrs['value'], '90');
+    assert.equal(input.attrs['min'], '1');
+    assert.equal(input.attrs['max'], '100');
+  });
+
+  test('window input has data-key="masteryWindow", type="number", value="70"', () => {
+    const card = buildMasteryCard({ masteryThreshold: 90, masteryWindow: 70 });
+    const input = findDesc(card, (d) => d.tag === 'input' && d.attrs?.['data-key'] === 'masteryWindow');
+    assert.ok(input, 'masteryWindow input present');
+    assert.equal(input.attrs['type'], 'number');
+    assert.equal(input.attrs['value'], '70');
+    assert.equal(input.attrs['min'], '1');
+    assert.equal(input.attrs['max'], '365');
+  });
+
+  test('defaults to 90 and 70 when no args provided', () => {
+    const card = buildMasteryCard();
+    const tInput = findDesc(card, (d) => d.tag === 'input' && d.attrs?.['data-key'] === 'masteryThreshold');
+    const wInput = findDesc(card, (d) => d.tag === 'input' && d.attrs?.['data-key'] === 'masteryWindow');
+    assert.equal(tInput?.attrs?.value, '90', 'threshold defaults to 90');
+    assert.equal(wInput?.attrs?.value, '70', 'window defaults to 70');
+  });
+
+  test('defaults to 90 and 70 when null is passed', () => {
+    const card = buildMasteryCard({ masteryThreshold: null, masteryWindow: null });
+    const tInput = findDesc(card, (d) => d.tag === 'input' && d.attrs?.['data-key'] === 'masteryThreshold');
+    const wInput = findDesc(card, (d) => d.tag === 'input' && d.attrs?.['data-key'] === 'masteryWindow');
+    assert.equal(tInput?.attrs?.value, '90', 'threshold defaults to 90 when null');
+    assert.equal(wInput?.attrs?.value, '70', 'window defaults to 70 when null');
   });
 });
