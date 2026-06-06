@@ -95,6 +95,61 @@
     font: inherit;
   }
 
+  /* Nag banner (EXPORT-08, D-101, D-102) — warning when last backup is ≥7 days
+   * old. Sits at the top of the backup section (below the Data card h2, above
+   * the "Last backup" dl row). Dismissible via the × button.
+   *
+   * Color: --color-warning / #fff3cd (amber-tinted background) with
+   * --color-warning-border / #ffc107 left accent border and dark text so the
+   * banner reads clearly in both light and dark schemes.
+   * NFR-07: color is paired with icon text ("⚠") so screen readers and
+   * color-blind users get the same affordance. */
+  .nag-banner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
+    background-color: var(--color-warning, #fff3cd);
+    border: 1px solid var(--color-warning-border, #ffc107);
+    border-left-width: 4px;
+    border-radius: var(--radius-md, 0.25rem);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-3);
+    font-size: 0.9rem;
+    color: var(--color-warning-text, #664d00);
+  }
+
+  .nag-banner span {
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  .nag-banner__dismiss {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid var(--color-warning-border, #ffc107);
+    border-radius: var(--radius-sm, 0.2rem);
+    color: var(--color-warning-text, #664d00);
+    cursor: pointer;
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 var(--space-2);
+    min-height: 28px;
+    min-width: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nag-banner__dismiss:hover,
+  .nag-banner__dismiss:focus-visible {
+    background-color: var(--color-warning-border, #ffc107);
+    color: var(--color-on-warning, #000);
+    outline: 2px solid var(--color-focus, currentColor);
+    outline-offset: 1px;
+  }
+
   /* Mastery card (SETTINGS-01, D-86) — threshold % + rolling window (days). */
   .mastery-row {
     display: flex;
