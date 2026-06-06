@@ -19,10 +19,11 @@
  *   - Production: call with `{ repo }` only; `localStorage` falls back to
  *     `globalThis.localStorage`; `today` falls back to computed local date.
  *
- * Date formatting: uses the `formatLocalYMD` + `parseLocalYMD` helpers from
- * `js/util/date.js` so every YYYY-MM-DD string is local-calendar based
- * (DATA-06, D-06 / Anti-Pattern 3). The `sv-SE` locale trick is equivalent
- * but the explicit helpers keep the derivation visible and testable.
+ * Date formatting: uses `formatLocalYMD` + `daysBetween` helpers from
+ * `js/util/date.js` so every YYYY-MM-DD string is local-calendar based and
+ * day-delta arithmetic uses Math.round (DATA-06, D-06, D-101 / Anti-Pattern 3).
+ * The `sv-SE` locale trick is equivalent but the explicit helpers keep the
+ * derivation visible, testable, and in a single place.
  *
  * Pitfall 5 (from RESEARCH): 'nag:lastDismissed' in localStorage is NOT
  * cleared by "Reset data" (which only clears IDB). The Settings reset handler
@@ -35,7 +36,7 @@
  *   - EXPORT-08: "Last backup: N days ago" display + dismissible banner
  */
 
-import { formatLocalYMD, parseLocalYMD } from '../util/date.js';
+import { formatLocalYMD, daysBetween } from '../util/date.js';
 
 // ---------------------------------------------------------------------------
 // DI state
@@ -89,22 +90,6 @@ function getLocalStorage() {
   return _localStorage ?? globalThis.localStorage;
 }
 
-/**
- * Compute elapsed whole days between two YYYY-MM-DD strings using Math.round
- * (D-101). DST transitions shift the millisecond delta by up to ±1 hour;
- * Math.round keeps the result integer-correct for all timezone transitions.
- * Math.floor is FORBIDDEN (it would silently undercount by 1 on DST nights).
- *
- * @param {string} fromYMD
- * @param {string} toYMD
- * @returns {number}
- */
-function wholeDaysBetween(fromYMD, toYMD) {
-  const a = parseLocalYMD(fromYMD);
-  const b = parseLocalYMD(toYMD);
-  return Math.round((b - a) / 86400000);
-}
-
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -129,7 +114,7 @@ export async function daysSinceLastBackup() {
   if (!lastDate) return null;
 
   const today = getToday();
-  const days = wholeDaysBetween(lastDate, today);
+  const days = daysBetween(lastDate, today);
   return Math.max(0, days);
 }
 
@@ -157,7 +142,7 @@ export async function shouldShowNag() {
 
   // Dismissed recently — only reappear after another 7 days (D-102)
   const today = getToday();
-  const daysSinceDismissal = wholeDaysBetween(lastDismissed, today);
+  const daysSinceDismissal = daysBetween(lastDismissed, today);
   return daysSinceDismissal >= 7;
 }
 
