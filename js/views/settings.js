@@ -1,6 +1,6 @@
 /**
- * @file Settings view mounter — composes 5 cards, subscribes to store.notify
- * for live refresh, wires actions (D-60..D-67, D-72, D-75, D-79).
+ * @file Settings view mounter — composes 6 cards, subscribes to store.notify
+ * for live refresh, wires actions (D-60..D-67, D-72, D-75, D-79, SETTINGS-03).
  *
  * Wires the pure description-tree builders (`js/views/settings/builders.js`)
  * into real DOM via `mount()` (D-77). `mountSettings(parent, {repo, store})`
@@ -19,10 +19,13 @@
  *   - Install card (D-64): static, no reactivity.
  *   - Data card (D-65): reads `meta.undoToken` + `repo.getEvent(token)` at
  *     mount; re-renders on every notify (any mutation may have replaced the
- *     most-recent event).
+ *     most-recent event). Also includes Export JSON, Export CSV, and Import
+ *     JSON buttons (SETTINGS-03) and backup nag display (EXPORT-08).
  *   - About card (D-66): mostly static (APP_VERSION); async-loads schemaVersion
  *     via Pattern S5 + cache-name via `caches.keys()` + SW state via
  *     `navigator.serviceWorker.controller`.
+ *   - Mastery card (SETTINGS-01, D-86): reads threshold + window from cache;
+ *     falls back to defaults when not set.
  *
  * Action closures (D-75 chokepoint discipline — Schedule writes through
  * apply, NEVER directly to the repo):
@@ -35,6 +38,12 @@
  *   - undoLastAction → undo(); catch shows showErrorToast.
  *   - resetData → confirm(D-67 prose) → indexedDB.deleteDatabase('habits')
  *     → location.reload().
+ *   - exportJSON → calls exportJSON(), Blob download, updates lastBackupDate.
+ *   - exportCSV → calls exportCSV(), Blob download, updates lastBackupDate.
+ *   - importJSON → FileReader reads file, mergeImportedStores(), broadcasts
+ *     {type:'import:done'} to other tabs (D-100). File input change handler
+ *     is wired separately via wireImportInput() (mount.js wires only click).
+ *   - dismissNag → calls dismissNag(), re-renders Data card.
  *
  * The Reset-data click handler uses the D-67 SETTINGS-flavored prose —
  * intentionally distinct from D-06 verbatim diagnostics text (which stays
@@ -69,6 +78,13 @@ import {
   buildAboutCard,
   buildMasteryCard,
 } from './settings/builders.js';
+import { exportJSON, exportCSV } from '../io/export.js';
+import { mergeImportedStores } from '../io/import.js';
+import {
+  daysSinceLastBackup,
+  shouldShowNag as checkShouldShowNag,
+  dismissNag as doDissmissNag,
+} from '../io/backup-nag.js';
 
 /* D-67 SETTINGS-flavored Reset-data confirm prose — INTENTIONALLY distinct
  * from D-06 verbatim diagnostics text used in js/views/diagnostics.js. */
@@ -254,11 +270,19 @@ function loadAboutStateAsync(cardEl, repo) {
  *
  * @param {object|undefined} eventRow
  * @param {string|undefined} habitName
+ * @param {number|null} lastBackupDays
+ * @param {boolean} nagVisible
  * @returns {object} description
  */
-function buildDataCardFromState(eventRow, habitName) {
+function buildDataCardFromState(eventRow, habitName, lastBackupDays, nagVisible) {
   if (!eventRow) {
-    return buildDataCard({ lastEvent: '', hasUndoToken: false, relativeTime: '' });
+    return buildDataCard({
+      lastEvent: '',
+      hasUndoToken: false,
+      relativeTime: '',
+      lastBackupDays,
+      shouldShowNag: nagVisible,
+    });
   }
   const relativeTime = formatRelative(eventRow.at);
   let lastEvent;
@@ -275,6 +299,8 @@ function buildDataCardFromState(eventRow, habitName) {
     lastEvent,
     hasUndoToken: true,
     relativeTime,
+    lastBackupDays,
+    shouldShowNag: nagVisible,
   });
 }
 
@@ -419,6 +445,126 @@ function buildActions() {
         showErrorToast("Couldn't change mastery window — try again");
       });
     },
+
+    /**
+     * Export JSON button (SETTINGS-03, EXPORT-01/02). Calls exportJSON(),
+     * creates a Blob, triggers anchor download, then updates lastBackupDate
+     * via apply() (D-75 chokepoint). Shows error toast on failure.
+     */
+    exportJSON: async () => {
+      try {
+        const json = await exportJSON();
+        const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = (_panelEl?.ownerDocument ?? globalThis.document).createElement('a');
+        a.href = url;
+        a.download = 'habits-' + new Date().toLocaleDateString('sv-SE') + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        // Update lastBackupDate via apply chokepoint (D-75) — triggers store.notify
+        // which will re-render the Data card and clear the nag if applicable.
+        await apply({
+          type: 'setSetting',
+          payload: { key: 'lastBackupDate', value: new Date().toLocaleDateString('sv-SE') },
+        });
+      } catch (err) {
+        showErrorToast('JSON export failed: ' + (err?.message ?? String(err)));
+      }
+    },
+
+    /**
+     * Export CSV button (SETTINGS-03, EXPORT-03/04/05/07). Calls exportCSV(),
+     * creates a Blob, triggers anchor download, then updates lastBackupDate.
+     * Shows error toast on failure.
+     */
+    exportCSV: async () => {
+      try {
+        const csv = await exportCSV();
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = (_panelEl?.ownerDocument ?? globalThis.document).createElement('a');
+        a.href = url;
+        a.download =
+          'habits-completion-' + new Date().toLocaleDateString('sv-SE') + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        // Update lastBackupDate via apply chokepoint (D-75).
+        await apply({
+          type: 'setSetting',
+          payload: { key: 'lastBackupDate', value: new Date().toLocaleDateString('sv-SE') },
+        });
+      } catch (err) {
+        showErrorToast('CSV export failed: ' + (err?.message ?? String(err)));
+      }
+    },
+
+    /**
+     * Import JSON file input change handler (SETTINGS-03, IMPORT-01/02/03/04).
+     * Reads the selected file via FileReader, JSON.parses it, calls
+     * mergeImportedStores(), and broadcasts {type:'import:done'} to other
+     * tabs (D-100). Wired on the `change` event (not `click`) by
+     * wireImportInput() since mount.js only wires click.
+     *
+     * @param {Event} evt
+     */
+    importJSON: async (evt) => {
+      const file = (evt?.currentTarget ?? evt?.target)?.files?.[0];
+      if (!file) return;
+
+      try {
+        const text = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = () => reject(new Error('FileReader error'));
+          reader.readAsText(file, 'utf-8');
+        });
+
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch (_e) {
+          throw new Error('File is not valid JSON');
+        }
+
+        await mergeImportedStores(parsed);
+
+        // D-100: Broadcast {type:'import:done'} to other tabs AFTER tx commits
+        // (mergeImportedStores calls _broadcast internally when configured; here
+        // we also emit via a fresh channel so the UI channel always fires even
+        // if configureImport's broadcast was injected only for unit tests).
+        try {
+          const bc = new BroadcastChannel('habits');
+          bc.postMessage({ type: 'import:done' });
+          bc.close();
+        } catch (_bcErr) {
+          // BroadcastChannel may not be available on some file:// contexts;
+          // swallow — import itself succeeded.
+        }
+
+        // Reset the file input so the user can import the same file again.
+        if (evt?.currentTarget) evt.currentTarget.value = '';
+        else if (evt?.target) evt.target.value = '';
+      } catch (err) {
+        showErrorToast('Import failed: ' + (err?.message ?? String(err)));
+      }
+    },
+
+    /**
+     * Dismiss the backup nag banner (D-102). Writes today as the dismissal
+     * date to localStorage and triggers a Data card re-render to hide the
+     * banner. Wired to the '×' button inside the nag banner.
+     */
+    dismissNag: async () => {
+      try {
+        doDissmissNag();
+        // Trigger a live-card refresh so the nag banner disappears without a
+        // full page reload. We do NOT call apply() here because dismissing the
+        // nag is a pure UI preference (localStorage), not an IDB mutation.
+        await refreshLiveCards();
+      } catch (err) {
+        showErrorToast("Couldn't dismiss nag: " + (err?.message ?? String(err)));
+      }
+    },
   };
 }
 
@@ -446,10 +592,29 @@ function wireMasteryInputs(cardEl, actions) {
 }
 
 /**
+ * Wire the `change` event listener on the import file input inside `cardEl`.
+ * `mount.js` wires only `click` via `data-action`; file inputs fire `change`.
+ * Called after the Data card is mounted or re-rendered.
+ *
+ * @param {object} cardEl
+ * @param {Record<string, Function>} actions
+ */
+function wireImportInput(cardEl, actions) {
+  if (!cardEl) return;
+  const fileInput = cardEl.querySelector('[data-action="importJSON"]');
+  if (fileInput && typeof actions.importJSON === 'function') {
+    fileInput.addEventListener('change', actions.importJSON);
+  }
+}
+
+/**
  * Refresh the Data card + Schedule card after a notify event. Both cards
  * read from cache (canonical post-notify state — Pitfall 2 / D-72). The
  * other three cards are static or async-resolved once at mount and don't
  * need to participate in the live-refresh loop.
+ *
+ * Also re-computes backup nag state on each refresh so the "Last backup"
+ * row and optional nag banner stay current with the settings store.
  */
 async function refreshLiveCards() {
   if (!_panelEl || !_currentDeps) return;
@@ -468,9 +633,21 @@ async function refreshLiveCards() {
   }
 
   if (dataCard) {
-    const { eventRow, habitName } = await readDataCardInputs(repo, store);
-    const newData = buildDataCardFromState(eventRow, habitName);
+    // Read undo state + backup nag state in parallel.
+    const [
+      { eventRow, habitName },
+      lastBackupDays,
+      nagVisible,
+    ] = await Promise.all([
+      readDataCardInputs(repo, store),
+      daysSinceLastBackup(),
+      checkShouldShowNag(),
+    ]);
+    const newData = buildDataCardFromState(eventRow, habitName, lastBackupDays, nagVisible);
     replaceCardChildren(dataCard, newData, actions);
+    // Re-wire the import file input after card re-render (change listener is not
+    // preserved through replaceCardChildren which replaces all children).
+    wireImportInput(dataCard, actions);
   }
 }
 
@@ -528,13 +705,25 @@ export function mountSettings(parent, deps) {
   // Install card.
   mount(buildInstallCard(), _panelEl, actions);
 
-  // Data card — synchronous initial render with hasUndoToken=false; the
-  // async repo read fills it in via refreshLiveCards() below.
-  mount(
-    buildDataCard({ lastEvent: '', hasUndoToken: false, relativeTime: '' }),
+  // Data card — synchronous initial render with hasUndoToken=false and
+  // lastBackupDays=null; the async repo + nag reads fill it in via
+  // refreshLiveCards() below (Pattern S5 for the async-loaded values).
+  const dataCardEl = mount(
+    buildDataCard({
+      lastEvent: '',
+      hasUndoToken: false,
+      relativeTime: '',
+      lastBackupDays: null,
+      shouldShowNag: false,
+    }),
     _panelEl,
     actions,
   );
+
+  // Wire the import file input change listener after initial mount.
+  if (dataCardEl) {
+    wireImportInput(dataCardEl, actions);
+  }
 
   // About card.
   const aboutDesc = buildAboutCard({

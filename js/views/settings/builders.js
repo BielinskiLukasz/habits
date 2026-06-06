@@ -252,24 +252,136 @@ export function buildInstallCard() {
 }
 
 /**
- * Build the Data card description (D-65, D-71).
+ * Build the Data card description (D-65, D-71, SETTINGS-03, EXPORT-08).
  *
- * Two sub-blocks:
- *   (a) Undo last action — button + preview text. When `hasUndoToken=false`
+ * Three sub-blocks:
+ *   (a) Backup status — "Last backup: N days ago" (or "Never") read-only
+ *       display row, plus export/import action buttons. If `shouldShowNag`
+ *       is true, a dismissible nag banner appears at the top of this section
+ *       (D-101, D-102 / EXPORT-08).
+ *   (b) Undo last action — button + preview text. When `hasUndoToken=false`
  *       the button is disabled and preview reads `"Nothing to undo."`.
  *       When `hasUndoToken=true` the button is enabled and preview reads
  *       `"Last: <lastEvent> · <relativeTime>"` (D-71).
- *   (b) Reset data — destructive-red button wrapped in
+ *   (c) Reset data — destructive-red button wrapped in
  *       `.settings-card--destructive`. The Reset confirm string (D-67) lives
  *       in the mounter, not the builder.
  *
- * Both buttons carry `aria-label` for the verb only (D-79); the visible
+ * All buttons carry `aria-label` for the verb only (D-79); the visible
  * text mirrors the label so sighted users see the same affordance.
  *
- * @param {{ lastEvent: string, hasUndoToken: boolean, relativeTime: string }} args
+ * The `<input type="file">` for JSON import carries `data-action="importJSON"`
+ * so the mounter can locate it via querySelector for `change` event wiring
+ * (mount.js wires only `click` for data-action; file inputs need `change`).
+ *
+ * @param {{
+ *   lastEvent: string,
+ *   hasUndoToken: boolean,
+ *   relativeTime: string,
+ *   lastBackupDays?: number|null,
+ *   shouldShowNag?: boolean,
+ * }} args
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
-export function buildDataCard({ lastEvent, hasUndoToken, relativeTime }) {
+export function buildDataCard({
+  lastEvent,
+  hasUndoToken,
+  relativeTime,
+  lastBackupDays = null,
+  shouldShowNag = false,
+}) {
+  /** @type {object[]} */
+  const cardChildren = [
+    { tag: 'h2', attrs: { id: DATA_LABEL_ID }, text: 'Data' },
+  ];
+
+  // --- Backup section (SETTINGS-03, EXPORT-08) ---
+
+  /** @type {object[]} */
+  const backupChildren = [];
+
+  // Nag banner (D-101, D-102) — only shown when ≥7 days since last backup
+  // and dismissal has expired.
+  if (shouldShowNag) {
+    backupChildren.push({
+      tag: 'div',
+      attrs: { class: 'nag-banner', role: 'alert' },
+      children: [
+        {
+          tag: 'span',
+          text:
+            lastBackupDays === null
+              ? 'No backup found. Export your data now.'
+              : `Last backup: ${lastBackupDays} days ago. Export your data now.`,
+        },
+        {
+          tag: 'button',
+          attrs: {
+            'data-action': 'dismissNag',
+            'aria-label': 'Dismiss backup nag',
+            class: 'nag-banner__dismiss',
+            title: 'Dismiss',
+          },
+          text: '×',
+        },
+      ],
+    });
+  }
+
+  // Last backup status row.
+  backupChildren.push({
+    tag: 'dl',
+    children: [
+      { tag: 'dt', text: 'Last backup' },
+      {
+        tag: 'dd',
+        text:
+          lastBackupDays === null ? 'Never' : `${lastBackupDays} days ago`,
+      },
+    ],
+  });
+
+  // Export buttons.
+  backupChildren.push({
+    tag: 'button',
+    attrs: {
+      'data-action': 'exportJSON',
+      'aria-label': 'Export JSON backup',
+      class: 'settings-export-btn',
+    },
+    text: 'Export JSON',
+  });
+  backupChildren.push({
+    tag: 'button',
+    attrs: {
+      'data-action': 'exportCSV',
+      'aria-label': 'Export CSV',
+      class: 'settings-export-btn',
+    },
+    text: 'Export CSV',
+  });
+
+  // Import file input — carries data-action so the mounter can locate it
+  // via `[data-action="importJSON"]` and attach a `change` listener.
+  backupChildren.push({
+    tag: 'input',
+    attrs: {
+      type: 'file',
+      accept: 'application/json',
+      'data-action': 'importJSON',
+      id: 'import-file-input',
+      'aria-label': 'Import JSON backup file',
+    },
+  });
+
+  cardChildren.push({
+    tag: 'div',
+    attrs: { class: 'settings-data-backup' },
+    children: backupChildren,
+  });
+
+  // --- Undo section ---
+
   /** @type {object[]} */
   const undoChildren = [];
   if (hasUndoToken) {
@@ -298,31 +410,37 @@ export function buildDataCard({ lastEvent, hasUndoToken, relativeTime }) {
     });
   }
 
+  cardChildren.push({
+    tag: 'div',
+    attrs: { class: 'settings-data-undo' },
+    children: undoChildren,
+  });
+
+  // --- Reset section ---
+
+  cardChildren.push({
+    tag: 'div',
+    attrs: { class: 'settings-card--destructive' },
+    children: [
+      {
+        tag: 'button',
+        attrs: {
+          'data-action': 'resetData',
+          'aria-label': 'Reset data',
+        },
+        text: 'Reset data',
+      },
+      { tag: 'p', text: 'This deletes everything stored on this device.' },
+    ],
+  });
+
   return {
     tag: 'section',
     attrs: {
       class: 'settings-card',
       'aria-labelledby': DATA_LABEL_ID,
     },
-    children: [
-      { tag: 'h2', attrs: { id: DATA_LABEL_ID }, text: 'Data' },
-      { tag: 'div', attrs: { class: 'settings-data-undo' }, children: undoChildren },
-      {
-        tag: 'div',
-        attrs: { class: 'settings-card--destructive' },
-        children: [
-          {
-            tag: 'button',
-            attrs: {
-              'data-action': 'resetData',
-              'aria-label': 'Reset data',
-            },
-            text: 'Reset data',
-          },
-          { tag: 'p', text: 'This deletes everything stored on this device.' },
-        ],
-      },
-    ],
+    children: cardChildren,
   };
 }
 
