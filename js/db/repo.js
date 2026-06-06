@@ -238,6 +238,72 @@ export async function putSetting(s) {
 }
 
 /**
+ * Get every log row. Used by `js/io/export.js#exportJSON` to dump the full
+ * logs store into the JSON backup (EXPORT-01, Plan 05-02).
+ *
+ * @returns {Promise<object[]>}
+ */
+export async function getAllLogs() {
+  const db = await openDB();
+  return getAll(db, 'logs');
+}
+
+/**
+ * Get every `habit_versions` row. Used by `js/io/export.js#exportJSON`
+ * (EXPORT-01, Plan 05-02).
+ *
+ * @returns {Promise<object[]>}
+ */
+export async function getAllHabitVersions() {
+  const db = await openDB();
+  return getAll(db, 'habit_versions');
+}
+
+/**
+ * Get every event row. Used by `js/io/export.js#exportJSON` (EXPORT-01,
+ * Plan 05-02).
+ *
+ * @returns {Promise<object[]>}
+ */
+export async function getAllEvents() {
+  const db = await openDB();
+  return getAll(db, 'events');
+}
+
+/**
+ * Get every settings row. Used by `js/io/export.js#exportJSON` (EXPORT-01,
+ * Plan 05-02).
+ *
+ * @returns {Promise<object[]>}
+ */
+export async function getAllSettings() {
+  const db = await openDB();
+  return getAll(db, 'settings');
+}
+
+/**
+ * Get every meta row. Used by `js/io/export.js#exportJSON` (EXPORT-01,
+ * Plan 05-02).
+ *
+ * @returns {Promise<object[]>}
+ */
+export async function getAllMeta() {
+  const db = await openDB();
+  return getAll(db, 'meta');
+}
+
+/**
+ * Get every `score_snapshots` row. Used by `js/io/export.js#exportJSON`
+ * (EXPORT-01, Plan 05-02). Will be empty in P5 since scoring runs in P6.
+ *
+ * @returns {Promise<object[]>}
+ */
+export async function getAllScoreSnapshots() {
+  const db = await openDB();
+  return getAll(db, 'score_snapshots');
+}
+
+/**
  * Multi-store readwrite tx — entry point for `apply.js` / `seed.js` /
  * `undo.js`. The `body` receives the raw IDBTransaction; callers compose
  * `tx.objectStore(name).put(row)` etc. and trust the wrapper to `await

@@ -1,35 +1,123 @@
 /**
- * @file CSV cell encoding and field escaping for the habit×day export matrix.
+ * @file CSV cell encoding, field escaping, and JSON export for the habit data
+ * export flows (EXPORT-01, EXPORT-02, EXPORT-03, EXPORT-06).
  *
+ * **CSV encoding (Plan 05-01):** Pure functions for the habit×day matrix.
  * Implements EXPORT-03 (habit × day matrix with 1/0/x cells) and EXPORT-06
- * (multi-occurrence habits show numeric counts). This module contains the
- * pure encoding logic — no file I/O, no IDB reads, no DOM interaction.
- * Integration with full CSV generation (repo reads, file download) is wired
- * in Plan 02 (05-02).
+ * (multi-occurrence habits show numeric counts). No file I/O, no IDB reads,
+ * no DOM interaction. Integration with full CSV generation (repo reads, file
+ * download) is wired in a later plan.
+ *
+ * **JSON export (Plan 05-02):** Full-fidelity snapshot of all 7 IDB stores.
+ * Implements EXPORT-01 (full-fidelity backup) and EXPORT-02 (schemaVersion
+ * embedding). Reads every row from all stores and returns
+ * `JSON.stringify({schemaVersion, habits, logs, habit_versions, events,
+ * settings, meta, score_snapshots})`.
+ *
+ * DI pattern (mirrors js/io/seed.js `configureSeed`):
+ *   - `configureExport({repo})` injects the repo handle for testing.
+ *   - Production boot calls this once with the real repo.
+ *   - Tests inject a minimal fake repo with `getAll*` methods.
  *
  * Decisions honoured:
- *   - D-93: cell encoding — 1 (applicable + completed), 0 (applicable +
- *     not completed), x (not applicable: cadence exclusion, future startDate,
- *     archived status).
+ *   - D-91: JSON structure — flat object with `schemaVersion` at top level;
+ *     all 7 stores as arrays under their store name keys.
+ *   - D-93: cell encoding — 1/0/x cells for the CSV matrix.
  *   - D-94: multi-occurrence habits show the raw numeric count (not 1/0).
  *   - T-05-01 (threat): escapeCSVField quotes any field containing `;`, `"`,
  *     `\r`, `\n`, or leading/trailing whitespace per RFC 4180.
+ *   - T-05-04 (threat): JSON.stringify is a safe built-in serializer; no
+ *     .toJSON() overrides or custom reviver logic.
  *   - Pitfall 1 (05-RESEARCH): archived habits return 'x' via status check.
  *   - Pitfall 2 (05-RESEARCH): partial numeric/slot counts output raw number,
  *     not '1'.
  *
- * Cadence applicability is evaluated by importing `appliesToday` from
- * js/domain/cadence.js. The caller is responsible for providing a cadence
- * context (`ctx`) whose `weekCompletions` and `monthCompletions` closures
- * read from the same in-memory logs array (sync, closure-based).
+ * Cadence applicability (CSV path) is evaluated by importing `appliesToday`
+ * from js/domain/cadence.js. The caller provides a cadence context (`ctx`)
+ * whose `weekCompletions` and `monthCompletions` closures read from the same
+ * in-memory logs array (sync, closure-based).
  *
  * CSV delimiter is `;` (semicolon) — Polish Windows Excel default (D-93,
  * locked Phase 5 decision). The BOM prefix (`﻿`) and CRLF line endings
- * for the full CSV file are applied in Plan 02 at file assembly time, not
- * here.
+ * for the full CSV file are applied at file assembly time, not here.
  */
 
 import { appliesToday } from '../domain/cadence.js';
+import { DB_VERSION } from '../db/schema.js';
+
+// ---------------------------------------------------------------------------
+// JSON Export — DI state
+// ---------------------------------------------------------------------------
+
+/** @type {object|null} */
+let _repo = null;
+
+/**
+ * Inject dependencies for JSON export. Truthy fields overwrite the
+ * module-level mutables (mirrors `configureSeed` in js/io/seed.js).
+ * Production boot calls this once with the real repo; tests inject a minimal
+ * fake repo with `getAll*` read methods.
+ *
+ * @param {{ repo?: object }} deps
+ * @returns {void}
+ */
+export function configureExport(deps) {
+  if (deps.repo) _repo = deps.repo;
+}
+
+/**
+ * Export all 7 IDB stores as a full-fidelity JSON string (EXPORT-01,
+ * EXPORT-02). The returned string embeds `schemaVersion` (matching
+ * `DB_VERSION` from `js/db/schema.js`) and one array per store.
+ *
+ * The repo must expose `getAll*` methods for every store:
+ *   `getAllHabits()`, `getAllLogs()`, `getAllHabitVersions()`,
+ *   `getAllEvents()`, `getAllSettings()`, `getAllMeta()`,
+ *   `getAllScoreSnapshots()`.
+ *
+ * Empty stores (e.g. `score_snapshots` in P5 before any scoring runs) are
+ * exported as `[]` — never `undefined` or `null`.
+ *
+ * @returns {Promise<string>} A valid JSON string: `{schemaVersion, habits,
+ *   logs, habit_versions, events, settings, meta, score_snapshots}`.
+ * @throws {Error} If `configureExport({repo})` was not called before invoking.
+ */
+export async function exportJSON() {
+  if (!_repo) {
+    throw new Error('export: configureExport({repo}) not called');
+  }
+  const repo = _repo;
+
+  // Read all 7 stores in parallel for performance — no ordering dependency.
+  const [
+    habits,
+    logs,
+    habit_versions,
+    events,
+    settings,
+    meta,
+    score_snapshots,
+  ] = await Promise.all([
+    repo.getAllHabits(),
+    repo.getAllLogs(),
+    repo.getAllHabitVersions(),
+    repo.getAllEvents(),
+    repo.getAllSettings(),
+    repo.getAllMeta(),
+    repo.getAllScoreSnapshots(),
+  ]);
+
+  return JSON.stringify({
+    schemaVersion: DB_VERSION,
+    events,
+    habit_versions,
+    habits,
+    logs,
+    meta,
+    score_snapshots,
+    settings,
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Public API

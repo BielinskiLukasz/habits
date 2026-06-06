@@ -21,6 +21,11 @@
  *
  * Phase 04 plan 05 (Task 1): adds `getLogsForDate` and `getHabitVersionAtDate`
  * to match the new methods added to `js/db/repo.js` (A7 contract preserved).
+ *
+ * Phase 05 plan 02 (Task 1): adds `getAllLogs`, `getAllHabitVersions`,
+ * `getAllEvents`, `getAllSettings`, `getAllMeta`, `getAllScoreSnapshots` to
+ * support `js/io/export.js#exportJSON` full-store reads (EXPORT-01, A7
+ * contract preserved).
  */
 
 const COMPOUND_KEY_STORES = new Set(['logs', 'habit_versions', 'score_snapshots']);
@@ -50,16 +55,22 @@ function keyOf(storeName, value) {
  *   putHabit:                 (h: object) => Promise<void>,
  *   putLog:                   (l: object) => Promise<void>,
  *   getLog:                   (habitId: string, date: string) => Promise<object|undefined>,
+ *   getAllLogs:                () => Promise<object[]>,
  *   getLogsInRange:           (startYMD: string, endYMD: string) => Promise<object[]>,
  *   getLogsByHabit:           (habitId: string) => Promise<object[]>,
  *   getLogsForDate:           (date: string) => Promise<object[]>,
+ *   getAllHabitVersions:      () => Promise<object[]>,
  *   getHabitVersionAtDate:    (habitId: string, date: string) => Promise<object|undefined>,
  *   putEvent:                 (e: object) => Promise<void>,
  *   getEvent:                 (id: string) => Promise<object|undefined>,
+ *   getAllEvents:              () => Promise<object[]>,
  *   getMeta:                  (key: string) => Promise<*>,
  *   putMeta:                  (key: string, value: *) => Promise<void>,
+ *   getAllMeta:                () => Promise<object[]>,
  *   putSetting:               (s: object) => Promise<void>,
  *   getSetting:               (key: string) => Promise<object|undefined>,
+ *   getAllSettings:            () => Promise<object[]>,
+ *   getAllScoreSnapshots:      () => Promise<object[]>,
  *   runTx:                    (stores: string[], mode: 'readonly'|'readwrite', body: (tx: object) => *|Promise<*>) => Promise<*>,
  *   _stores:                  Record<string, Map<string, object>>,
  * }}
@@ -98,6 +109,10 @@ export function createFakeRepo() {
     async getAllHabits() {
       return Array.from(stores.habits.values());
     },
+    // Phase 05 plan 02 Task 1: full-store reads for JSON export (EXPORT-01).
+    async getAllLogs() {
+      return Array.from(stores.logs.values());
+    },
     async getLogsInRange(startYMD, endYMD) {
       /** @type {object[]} */
       const out = [];
@@ -133,6 +148,10 @@ export function createFakeRepo() {
       }
       return out;
     },
+    // Phase 05 plan 02 Task 1: full habit_versions scan for JSON export.
+    async getAllHabitVersions() {
+      return Array.from(stores.habit_versions.values());
+    },
     // Phase 04 plan 05 Task 1: most-recent habit_versions row effectiveFrom <= date.
     // Mirrors repo.getHabitVersionAtDate; real uses IDBKeyRange.bound on compound
     // keypath [habitId, effectiveFrom] per D-39 schema.
@@ -151,10 +170,27 @@ export function createFakeRepo() {
     },
     async putEvent(e) { putters.events(e); },
     async getEvent(id) { return stores.events.get(id); },
+    // Phase 05 plan 02 Task 1: full events scan for JSON export.
+    async getAllEvents() {
+      return Array.from(stores.events.values());
+    },
     async getMeta(key) { return stores.meta.get(key)?.value; },
     async putMeta(key, value) { putters.meta({ key, value }); },
+    // Phase 05 plan 02 Task 1: full meta scan for JSON export.
+    async getAllMeta() {
+      return Array.from(stores.meta.values());
+    },
     async putSetting(s) { putters.settings(s); },
     async getSetting(key) { return stores.settings.get(key); },
+    // Phase 05 plan 02 Task 1: full settings scan for JSON export.
+    async getAllSettings() {
+      return Array.from(stores.settings.values());
+    },
+    // Phase 05 plan 02 Task 1: full score_snapshots scan for JSON export.
+    // Will be empty in P5; populated in P6 when scoring runs.
+    async getAllScoreSnapshots() {
+      return Array.from(stores.score_snapshots.values());
+    },
 
     /**
      * Minimal tx-shape (A7 contract). Downstream apply.js / seed.js / undo.js
