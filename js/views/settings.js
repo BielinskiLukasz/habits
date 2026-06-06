@@ -403,6 +403,16 @@ function buildActions() {
         ? globalThis.confirm(RESET_CONFIRM_D67)
         : false;
       if (!confirmed) return;
+      // Clear nag dismissal state from localStorage so the nag resets along
+      // with the backup — otherwise a dismissed nag would stay dismissed even
+      // after the user wipes all their data (Pitfall 5 from RESEARCH.md).
+      try {
+        if (globalThis.localStorage) {
+          globalThis.localStorage.removeItem('nag:lastDismissed');
+        }
+      } catch (_e) {
+        // localStorage may be unavailable (e.g., private browsing restrictions).
+      }
       try {
         await new Promise((resolve, reject) => {
           const req = globalThis.indexedDB.deleteDatabase('habits');
