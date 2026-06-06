@@ -102,22 +102,22 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### EXPORT — JSON backup + CSV analytics export
 
-- [ ] **EXPORT-01**: User can download a full-fidelity JSON backup of every IndexedDB store via a Settings action
-- [ ] **EXPORT-02**: JSON export embeds the current `schemaVersion`
-- [ ] **EXPORT-03**: User can download a CSV export of habit × day completion matrix (rows = habits grouped by wave, columns = days, cells = `1`/`0`/`x`)
-- [ ] **EXPORT-04**: CSV export uses `;` (semicolon) as field separator, UTF-8 with BOM, CRLF line endings
-- [ ] **EXPORT-05**: CSV export correctly preserves Polish diacritics (ą, ć, ę, ł, ń, ó, ś, ź, ż) when opened by double-click in Polish Windows Excel
-- [ ] **EXPORT-06**: CSV cells encode multi-occurrence habits as their numeric count for the period (not `1`)
-- [ ] **EXPORT-07**: CSV filename includes the export date (e.g., `nawyki-completion-2026-05-26.csv`)
-- [ ] **EXPORT-08**: User sees a "Last backup: N days ago" banner; a nag appears weekly to remind user to export
+- [x] **EXPORT-01**: User can download a full-fidelity JSON backup of every IndexedDB store via a Settings action
+- [x] **EXPORT-02**: JSON export embeds the current `schemaVersion`
+- [x] **EXPORT-03**: User can download a CSV export of habit × day completion matrix (rows = habits grouped by wave, columns = days, cells = `1`/`0`/`x`)
+- [x] **EXPORT-04**: CSV export uses `;` (semicolon) as field separator, UTF-8 with BOM, CRLF line endings
+- [x] **EXPORT-05**: CSV export correctly preserves Polish diacritics (ą, ć, ę, ł, ń, ó, ś, ź, ż) when opened by double-click in Polish Windows Excel
+- [x] **EXPORT-06**: CSV cells encode multi-occurrence habits as their numeric count for the period (not `1`)
+- [x] **EXPORT-07**: CSV filename includes the export date (e.g., `nawyki-completion-2026-05-26.csv`)
+- [x] **EXPORT-08**: User sees a "Last backup: N days ago" banner; a nag appears weekly to remind user to export
 
 ### IMPORT — JSON restore (merge-by-id)
 
-- [ ] **IMPORT-01**: User can upload a JSON backup file to restore data
-- [ ] **IMPORT-02**: Import uses merge-by-id semantics: overwrite-on-collision by primary key, never delete local-only records
-- [ ] **IMPORT-03**: Import rejects files from a newer `schemaVersion` with a clear error message
-- [ ] **IMPORT-04**: Import broadcasts a reload signal so other tabs refresh after merge completes
-- [ ] **IMPORT-05**: CSV import is explicitly NOT supported (read-only export only)
+- [x] **IMPORT-01**: User can upload a JSON backup file to restore data
+- [x] **IMPORT-02**: Import uses merge-by-id semantics: overwrite-on-collision by primary key, never delete local-only records
+- [x] **IMPORT-03**: Import rejects files from a newer `schemaVersion` with a clear error message
+- [x] **IMPORT-04**: Import broadcasts a reload signal so other tabs refresh after merge completes
+- [x] **IMPORT-05**: CSV import is explicitly NOT supported (read-only export only)
 
 ### SCORING — User-selectable scoring model
 
@@ -163,7 +163,7 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 - [x] **SETTINGS-01**: User can view and edit global mastery threshold (default 90%) and window (default 70 days)
 - [ ] **SETTINGS-02**: User can choose scoring model (S1 / S2 / S3)
-- [ ] **SETTINGS-03**: User can trigger JSON export, JSON import, CSV export from Settings
+- [x] **SETTINGS-03**: User can trigger JSON export, JSON import, CSV export from Settings
 - [x] **SETTINGS-04**: User can see storage persistence status (persistent: yes/no) and last-backup timestamp
 - [x] **SETTINGS-05**: User can see app version and schema version in an About panel
 - [ ] **SETTINGS-06**: User can perform "Recompute scores" action (re-runs scoring across all snapshots)
@@ -305,19 +305,19 @@ Every v1 requirement maps to exactly one phase.
 | DATA-06 | Phase 2 | Complete |
 | DATA-07 | Phase 2 | Complete |
 | DATA-08 | Phase 2 | Complete |
-| EXPORT-01 | Phase 5 | Pending |
-| EXPORT-02 | Phase 5 | Pending |
-| EXPORT-03 | Phase 5 | Pending |
-| EXPORT-04 | Phase 5 | Pending |
-| EXPORT-05 | Phase 5 | Pending |
-| EXPORT-06 | Phase 5 | Pending |
-| EXPORT-07 | Phase 5 | Pending |
-| EXPORT-08 | Phase 5 | Pending |
-| IMPORT-01 | Phase 5 | Pending |
-| IMPORT-02 | Phase 5 | Pending |
-| IMPORT-03 | Phase 5 | Pending |
-| IMPORT-04 | Phase 5 | Pending |
-| IMPORT-05 | Phase 5 | Pending |
+| EXPORT-01 | Phase 5 | Complete |
+| EXPORT-02 | Phase 5 | Complete |
+| EXPORT-03 | Phase 5 | Complete |
+| EXPORT-04 | Phase 5 | Complete |
+| EXPORT-05 | Phase 5 | Complete |
+| EXPORT-06 | Phase 5 | Complete |
+| EXPORT-07 | Phase 5 | Complete |
+| EXPORT-08 | Phase 5 | Complete |
+| IMPORT-01 | Phase 5 | Complete |
+| IMPORT-02 | Phase 5 | Complete |
+| IMPORT-03 | Phase 5 | Complete |
+| IMPORT-04 | Phase 5 | Complete |
+| IMPORT-05 | Phase 5 | Complete |
 | SCORING-01 | Phase 6 | Pending |
 | SCORING-02 | Phase 6 | Pending |
 | SCORING-03 | Phase 6 | Pending |
@@ -348,7 +348,7 @@ Every v1 requirement maps to exactly one phase.
 | SEED-05 | Phase 2 | Complete |
 | SETTINGS-01 | Phase 4 | Complete |
 | SETTINGS-02 | Phase 6 | Pending |
-| SETTINGS-03 | Phase 5 | Pending |
+| SETTINGS-03 | Phase 5 | Complete |
 | SETTINGS-04 | Phase 3 | Complete (03-05) |
 | SETTINGS-05 | Phase 3 | Complete (03-05) |
 | SETTINGS-06 | Phase 6 | Pending |
