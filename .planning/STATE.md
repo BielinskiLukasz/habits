@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-06-05T19:54:41.374Z"
-last_activity: 2026-06-05 -- Phase 5 planning complete
+last_updated: "2026-06-06T06:56:03.888Z"
+last_activity: 2026-06-06 -- Phase 5 execution started
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 25
+  total_plans: 31
   completed_plans: 24
   percent: 40
 ---
@@ -20,15 +20,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 04 — domain-model-cadence-catalog-stages-mastery-multi-occurrence
+**Current focus:** Phase 5 — backup-restore-json-csv-exports-json-import-nag
 
 ## Current Position
 
-Phase: 5
+Phase: 5 (backup-restore-json-csv-exports-json-import-nag) — EXECUTING
 Previous: Phase 02 (storage-foundation-the-spine) — COMPLETE + VERIFIED (10/10 UAT pass, 2026-05-27)
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-05 -- Phase 5 planning complete
+Plan: 1 of 6
+Status: Executing Phase 5
+Last activity: 2026-06-06 -- Phase 5 execution started
 
 Progress: [██████████████████████░░░░░░░░] 54% (All Phase 3 complete: 6/6 plans shipped + UAT verified; Phase 4 ready to plan)
 

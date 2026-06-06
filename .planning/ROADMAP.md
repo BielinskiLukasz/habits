@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Storage Foundation (The Spine)** - Date utils, raw IDB, 7 stores + migrations, repo, single mutator, sync, lifecycle, seed (completed 2026-05-27)
 - [ ] **Phase 3: Today View & Settings v1 (First Usable Slice)** - Mobile shell rendering seed data, single-tap binary mark/unmark, persistent undo, install help, persistence status
 - [x] **Phase 4: Domain Model (Cadence, Catalog, Stages, Mastery, Multi-occurrence, History, Waves)** - Full habit lifecycle honoring the versioned-edit invariant (completed 2026-06-05)
-- [ ] **Phase 5: Backup & Restore (JSON + CSV Exports, JSON Import, Nag)** - Full-fidelity JSON round-trip + Polish-Excel-compatible CSV + weekly backup banner
+- [x] **Phase 5: Backup & Restore (JSON + CSV Exports, JSON Import, Nag)** - Full-fidelity JSON round-trip + Polish-Excel-compatible CSV + weekly backup banner (completed 2026-06-06)
 - [ ] **Phase 6: Desktop Analytics & Scoring Trio** - Desktop shell, analytics/wave-board/planning views, all three S1/S2/S3 scoring models with Settings toggle
 
 ## Phase Details
@@ -155,22 +155,21 @@ Plans:
   4. Import rejects files from a newer `schemaVersion` with a clear error and broadcasts a reload signal to other tabs after a successful merge
   5. Settings shows "Last backup: N days ago" and a nag appears weekly to remind the user to export
 
-
 **Plans**: 6 plans
 
 Plans:
 
 **Wave 1** *(TDD: CSV, JSON export, import, nag logic — parallel)*
 
-- [ ] 05-01-PLAN.md — CSV cell encoding (TDD): csvCellValue (1/0/x/numeric), escapeCSVField (RFC 4180 quoting), cadence-aware denominators, multi-occurrence handling — EXPORT-03, EXPORT-06
-- [ ] 05-02-PLAN.md — JSON export (TDD): exportJSON (all 7 stores), schemaVersion embedding, configureExport DI — EXPORT-01, EXPORT-02
-- [ ] 05-03-PLAN.md — JSON import (TDD): mergeImportedStores (merge-by-id), schema validation (reject newer), atomic tx — IMPORT-01, IMPORT-02, IMPORT-03
-- [ ] 05-04-PLAN.md — Backup nag (TDD): daysSinceLastBackup, shouldShowNag (7-day threshold + dismissal), dismissNag (localStorage) — EXPORT-08 calculation
+- [x] 05-01-PLAN.md — CSV cell encoding (TDD): csvCellValue (1/0/x/numeric), escapeCSVField (RFC 4180 quoting), cadence-aware denominators, multi-occurrence handling — EXPORT-03, EXPORT-06
+- [x] 05-02-PLAN.md — JSON export (TDD): exportJSON (all 7 stores), schemaVersion embedding, configureExport DI — EXPORT-01, EXPORT-02
+- [x] 05-03-PLAN.md — JSON import (TDD): mergeImportedStores (merge-by-id), schema validation (reject newer), atomic tx — IMPORT-01, IMPORT-02, IMPORT-03
+- [x] 05-04-PLAN.md — Backup nag (TDD): daysSinceLastBackup, shouldShowNag (7-day threshold + dismissal), dismissNag (localStorage) — EXPORT-08 calculation
 
 **Wave 2** *(execute: file I/O, UI wiring, nag banner — parallel)*
 
-- [ ] 05-05-PLAN.md — Export/import file I/O + Settings Data card: exportCSV full generation (BOM/CRLF), Blob download, file picker, lastBackupDate update, broadcast on import — EXPORT-04, EXPORT-05, EXPORT-07, IMPORT-04, SETTINGS-03
-- [ ] 05-06-PLAN.md — Nag banner UI + dismissal: buildDataCard with conditional banner, Settings mount logic, live refresh, dismiss action, localStorage reset on Reset-data — EXPORT-08 UI
+- [x] 05-05-PLAN.md — Export/import file I/O + Settings Data card: exportCSV full generation (BOM/CRLF), Blob download, file picker, lastBackupDate update, broadcast on import — EXPORT-04, EXPORT-05, EXPORT-07, IMPORT-04, SETTINGS-03
+- [x] 05-06-PLAN.md — Nag banner UI + dismissal: buildDataCard with conditional banner, Settings mount logic, live refresh, dismiss action, localStorage reset on Reset-data — EXPORT-08 UI
 
 **UI hint**: yes
 
@@ -202,8 +201,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Storage Foundation (The Spine) | 6/6 | Complete    | 2026-05-27 |
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
 | 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
-| 5. Backup & Restore | 0/TBD | Not started | - |
+| 5. Backup & Restore | 6/6 | Complete   | 2026-06-06 |
 | 6. Desktop Analytics & Scoring Trio | 0/TBD | Not started | - |
 
 ## Backlog
+
 See [BACKLOG.md](BACKLOG.md) for captured ideas and issues.
