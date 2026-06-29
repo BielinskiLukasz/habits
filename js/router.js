@@ -42,9 +42,9 @@ let _currentHash = null;
 
 /**
  * Mount the hash router. Resolves the initial route from `target.location.hash`
- * (defaulting to `#today` when missing or unknown), invokes the matched route
- * function + `onChange(hash)`, and registers a `hashchange` listener so future
- * URL changes are dispatched.
+ * (defaulting to `defaultRoute` when missing or unknown), invokes the matched
+ * route function + `onChange(hash)`, and registers a `hashchange` listener so
+ * future URL changes are dispatched.
  *
  * Calling `mountRoutes` a second time does NOT register a duplicate
  * `hashchange` listener. The second call still triggers an initial dispatch
@@ -54,15 +54,16 @@ let _currentHash = null;
  *   routes: Record<string, () => void>,
  *   onChange: (hash: string) => void,
  *   target?: { location: { hash: string }, addEventListener: (type: string, fn: (e: { type: string }) => void) => void },
+ *   defaultRoute?: string,
  * }} opts
  * @returns {void}
  */
-export function mountRoutes({ routes, onChange, target }) {
+export function mountRoutes({ routes, onChange, target, defaultRoute = '#today' }) {
   const win = target ?? globalThis.window;
 
   function resolve() {
-    const raw = win.location.hash || '#today';
-    const hash = routes[raw] ? raw : '#today';
+    const raw = win.location.hash || defaultRoute;
+    const hash = routes[raw] ? raw : defaultRoute;
     if (hash === _currentHash) return;
     _currentHash = hash;
     routes[hash]();

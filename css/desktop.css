@@ -1,0 +1,181 @@
+/* css/desktop.css — Desktop analytics shell layout and scoring status classes.
+ *
+ * Linked ONLY from desktop.html — not from index.html (mobile shell).
+ * Scoring status tokens (--color-score-*) live in css/tokens.css so both
+ * shells can reference them; the visual classes that consume those tokens
+ * (score badges, waveboard cells) live here.
+ *
+ * Layer order: desktop-layout (shell structure) → desktop-scoring (status classes).
+ * Both layers are registered inline via @layer; they inherit the cascade layer
+ * ordering established in css/main.css.
+ *
+ * D-115: sidebar + hash-routed panels shell.
+ * D-119: cell color encoding via --color-score-* custom properties.
+ */
+
+@layer desktop-layout {
+  /* Two-column layout: sidebar + main */
+  .desktop-layout {
+    display: flex;
+    height: calc(100vh - 49px);
+  }
+
+  /* Fixed-width sidebar */
+  .desktop-sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    background: var(--color-surface);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* Sidebar nav links: min 44px tap target */
+  .desktop-sidebar-link {
+    display: block;
+    padding: var(--space-2) var(--space-4);
+    min-height: 44px;
+    line-height: 44px;
+    color: var(--color-fg);
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  .desktop-sidebar-link:hover,
+  .desktop-sidebar-link:focus {
+    background: var(--color-accent-soft);
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+  .desktop-sidebar-link[aria-current="page"] {
+    color: var(--color-accent);
+    border-bottom: 2px solid var(--color-accent);
+  }
+
+  /* Main content area */
+  .desktop-main {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-5);
+  }
+
+  /* Route panels: full width, visible when not hidden */
+  .route-panel {
+    display: block;
+  }
+  .route-panel[hidden] {
+    display: none;
+  }
+
+  /* Desktop header */
+  .desktop-header {
+    background: var(--color-surface);
+    padding: var(--space-3) var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .desktop-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+@layer desktop-scoring {
+  /* S1 status badge (inline badge in Analytics rows) */
+  .score-badge {
+    display: inline-block;
+    padding: 2px var(--space-2);
+    border-radius: 4px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: #fff;
+  }
+  .score-badge--healthy  { background: var(--color-score-healthy); }
+  .score-badge--watch    { background: var(--color-score-watch); }
+  .score-badge--atrisk   { background: var(--color-score-atrisk); }
+  .score-badge--failing  { background: var(--color-score-failing); }
+  .score-badge--na       { background: var(--color-score-na); }
+
+  /* Wave-board cell */
+  .waveboard-cell {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+    cursor: default;
+  }
+  .waveboard-cell--healthy  { background: var(--color-score-healthy); color: #fff; }
+  .waveboard-cell--watch    { background: var(--color-score-watch);   color: #fff; }
+  .waveboard-cell--atrisk   { background: var(--color-score-atrisk);  color: #fff; }
+  .waveboard-cell--failing  { background: var(--color-score-failing); color: #fff; }
+  .waveboard-cell--na       { background: var(--color-score-na);      color: #fff; }
+
+  /* Wave-board grid */
+  .waveboard-grid {
+    overflow-x: auto;
+    display: grid;
+    /* column count determined by JS */
+  }
+  .waveboard-sticky-column {
+    position: sticky;
+    left: 0;
+    background: var(--color-surface);
+    z-index: 1;
+  }
+
+  /* Analytics habit table */
+  .analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .analytics-table th {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .analytics-table td {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-md);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .analytics-wave-header td {
+    background: var(--color-surface-raised);
+    font-weight: 600;
+    font-size: var(--text-md);
+  }
+  .analytics-row--archived {
+    opacity: 0.4;
+  }
+
+  /* Planning grid */
+  .planning-grid {
+    overflow-x: auto;
+  }
+  .planning-cell--scheduled {
+    background: var(--color-accent-soft);
+    border: 1px solid var(--color-accent);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+    border-radius: 3px;
+  }
+
+  /* Settings desktop link */
+  .settings-desktop-link {
+    text-align: center;
+    padding: var(--space-3);
+  }
+  .settings-desktop-link a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .settings-desktop-link a:hover {
+    text-decoration: underline;
+  }
+}

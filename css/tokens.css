@@ -52,5 +52,12 @@
     /* Z-index layers */
     --z-toast: 1000;
     --z-overlay: 2000;
+
+    /* Score status colors (D-119) */
+    --color-score-healthy: #10b981;
+    --color-score-watch: #f59e0b;
+    --color-score-atrisk: #f97316;
+    --color-score-failing: #ef4444;
+    --color-score-na: #6b7280;
   }
 }

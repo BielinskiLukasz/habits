@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Habits — Desktop (coming soon)</title>
-  <meta name="description" content="Personal multi-year habit tracker.">
+  <title>Habits — Desktop Analytics</title>
+  <meta name="description" content="Personal multi-year habit tracker — desktop analytics.">
   <meta name="theme-color" content="#f5a623">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,13 +13,30 @@
   <link rel="apple-touch-icon" href="./icon.svg">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./css/main.css">
+  <link rel="stylesheet" href="./css/desktop.css">
 </head>
 <body>
-  <main class="stub">
-    <h1>Habits</h1>
-    <p>The desktop analytics layout ships in a later phase.</p>
-    <p><a href="./index.html">Open the mobile view →</a></p>
-  </main>
+  <header class="desktop-header">
+    <h1 class="desktop-title">Habit Analytics</h1>
+  </header>
+  <div class="desktop-layout">
+    <nav class="desktop-sidebar" aria-label="Desktop navigation">
+      <a href="#analytics" class="desktop-sidebar-link" data-route-link="analytics">Analytics</a>
+      <a href="#waveboard" class="desktop-sidebar-link" data-route-link="waveboard">Wave Board</a>
+      <a href="#planning" class="desktop-sidebar-link" data-route-link="planning">Planning</a>
+    </nav>
+    <main class="desktop-main">
+      <section data-route="analytics" class="route-panel">
+        <h1 tabindex="-1">Analytics</h1>
+      </section>
+      <section data-route="waveboard" class="route-panel" hidden>
+        <h1 tabindex="-1">Wave Board</h1>
+      </section>
+      <section data-route="planning" class="route-panel" hidden>
+        <h1 tabindex="-1">Planning</h1>
+      </section>
+    </main>
+  </div>
   <script type="module" src="./js/desktop.js"></script>
 </body>
 </html>
