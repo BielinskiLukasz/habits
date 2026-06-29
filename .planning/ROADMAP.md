@@ -194,7 +194,7 @@ Plans:
 **Wave 1** *(pure domain — parallel)*
 
 - [x] 06-01-PLAN.md — Pure scoring domain: `js/domain/scoring.js` (computeS1, computeS2, computeS3 — pure functions, TDD) — SCORING-01, SCORING-04, SCORING-05, SCORING-06, SCORING-07, SCORING-09
-- [ ] 06-02-PLAN.md — Score snapshot writer: `js/io/scoreSnapshots.js` (writeHabitSnapshots + rebuildAllSnapshots with single-tx-per-habit strategy, TDD) — SCORING-08, SCORING-09, NFR-03
+- [x] 06-02-PLAN.md — Score snapshot writer: `js/io/scoreSnapshots.js` (writeHabitSnapshots + rebuildAllSnapshots with single-tx-per-habit strategy, TDD) — SCORING-08, SCORING-09, NFR-03
 
 **Wave 2** *(infrastructure + shell — parallel)*
 
