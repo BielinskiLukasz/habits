@@ -123,12 +123,12 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 - [x] **SCORING-01**: User can choose between three scoring models from Settings: S1 (Rolling Threshold Health), S2 (Day-Weighted Wave Score), S3 (Load-Adjusted Capacity Score)
 - [x] **SCORING-02**: Default scoring model is S1
-- [ ] **SCORING-03**: Switching models updates dashboards without requiring a reload
+- [x] **SCORING-03**: Switching models updates dashboards without requiring a reload
 - [x] **SCORING-04**: S1 computes per-habit status: Healthy / Watch / At-risk / Failing based on rolling-window % vs threshold
 - [x] **SCORING-05**: S2 computes a momentum score with exponential day-weighting (e.g., 21-day half-life) and stage-difficulty weighting; aggregates to wave level
 - [x] **SCORING-06**: S3 computes a load-adjusted score that corrects for the number of habits active each day; mastered habits grant graduation credit
 - [x] **SCORING-07**: All scoring models honor: cadence-aware denominator, 7-day new-habit grace period, mastered-habit 0.3× weighting
-- [ ] **SCORING-08**: Scoring outputs are persisted in `score_snapshots` IDB store; views read snapshots and never call `scoring.js` directly
+- [x] **SCORING-08**: Scoring outputs are persisted in `score_snapshots` IDB store; views read snapshots and never call `scoring.js` directly
 - [x] **SCORING-09**: Snapshots include a `scoreVersion` field so algorithm changes can be re-run via "Recompute scores" Settings action
 
 ### DESKTOP — Analytics surface
@@ -162,11 +162,11 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 ### SETTINGS — Configuration surface
 
 - [x] **SETTINGS-01**: User can view and edit global mastery threshold (default 90%) and window (default 70 days)
-- [ ] **SETTINGS-02**: User can choose scoring model (S1 / S2 / S3)
+- [x] **SETTINGS-02**: User can choose scoring model (S1 / S2 / S3)
 - [x] **SETTINGS-03**: User can trigger JSON export, JSON import, CSV export from Settings
 - [x] **SETTINGS-04**: User can see storage persistence status (persistent: yes/no) and last-backup timestamp
 - [x] **SETTINGS-05**: User can see app version and schema version in an About panel
-- [ ] **SETTINGS-06**: User can perform "Recompute scores" action (re-runs scoring across all snapshots)
+- [x] **SETTINGS-06**: User can perform "Recompute scores" action (re-runs scoring across all snapshots)
 - [ ] **SETTINGS-07**: User has a "Reset app" debug action that clears all IDB data (with explicit confirmation)
 
 ### NFR — Non-functional requirements
@@ -320,12 +320,12 @@ Every v1 requirement maps to exactly one phase.
 | IMPORT-05 | Phase 5 | Complete |
 | SCORING-01 | Phase 6 | Complete |
 | SCORING-02 | Phase 6 | Complete |
-| SCORING-03 | Phase 6 | Pending |
+| SCORING-03 | Phase 6 | Complete |
 | SCORING-04 | Phase 6 | Complete |
 | SCORING-05 | Phase 6 | Complete |
 | SCORING-06 | Phase 6 | Complete |
 | SCORING-07 | Phase 6 | Complete |
-| SCORING-08 | Phase 6 | Pending |
+| SCORING-08 | Phase 6 | Complete |
 | SCORING-09 | Phase 6 | Complete |
 | DESKTOP-01 | Phase 6 | Pending |
 | DESKTOP-02 | Phase 6 | Pending |
@@ -347,11 +347,11 @@ Every v1 requirement maps to exactly one phase.
 | SEED-04 | Phase 2 | Complete |
 | SEED-05 | Phase 2 | Complete |
 | SETTINGS-01 | Phase 4 | Complete |
-| SETTINGS-02 | Phase 6 | Pending |
+| SETTINGS-02 | Phase 6 | Complete |
 | SETTINGS-03 | Phase 5 | Complete |
 | SETTINGS-04 | Phase 3 | Complete (03-05) |
 | SETTINGS-05 | Phase 3 | Complete (03-05) |
-| SETTINGS-06 | Phase 6 | Pending |
+| SETTINGS-06 | Phase 6 | Complete |
 | SETTINGS-07 | Phase 1 | Pending |
 | NFR-01 | Phase 3 | Complete (03-02) |
 | NFR-02 | Phase 3 | Complete (03-03) |

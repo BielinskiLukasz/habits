@@ -3,14 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-06-29T20:15:00.000Z"
-last_activity: 2026-06-29 -- Phase 06 plan 02 complete (scoreSnapshots.js)
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-06-29T21:47:32.607Z"
+last_activity: 2026-06-29 -- Phase 06 execution started
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 39
-  completed_plans: 33
-  percent: 62
+  completed_plans: 34
+  percent: 60
 ---
 
 # Project State
@@ -26,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 06 (desktop-analytics-scoring-trio) — EXECUTING
 Previous: Phase 05 (backup-restore-json-csv-exports-json-import-nag) — COMPLETE (2026-06-06)
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-06-29 -- Phase 06 execution started
 
@@ -143,6 +144,7 @@ Phase 2 inherits the conventions locked during Phase 1:
 *Updated after each plan completion*
 | Phase 06 P01 | 448 | - tasks | - files |
 | Phase 06 P02 | 23 min | 2 tasks | 2 files |
+| Phase 06 P03 | 11 min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -225,6 +227,9 @@ Locked during Phase 3 plan 03-05 execution (2026-05-28):
 - Settings panel mounts INSIDE `<section data-route="settings">` which carries a pre-mounted `<h1 tabindex="-1">Settings</h1>` for router focus per D-79. The h1 is OWNED by index.html (not the settings.js builder) so the router can `focusH1()` even before mountSettings finishes.
 - About card uses `'controlled'` / `'registered'` / `'unsupported'` for SW state. Diagnostics keeps the longer string `'registered, not yet controlled'` for the DevTools workflow; Settings uses the shorter form for the user-facing surface.
 - [Phase ?]: LOG_COMPLETED dispatch table self-contained in scoring.js for independent testability (D-124)
+- [Phase ?]: D-122: buildScoringModelCard radio group wired via data-action=setScoringModel dispatching apply setSetting
+- [Phase ?]: D-123: Recompute Scores button in buildDataCard with isRecomputing loading state; rebuildAllSnapshots called via settings action
+- [Phase ?]: apply.js onLogWrite DI seam: non-fatal snapshot write fires after log-mutating events with keys.habitId (SCORING-03)
 
 ### Pending Todos
 
@@ -252,8 +257,8 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-06-29T20:15:00.000Z
-Stopped at: Completed 06-02-PLAN.md
+Last session: 2026-06-29T21:47:32.592Z
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None
 
 **Phase 06 Plan 02 Complete:**
@@ -265,6 +270,7 @@ Resume file: None
 - Current HEAD: `1b03395` (feat(06-02): implement writeHabitSnapshots and rebuildAllSnapshots)
 
 **Ready for:** Plans 06-03 and 06-04 (Wave 2 — parallel execution)
+
 - 06-03: Snapshot trigger in apply.js + Settings model selector + Recompute action
 - 06-04: Desktop shell (desktop.html, desktop.js, router extension, CSS)
 

@@ -198,7 +198,7 @@ Plans:
 
 **Wave 2** *(infrastructure + shell — parallel)*
 
-- [ ] 06-03-PLAN.md — Snapshot write-time trigger + Settings Scoring Model card + Recompute action: apply.js onLogWrite DI seam, buildScoringModelCard, Recompute button in Data card, desktop link in Settings — SCORING-02, SCORING-03, SETTINGS-02, SETTINGS-06, DESKTOP-01
+- [x] 06-03-PLAN.md — Snapshot write-time trigger + Settings Scoring Model card + Recompute action: apply.js onLogWrite DI seam, buildScoringModelCard, Recompute button in Data card, desktop link in Settings — SCORING-02, SCORING-03, SETTINGS-02, SETTINGS-06, DESKTOP-01
 - [ ] 06-04-PLAN.md — Desktop shell: router.js defaultRoute param, desktop.html sidebar+panels structure, js/desktop.js route dispatch, css/desktop.css layout + scoring status tokens in css/tokens.css — DESKTOP-02, DESKTOP-07, NFR-05
 
 **Wave 3** *(desktop views — parallel)*
@@ -225,7 +225,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
 | 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
 | 5. Backup & Restore | 6/6 | Complete    | 2026-06-06 |
-| 6. Desktop Analytics & Scoring Trio | 2/8 | In Progress|  |
+| 6. Desktop Analytics & Scoring Trio | 4/8 | In Progress|  |
 
 ## Backlog
 
