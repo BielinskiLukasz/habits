@@ -1,5 +1,6 @@
 /**
- * @file Desktop stub entry point (D-04, D-20, DATA-03/04/07/08, SEED-01..05).
+ * @file Desktop entry point — P2 spine boot + P6 route dispatch (D-04, D-20,
+ * DATA-03/04/07/08, SEED-01..05, DESKTOP-02, D-115).
  *
  * Boot sequence for `desktop.html`:
  *
@@ -10,7 +11,7 @@
  *     2. Mount the diagnostics panel if `?debug=1` is present (D-02).
  *
  *   P2 spine wiring (DESKTOP-02 — both shells share the spine):
- *     3. configureApply({repo, broadcast, trackTx})
+ *     3. configureApply({repo, broadcast, trackTx, onLogWrite})
  *     4. configureUndo({repo})
  *     5. configureSeed({repo, storage: navigator.storage, fetch})
  *     6. bootSync()
@@ -18,16 +19,22 @@
  *     8. await bootSeed()
  *     9. await hydrate()
  *
+ *   P6 desktop wiring (D-115 — sidebar + hash-routed panels):
+ *    10. configureWave({fetch}) + configureStore({repo})
+ *    11. await bootWaves()
+ *    12. mountRoutes({routes, onChange, defaultRoute: '#analytics'})
+ *
  * Order rationale (T-02-BOOT): same as `main.js` — configure DI seams first,
  * platform listeners next, then bootSeed (first write), then hydrate. Top-level
  * await is fine — desktop.html uses <script type="module"> and top-level await
  * is Baseline Widely Available since 2022 (N1).
  *
- * No long-press attach here — D-04 says the desktop stub is minimal; there is
- * no app title to long-press in the "Switch to mobile" body.
+ * Stub view mounts: Plans 06-05, 06-06, 06-07 replace the stub content with
+ * real mountAnalytics / mountWaveboard / mountPlanning imports.
  *
- * No fetch() calls outside of bootSeed (NFR-04 / T-01-NoNet). All imports are
- * `./` relative (D-19).
+ * Forbidden constructs in this file:
+ *   - `.innerHTML` family — D-78 grep gate.
+ *   - Direct `window.*` references outside of `mountRoutes` target (DI pattern).
  */
 
 import { registerServiceWorker } from './platform/sw-register.js';
@@ -39,9 +46,13 @@ import { configure as configureApply } from './state/apply.js';
 import { writeHabitSnapshots } from './io/scoreSnapshots.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
-import { hydrate } from './state/store.js';
+import { hydrate, configureStore } from './state/store.js';
 import { bootSync, broadcast } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
+
+// P6 desktop imports (D-115, D-117).
+import { mountRoutes } from './router.js';
+import { configureWave, bootWaves } from './domain/wave.js';
 
 registerServiceWorker();
 
@@ -68,3 +79,99 @@ bootSync();
 bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
+
+// P6 desktop wiring — configure wave module and store for desktop views.
+configureWave({ fetch: globalThis.fetch });
+configureStore({ repo });
+try { await bootWaves(); } catch (_e) { /* swallow — wave data non-critical for shell render */ }
+
+// Panel element queries (D-115 — each section carries data-route attribute).
+const analyticsPanel = document.querySelector('section[data-route="analytics"]');
+const waveboardPanel = document.querySelector('section[data-route="waveboard"]');
+const planningPanel  = document.querySelector('section[data-route="planning"]');
+const sidebarLinks   = document.querySelectorAll('.desktop-sidebar-link[data-route-link]');
+
+/**
+ * Show one panel and hide the rest. Toggles the HTML `hidden` attribute
+ * per the D-79 / D-115 route panel pattern.
+ *
+ * @param {Element} panel - The panel element to make visible.
+ * @returns {void}
+ */
+function show(panel) {
+  for (const p of [analyticsPanel, waveboardPanel, planningPanel]) {
+    if (p === panel) p.hidden = false; else p.hidden = true;
+  }
+}
+
+/**
+ * Focus the pre-placed h1 inside a route panel so keyboard / screen-reader
+ * users land at a meaningful heading after navigation (D-79).
+ *
+ * @param {Element} panel - The panel whose h1 to focus.
+ * @returns {void}
+ */
+function focusH1(panel) {
+  const h1 = panel.querySelector('h1');
+  if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }
+}
+
+/**
+ * Update aria-current="page" on the sidebar nav links to reflect the active
+ * route hash. Called by mountRoutes onChange on every route change.
+ *
+ * @param {string} hash - The currently active route hash (e.g. '#analytics').
+ * @returns {void}
+ */
+function updateNav(hash) {
+  for (const link of sidebarLinks) {
+    const routeKey = `#${link.dataset.routeLink}`;
+    if (routeKey === hash) {
+      link.setAttribute('aria-current', 'page');
+    } else {
+      link.removeAttribute('aria-current');
+    }
+  }
+}
+
+/**
+ * Mount stub content into a panel. Idempotent — only appends the stub
+ * paragraph on the first call per panel. Plans 06-05/06-06/06-07 replace
+ * these stubs with real view mounts (mountAnalytics / mountWaveboard /
+ * mountPlanning).
+ *
+ * @param {Element} panel - The panel to stub.
+ * @param {string} label - Human-readable label for the stub text.
+ * @returns {void}
+ */
+function mountStub(panel, label) {
+  if (panel.querySelector('[data-stub]')) return; // idempotent
+  const p = document.createElement('p');
+  p.setAttribute('data-stub', '');
+  p.textContent = `${label} — loading…`;
+  panel.appendChild(p);
+}
+
+// Wire hash router with desktop-specific defaultRoute (D-115).
+// Mobile main.js does NOT pass defaultRoute so it defaults to '#today' (backward compat).
+mountRoutes({
+  routes: {
+    '#analytics': () => {
+      mountStub(analyticsPanel, 'Analytics');
+      show(analyticsPanel);
+      focusH1(analyticsPanel);
+    },
+    '#waveboard': () => {
+      mountStub(waveboardPanel, 'Wave Board');
+      show(waveboardPanel);
+      focusH1(waveboardPanel);
+    },
+    '#planning': () => {
+      mountStub(planningPanel, 'Planning');
+      show(planningPanel);
+      focusH1(planningPanel);
+    },
+  },
+  onChange: (hash) => { updateNav(hash); },
+  defaultRoute: '#analytics',
+});
