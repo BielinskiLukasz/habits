@@ -66,9 +66,15 @@ SCORING-01..09, DESKTOP-01..07, SETTINGS-02, SETTINGS-06, NFR-03, NFR-05, NFR-08
   - Grace period: same 7-day exclusion as S1/S2.
 
 - **D-113 — Score output shape: all 3 models produce both per-habit and wave-level aggregates.**
-  - Every `score_snapshots` row carries: `{habitId, date, model: 'S1'|'S2'|'S3', perHabitScore, s1Status: 'Healthy'|'Watch'|'At-risk'|'Failing'|null, scoreVersion}`.
-  - Wave-level aggregates are computed by reading all per-habit snapshots for habits in that wave and averaging.
-  - This means 3 rows per (habit, date) — one per model.
+  - ~~Every `score_snapshots` row carries: `{habitId, date, model: 'S1'|'S2'|'S3', perHabitScore, s1Status, scoreVersion}` — 3 rows per (habit, date).~~
+  - **SUPERSEDED BY D-124 (2026-06-29 — IDB keyPath constraint):** See D-124 for the locked row shape.
+  - Wave-level aggregates are computed by reading all per-habit snapshots for habits in that wave and averaging their per-model scores inline (no separate wave-level row needed).
+
+- **D-124 — score_snapshots single-row schema (supersedes D-113's 3-row spec):**
+  - `js/db/schema.js` declares `score_snapshots` with `keyPath: ['habitId', 'date']`. This allows exactly **one row per (habitId, date)**. D-113's "3 rows per model" design would require `keyPath: ['habitId', 'date', 'model']` — a v1 schema migration that would break the locked "additive-only" schema invariant (DATA-02).
+  - **Locked row shape:** `{habitId, date, s1Score, s1Status, s2Score, s3Score, scoreVersion: 1}` — all three model scores embedded in one row.
+  - Views read the appropriate score column (`s1Score`/`s2Score`/`s3Score`) based on `settings.scoringModel`.
+  - This is a no-migration design that fits the existing v1 IDB schema exactly.
 
 - **D-114 — Snapshot write trigger:**
   - **Write-time:** On every log write (via `apply.js` chokepoint), recompute snapshots for the affected habit across its rolling window (all 3 models). This keeps snapshots always current.
