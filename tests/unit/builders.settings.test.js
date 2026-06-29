@@ -31,6 +31,7 @@ import {
   buildDataCard,
   buildAboutCard,
   buildMasteryCard,
+  buildScoringModelCard,
 } from '../../js/views/settings/builders.js';
 
 /**
@@ -408,5 +409,128 @@ describe('buildMasteryCard — SETTINGS-01 (D-86)', () => {
     const wInput = findDesc(card, (d) => d.tag === 'input' && d.attrs?.['data-key'] === 'masteryWindow');
     assert.equal(tInput?.attrs?.value, '90', 'threshold defaults to 90 when null');
     assert.equal(wInput?.attrs?.value, '70', 'window defaults to 70 when null');
+  });
+});
+
+describe('buildScoringModelCard — D-122 (S1/S2/S3 radio selector)', () => {
+  test('returns <section class="settings-card"> with <h2>Scoring Model</h2>', () => {
+    const card = buildScoringModelCard({ scoringModel: 'S1' });
+    assert.equal(card.tag, 'section');
+    assert.equal(card.attrs.class, 'settings-card');
+    const h2 = findDesc(card, (d) => d.tag === 'h2');
+    assert.ok(h2, '<h2> present');
+    assert.equal(h2.text, 'Scoring Model');
+  });
+
+  test('has a <fieldset> with three radio inputs named "scoringModel"', () => {
+    const card = buildScoringModelCard({ scoringModel: 'S1' });
+    const fieldset = findDesc(card, (d) => d.tag === 'fieldset');
+    assert.ok(fieldset, '<fieldset> present');
+    const radios = findAll(card, (d) => d.tag === 'input' && d.attrs?.type === 'radio');
+    assert.equal(radios.length, 3, 'exactly 3 radios');
+    for (const r of radios) {
+      assert.equal(r.attrs.name, 'scoringModel', 'radio name is "scoringModel"');
+    }
+  });
+
+  test('radio with value matching scoringModel param has checked attr; others do not', () => {
+    const card = buildScoringModelCard({ scoringModel: 'S2' });
+    const radios = findAll(card, (d) => d.tag === 'input' && d.attrs?.type === 'radio');
+    const s2Radio = radios.find((r) => r.attrs.value === 'S2');
+    const s1Radio = radios.find((r) => r.attrs.value === 'S1');
+    const s3Radio = radios.find((r) => r.attrs.value === 'S3');
+    assert.ok(s2Radio, 'S2 radio present');
+    assert.ok('checked' in (s2Radio.attrs ?? {}), 'S2 radio has checked attr');
+    assert.equal(s1Radio?.attrs?.checked, undefined, 'S1 not checked');
+    assert.equal(s3Radio?.attrs?.checked, undefined, 'S3 not checked');
+  });
+
+  test('all three radios carry data-action="setScoringModel"', () => {
+    const card = buildScoringModelCard({ scoringModel: 'S3' });
+    const radios = findAll(card, (d) => d.tag === 'input' && d.attrs?.type === 'radio');
+    assert.equal(radios.length, 3);
+    for (const r of radios) {
+      assert.equal(r.attrs['data-action'], 'setScoringModel', 'radio carries data-action');
+    }
+  });
+
+  test('radio values are S1, S2, S3', () => {
+    const card = buildScoringModelCard({ scoringModel: 'S1' });
+    const radios = findAll(card, (d) => d.tag === 'input' && d.attrs?.type === 'radio');
+    const values = radios.map((r) => r.attrs.value).sort();
+    assert.deepEqual(values, ['S1', 'S2', 'S3']);
+  });
+
+  test('<h2> id is referenced by aria-labelledby on the section wrapper', () => {
+    const card = buildScoringModelCard({ scoringModel: 'S1' });
+    const labelId = card.attrs['aria-labelledby'];
+    assert.ok(labelId, 'aria-labelledby present');
+    const h2 = findDesc(card, (d) => d.tag === 'h2');
+    assert.ok(h2, '<h2> present');
+    assert.equal(h2.attrs?.id, labelId, 'h2.id matches aria-labelledby');
+  });
+});
+
+describe('buildDataCard — isRecomputing param (D-123)', () => {
+  test('isRecomputing=false (default): button text is "Recompute Scores", no disabled attr', () => {
+    const card = buildDataCard({
+      lastEvent: '',
+      hasUndoToken: false,
+      relativeTime: '',
+      isRecomputing: false,
+    });
+    const btn = findDesc(
+      card,
+      (d) => d.tag === 'button' && d.attrs?.['data-action'] === 'recomputeScores',
+    );
+    assert.ok(btn, 'Recompute Scores button present');
+    assert.equal(btn.text, 'Recompute Scores', 'button text');
+    assert.equal(btn.attrs.disabled, undefined, 'not disabled when not recomputing');
+  });
+
+  test('isRecomputing=true: button text is "Recomputing…" and has disabled attr', () => {
+    const card = buildDataCard({
+      lastEvent: '',
+      hasUndoToken: false,
+      relativeTime: '',
+      isRecomputing: true,
+    });
+    const btn = findDesc(
+      card,
+      (d) => d.tag === 'button' && d.attrs?.['data-action'] === 'recomputeScores',
+    );
+    assert.ok(btn, 'Recompute Scores button present');
+    assert.equal(btn.text, 'Recomputing…', 'button text when recomputing');
+    assert.ok('disabled' in (btn.attrs ?? {}), 'disabled attr present when recomputing');
+  });
+
+  test('Recompute button carries data-action="recomputeScores" and aria-label="Recompute Scores"', () => {
+    const card = buildDataCard({
+      lastEvent: '',
+      hasUndoToken: false,
+      relativeTime: '',
+    });
+    const btn = findDesc(
+      card,
+      (d) => d.tag === 'button' && d.attrs?.['data-action'] === 'recomputeScores',
+    );
+    assert.ok(btn, 'Recompute Scores button present');
+    assert.equal(btn.attrs['data-action'], 'recomputeScores');
+    assert.equal(btn.attrs['aria-label'], 'Recompute Scores');
+  });
+
+  test('Recompute button is present even when isRecomputing is omitted (defaults to false)', () => {
+    const card = buildDataCard({
+      lastEvent: '',
+      hasUndoToken: false,
+      relativeTime: '',
+    });
+    const btn = findDesc(
+      card,
+      (d) => d.tag === 'button' && d.attrs?.['data-action'] === 'recomputeScores',
+    );
+    assert.ok(btn, 'Recompute Scores button present with default params');
+    assert.equal(btn.text, 'Recompute Scores');
+    assert.equal(btn.attrs.disabled, undefined);
   });
 });
