@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Storage Foundation (The Spine)** - Date utils, raw IDB, 7 stores + migrations, repo, single mutator, sync, lifecycle, seed (completed 2026-05-27)
 - [ ] **Phase 3: Today View & Settings v1 (First Usable Slice)** - Mobile shell rendering seed data, single-tap binary mark/unmark, persistent undo, install help, persistence status
 - [x] **Phase 4: Domain Model (Cadence, Catalog, Stages, Mastery, Multi-occurrence, History, Waves)** - Full habit lifecycle honoring the versioned-edit invariant (completed 2026-06-05)
-- [x] **Phase 5: Backup & Restore (JSON + CSV Exports, JSON Import, Nag)** - Full-fidelity JSON round-trip + Polish-Excel-compatible CSV + weekly backup banner (completed 2026-06-06)
+- [x] **Phase 5: Backup & Restore (JSON + CSV Exports, JSON Import, Nag)** - Full-fidelity JSON round-trip + Polish-Excel-compatible CSV + weekly backup banner (completed 2026-06-06)
 - [ ] **Phase 6: Desktop Analytics & Scoring Trio** - Desktop shell, analytics/wave-board/planning views, all three S1/S2/S3 scoring models with Settings toggle
 
 ## Phase Details
@@ -82,7 +82,7 @@ Plans:
 
   1. User opens `index.html` on mobile and the Today view renders synchronously with today's date, current wave context, and today's binary habits in under 300 ms cold paint
   2. User marks a binary habit complete with a single tap and sees the row update in under 100 ms
-  3. User unmarks a previously-completed binary habit with a single tap from the same row
+  3. User unmarks a previously-completed habit with a single tap from the same row
   4. User undoes the last mark/unmark from a toast or Settings shortcut; the undo still works after a full page reload (persisted via `meta.undoToken`)
   5. User opens Settings and sees persistence status (Persistent: yes/no), app + schema versions, and platform-detected install instructions (iOS Share / Android Install / desktop URL-bar icon)
 
@@ -187,7 +187,30 @@ Plans:
   4. All three scoring models honor cadence-aware denominators, a 7-day new-habit grace period, and a 0.3× weighting for mastered habits; scoring outputs are persisted in the `score_snapshots` store (views read snapshots, never call `scoring.js` on render)
   5. User triggers "Recompute scores" from Settings and snapshots are re-run; the desktop view renders 5 years of synthetic data in under 2 s on the latest 2 versions of Chrome / Edge / Firefox / Safari with zero outbound network calls
 
-**Plans**: TBD
+**Plans**: 8 plans
+
+Plans:
+
+**Wave 1** *(pure domain — parallel)*
+
+- [ ] 06-01-PLAN.md — Pure scoring domain: `js/domain/scoring.js` (computeS1, computeS2, computeS3 — pure functions, TDD) — SCORING-01, SCORING-04, SCORING-05, SCORING-06, SCORING-07, SCORING-09
+- [ ] 06-02-PLAN.md — Score snapshot writer: `js/io/scoreSnapshots.js` (writeHabitSnapshots + rebuildAllSnapshots with single-tx-per-habit strategy, TDD) — SCORING-08, SCORING-09, NFR-03
+
+**Wave 2** *(infrastructure + shell — parallel)*
+
+- [ ] 06-03-PLAN.md — Snapshot write-time trigger + Settings Scoring Model card + Recompute action: apply.js onLogWrite DI seam, buildScoringModelCard, Recompute button in Data card, desktop link in Settings — SCORING-02, SCORING-03, SETTINGS-02, SETTINGS-06, DESKTOP-01
+- [ ] 06-04-PLAN.md — Desktop shell: router.js defaultRoute param, desktop.html sidebar+panels structure, js/desktop.js route dispatch, css/desktop.css layout + scoring status tokens in css/tokens.css — DESKTOP-02, DESKTOP-07, NFR-05
+
+**Wave 3** *(desktop views — parallel)*
+
+- [ ] 06-05-PLAN.md — Analytics view: `js/views/desktop/analytics.js` (mountAnalytics + pure builders, TDD), reactive model switching, "Show archived" toggle — DESKTOP-03, SCORING-02, SCORING-03
+- [ ] 06-06-PLAN.md — Wave-board view: `js/views/desktop/waveboard.js` (mountWaveboard + builders, TDD), 12-week heat-map, sticky habit column, S1 status colors — DESKTOP-04
+- [ ] 06-07-PLAN.md — Planning view: `js/views/desktop/planning.js` (mountPlanning + builders, TDD), forward 12-week grid, future habits only, Catalog links — DESKTOP-05, DESKTOP-06
+
+**Wave 4** *(closeout)*
+
+- [ ] 06-08-PLAN.md — Phase closeout: sw.js SHELL P6 extension, sw.shell.test.js P6_REQUIRED list, APP_VERSION 0.4.0 → 0.5.0, VERSIONING.md v0.5.0 entry — NFR-08
+
 **UI hint**: yes
 
 ## Progress
@@ -202,7 +225,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
 | 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
 | 5. Backup & Restore | 6/6 | Complete    | 2026-06-06 |
-| 6. Desktop Analytics & Scoring Trio | 0/TBD | Not started | - |
+| 6. Desktop Analytics & Scoring Trio | 0/8 | Not started | - |
 
 ## Backlog
 
