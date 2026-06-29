@@ -77,6 +77,7 @@ import {
   buildDataCard,
   buildAboutCard,
   buildMasteryCard,
+  buildScoringModelCard,
 } from './settings/builders.js';
 import { exportJSON, exportCSV } from '../io/export.js';
 import { mergeImportedStores } from '../io/import.js';
@@ -85,6 +86,8 @@ import {
   shouldShowNag as checkShouldShowNag,
   dismissNag as doDissmissNag,
 } from '../io/backup-nag.js';
+import { rebuildAllSnapshots } from '../io/scoreSnapshots.js';
+import { showSuccessToast } from './toast.js';
 
 /* D-67 SETTINGS-flavored Reset-data confirm prose — INTENTIONALLY distinct
  * from D-06 verbatim diagnostics text used in js/views/diagnostics.js. */
@@ -575,6 +578,66 @@ function buildActions() {
         showErrorToast("Couldn't dismiss nag: " + (err?.message ?? String(err)));
       }
     },
+
+    /**
+     * Scoring model radio change — dispatches setSetting through the apply
+     * chokepoint (D-75, D-122). Wired as a `change` listener on the scoring
+     * model card's radio group by `wireScoringModelCard()` after mount.
+     *
+     * @param {Event} evt
+     */
+    setScoringModel: (evt) => {
+      const value = evt?.currentTarget?.value ?? evt?.target?.value;
+      if (value !== 'S1' && value !== 'S2' && value !== 'S3') return;
+      apply({ type: 'setSetting', payload: { key: 'scoringModel', value } }).catch(() => {
+        showErrorToast("Couldn't change scoring model — try again");
+      });
+    },
+
+    /**
+     * Recompute Scores button (D-123, SETTINGS-06). Re-renders the Data card
+     * with `isRecomputing: true`, calls `rebuildAllSnapshots`, shows a success
+     * toast, and re-renders with `isRecomputing: false`. Non-fatal: snapshot
+     * failures show an error toast instead of crashing.
+     */
+    recomputeScores: async () => {
+      if (!_currentDeps) return;
+      const { repo, store } = _currentDeps;
+
+      // Set loading state — re-render Data card with isRecomputing: true.
+      if (_panelEl) {
+        const cards = _panelEl.querySelectorAll('.settings-card');
+        // Card order: Storage[0] / Schedule[1] / Install[2] / Data[3] / About[4] / Mastery[5] / ScoringModel[6]
+        const dataCard = cards[3];
+        if (dataCard) {
+          const actions = buildActions();
+          replaceCardChildren(
+            dataCard,
+            buildDataCard({
+              lastEvent: '',
+              hasUndoToken: false,
+              relativeTime: '',
+              isRecomputing: true,
+            }),
+            actions,
+          );
+        }
+      }
+
+      try {
+        await rebuildAllSnapshots(repo);
+        showSuccessToast('Snapshots recomputed. All scores updated.');
+        // Notify store subscribers so desktop view refreshes.
+        if (store && typeof store.notify === 'function') {
+          await store.notify({ event: 'snapshot:rebuild' });
+        }
+      } catch (err) {
+        showErrorToast('Recompute failed: ' + (err?.message ?? String(err)));
+      }
+
+      // Restore Data card with isRecomputing: false.
+      await refreshLiveCards();
+    },
   };
 }
 
@@ -618,6 +681,24 @@ function wireImportInput(cardEl, actions) {
 }
 
 /**
+ * Wire `change` event listeners on the Scoring Model radio inputs (D-122).
+ * Called after the Scoring Model card is mounted or re-rendered. `mount.js`
+ * wires only `click` via `data-action`; radio inputs fire `change`.
+ *
+ * @param {object} cardEl — the scoring model card element
+ * @param {Record<string, Function>} actions — the shared actions map
+ */
+function wireScoringModelCard(cardEl, actions) {
+  if (!cardEl) return;
+  const radios = cardEl.querySelectorAll('[data-action="setScoringModel"]');
+  for (const radio of radios) {
+    if (typeof actions.setScoringModel === 'function') {
+      radio.addEventListener('change', actions.setScoringModel);
+    }
+  }
+}
+
+/**
  * Refresh the Data card + Schedule card after a notify event. Both cards
  * read from cache (canonical post-notify state — Pitfall 2 / D-72). The
  * other three cards are static or async-resolved once at mount and don't
@@ -631,9 +712,10 @@ async function refreshLiveCards() {
   const { repo, store } = _currentDeps;
   const actions = buildActions();
   const cards = _panelEl.querySelectorAll('.settings-card');
-  // Order: Storage[0] / Schedule[1] / Install[2] / Data[3] / About[4].
+  // Order: Storage[0] / Schedule[1] / Install[2] / Data[3] / About[4] / Mastery[5] / ScoringModel[6]
   const scheduleCard = cards[1];
   const dataCard = cards[3];
+  const scoringModelCard = cards[6];
 
   if (scheduleCard) {
     const newSchedule = buildScheduleCard({
@@ -658,6 +740,16 @@ async function refreshLiveCards() {
     // Re-wire the import file input after card re-render (change listener is not
     // preserved through replaceCardChildren which replaces all children).
     wireImportInput(dataCard, actions);
+  }
+
+  // Refresh Scoring Model card — re-reads scoringModel from cached settings so
+  // the checked radio reflects the current active model (D-122 live-refresh).
+  if (scoringModelCard) {
+    const cachedSettings = store.getCachedSettings ? store.getCachedSettings() : {};
+    const scoringModel = cachedSettings.scoringModel ?? 'S1';
+    const newScoringModel = buildScoringModelCard({ scoringModel });
+    replaceCardChildren(scoringModelCard, newScoringModel, actions);
+    wireScoringModelCard(scoringModelCard, actions);
   }
 }
 
@@ -753,12 +845,33 @@ export function mountSettings(parent, deps) {
   });
   const masteryCardEl = mount(masteryDesc, _panelEl, actions);
 
+  // Scoring Model card (D-122, SETTINGS-02, SETTINGS-06) — reads current
+  // scoringModel from cached settings; defaults to 'S1'.
+  const scoringModel = cachedSettings.scoringModel ?? 'S1';
+  const scoringModelDesc = buildScoringModelCard({ scoringModel });
+  const scoringModelCardEl = mount(scoringModelDesc, _panelEl, actions);
+
+  // Desktop link (D-115, DESKTOP-01) — provides navigation to the desktop
+  // analytics shell. Appended after all cards, before closing tag.
+  const desktopLinkEl = _panelEl.ownerDocument.createElement('p');
+  desktopLinkEl.setAttribute('class', 'settings-desktop-link');
+  const anchor = _panelEl.ownerDocument.createElement('a');
+  anchor.href = './desktop.html';
+  anchor.textContent = 'Open desktop analytics →';
+  desktopLinkEl.appendChild(anchor);
+  _panelEl.appendChild(desktopLinkEl);
+
   parent.appendChild(_panelEl);
 
   // Wire change listeners on mastery inputs (mount.js wires only click;
   // number inputs fire change, not click).
   if (masteryCardEl) {
     wireMasteryInputs(masteryCardEl, actions);
+  }
+
+  // Wire change listeners on scoring model radio inputs.
+  if (scoringModelCardEl) {
+    wireScoringModelCard(scoringModelCardEl, actions);
   }
 
   // Pattern S5 async-loaders (mutate dd.textContent after Promise resolves).

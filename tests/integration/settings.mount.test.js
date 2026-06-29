@@ -311,8 +311,8 @@ function wire({ store, applyMod, undoMod, repo, broadcastSpy }) {
   undoMod.configureUndo({ repo, apply: applyMod.apply });
 }
 
-describe('mountSettings — 6 cards in locked order (D-61, extended Phase 04-07 with Mastery)', () => {
-  test('renders Storage / Schedule / Install / Data / About / Mastery in that order', async () => {
+describe('mountSettings — 7 cards in locked order (D-61, extended Phase 06-03 with Scoring Model)', () => {
+  test('renders Storage / Schedule / Install / Data / About / Mastery / Scoring Model in that order', async () => {
     const { store, applyMod, undoMod, settingsMod } = await freshAll();
     const repo = createFakeRepo();
     wire({ store, applyMod, undoMod, repo });
@@ -325,7 +325,7 @@ describe('mountSettings — 6 cards in locked order (D-61, extended Phase 04-07 
     settingsMod.mountSettings(body, { repo, store });
 
     const cards = body.querySelectorAll('.settings-card');
-    assert.equal(cards.length, 6, '6 settings cards rendered (Phase 04-07 adds Mastery card)');
+    assert.equal(cards.length, 7, '7 settings cards rendered (Phase 06-03 adds Scoring Model card)');
 
     const titles = cards.map((card) => {
       const h2 = card.querySelector('h2');
@@ -333,8 +333,8 @@ describe('mountSettings — 6 cards in locked order (D-61, extended Phase 04-07 
     });
     assert.deepEqual(
       titles,
-      ['Storage', 'Schedule', 'Install', 'Data', 'About', 'Mastery'],
-      'titles in locked top-down order (D-61 + Phase 04-07 Mastery appended)',
+      ['Storage', 'Schedule', 'Install', 'Data', 'About', 'Mastery', 'Scoring Model'],
+      'titles in locked top-down order (D-61 + Phase 04-07 Mastery + Phase 06-03 Scoring Model)',
     );
   });
 });

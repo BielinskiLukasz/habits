@@ -201,6 +201,22 @@ export function showErrorToast(message) {
 }
 
 /**
+ * Show a success-variant toast (06-03, SETTINGS-06). 4s auto-dismiss; no
+ * action button. Used by the Recompute Scores action in settings.js to
+ * confirm that snapshot rebuild completed successfully.
+ *
+ * @param {string} message
+ * @returns {void}
+ */
+export function showSuccessToast(message) {
+  _showToast({
+    message,
+    autoDismissMs: 4000,
+    variant: 'success',
+  });
+}
+
+/**
  * Test-only: force-clear module-level toast state. Mirrors the
  * `_resetTodayForTest` / `_resetStoreForTest` pattern. Production NEVER
  * calls this.

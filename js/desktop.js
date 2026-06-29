@@ -36,6 +36,7 @@ import { mountDiagnostics } from './views/diagnostics.js';
 // P2 spine imports (DATA-03/04/07/08, SEED-01..05, DESKTOP-02). All relative per D-19.
 import * as repo from './db/repo.js';
 import { configure as configureApply } from './state/apply.js';
+import { writeHabitSnapshots } from './io/scoreSnapshots.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
 import { hydrate } from './state/store.js';
@@ -53,7 +54,14 @@ if (params.get('debug') === '1') mountDiagnostics();
 // attach platform listeners; then bootSeed (first write); then hydrate.
 // Top-level await is fine here — desktop.html uses type=module and top-level
 // await is Baseline Widely Available since 2022 (N1).
-configureApply({ repo, broadcast, trackTx });
+configureApply({
+  repo,
+  broadcast,
+  trackTx,
+  onLogWrite: async (habitId) => {
+    try { await writeHabitSnapshots(habitId, repo); } catch (_e) {}
+  },
+});
 configureUndo({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
 bootSync();

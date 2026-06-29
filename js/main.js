@@ -56,6 +56,8 @@ import { hydrate, configureStore } from './state/store.js';
 import { bootSync, broadcast } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 
+import { writeHabitSnapshots } from './io/scoreSnapshots.js';
+
 // P3 router + Today view wiring (D-60, CORE-01..06).
 import { mountRoutes } from './router.js';
 import { mountToday, mountFooterNav } from './views/today.js';
@@ -77,7 +79,14 @@ if (params.get('debug') === '1') mountDiagnostics();
 // attach platform listeners; then bootSeed (first write); then hydrate.
 // Top-level await is fine here — index.html uses type=module and top-level
 // await is Baseline Widely Available since 2022 (N1).
-configureApply({ repo, broadcast, trackTx });
+configureApply({
+  repo,
+  broadcast,
+  trackTx,
+  onLogWrite: async (habitId) => {
+    try { await writeHabitSnapshots(habitId, repo); } catch (_e) {}
+  },
+});
 configureUndo({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
 configureWave({ fetch: globalThis.fetch });

@@ -44,6 +44,7 @@ const INSTALL_LABEL_ID = 'settings-install-h2';
 const DATA_LABEL_ID = 'settings-data-h2';
 const ABOUT_LABEL_ID = 'settings-about-h2';
 const MASTERY_LABEL_ID = 'settings-mastery-h2';
+const SCORING_MODEL_LABEL_ID = 'settings-scoring-model-h2';
 
 /**
  * Build the Storage card description (D-62, PWA-07 partial).
@@ -280,6 +281,7 @@ export function buildInstallCard() {
  *   relativeTime: string,
  *   lastBackupDays?: number|null,
  *   shouldShowNag?: boolean,
+ *   isRecomputing?: boolean,
  * }} args
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
@@ -289,6 +291,7 @@ export function buildDataCard({
   relativeTime,
   lastBackupDays = null,
   shouldShowNag = false,
+  isRecomputing = false,
 }) {
   /** @type {object[]} */
   const cardChildren = [
@@ -378,6 +381,27 @@ export function buildDataCard({
     tag: 'div',
     attrs: { class: 'settings-data-backup' },
     children: backupChildren,
+  });
+
+  // --- Recompute Scores section (D-123) — sits before Undo ---
+
+  /** @type {Record<string, string>} */
+  const recomputeAttrs = {
+    'data-action': 'recomputeScores',
+    'aria-label': 'Recompute Scores',
+  };
+  if (isRecomputing) recomputeAttrs.disabled = '';
+
+  cardChildren.push({
+    tag: 'div',
+    attrs: { class: 'settings-data-recompute' },
+    children: [
+      {
+        tag: 'button',
+        attrs: recomputeAttrs,
+        text: isRecomputing ? 'Recomputing…' : 'Recompute Scores',
+      },
+    ],
   });
 
   // --- Undo section ---
@@ -475,6 +499,64 @@ export function buildAboutCard({ appVersion, schemaVersion, cacheName, swState }
           { tag: 'dd', text: String(cacheName) },
           { tag: 'dt', text: 'Service worker' },
           { tag: 'dd', text: String(swState) },
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * Build the Scoring Model card description (D-122, SETTINGS-02, SETTINGS-06).
+ *
+ * Three radios sharing `name="scoringModel"` with values `'S1'`, `'S2'`, `'S3'`.
+ * Each carries `data-action="setScoringModel"` so the mounter wires a single
+ * `change` listener that dispatches `apply({type:'setSetting', payload:{key:'scoringModel', value}})`.
+ *
+ * Card structure mirrors `buildScheduleCard` (radio group pattern).
+ *
+ * @param {{ scoringModel?: 'S1'|'S2'|'S3' }} args
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildScoringModelCard({ scoringModel = 'S1' } = {}) {
+  /**
+   * Build a single scoring model radio label+input pair.
+   * @param {'S1'|'S2'|'S3'} value
+   * @param {string} label
+   */
+  function radio(value, label) {
+    /** @type {Record<string, string>} */
+    const attrs = {
+      type: 'radio',
+      name: 'scoringModel',
+      value,
+      'data-action': 'setScoringModel',
+    };
+    if (scoringModel === value) attrs.checked = '';
+    return {
+      tag: 'label',
+      children: [
+        { tag: 'input', attrs },
+        { tag: 'span', text: ` ${label}` },
+      ],
+    };
+  }
+
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': SCORING_MODEL_LABEL_ID,
+    },
+    children: [
+      { tag: 'h2', attrs: { id: SCORING_MODEL_LABEL_ID }, text: 'Scoring Model' },
+      {
+        tag: 'fieldset',
+        attrs: { class: 'settings-radio-group' },
+        children: [
+          { tag: 'legend', text: 'Scoring model' },
+          radio('S1', 'S1 — Rolling Threshold'),
+          radio('S2', 'S2 — Day-Weighted'),
+          radio('S3', 'S3 — Load-Adjusted'),
         ],
       },
     ],

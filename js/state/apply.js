@@ -88,6 +88,17 @@ let _broadcast = () => {};
 let _trackTx = () => {};
 
 /**
+ * Snapshot write callback — called after every log-mutating event with the
+ * affected habitId. Default is a no-op so existing callers are unaffected
+ * when onLogWrite is not provided. Production wires this to
+ * `writeHabitSnapshots(habitId, repo)` from `js/io/scoreSnapshots.js` (06-03,
+ * SCORING-03). Non-fatal: snapshot failure must not block the mutation.
+ *
+ * @type {(habitId: string) => Promise<void>}
+ */
+let _onLogWrite = async (_habitId) => {};
+
+/**
  * Notify handle — defaults to the statically-imported `store.notify` so
  * production needs no DI seam beyond `configure({repo, broadcast, trackTx})`.
  * Tests that cache-bust both `apply.js` and `store.js` separately MUST inject
@@ -107,7 +118,7 @@ let _notify = defaultNotify;
  * repo. Production calls this once at boot (plan 02-05) with the real repo +
  * the real broadcast + the real trackTx.
  *
- * @param {{ repo?: object, broadcast?: (msg: object) => void, trackTx?: (p: Promise<unknown>) => void, notify?: (payload: { event?: string, keys?: object }) => Promise<void>|void }} deps
+ * @param {{ repo?: object, broadcast?: (msg: object) => void, trackTx?: (p: Promise<unknown>) => void, notify?: (payload: { event?: string, keys?: object }) => Promise<void>|void, onLogWrite?: (habitId: string) => Promise<void> }} deps
  * @returns {void}
  */
 export function configure(deps) {
@@ -115,6 +126,7 @@ export function configure(deps) {
   if (deps.broadcast) _broadcast = deps.broadcast;
   if (deps.trackTx) _trackTx = deps.trackTx;
   if (deps.notify) _notify = deps.notify;
+  if (deps.onLogWrite) _onLogWrite = deps.onLogWrite;
 }
 
 /**
@@ -187,6 +199,14 @@ export async function apply(event) {
   // that cache-bust apply.js + store.js separately can route through the
   // store instance they actually inspect.
   await _notify({ event: event.type, keys });
+
+  // 06-03 SCORING-03: fire snapshot write callback for log-mutating events.
+  // `keys.habitId` is present only for handlers that write logs (markCompleted,
+  // markUncompleted, restoreLogRow, logNumeric, logSlot). Wrapped in try/catch
+  // so a snapshot failure never blocks the mutation or its subscribers.
+  if (keys && keys.habitId) {
+    try { await _onLogWrite(keys.habitId); } catch (_e) { /* non-fatal */ }
+  }
 
   return eventRow.id;
 }
