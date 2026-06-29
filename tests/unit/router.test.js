@@ -209,3 +209,33 @@ describe('mountRoutes — idempotent re-mount (Pattern S4)', () => {
     assert.equal(typeof _resetRouterForTest, 'function');
   });
 });
+
+describe('mountRoutes — defaultRoute parameter', () => {
+  test('custom defaultRoute "#analytics" falls back for unknown hash', async () => {
+    const { mountRoutes, _resetRouterForTest } = await freshRouter();
+    const fakeWin = createFakeWindow({ hash: '#unknown-panel' });
+    const called = {};
+    mountRoutes({
+      routes: { '#analytics': () => { called.route = '#analytics'; } },
+      onChange: () => {},
+      target: fakeWin,
+      defaultRoute: '#analytics',
+    });
+    assert.equal(called.route, '#analytics', 'unknown hash resolves to custom defaultRoute');
+    _resetRouterForTest();
+  });
+
+  test('no defaultRoute param still falls back to #today (backward compat regression guard)', async () => {
+    const { mountRoutes, _resetRouterForTest } = await freshRouter();
+    const fakeWin = createFakeWindow({ hash: '#unknown-panel' });
+    const called = {};
+    mountRoutes({
+      routes: { '#today': () => { called.route = '#today'; } },
+      onChange: () => {},
+      target: fakeWin,
+      // no defaultRoute — should default to '#today'
+    });
+    assert.equal(called.route, '#today', 'no defaultRoute param preserves #today fallback');
+    _resetRouterForTest();
+  });
+});
