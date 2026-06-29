@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-06-29T21:47:32.607Z"
+stopped_at: Completed 06-04-PLAN.md
+last_updated: "2026-06-29T23:12:42.317Z"
 last_activity: 2026-06-29 -- Phase 06 execution started
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 39
-  completed_plans: 34
+  completed_plans: 35
   percent: 60
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 06 (desktop-analytics-scoring-trio) — EXECUTING
 Previous: Phase 05 (backup-restore-json-csv-exports-json-import-nag) — COMPLETE (2026-06-06)
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-06-29 -- Phase 06 execution started
 
@@ -145,6 +145,7 @@ Phase 2 inherits the conventions locked during Phase 1:
 | Phase 06 P01 | 448 | - tasks | - files |
 | Phase 06 P02 | 23 min | 2 tasks | 2 files |
 | Phase 06 P03 | 11 min | 2 tasks | 8 files |
+| Phase 06 P04 | 18 min | - tasks | - files |
 
 ## Accumulated Context
 
@@ -230,6 +231,8 @@ Locked during Phase 3 plan 03-05 execution (2026-05-28):
 - [Phase ?]: D-122: buildScoringModelCard radio group wired via data-action=setScoringModel dispatching apply setSetting
 - [Phase ?]: D-123: Recompute Scores button in buildDataCard with isRecomputing loading state; rebuildAllSnapshots called via settings action
 - [Phase ?]: apply.js onLogWrite DI seam: non-fatal snapshot write fires after log-mutating events with keys.habitId (SCORING-03)
+- [Phase ?]: defaultRoute='#today' default in mountRoutes preserves full backward compat for mobile main.js (D-115)
+- [Phase ?]: desktop.js stub view mounts are idempotent (data-stub guard); replaced in plans 06-05..07 (D-115)
 
 ### Pending Todos
 
@@ -257,8 +260,8 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-06-29T21:47:32.592Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-06-29T23:12:42.289Z
+Stopped at: Completed 06-04-PLAN.md
 Resume file: None
 
 **Phase 06 Plan 02 Complete:**
