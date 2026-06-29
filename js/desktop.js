@@ -46,13 +46,14 @@ import { configure as configureApply } from './state/apply.js';
 import { writeHabitSnapshots } from './io/scoreSnapshots.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
-import { hydrate, configureStore } from './state/store.js';
+import { hydrate, configureStore, subscribe } from './state/store.js';
 import { bootSync, broadcast } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 
 // P6 desktop imports (D-115, D-117).
 import { mountRoutes } from './router.js';
 import { configureWave, bootWaves } from './domain/wave.js';
+import { mountAnalytics } from './views/desktop/analytics.js';
 
 registerServiceWorker();
 
@@ -157,7 +158,7 @@ function mountStub(panel, label) {
 mountRoutes({
   routes: {
     '#analytics': () => {
-      mountStub(analyticsPanel, 'Analytics');
+      mountAnalytics(analyticsPanel, { repo, store: { subscribe } });
       show(analyticsPanel);
       focusH1(analyticsPanel);
     },
