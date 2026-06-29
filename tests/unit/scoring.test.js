@@ -71,7 +71,8 @@ describe('computeS1 — basic rolling-window score', () => {
   const EVAL = '2026-06-29';
   const ctx = { ...makeCtx(), evaluationDate: EVAL };
 
-  test('14/14 daily completed → s1Score 100, s1Status Healthy', () => {
+  test('14/14 daily completed in 14-day window → s1Score 100, s1Status Healthy', () => {
+    const ctx14 = { ...makeCtx({ windowDays: 14 }), evaluationDate: EVAL };
     const habit = {
       id: 'h1',
       cadence: { type: 'daily' },
@@ -79,7 +80,7 @@ describe('computeS1 — basic rolling-window score', () => {
       targetType: 'binary',
     };
     const logs = buildCompletedLogs('h1', EVAL, 14);
-    const result = computeS1(habit, logs, ctx);
+    const result = computeS1(habit, logs, ctx14);
     assert.equal(result.s1Score, 100);
     assert.equal(result.s1Status, 'Healthy');
   });
@@ -203,7 +204,8 @@ describe('computeS2 — basic weighted score', () => {
     assert.ok(result.s2Score <= 1, `s2Score ${result.s2Score} should be <= 1`);
   });
 
-  test('habit completed every day for 21 days scores close to 1.0 (within 0.01)', () => {
+  test('habit completed every day for 21 days in 21-day window scores close to 1.0 (within 0.01)', () => {
+    const ctx21 = { ...makeCtx({ windowDays: 21 }), evaluationDate: EVAL };
     const habit = {
       id: 'h2',
       cadence: { type: 'daily' },
@@ -212,7 +214,7 @@ describe('computeS2 — basic weighted score', () => {
       stage: 1,
     };
     const logs = buildCompletedLogs('h2', EVAL, 21);
-    const result = computeS2(habit, logs, ctx);
+    const result = computeS2(habit, logs, ctx21);
     assert.ok(result.s2Score > 0.99, `Expected s2Score near 1.0, got ${result.s2Score}`);
   });
 
