@@ -121,15 +121,15 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 
 ### SCORING — User-selectable scoring model
 
-- [ ] **SCORING-01**: User can choose between three scoring models from Settings: S1 (Rolling Threshold Health), S2 (Day-Weighted Wave Score), S3 (Load-Adjusted Capacity Score)
-- [ ] **SCORING-02**: Default scoring model is S1
+- [x] **SCORING-01**: User can choose between three scoring models from Settings: S1 (Rolling Threshold Health), S2 (Day-Weighted Wave Score), S3 (Load-Adjusted Capacity Score)
+- [x] **SCORING-02**: Default scoring model is S1
 - [ ] **SCORING-03**: Switching models updates dashboards without requiring a reload
-- [ ] **SCORING-04**: S1 computes per-habit status: Healthy / Watch / At-risk / Failing based on rolling-window % vs threshold
-- [ ] **SCORING-05**: S2 computes a momentum score with exponential day-weighting (e.g., 21-day half-life) and stage-difficulty weighting; aggregates to wave level
-- [ ] **SCORING-06**: S3 computes a load-adjusted score that corrects for the number of habits active each day; mastered habits grant graduation credit
-- [ ] **SCORING-07**: All scoring models honor: cadence-aware denominator, 7-day new-habit grace period, mastered-habit 0.3× weighting
+- [x] **SCORING-04**: S1 computes per-habit status: Healthy / Watch / At-risk / Failing based on rolling-window % vs threshold
+- [x] **SCORING-05**: S2 computes a momentum score with exponential day-weighting (e.g., 21-day half-life) and stage-difficulty weighting; aggregates to wave level
+- [x] **SCORING-06**: S3 computes a load-adjusted score that corrects for the number of habits active each day; mastered habits grant graduation credit
+- [x] **SCORING-07**: All scoring models honor: cadence-aware denominator, 7-day new-habit grace period, mastered-habit 0.3× weighting
 - [ ] **SCORING-08**: Scoring outputs are persisted in `score_snapshots` IDB store; views read snapshots and never call `scoring.js` directly
-- [ ] **SCORING-09**: Snapshots include a `scoreVersion` field so algorithm changes can be re-run via "Recompute scores" Settings action
+- [x] **SCORING-09**: Snapshots include a `scoreVersion` field so algorithm changes can be re-run via "Recompute scores" Settings action
 
 ### DESKTOP — Analytics surface
 
@@ -318,15 +318,15 @@ Every v1 requirement maps to exactly one phase.
 | IMPORT-03 | Phase 5 | Complete |
 | IMPORT-04 | Phase 5 | Complete |
 | IMPORT-05 | Phase 5 | Complete |
-| SCORING-01 | Phase 6 | Pending |
-| SCORING-02 | Phase 6 | Pending |
+| SCORING-01 | Phase 6 | Complete |
+| SCORING-02 | Phase 6 | Complete |
 | SCORING-03 | Phase 6 | Pending |
-| SCORING-04 | Phase 6 | Pending |
-| SCORING-05 | Phase 6 | Pending |
-| SCORING-06 | Phase 6 | Pending |
-| SCORING-07 | Phase 6 | Pending |
+| SCORING-04 | Phase 6 | Complete |
+| SCORING-05 | Phase 6 | Complete |
+| SCORING-06 | Phase 6 | Complete |
+| SCORING-07 | Phase 6 | Complete |
 | SCORING-08 | Phase 6 | Pending |
-| SCORING-09 | Phase 6 | Pending |
+| SCORING-09 | Phase 6 | Complete |
 | DESKTOP-01 | Phase 6 | Pending |
 | DESKTOP-02 | Phase 6 | Pending |
 | DESKTOP-03 | Phase 6 | Pending |
@@ -357,7 +357,7 @@ Every v1 requirement maps to exactly one phase.
 | NFR-02 | Phase 3 | Complete (03-03) |
 | NFR-03 | Phase 6 | Pending |
 | NFR-04 | Phase 1 | Pending |
-| NFR-05 | Phase 6 | Pending |
+| NFR-05 | Phase 6 | Complete |
 | NFR-06 | Phase 3 | Complete (03-02) |
 | NFR-07 | Phase 3 | Complete (03-02) |
 | NFR-08 | Phase 6 | Pending |

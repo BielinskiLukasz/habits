@@ -193,7 +193,7 @@ Plans:
 
 **Wave 1** *(pure domain — parallel)*
 
-- [ ] 06-01-PLAN.md — Pure scoring domain: `js/domain/scoring.js` (computeS1, computeS2, computeS3 — pure functions, TDD) — SCORING-01, SCORING-04, SCORING-05, SCORING-06, SCORING-07, SCORING-09
+- [x] 06-01-PLAN.md — Pure scoring domain: `js/domain/scoring.js` (computeS1, computeS2, computeS3 — pure functions, TDD) — SCORING-01, SCORING-04, SCORING-05, SCORING-06, SCORING-07, SCORING-09
 - [ ] 06-02-PLAN.md — Score snapshot writer: `js/io/scoreSnapshots.js` (writeHabitSnapshots + rebuildAllSnapshots with single-tx-per-habit strategy, TDD) — SCORING-08, SCORING-09, NFR-03
 
 **Wave 2** *(infrastructure + shell — parallel)*
@@ -225,7 +225,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
 | 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
 | 5. Backup & Restore | 6/6 | Complete    | 2026-06-06 |
-| 6. Desktop Analytics & Scoring Trio | 0/8 | Not started | - |
+| 6. Desktop Analytics & Scoring Trio | 2/8 | In Progress|  |
 
 ## Backlog
 

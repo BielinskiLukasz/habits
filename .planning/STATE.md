@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-06-29T18:30:00.000Z"
-last_activity: 2026-06-29
+last_updated: "2026-06-29T19:33:19.788Z"
+last_activity: 2026-06-29 -- Phase 06 execution started
 progress:
-  total_phases: 6
-  completed_phases: 5
+  total_phases: 5
+  completed_phases: 3
   total_plans: 39
-  completed_plans: 30
+  completed_plans: 32
   percent: 60
 ---
 
@@ -20,15 +20,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 6 — desktop-analytics-scoring-trio
+**Current focus:** Phase 06 — desktop-analytics-scoring-trio
 
 ## Current Position
 
-Phase: 6
+Phase: 06 (desktop-analytics-scoring-trio) — EXECUTING
 Previous: Phase 05 (backup-restore-json-csv-exports-json-import-nag) — COMPLETE (2026-06-06)
-Plan: 8 plans in 4 waves — READY TO EXECUTE
-Status: Planning complete — ready to execute Wave 1 (06-01 + 06-02 in parallel)
-Last activity: 2026-06-06
+Plan: 2 of 8
+Status: Ready to execute
+Last activity: 2026-06-29 -- Phase 06 execution started
 
 Progress: [██████████████████████░░░░░░░░] 54% (All Phase 3 complete: 6/6 plans shipped + UAT verified; Phase 4 ready to plan)
 
@@ -141,6 +141,7 @@ Phase 2 inherits the conventions locked during Phase 1:
 - Trend: TDD per-task (RED → GREEN) holding clean across all 6 phase-3 plans. Closeout (03-06) was the lightest plan of the phase at 15 min.
 
 *Updated after each plan completion*
+| Phase 06 P01 | 448 | - tasks | - files |
 
 ## Accumulated Context
 
@@ -222,6 +223,7 @@ Locked during Phase 3 plan 03-05 execution (2026-05-28):
 - The cross-tab refresh integration test needs 2 microtask settles after `store.notify` because the subscriber's `readDataCardInputs` is fire-and-forget from notify's perspective (`for (const fn of subs) fn(payload)` — synchronous). Production behavior is unchanged (the user sees the refresh within one animation frame); only the test needs to settle the queue. A future architectural change (have notify await each subscriber Promise) is a P4+ consideration.
 - Settings panel mounts INSIDE `<section data-route="settings">` which carries a pre-mounted `<h1 tabindex="-1">Settings</h1>` for router focus per D-79. The h1 is OWNED by index.html (not the settings.js builder) so the router can `focusH1()` even before mountSettings finishes.
 - About card uses `'controlled'` / `'registered'` / `'unsupported'` for SW state. Diagnostics keeps the longer string `'registered, not yet controlled'` for the DevTools workflow; Settings uses the shorter form for the user-facing surface.
+- [Phase ?]: LOG_COMPLETED dispatch table self-contained in scoring.js for independent testability (D-124)
 
 ### Pending Todos
 
@@ -249,7 +251,7 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-06-29T17:59:26.716Z
+Last session: 2026-06-29T19:33:19.760Z
 Current session: 2026-05-29T19:47:00Z (Phase 3 UAT verification)
 
 **Phase 3 Complete:**
@@ -262,4 +264,4 @@ Current session: 2026-05-29T19:47:00Z (Phase 3 UAT verification)
 
 **Ready for:** Phase 4 planning (Domain Model: catalog CRUD, stages, mastery, multi-occurrence logging, history navigation, wave aggregates)
 
-Resume file: .planning/phases/06-desktop-analytics-scoring-trio/06-UI-SPEC.md
+Resume file: None
