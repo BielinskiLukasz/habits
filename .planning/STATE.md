@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-04-PLAN.md
-last_updated: "2026-06-29T23:12:42.317Z"
+stopped_at: Completed 06-05-PLAN.md
+last_updated: "2026-06-30T00:00:00.000Z"
 last_activity: 2026-06-29 -- Phase 06 execution started
 progress:
   total_phases: 5
@@ -27,9 +27,9 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 06 (desktop-analytics-scoring-trio) — EXECUTING
 Previous: Phase 05 (backup-restore-json-csv-exports-json-import-nag) — COMPLETE (2026-06-06)
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
-Last activity: 2026-06-29 -- Phase 06 execution started
+Last activity: 2026-06-30 -- Phase 06 Plan 05 (Analytics view) complete
 
 Progress: [██████████████████████░░░░░░░░] 54% (All Phase 3 complete: 6/6 plans shipped + UAT verified; Phase 4 ready to plan)
 
@@ -146,6 +146,7 @@ Phase 2 inherits the conventions locked during Phase 1:
 | Phase 06 P02 | 23 min | 2 tasks | 2 files |
 | Phase 06 P03 | 11 min | 2 tasks | 8 files |
 | Phase 06 P04 | 18 min | - tasks | - files |
+| Phase 06 P05 | ~20 min | 3 tasks | 2 files created, 1 modified |
 
 ## Accumulated Context
 
@@ -232,7 +233,10 @@ Locked during Phase 3 plan 03-05 execution (2026-05-28):
 - [Phase ?]: D-123: Recompute Scores button in buildDataCard with isRecomputing loading state; rebuildAllSnapshots called via settings action
 - [Phase ?]: apply.js onLogWrite DI seam: non-fatal snapshot write fires after log-mutating events with keys.habitId (SCORING-03)
 - [Phase ?]: defaultRoute='#today' default in mountRoutes preserves full backward compat for mobile main.js (D-115)
-- [Phase ?]: desktop.js stub view mounts are idempotent (data-stub guard); replaced in plans 06-05..07 (D-115)
+- desktop.js stub view mounts are idempotent (data-stub guard); replaced in plans 06-05..07 (D-115) — 06-05 analytics stub now replaced
+- D-116: Analytics reads only from score_snapshots IDB (never calls scoring.js directly — SCORING-08 enforced architecturally)
+- D-117: Reactive model switching via store.subscribe; analytics radio buttons dispatch apply setSetting (same path as Settings card)
+- Wave aggregates in Analytics view computed inline from snapshot averages (not from waveAggregates.js which operates on raw logs) — O(habits), correct for the view's purpose
 
 ### Pending Todos
 
@@ -260,21 +264,22 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-06-29T23:12:42.289Z
-Stopped at: Completed 06-04-PLAN.md
+Last session: 2026-06-30T00:00:00.000Z
+Stopped at: Completed 06-05-PLAN.md
 Resume file: None
 
-**Phase 06 Plan 02 Complete:**
+**Phase 06 Plan 05 Complete:**
 
-- Plan 06-02 (Score Snapshot Writer) executed: 2 tasks (TDD RED + GREEN), 2 files created
-- js/io/scoreSnapshots.js: writeHabitSnapshots + rebuildAllSnapshots with configure() DI seam
-- tests/unit/io/scoreSnapshots.test.js: 11 tests, all passing
-- Full suite: 743/745 (2 pre-existing stubs from 04-02 and 04-04)
-- Current HEAD: `1b03395` (feat(06-02): implement writeHabitSnapshots and rebuildAllSnapshots)
+- Plan 06-05 (Analytics View) executed: 3 tasks (TDD RED + GREEN + T3 wire), 2 files created, 1 modified
+- js/views/desktop/analytics.js: buildAnalyticsHeader, buildAnalyticsTable, mountAnalytics
+- tests/unit/views/desktop/analytics.builders.test.js: 16 tests, all passing
+- js/desktop.js: mountAnalytics wired, analytics stub replaced
+- Full suite: 771/773 (2 pre-existing stubs from 04-02 and 04-04)
+- Current HEAD: `5501ec9` (feat(06-05): wire mountAnalytics into desktop.js)
 
-**Ready for:** Plans 06-03 and 06-04 (Wave 2 — parallel execution)
+**Ready for:** Plans 06-06 and 06-07 (Wave 3 remaining — parallel execution)
 
-- 06-03: Snapshot trigger in apply.js + Settings model selector + Recompute action
-- 06-04: Desktop shell (desktop.html, desktop.js, router extension, CSS)
+- 06-06: Wave-board view (mountWaveboard + builders, TDD), 12-week heat-map
+- 06-07: Planning view (mountPlanning + builders, TDD), forward 12-week grid
 
 Resume file: None
