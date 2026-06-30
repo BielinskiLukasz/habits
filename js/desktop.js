@@ -50,11 +50,12 @@ import { hydrate, configureStore, subscribe } from './state/store.js';
 import { bootSync, broadcast } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 
-// P6 desktop imports (D-115, D-117, D-118).
+// P6 desktop imports (D-115, D-117, D-118, D-121).
 import { mountRoutes } from './router.js';
 import { configureWave, bootWaves } from './domain/wave.js';
 import { mountAnalytics } from './views/desktop/analytics.js';
 import { mountWaveboard } from './views/desktop/waveboard.js';
+import { mountPlanning } from './views/desktop/planning.js';
 
 registerServiceWorker();
 
@@ -169,7 +170,7 @@ mountRoutes({
       focusH1(waveboardPanel);
     },
     '#planning': () => {
-      mountStub(planningPanel, 'Planning');
+      mountPlanning(planningPanel, { repo, store: { subscribe } });
       show(planningPanel);
       focusH1(planningPanel);
     },
