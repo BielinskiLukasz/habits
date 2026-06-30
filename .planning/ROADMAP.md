@@ -187,7 +187,7 @@ Plans:
   4. All three scoring models honor cadence-aware denominators, a 7-day new-habit grace period, and a 0.3× weighting for mastered habits; scoring outputs are persisted in the `score_snapshots` store (views read snapshots, never call `scoring.js` on render)
   5. User triggers "Recompute scores" from Settings and snapshots are re-run; the desktop view renders 5 years of synthetic data in under 2 s on the latest 2 versions of Chrome / Edge / Firefox / Safari with zero outbound network calls
 
-**Plans**: 8 plans
+**Plans**: 9/8 plans complete
 
 Plans:
 
@@ -209,7 +209,7 @@ Plans:
 
 **Wave 4** *(closeout)*
 
-- [ ] 06-08-PLAN.md — Phase closeout: sw.js SHELL P6 extension, sw.shell.test.js P6_REQUIRED list, APP_VERSION 0.4.0 → 0.5.0, VERSIONING.md v0.5.0 entry — NFR-08
+- [x] 06-08-PLAN.md — Phase closeout: sw.js SHELL P6 extension, sw.shell.test.js P6_REQUIRED list, APP_VERSION 0.4.0 → 0.5.0, VERSIONING.md v0.5.0 entry — NFR-08
 
 **UI hint**: yes
 
@@ -225,7 +225,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
 | 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
 | 5. Backup & Restore | 6/6 | Complete    | 2026-06-06 |
-| 6. Desktop Analytics & Scoring Trio | 8/8 | Complete   | 2026-06-30 |
+| 6. Desktop Analytics & Scoring Trio | 9/8 | Complete   | 2026-06-30 |
 
 ## Backlog
 

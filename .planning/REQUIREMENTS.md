@@ -355,12 +355,12 @@ Every v1 requirement maps to exactly one phase.
 | SETTINGS-07 | Phase 1 | Pending |
 | NFR-01 | Phase 3 | Complete (03-02) |
 | NFR-02 | Phase 3 | Complete (03-03) |
-| NFR-03 | Phase 6 | Pending |
+| NFR-03 | Phase 6 | Complete |
 | NFR-04 | Phase 1 | Pending |
 | NFR-05 | Phase 6 | Complete |
 | NFR-06 | Phase 3 | Complete (03-02) |
 | NFR-07 | Phase 3 | Complete (03-02) |
-| NFR-08 | Phase 6 | Pending |
+| NFR-08 | Phase 6 | Complete |
 | NFR-09 | Phase 1 | Pending |
 | NFR-10 | Phase 4 | Complete |
 | NFR-11 | Phase 1 | Pending |
