@@ -61,7 +61,11 @@ Introduces `scheduled` as a first-class habit status for future-start habits, au
   3. Existing IDB habits that have `status: 'active'` and `startDate > today` are silently reclassified to `'scheduled'` on the first boot after this phase ships
   4. `scripts/convert-nawyki.js` outputs `status: 'scheduled'` for source habits whose `startDate` is in the future (relative to the run date)
   5. A JSON backup file containing `status: 'scheduled'` habits round-trips correctly through `mergeImportedStores` without status being overwritten
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 07-01-PLAN.md — TDD: scheduled.js domain service (configureScheduled + bootScheduled + runMigration + runPromotion)
+- [ ] 07-02-PLAN.md — TDD: createHabit status derivation from startDate
+- [ ] 07-03-PLAN.md — Boot wiring (main.js + desktop.js) + convert-nawyki.js status fix + DATA-02 verification
 
 ### Phase 8: Today & Catalog — Upcoming Section
 **Goal**: Users see only active (and mastered) habits on Today and in the active Catalog list; scheduled habits appear in a dedicated Upcoming section with startDate/wave info and a promote action
@@ -92,7 +96,7 @@ Introduces `scheduled` as a first-class habit status for future-start habits, au
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Scheduled Status Foundation | 0/? | Not started | - |
+| 7. Scheduled Status Foundation | 0/3 | Not started | - |
 | 8. Today & Catalog — Upcoming Section | 0/? | Not started | - |
 | 9. Desktop Waveboard | 0/? | Not started | - |
 
