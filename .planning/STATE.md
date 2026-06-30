@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-06-PLAN.md
-last_updated: "2026-06-30T00:02:20.335Z"
-last_activity: 2026-06-30 -- Phase 06 Plan 06 (Wave-board view) complete
+stopped_at: Completed 06-07-PLAN.md
+last_updated: "2026-06-30T00:27:34.761Z"
+last_activity: 2026-06-30 -- Phase 06 Plan 05 (Analytics view) complete
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 39
-  completed_plans: 37
-  percent: 60
+  completed_plans: 38
+  percent: 80
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 06 (desktop-analytics-scoring-trio) — EXECUTING
 Previous: Phase 05 (backup-restore-json-csv-exports-json-import-nag) — COMPLETE (2026-06-06)
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-06-30 -- Phase 06 Plan 05 (Analytics view) complete
 
@@ -148,6 +148,7 @@ Phase 2 inherits the conventions locked during Phase 1:
 | Phase 06 P04 | 18 min | - tasks | - files |
 | Phase 06 P05 | ~20 min | 3 tasks | 2 files created, 1 modified |
 | Phase 06 P06 | 25 min | 3 tasks | 3 files |
+| Phase 06 P07 | 18 min | - tasks | - files |
 
 ## Accumulated Context
 
@@ -239,6 +240,7 @@ Locked during Phase 3 plan 03-05 execution (2026-05-28):
 - D-117: Reactive model switching via store.subscribe; analytics radio buttons dispatch apply setSetting (same path as Settings card)
 - Wave aggregates in Analytics view computed inline from snapshot averages (not from waveAggregates.js which operates on raw logs) — O(habits), correct for the view's purpose
 - [Phase ?]: D-118: Wave-board always uses S1 status regardless of active scoringModel (no getSetting call in waveboard.js)
+- [Phase ?]: D-121: Planning view habit links use ./index.html#catalog (same tab); computeNextNWeeks skips current week; ISO helpers inlined in planning.js for view independence
 
 ### Pending Todos
 
@@ -266,8 +268,8 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-06-30T00:02:20.315Z
-Stopped at: Completed 06-06-PLAN.md
+Last session: 2026-06-30T00:27:34.750Z
+Stopped at: Completed 06-07-PLAN.md
 Resume file: None
 
 **Phase 06 Plan 05 Complete:**

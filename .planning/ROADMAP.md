@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Today View & Settings v1 (First Usable Slice)** - Mobile shell rendering seed data, single-tap binary mark/unmark, persistent undo, install help, persistence status
 - [x] **Phase 4: Domain Model (Cadence, Catalog, Stages, Mastery, Multi-occurrence, History, Waves)** - Full habit lifecycle honoring the versioned-edit invariant (completed 2026-06-05)
 - [x] **Phase 5: Backup & Restore (JSON + CSV Exports, JSON Import, Nag)** - Full-fidelity JSON round-trip + Polish-Excel-compatible CSV + weekly backup banner (completed 2026-06-06)
-- [ ] **Phase 6: Desktop Analytics & Scoring Trio** - Desktop shell, analytics/wave-board/planning views, all three S1/S2/S3 scoring models with Settings toggle
+- [x] **Phase 6: Desktop Analytics & Scoring Trio** - Desktop shell, analytics/wave-board/planning views, all three S1/S2/S3 scoring models with Settings toggle (completed 2026-06-30)
 
 ## Phase Details
 
@@ -205,7 +205,7 @@ Plans:
 
 - [x] 06-05-PLAN.md — Analytics view: `js/views/desktop/analytics.js` (mountAnalytics + pure builders, TDD), reactive model switching, "Show archived" toggle — DESKTOP-03, SCORING-02, SCORING-03
 - [x] 06-06-PLAN.md — Wave-board view: `js/views/desktop/waveboard.js` (mountWaveboard + builders, TDD), 12-week heat-map, sticky habit column, S1 status colors — DESKTOP-04
-- [ ] 06-07-PLAN.md — Planning view: `js/views/desktop/planning.js` (mountPlanning + builders, TDD), forward 12-week grid, future habits only, Catalog links — DESKTOP-05, DESKTOP-06
+- [x] 06-07-PLAN.md — Planning view: `js/views/desktop/planning.js` (mountPlanning + builders, TDD), forward 12-week grid, future habits only, Catalog links — DESKTOP-05, DESKTOP-06
 
 **Wave 4** *(closeout)*
 
@@ -225,7 +225,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Today View & Settings v1 | 7/7 | Complete | 2026-05-29 |
 | 4. Domain Model | 11/11 | Complete    | 2026-06-05 |
 | 5. Backup & Restore | 6/6 | Complete    | 2026-06-06 |
-| 6. Desktop Analytics & Scoring Trio | 7/8 | In Progress|  |
+| 6. Desktop Analytics & Scoring Trio | 8/8 | Complete   | 2026-06-30 |
 
 ## Backlog
 
