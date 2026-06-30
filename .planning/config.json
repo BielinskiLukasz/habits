@@ -9,7 +9,7 @@
   },
   "context": null,
   "workflow": {
-    "research": true,
+    "research": false,
     "plan_check": false,
     "verifier": true,
     "auto_advance": false,
