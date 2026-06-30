@@ -78,6 +78,36 @@ Ideas and issues captured during phase work for consideration in future mileston
 
 ---
 
+## Captured 2026-06-30
+
+### Fix import JSON UI label
+
+**Issue:** The import control in Settings → Data is a raw `<input type="file">` with no visible label. Browsers render it as "Choose File" — the user has no indication it's for importing a JSON backup.
+
+**Current:** `builders.js` renders the `<input>` with only an `aria-label="Import JSON backup file"` (screen-reader only). No visible `<label>` or adjacent text.
+
+**Expected:** A visible "Import JSON" label or a styled button wrapper so the action is self-explanatory without relying on context.
+
+**Effort:** Low — add a `<label for="import-file-input">` in `settings/builders.js`.
+
+---
+
+### Move waves to a first-class data model
+
+**Issue:** Wave is a plain string field on each habit (e.g. `wave: "Fala 1"`). There is no `waves` IDB store — no wave-level metadata (description, start date, color, order) can be stored, and wave CRUD is impossible without touching every habit row.
+
+**Current:** Wave grouping is purely derived at query time from the `habits.wave` index. Wave identity = the string value.
+
+**Desired:** A dedicated `waves` IDB store with its own UUID, label, order, optional description/color, and date range. Habits reference a wave by ID. Enables wave creation, editing, reordering, and richer analytics groupings.
+
+**Dependencies:** Requires a v2 IDB migration (additive — new store only), an update to seed loader, and changes to all habit CRUD paths that currently write the wave string.
+
+**Note:** The existing "Cannot add waves" backlog entry (Phase 4 UAT findings) is a UI gap; this is the underlying data model prerequisite for that feature.
+
+**Effort:** High — schema migration + seed update + CRUD + all views that group by wave.
+
+---
+
 ## Unscheduled features
 
 ### Slot collapse behavior after selection
