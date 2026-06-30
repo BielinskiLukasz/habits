@@ -16,29 +16,28 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Validated
 
-<!-- Shipped and confirmed valuable. -->
+<!-- Shipped and confirmed valuable — v1.0 (2026-06-30) -->
 
-(None yet — ship to validate)
+- ✓ CORE — Daily check-in view (Today), mobile-first, single-tap mark/unmark, multi-occurrence logging — v1.0
+- ✓ CATALOG — Habit CRUD with stages, cadence, day-of-week rules, multi-occurrence targets, per-habit threshold/window overrides — v1.0
+- ✓ LOG — Multi-occurrence logging: numeric `+1` counter AND slot-checklist (anonymous or user-labeled slots) — v1.0
+- ✓ STAGE — Stage progression: manual button, scheduled by wave week, automatic after N days at current stage (composable) — v1.0
+- ✓ MASTERY — Threshold-based "mastered" badge: 90% / 70 days default, globally configurable, per-habit override; mastered habits stay visible on Today, muted — v1.0
+- ✓ CADENCE — Day-of-week, "every N days", daily, weekly, monthly cadence engine — v1.0
+- ✓ WAVE — Wave/Fala model: habits tagged by wave, aggregate metrics (completion %, status counts, streak, "wave at risk") — v1.0
+- ✓ HISTORY — Navigate any past day, mark habits not-completed, bulk-mark uncompleted, single-step undo across reload — v1.0
+- ✓ DATA — Habit edits never rewrite history; definition changes apply forward only via `habit_versions` — v1.0
+- ✓ SEED — Hand-curated JSON bundled with app, ~65 habits idempotently loaded on first run — v1.0
+- ✓ EXPORT/IMPORT — JSON full-fidelity backup/restore (merge-by-id), CSV habit×day matrix for Excel — v1.0
+- ✓ PWA — Installable, works fully offline, service worker silent-fails on file:// — v1.0
+- ✓ DESKTOP — Separate desktop.html with analytics, wave-board, planning views (not just wider Today) — v1.0
+- ✓ SCORING — S1/S2/S3 scoring trio, switchable from Settings, persisted in score_snapshots IDB store — v1.0
 
 ### Active
 
-<!-- v1 hypotheses. Refined further in REQUIREMENTS.md. -->
+<!-- Next milestone hypotheses — see /gsd-new-milestone to define v1.1 requirements -->
 
-- [ ] Daily check-in view (Today) — mobile-first, mark/unmark habits, log counts
-- [ ] Habit catalog — CRUD with stages, cadence, day-of-week rules, multi-occurrence targets, per-habit threshold/window overrides
-- [ ] Multi-occurrence logging — both `+1` numeric and slot-checklist styles (slots can be user-labeled or anonymous, per habit)
-- [ ] Stage progression — each habit may declare any combination of advancement triggers: manual button, scheduled by wave week, automatic after N days at current stage
-- [ ] Threshold-based "mastered" badge — per-habit % threshold over rolling N-day window, defaults 90% / 70 days, both configurable globally and overridable per habit; mastered habits stay visible on Today, just muted
-- [ ] Day-of-week and "every N days" cadence engine (`[nd]`, `[sb]`, `[pn-pt]`, "co 2 dni"…)
-- [ ] Wave/Fala model — habits tagged with a wave; waves have aggregate metrics (completion %, count by status, longest active streak, "wave at risk")
-- [ ] History — navigate any past day, mark habits as not-completed; bulk "mark all not-yet-completed as uncompleted" on a given day; per-habit edit history; undo last action
-- [ ] Habit edits don't rewrite history — definition changes apply forward only; the habit identity is preserved
-- [ ] Seeded data — hand-curated JSON bundled with the app, parsed once from `Nawyki v1.xlsx` + `Nawyki-fale.txt`
-- [ ] JSON export/import — manual backup/restore from IndexedDB (full fidelity, round-trippable)
-- [ ] CSV export — flattened table-shaped export of logs and habit definitions, so the data can be pasted into Excel for ad-hoc analysis (read-only; not used for import)
-- [ ] PWA — installable, works offline
-- [ ] Desktop analytics layout — separate, richer layouts for stats/planning views (not just a wider Today)
-- [ ] Scoring model — research phase to propose 2-3 alternatives, user picks one for v1
+(None yet — run `/gsd-new-milestone` to define v1.1 requirements)
 
 ### Out of Scope
 
@@ -99,20 +98,20 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Vanilla multi-file static app (no build) | Mirrors `mindful-breathing`; zero-dependency longevity | — Pending |
-| IndexedDB + JSON export/import (not localStorage, not cloud) | Capacity for years of logs; manual backup is acceptable for a personal tool | — Pending |
+| Vanilla multi-file static app (no build) | Mirrors `mindful-breathing`; zero-dependency longevity | Shipped v1.0 — 52 JS files, 0 npm installs, 0 build steps. Zero dependency rot across 36 days. |
+| IndexedDB + JSON export/import (not localStorage, not cloud) | Capacity for years of logs; manual backup is acceptable for a personal tool | Shipped v1.0 — 7 IDB stores, merge-by-id import, JSON+CSV export. |
 | D-35: English UI + English habit names primary; optional Polish original as `name_pl` (supersedes original "Polish habit names (data)" framing) | The only spreadsheet column needing translation is `name`; storing both `name` (English) and `name_pl` (Polish) keeps the user's existing identifiers retrievable while letting any future UI surface either | Locked 2026-05-26 (Phase 2) |
-| Seed data as bundled hand-curated JSON | Faster v1, no importer code in-app, future-resilient | — Pending |
-| Two export formats: JSON (full backup, round-trippable) + CSV (flattened, Excel-pasteable, read-only) | JSON for the app, CSV for the user's Excel-based ad-hoc analysis habits | — Pending |
-| Threshold model: 90% / 70 days, configurable globally + per-habit override | Matches existing xlsx model exactly; allows per-habit tuning that the spreadsheet already required | — Pending |
-| Graduation: stay on Today, muted/badged (don't hide) | User wants to keep "feeding" mastered habits without pressure | — Pending |
-| Stage advancement: multiple triggers per habit (manual OR scheduled-by-week OR after-N-days), composable | Honors the diversity in the existing system (some habits step up by calendar, some by effort, some on-demand) | — Pending |
-| Multi-occurrence UX: numeric +1 counter AND slot-checklist (with optional user-defined slot labels), choice per habit | Different habits naturally want different UX (5 things to be grateful for vs 7 meatless meals) | — Pending |
-| Mobile-first daily check-in, desktop-first analytics — distinct layouts | Recognizes that the two jobs have different ergonomics | — Pending |
-| History edits don't overwrite prior state (partial completions persist as "uncompleted but data retained"); per-habit edit history + global undo | History must be trustworthy and recoverable | — Pending |
-| Scoring model deferred to research (3 alternatives → user picks) | The xlsx's "WYNIK SKORYGOWANY" is a candidate but not the only good answer; this deserves a deliberate redesign | — Pending |
-| Ongoing tool, multi-year (waves are seed plan, not a hard endpoint) | The 47-week plan is the first wave plan, not the whole product | — Pending |
-| Reminders/notifications OUT of v1 | User explicitly opted out for now; revisit later | — Pending |
+| Seed data as bundled hand-curated JSON | Faster v1, no importer code in-app, future-resilient | Shipped v1.0 — `seed/habits.json` with ~65 habits idempotently loaded. |
+| Two export formats: JSON (full backup, round-trippable) + CSV (flattened, Excel-pasteable, read-only) | JSON for the app, CSV for the user's Excel-based ad-hoc analysis habits | Shipped v1.0 — UTF-8 BOM + CRLF + semicolon delimiter for Polish Windows Excel. |
+| Threshold model: 90% / 70 days, configurable globally + per-habit override | Matches existing xlsx model exactly; allows per-habit tuning that the spreadsheet already required | Shipped v1.0 — `mastery.js` rolling-window evaluation, per-habit override. |
+| Graduation: stay on Today, muted/badged (don't hide) | User wants to keep "feeding" mastered habits without pressure | Shipped v1.0 — mastered badge visible on Today, muted visual treatment. |
+| Stage advancement: multiple triggers per habit (manual OR scheduled-by-week OR after-N-days), composable | Honors the diversity in the existing system (some habits step up by calendar, some by effort, some on-demand) | Shipped v1.0 — OR-composed trigger evaluation in `stage.js`. |
+| Multi-occurrence UX: numeric +1 counter AND slot-checklist (with optional user-defined slot labels), choice per habit | Different habits naturally want different UX (5 things to be grateful for vs 7 meatless meals) | Shipped v1.0 — binary, numeric, slot-checklist all implemented. |
+| Mobile-first daily check-in, desktop-first analytics — distinct layouts | Recognizes that the two jobs have different ergonomics | Shipped v1.0 — `index.html` (mobile) + `desktop.html` (analytics), two separate DOM trees. |
+| History edits don't overwrite prior state (partial completions persist as "uncompleted but data retained"); per-habit edit history + global undo | History must be trustworthy and recoverable | Shipped v1.0 — `habit_versions` store, single-step undo persists across reload. |
+| Scoring model: 3 alternatives → user picks | The xlsx's "WYNIK SKORYGOWANY" is a candidate but not the only good answer; deserves deliberate redesign | Shipped v1.0 — S1 (Rolling Threshold Health), S2 (Day-Weighted Wave Score), S3 (Load-Adjusted Capacity Score); S1 default; Settings toggle. |
+| Ongoing tool, multi-year (waves are seed plan, not a hard endpoint) | The 47-week plan is the first wave plan, not the whole product | Confirmed v1.0 — wave model extensible; no hard endpoint in schema. |
+| Reminders/notifications OUT of v1 | User explicitly opted out for now; revisit later | Confirmed out of v1 — no notification code shipped. |
 | D-23: Unit tests use Node's built-in `node --test` runner; tests live in `tests/` (excluded from SW shell and GH Pages deploy); cover pure-function modules only (domain logic, db migrations, utils); browser-driven integration testing remains manual via DevTools | Zero npm/build dependency matches anti-stack rule; pure ES modules already import-compatible with Node; tests must never reach the browser (no app-shell impact, GH Pages stays vanilla) | Locked 2026-05-26; introduce starting Phase 2 (first phase with testable logic — schema migrations, date utils, cadence engine) |
 | D-24: GitHub Actions CI runs `node --test tests/` on push to `main` and on every PR; single `.github/workflows/test.yml`, `actions/setup-node@v4`, no other automation in v1 | Single-source automated regression gate; free for personal/public repos; ~10 s/run; matches D-23 (Node tests only, no browser, no install) | Locked 2026-05-26; ships in Phase 2 alongside the first testable module |
 | D-25: Integration tests live in Node alongside unit tests; module composition (seed → schema → repo → derived view-model; JSON export ↔ import round-trip) uses a hand-written ~30-line in-memory fake IDB repo with same surface as the real `js/db/repo.js`. Real-IDB integration testing stays in `tests-browser.html` (manual, excluded from SW SHELL) | Catches cross-module invariants without a DOM polyfill or IDB shim from npm; mirrors the project's "small hand-written wrappers" pattern; keeps CI deterministic | Locked 2026-05-26; Phase 2 (storage spine) is the first consumer |
@@ -144,4 +143,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-30 — Phase 6 complete (desktop analytics + scoring trio, APP_VERSION 0.5.0, v1.0 milestone sealed)*
+*Last updated: 2026-06-30 — v1.0 milestone complete (309 commits, 52 JS files, 756 tests, 123/123 requirements shipped)*
