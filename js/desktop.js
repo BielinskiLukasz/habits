@@ -49,6 +49,9 @@ import { configureSeed, bootSeed } from './io/seed.js';
 import { hydrate, configureStore, subscribe, notify } from './state/store.js';
 import { bootSync, broadcast, onMessage } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
+import { configureExport } from './io/export.js';
+import { configureImport } from './io/import.js';
+import { configureBackupNag } from './io/backup-nag.js';
 
 // P6 desktop imports (D-115, D-117, D-118, D-121).
 import { mountRoutes } from './router.js';
@@ -78,6 +81,9 @@ configureApply({
 });
 configureUndo({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
+configureExport({ repo });
+configureImport({ repo, broadcast });
+configureBackupNag({ repo });
 bootSync();
 bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
