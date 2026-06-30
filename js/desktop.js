@@ -46,8 +46,8 @@ import { configure as configureApply } from './state/apply.js';
 import { writeHabitSnapshots } from './io/scoreSnapshots.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
-import { hydrate, configureStore, subscribe } from './state/store.js';
-import { bootSync, broadcast } from './platform/sync.js';
+import { hydrate, configureStore, subscribe, notify } from './state/store.js';
+import { bootSync, broadcast, onMessage } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 
 // P6 desktop imports (D-115, D-117, D-118, D-121).
@@ -82,6 +82,13 @@ bootSync();
 bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
+// Cross-tab sync: re-render when another tab mutates or completes a JSON import (DATA-07).
+onMessage(async (msg) => {
+  if (msg.type === 'import:done') { location.reload(); return; }
+  if (msg.type === 'mutation' && msg.keys) {
+    try { await notify({ event: msg.event, keys: msg.keys }); } catch (_e) {}
+  }
+});
 
 // P6 desktop wiring — configure wave module and store for desktop views.
 configureWave({ fetch: globalThis.fetch });

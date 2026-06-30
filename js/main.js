@@ -53,7 +53,10 @@ import { configure as configureApply } from './state/apply.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
 import { hydrate, configureStore } from './state/store.js';
-import { bootSync, broadcast } from './platform/sync.js';
+import { bootSync, broadcast, onMessage } from './platform/sync.js';
+import { configureExport } from './io/export.js';
+import { configureImport } from './io/import.js';
+import { configureBackupNag } from './io/backup-nag.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 
 import { writeHabitSnapshots } from './io/scoreSnapshots.js';
@@ -91,10 +94,20 @@ configureUndo({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
 configureWave({ fetch: globalThis.fetch });
 configureStore({ repo });
+configureExport({ repo });
+configureImport({ repo, broadcast });
+configureBackupNag({ repo });
 bootSync();
 bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
+// Cross-tab sync: re-render when another tab mutates or completes a JSON import (DATA-07).
+onMessage(async (msg) => {
+  if (msg.type === 'import:done') { location.reload(); return; }
+  if (msg.type === 'mutation' && msg.keys) {
+    try { await store.notify({ event: msg.event, keys: msg.keys }); } catch (_e) {}
+  }
+});
 try { await bootWaves(); } catch (_e) { /* swallow — wave display degrades to empty wave slot */ }
 
 // P3 router + view wiring (D-60, D-79, D-80).

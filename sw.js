@@ -135,6 +135,11 @@ const SHELL = [
   './js/domain/waveAggregates.js',
   './css/catalog.css',
   './css/history.css',
+  // Phase-5 backup & restore — added in 05-backup-restore-json-csv-exports-json-import-nag.
+  // export.js, import.js, backup-nag.js: io modules now wired at boot via DI seams in main.js.
+  './js/io/export.js',
+  './js/io/import.js',
+  './js/io/backup-nag.js',
   // Phase-6 desktop analytics — added in 06-desktop-analytics-scoring-trio.
   // scoring.js, scoreSnapshots.js: domain + IO modules written on every log write.
   // views/desktop/*: desktop-only view modules, route-dispatched from desktop.js.

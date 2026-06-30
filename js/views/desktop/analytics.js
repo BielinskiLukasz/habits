@@ -28,6 +28,7 @@
 
 import { mount } from '../../util/mount.js';
 import { todayLocal } from '../../util/date.js';
+import { getWave } from '../../domain/wave.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -357,11 +358,7 @@ export function mountAnalytics(parent, { repo, store }) {
     for (const habit of cachedHabits) {
       const waveNum = habit.wave ?? 0;
       if (!waveMap.has(waveNum)) {
-        // Use store.cache.waves if available, else fall back to "Wave N" label.
-        const waveName =
-          (store && store.cache && store.cache.waves && store.cache.waves.get)
-            ? (store.cache.waves.get(waveNum)?.name ?? `Wave ${waveNum}`)
-            : `Wave ${waveNum}`;
+        const waveName = getWave(waveNum)?.name ?? `Wave ${waveNum}`;
         waveMap.set(waveNum, { waveNumber: waveNum, waveName, habits: [] });
       }
       waveMap.get(waveNum).habits.push(habit);
