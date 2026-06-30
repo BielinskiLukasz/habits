@@ -141,6 +141,22 @@ const P4_REQUIRED = [
   './css/history.css',
 ];
 
+// P6-required entries — files introduced during Phase 6 plans 06-01..06-07
+// that are part of the app shell at startup and therefore must be precached.
+//
+// Note: `./desktop.html` is already in the P2 baseline — it is NOT duplicated here.
+// desktop.css: desktop layout and scoring status CSS tokens.
+// scoring.js, scoreSnapshots.js: domain + IO modules written on every log write.
+// views/desktop/*: desktop-only view modules, route-dispatched from desktop.js.
+const P6_REQUIRED = [
+  './css/desktop.css',
+  './js/domain/scoring.js',
+  './js/io/scoreSnapshots.js',
+  './js/views/desktop/analytics.js',
+  './js/views/desktop/waveboard.js',
+  './js/views/desktop/planning.js',
+];
+
 describe('D-81 SHELL coverage', () => {
   const src = readFileSync(join(ROOT, 'sw.js'), 'utf8');
   const shell = extractShell(src);
@@ -169,6 +185,15 @@ describe('D-81 SHELL coverage', () => {
       missing,
       [],
       `D-81 SHELL coverage gap (P4): ${missing.join(', ')} not present in sw.js SHELL — add them or document the SWR exception in this test.`,
+    );
+  });
+
+  test('P6 required entries are all present', () => {
+    const missing = P6_REQUIRED.filter((e) => !shell.has(e));
+    assert.deepEqual(
+      missing,
+      [],
+      `D-81 SHELL coverage gap (P6): ${missing.join(', ')} not present in sw.js SHELL — add them or document the SWR exception in this test.`,
     );
   });
 
