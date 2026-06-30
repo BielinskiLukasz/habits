@@ -58,27 +58,27 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHED-01 | — | Pending |
-| SCHED-02 | — | Pending |
-| SCHED-03 | — | Pending |
-| SCHED-04 | — | Pending |
-| CAT-01 | — | Pending |
-| CAT-02 | — | Pending |
-| CAT-03 | — | Pending |
-| CAT-04 | — | Pending |
-| WAVE-01 | — | Pending |
-| WAVE-02 | — | Pending |
-| WAVE-03 | — | Pending |
-| WAVE-04 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
+| SCHED-01 | Phase 7 | Pending |
+| SCHED-02 | Phase 7 | Pending |
+| SCHED-03 | Phase 7 | Pending |
+| SCHED-04 | Phase 8 | Pending |
+| CAT-01 | Phase 8 | Pending |
+| CAT-02 | Phase 8 | Pending |
+| CAT-03 | Phase 8 | Pending |
+| CAT-04 | Phase 8 | Pending |
+| WAVE-01 | Phase 9 | Pending |
+| WAVE-02 | Phase 9 | Pending |
+| WAVE-03 | Phase 9 | Pending |
+| WAVE-04 | Phase 9 | Pending |
+| DATA-01 | Phase 7 | Pending |
+| DATA-02 | Phase 7 | Pending |
+| DATA-03 | Phase 7 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 15 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 15 ⚠️ — will be resolved by roadmapper
+- Mapped to phases: 15 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-30*
-*Last updated: 2026-06-30 — initial definition*
+*Last updated: 2026-06-30 — traceability filled by roadmapper*
