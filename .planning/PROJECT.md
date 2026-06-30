@@ -144,4 +144,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after initialization*
+*Last updated: 2026-06-30 — Phase 6 complete (desktop analytics + scoring trio, APP_VERSION 0.5.0, v1.0 milestone sealed)*
