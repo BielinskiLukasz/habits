@@ -85,6 +85,7 @@ export function configureImport(deps) {
   if (Object.prototype.hasOwnProperty.call(deps, 'broadcast')) {
     _broadcast = deps.broadcast ?? null;
   }
+  console.log('[import] configureImport called — _repo set:', !!_repo);
 }
 
 /**
@@ -119,6 +120,7 @@ export async function mergeImportedStores(imported) {
   }
 
   const repo = _repo;
+  console.log('[import] mergeImportedStores called — _repo:', !!repo);
   if (!repo) {
     throw new Error('import: configureImport({repo}) not called');
   }

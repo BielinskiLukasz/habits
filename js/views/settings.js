@@ -558,6 +558,7 @@ function buildActions() {
         if (evt?.currentTarget) evt.currentTarget.value = '';
         else if (evt?.target) evt.target.value = '';
       } catch (err) {
+        console.error('[settings] importJSON failed:', err);
         showErrorToast('Import failed: ' + (err?.message ?? String(err)));
       }
     },
