@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-05-PLAN.md
-last_updated: "2026-06-30T00:00:00.000Z"
-last_activity: 2026-06-29 -- Phase 06 execution started
+stopped_at: Completed 06-06-PLAN.md
+last_updated: "2026-06-30T00:02:20.335Z"
+last_activity: 2026-06-30 -- Phase 06 Plan 06 (Wave-board view) complete
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 39
-  completed_plans: 35
+  completed_plans: 37
   percent: 60
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 06 (desktop-analytics-scoring-trio) — EXECUTING
 Previous: Phase 05 (backup-restore-json-csv-exports-json-import-nag) — COMPLETE (2026-06-06)
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-06-30 -- Phase 06 Plan 05 (Analytics view) complete
 
@@ -147,6 +147,7 @@ Phase 2 inherits the conventions locked during Phase 1:
 | Phase 06 P03 | 11 min | 2 tasks | 8 files |
 | Phase 06 P04 | 18 min | - tasks | - files |
 | Phase 06 P05 | ~20 min | 3 tasks | 2 files created, 1 modified |
+| Phase 06 P06 | 25 min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -237,6 +238,7 @@ Locked during Phase 3 plan 03-05 execution (2026-05-28):
 - D-116: Analytics reads only from score_snapshots IDB (never calls scoring.js directly — SCORING-08 enforced architecturally)
 - D-117: Reactive model switching via store.subscribe; analytics radio buttons dispatch apply setSetting (same path as Settings card)
 - Wave aggregates in Analytics view computed inline from snapshot averages (not from waveAggregates.js which operates on raw logs) — O(habits), correct for the view's purpose
+- [Phase ?]: D-118: Wave-board always uses S1 status regardless of active scoringModel (no getSetting call in waveboard.js)
 
 ### Pending Todos
 
@@ -264,8 +266,8 @@ None yet. Note for Phase 6: scoring formulas in FEATURES.md are sketches; precis
 
 ## Session Continuity
 
-Last session: 2026-06-30T00:00:00.000Z
-Stopped at: Completed 06-05-PLAN.md
+Last session: 2026-06-30T00:02:20.315Z
+Stopped at: Completed 06-06-PLAN.md
 Resume file: None
 
 **Phase 06 Plan 05 Complete:**
@@ -277,9 +279,17 @@ Resume file: None
 - Full suite: 771/773 (2 pre-existing stubs from 04-02 and 04-04)
 - Current HEAD: `5501ec9` (feat(06-05): wire mountAnalytics into desktop.js)
 
-**Ready for:** Plans 06-06 and 06-07 (Wave 3 remaining — parallel execution)
+**Phase 06 Plan 06 Complete:**
 
-- 06-06: Wave-board view (mountWaveboard + builders, TDD), 12-week heat-map
+- Plan 06-06 (Wave-board view) executed: 3 tasks (TDD RED + GREEN + T3 wire), 2 files created, 1 modified
+- js/views/desktop/waveboard.js: buildWaveboardHeader, buildWaveboardRows, mountWaveboard
+- tests/unit/views/desktop/waveboard.builders.test.js: 12 tests, all passing
+- js/desktop.js: mountWaveboard wired, waveboard stub replaced
+- Full suite: 783/785 (2 pre-existing stubs from 04-02 and 04-04)
+- Current HEAD: `921dd52` (feat(06-06): wire mountWaveboard into desktop.js)
+
+**Ready for:** Plan 06-07 (Planning view — final Wave 3 plan)
+
 - 06-07: Planning view (mountPlanning + builders, TDD), forward 12-week grid
 
 Resume file: None

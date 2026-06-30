@@ -136,7 +136,7 @@ Requirements for initial release. Each maps to exactly one roadmap phase (see Tr
 - [ ] **DESKTOP-01**: User can open `desktop.html` separately from `index.html`
 - [ ] **DESKTOP-02**: Desktop shell shares all `js/{db,state,domain,router,io,platform,util}/` modules with mobile; only entry file and view modules differ
 - [ ] **DESKTOP-03**: Desktop shell renders an analytics view: per-habit stats, per-wave aggregates, scoring dashboard
-- [ ] **DESKTOP-04**: Desktop shell renders a wave-board: timeline of all habits across all waves, with status colors
+- [x] **DESKTOP-04**: Desktop shell renders a wave-board: timeline of all habits across all waves, with status colors
 - [ ] **DESKTOP-05**: Desktop shell renders a planning view: schedule new habits to start in week N
 - [ ] **DESKTOP-06**: Settings has an explicit "Switch to desktop view" link (no auto-redirect on viewport)
 - [ ] **DESKTOP-07**: Desktop view is usable; not a primary acceptance gate for cold-paint speed (mobile-only constraint)
@@ -330,7 +330,7 @@ Every v1 requirement maps to exactly one phase.
 | DESKTOP-01 | Phase 6 | Pending |
 | DESKTOP-02 | Phase 6 | Pending |
 | DESKTOP-03 | Phase 6 | Pending |
-| DESKTOP-04 | Phase 6 | Pending |
+| DESKTOP-04 | Phase 6 | Complete |
 | DESKTOP-05 | Phase 6 | Pending |
 | DESKTOP-06 | Phase 6 | Pending |
 | DESKTOP-07 | Phase 6 | Pending |
