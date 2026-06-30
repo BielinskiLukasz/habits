@@ -10,7 +10,7 @@
   "context": null,
   "workflow": {
     "research": true,
-    "plan_check": true,
+    "plan_check": false,
     "verifier": true,
     "auto_advance": false,
     "nyquist_validation": false,
