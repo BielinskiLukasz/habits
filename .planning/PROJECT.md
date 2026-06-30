@@ -35,9 +35,15 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Active
 
-<!-- Next milestone hypotheses — see /gsd-new-milestone to define v1.1 requirements -->
+<!-- v1.1 Scheduled Habits — defined 2026-06-30 -->
 
-(None yet — run `/gsd-new-milestone` to define v1.1 requirements)
+- SCHED-01 — New `scheduled` status (4th, alongside active/mastered/archived) for future-start habits
+- SCHED-02 — Scheduled habits hidden from Today view and active Catalog list
+- SCHED-03 — Catalog shows scheduled habits in a dedicated "Upcoming" section
+- SCHED-04 — Desktop Waveboard surfaces scheduled habits per wave with their startDate
+- SCHED-05 — Auto-transition: `scheduled` → `active` when startDate is reached (on app boot)
+- SCHED-06 — Manual promote-to-active action available from the Upcoming section
+- SCHED-07 — Converter (`scripts/convert-nawyki.js`) sets `status: 'scheduled'` for habits with `startDate > today`
 
 ### Out of Scope
 
@@ -142,5 +148,16 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+## Current Milestone: v1.1 Scheduled Habits
+
+**Goal:** Introduce a first-class `scheduled` status for future-start habits so they are clearly separated from active habits, and surface them in the Catalog and desktop Waveboard.
+
+**Target features:**
+- New `scheduled` status (hidden from Today + active Catalog, visible in Upcoming section)
+- Auto-transition scheduled → active when startDate arrives (on boot)
+- Manual promote-to-active from Upcoming section
+- Desktop Waveboard: minimal implementation showing scheduled habits per wave with startDates
+- Converter update: future-start habits imported as `scheduled`
+
 ---
-*Last updated: 2026-06-30 — v1.0 milestone complete (309 commits, 52 JS files, 756 tests, 123/123 requirements shipped)*
+*Last updated: 2026-06-30 — v1.1 Scheduled Habits milestone started*

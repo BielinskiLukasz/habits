@@ -1,19 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-current_phase: done
-status: complete
-stopped_at: v1.0 milestone archived 2026-06-30
-last_updated: "2026-06-30"
+milestone: v1.1
+milestone_name: Scheduled Habits
+status: planning
+last_updated: "2026-06-30T21:51:56.116Z"
 last_activity: 2026-06-30
-last_activity_desc: v1.0 milestone complete — all 6 phases shipped, tagged, archived
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 44
-  completed_plans: 44
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -41,6 +38,7 @@ Archives: `.planning/milestones/`
 Run `/gsd-new-milestone` to define v1.1 requirements, roadmap, and kick off the next milestone.
 
 Potential v1.1 candidates (from BACKLOG.md):
+
 - Completion visualization for numeric/slot habits
 - Polish name (name_pl) display on Today / catalog
 - Wave management UI (create/edit waves beyond seed)
@@ -58,3 +56,10 @@ Potential v1.1 candidates (from BACKLOG.md):
 | 6. Desktop Analytics & Scoring Trio | 8/8 | 2026-06-30 |
 
 *Updated: 2026-06-30*
+
+## Current Position
+
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-06-30 — Milestone v1.1 started
