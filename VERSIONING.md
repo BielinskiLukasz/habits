@@ -33,6 +33,24 @@ Patch bumps (`0.1.0` → `0.1.1`) land for any shell-asset-only change between p
 
 ## Release history
 
+### v0.5.0 — Desktop Analytics & Scoring Trio (Phase 6)
+
+Released: 2026-06-29
+
+#### Added
+- Desktop analytics shell (`desktop.html`) with sidebar navigation and three hash-routed panels
+- Analytics view: per-habit stats grouped by wave with S1 status badges and active model score column
+- Wave-board: 12-week heat-map grid (habit x ISO week) with S1 status color coding
+- Planning view: forward-looking 12-week grid of future habits, links to Catalog
+- Three scoring models: S1 (Rolling Threshold Health), S2 (Day-Weighted), S3 (Load-Adjusted Capacity)
+- `score_snapshots` IDB store now populated on every log write and on bulk recompute
+- Settings: Scoring Model selector (S1/S2/S3 radio buttons) and "Recompute Scores" action
+- "Open desktop analytics" link in Settings (DESKTOP-01 — never auto-redirects by viewport)
+- Scoring status CSS tokens: `--color-score-healthy`, `--color-score-watch`, `--color-score-atrisk`, `--color-score-failing`, `--color-score-na`
+
+#### Fixed
+- `router.js` `mountRoutes` now accepts `defaultRoute` parameter (backward-compatible default `'#today'`)
+
 ### v0.4.0 — Phase 4 closeout (2026-06-05)
 
 - **What shipped:** Full habit lifecycle domain model. Catalog CRUD (create, edit, archive, restore, future-schedule habits with versioned `habit_versions` entries); stage progression with manual button and auto-advance triggers (after-N-days, composable OR logic); mastery threshold evaluation with global defaults (90% / 70 days) and per-habit overrides; multi-occurrence logging (numeric +1 counter with `logNumeric`, slot-checklist with `logSlot`); history navigation (past-day lookup, mark not-completed on historical days, bulk uncomplete); wave aggregate metrics (completion %, status counts, longest streak, at-risk indicator). Settings panel extended with mastery threshold and window fields (SETTINGS-01, D-86). `seed/habits.json` enriched with `targetType`, `stages`, `currentStageIndex`, `stageStartedAt`, `masteryThresholdOverride`, `masteryWindowOverride`, `startDate` (seedVersion bumped to 2).
