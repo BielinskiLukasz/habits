@@ -135,6 +135,17 @@ const SHELL = [
   './js/domain/waveAggregates.js',
   './css/catalog.css',
   './css/history.css',
+  // Phase-6 desktop analytics — added in 06-desktop-analytics-scoring-trio.
+  // scoring.js, scoreSnapshots.js: domain + IO modules written on every log write.
+  // views/desktop/*: desktop-only view modules, route-dispatched from desktop.js.
+  // css/desktop.css: desktop layout and scoring status styles.
+  // desktop.html is already in P2 baseline (./desktop.html) — no duplicate.
+  './css/desktop.css',
+  './js/domain/scoring.js',
+  './js/io/scoreSnapshots.js',
+  './js/views/desktop/analytics.js',
+  './js/views/desktop/waveboard.js',
+  './js/views/desktop/planning.js',
 ];
 
 self.addEventListener('install', e => {
