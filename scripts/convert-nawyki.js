@@ -17,6 +17,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
+const TODAY = new Date().toISOString().slice(0, 10);
 
 // ---------------------------------------------------------------------------
 // Wave assignment: CSV habit ID → wave number (derived from Nawyki-fale.txt)
@@ -275,7 +276,7 @@ function main() {
       name: NAME_EN[csvId] ?? `Habit ${csvId}`,
       name_pl: NAME_PL[csvId] ?? null,
       wave,
-      status: 'active',
+      status: startDate > TODAY ? 'scheduled' : 'active',
       cadence,
       targetType: 'binary',
       stages: [],
