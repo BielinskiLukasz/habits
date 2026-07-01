@@ -20,8 +20,11 @@
  *     7. bootSync() — open the BroadcastChannel('habits').
  *     8. bootLifecycle() — register visibilitychange+pagehide flush.
  *     9. await bootSeed() — first-run idempotent seed + persist() + D-45 defaults.
- *    10. await hydrate() — pre-warm cache with this-week logs + habits + weekStart.
- *    11. await bootWaves() — load wave catalog for header rendering.
+ *    10. await bootScheduled() — migrate active+future habits to scheduled (one-time,
+ *        DATA-03) and promote scheduled habits whose startDate <= today (every boot,
+ *        SCHED-03). Must run before hydrate() so cache sees final correct statuses.
+ *    11. await hydrate() — pre-warm cache with this-week logs + habits + weekStart.
+ *    12. await bootWaves() — load wave catalog for header rendering.
  *    12. mountRoutes(...) — install the hash router with three routes
  *        (#today / #settings / #history) + focus-on-route-change (D-79).
  *
@@ -69,6 +72,7 @@ import { mountCatalog } from './views/catalog.js';
 import { mountHistory } from './views/history.js';
 import * as store from './state/store.js';
 import { configureWave, bootWaves } from './domain/wave.js';
+import { configureScheduled, bootScheduled } from './domain/scheduled.js';
 
 registerServiceWorker();
 
@@ -91,6 +95,7 @@ configureApply({
   },
 });
 configureUndo({ repo });
+configureScheduled({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
 configureWave({ fetch: globalThis.fetch });
 configureStore({ repo });
@@ -100,6 +105,7 @@ configureBackupNag({ repo });
 bootSync();
 bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
+try { await bootScheduled(); } catch (_e) { /* swallow — promotion/migration non-critical on failure */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
 // Cross-tab sync: re-render when another tab mutates or completes a JSON import (DATA-07).
 onMessage(async (msg) => {

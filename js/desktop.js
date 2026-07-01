@@ -17,7 +17,10 @@
  *     6. bootSync()
  *     7. bootLifecycle()
  *     8. await bootSeed()
- *     9. await hydrate()
+ *     9. await bootScheduled() — migrate active+future habits to scheduled (one-time,
+ *        DATA-03) and promote scheduled habits whose startDate <= today (every boot,
+ *        SCHED-03). Must run before hydrate() so cache sees final correct statuses.
+ *    10. await hydrate()
  *
  *   P6 desktop wiring (D-115 — sidebar + hash-routed panels):
  *    10. configureWave({fetch}) + configureStore({repo})
@@ -56,6 +59,7 @@ import { configureBackupNag } from './io/backup-nag.js';
 // P6 desktop imports (D-115, D-117, D-118, D-121).
 import { mountRoutes } from './router.js';
 import { configureWave, bootWaves } from './domain/wave.js';
+import { configureScheduled, bootScheduled } from './domain/scheduled.js';
 import { mountAnalytics } from './views/desktop/analytics.js';
 import { mountWaveboard } from './views/desktop/waveboard.js';
 import { mountPlanning } from './views/desktop/planning.js';
@@ -80,6 +84,7 @@ configureApply({
   },
 });
 configureUndo({ repo });
+configureScheduled({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
 configureExport({ repo });
 configureImport({ repo, broadcast });
@@ -87,6 +92,7 @@ configureBackupNag({ repo });
 bootSync();
 bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
+try { await bootScheduled(); } catch (_e) { /* swallow — promotion/migration non-critical on failure */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
 // Cross-tab sync: re-render when another tab mutates or completes a JSON import (DATA-07).
 onMessage(async (msg) => {
