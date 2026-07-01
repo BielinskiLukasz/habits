@@ -160,4 +160,4 @@ This document evolves at phase transitions and milestone boundaries.
 - Converter update: future-start habits imported as `scheduled`
 
 ---
-*Last updated: 2026-06-30 — v1.1 Scheduled Habits milestone started*
+*Last updated: 2026-07-01 — Phase 7 complete: scheduled status foundation shipped (SCHED-01, SCHED-02, SCHED-03, DATA-01, DATA-02, DATA-03)*
