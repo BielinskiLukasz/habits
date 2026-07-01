@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Scheduled Habits — Phases 7–9
-current_phase: 7
-status: planned
+current_phase: 8
+current_phase_name: Today & Catalog — Upcoming Section
+status: planning
 stopped_at: Phase 7 planned — 3 plans ready for execution
-last_updated: "2026-07-01T00:00:00.000Z"
+last_updated: "2026-07-01T00:51:26.397Z"
 last_activity: 2026-07-01
-last_activity_desc: Phase 7 plans created
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -23,7 +23,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-30)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** v1.1 Scheduled Habits — Phase 7 planned, ready for execution
+**Current focus:** Phase 07 — scheduled-status-foundation
 
 ## Milestone Status
 
@@ -44,10 +44,10 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-**Phase:** Phase 7 — Scheduled Status Foundation (planned, not yet started)
-**Plan:** —
-**Status:** planned
-**Last activity:** 2026-07-01 — Phase 7 plans created
+**Phase:** 8 — Today & Catalog — Upcoming Section
+**Plan:** Not started
+**Status:** Ready to plan
+**Last activity:** 2026-07-01
 
 ```
 v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)

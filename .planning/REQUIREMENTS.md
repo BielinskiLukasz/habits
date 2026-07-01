@@ -8,9 +8,9 @@
 
 ### Scheduled Status
 
-- [ ] **SCHED-01**: App supports a `scheduled` status for habits (4th status alongside active/mastered/archived)
-- [ ] **SCHED-02**: Habits with `startDate > today` created or imported are stored with `status: 'scheduled'`
-- [ ] **SCHED-03**: On app boot, habits whose `startDate` has arrived auto-transition from `scheduled` → `active`
+- [x] **SCHED-01**: App supports a `scheduled` status for habits (4th status alongside active/mastered/archived)
+- [x] **SCHED-02**: Habits with `startDate > today` created or imported are stored with `status: 'scheduled'`
+- [x] **SCHED-03**: On app boot, habits whose `startDate` has arrived auto-transition from `scheduled` → `active`
 - [ ] **SCHED-04**: User can manually promote a scheduled habit to active before its startDate
 
 ### Catalog / Upcoming
@@ -29,9 +29,9 @@
 
 ### Data / Migration
 
-- [ ] **DATA-01**: `scripts/convert-nawyki.js` sets `status: 'scheduled'` for habits with `startDate > today`
-- [ ] **DATA-02**: JSON import (`mergeImportedStores`) correctly stores `status: 'scheduled'` from imported data
-- [ ] **DATA-03**: Existing IDB habits with `status: 'active'` and `startDate > today` are migrated to `scheduled` on boot (one-time pass)
+- [x] **DATA-01**: `scripts/convert-nawyki.js` sets `status: 'scheduled'` for habits with `startDate > today`
+- [x] **DATA-02**: JSON import (`mergeImportedStores`) correctly stores `status: 'scheduled'` from imported data
+- [x] **DATA-03**: Existing IDB habits with `status: 'active'` and `startDate > today` are migrated to `scheduled` on boot (one-time pass)
 
 ## Future Requirements
 
@@ -58,9 +58,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHED-01 | Phase 7 | Pending |
-| SCHED-02 | Phase 7 | Pending |
-| SCHED-03 | Phase 7 | Pending |
+| SCHED-01 | Phase 7 | Complete |
+| SCHED-02 | Phase 7 | Complete |
+| SCHED-03 | Phase 7 | Complete |
 | SCHED-04 | Phase 8 | Pending |
 | CAT-01 | Phase 8 | Pending |
 | CAT-02 | Phase 8 | Pending |
@@ -70,11 +70,12 @@
 | WAVE-02 | Phase 9 | Pending |
 | WAVE-03 | Phase 9 | Pending |
 | WAVE-04 | Phase 9 | Pending |
-| DATA-01 | Phase 7 | Pending |
-| DATA-02 | Phase 7 | Pending |
-| DATA-03 | Phase 7 | Pending |
+| DATA-01 | Phase 7 | Complete |
+| DATA-02 | Phase 7 | Complete |
+| DATA-03 | Phase 7 | Complete |
 
 **Coverage:**
+
 - v1.1 requirements: 15 total
 - Mapped to phases: 15 ✓
 - Unmapped: 0 ✓

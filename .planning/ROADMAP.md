@@ -45,50 +45,60 @@ Introduces `scheduled` as a first-class habit status for future-start habits, au
 
 ## Phases
 
-- [ ] **Phase 7: Scheduled Status Foundation** — Domain, storage, boot migration, converter, import
+- [x] **Phase 7: Scheduled Status Foundation** — Domain, storage, boot migration, converter, import (completed 2026-07-01)
 - [ ] **Phase 8: Today & Catalog — Upcoming Section** — Filter Today, Catalog Upcoming list, manual promote
 - [ ] **Phase 9: Desktop Waveboard** — Wave rows with startDates, scheduled/active counts, habit lists
 
 ## Phase Details
 
 ### Phase 7: Scheduled Status Foundation
+
 **Goal**: The app fully understands `scheduled` as a first-class status — stored correctly on create/import, auto-promoted to active on boot, and migrated from existing data
 **Depends on**: Nothing (continues from v1.0 storage foundation)
 **Requirements**: SCHED-01, SCHED-02, SCHED-03, DATA-01, DATA-02, DATA-03
 **Success Criteria** (what must be TRUE):
+
   1. A habit created with a future startDate is stored in IDB with `status: 'scheduled'`, not `'active'`
   2. On app boot, any habit with `status: 'scheduled'` and `startDate <= today` is automatically set to `'active'` without user action
   3. Existing IDB habits that have `status: 'active'` and `startDate > today` are silently reclassified to `'scheduled'` on the first boot after this phase ships
   4. `scripts/convert-nawyki.js` outputs `status: 'scheduled'` for source habits whose `startDate` is in the future (relative to the run date)
   5. A JSON backup file containing `status: 'scheduled'` habits round-trips correctly through `mergeImportedStores` without status being overwritten
+
 **Plans**: 3 plans
 Plans:
-- [ ] 07-01-PLAN.md — TDD: scheduled.js domain service (configureScheduled + bootScheduled + runMigration + runPromotion)
-- [ ] 07-02-PLAN.md — TDD: createHabit status derivation from startDate
-- [ ] 07-03-PLAN.md — Boot wiring (main.js + desktop.js) + convert-nawyki.js status fix + DATA-02 verification
+
+- [x] 07-01-PLAN.md — TDD: scheduled.js domain service (configureScheduled + bootScheduled + runMigration + runPromotion)
+- [x] 07-02-PLAN.md — TDD: createHabit status derivation from startDate
+- [x] 07-03-PLAN.md — Boot wiring (main.js + desktop.js) + convert-nawyki.js status fix + DATA-02 verification
 
 ### Phase 8: Today & Catalog — Upcoming Section
+
 **Goal**: Users see only active (and mastered) habits on Today and in the active Catalog list; scheduled habits appear in a dedicated Upcoming section with startDate/wave info and a promote action
 **Depends on**: Phase 7
 **Requirements**: CAT-01, CAT-02, CAT-03, CAT-04, SCHED-04
 **Success Criteria** (what must be TRUE):
+
   1. Today check-in never shows a habit with `status: 'scheduled'`, regardless of its startDate
   2. The active Catalog list shows only active/mastered habits; no scheduled habits appear in that list
   3. Catalog shows an "Upcoming" section below the active list containing all scheduled habits sorted ascending by startDate
   4. Each entry in the Upcoming section displays the habit's startDate and wave name
   5. A "Promote to active" action on any Upcoming entry immediately moves the habit to `status: 'active'` and removes it from the Upcoming section
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 9: Desktop Waveboard
+
 **Goal**: The desktop Waveboard gives a planning-level overview of every wave — its startDate, how many habits are active vs scheduled, and a drillable list of those habits with their individual statuses
 **Depends on**: Phase 8
 **Requirements**: WAVE-01, WAVE-02, WAVE-03, WAVE-04
 **Success Criteria** (what must be TRUE):
+
   1. Each wave is displayed in the desktop Waveboard as a row showing the wave's planned startDate
   2. Each wave row shows two counts at a glance: number of active habits and number of scheduled habits in that wave
   3. A user can expand (or always see) per-wave habit lists: scheduled habits show their individual startDate
   4. Active and mastered habits are listed per wave with their current status label (active / mastered)
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -96,7 +106,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Scheduled Status Foundation | 0/3 | Not started | - |
+| 7. Scheduled Status Foundation | 3/3 | Complete    | 2026-07-01 |
 | 8. Today & Catalog — Upcoming Section | 0/? | Not started | - |
 | 9. Desktop Waveboard | 0/? | Not started | - |
 
