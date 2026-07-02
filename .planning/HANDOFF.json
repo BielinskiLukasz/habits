@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-07-02T22:40:02.888Z",
+  "phase": "8",
+  "phase_name": "Today & Catalog — Upcoming Section",
+  "phase_dir": ".planning/phases/08-today-catalog-upcoming-section",
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "phase-7", "name": "Phase 7 — Scheduled Status Foundation", "status": "done", "commit": "e6d938d"}
+  ],
+  "remaining_tasks": [
+    {"id": "phase-8-plan", "name": "Plan Phase 8 — Today & Catalog Upcoming Section", "status": "not_started"},
+    {"id": "phase-8-execute", "name": "Execute Phase 8 plans", "status": "not_started"},
+    {"id": "phase-9", "name": "Phase 9 — Desktop Waveboard", "status": "not_started"}
+  ],
+  "blockers": [],
+  "async_jobs": [],
+  "human_actions_pending": [],
+  "decisions": [
+    {"decision": "scheduled is the 4th habit status alongside active/mastered/archived", "rationale": "Locked v1.1 decision", "phase": "7"},
+    {"decision": "Auto-transition scheduled→active fires on app boot when startDate <= today", "rationale": "Locked v1.1 decision", "phase": "7"},
+    {"decision": "Catalog Upcoming section sorted by startDate ascending", "rationale": "Locked v1.1 decision", "phase": "7"},
+    {"decision": "Waveboard is informational only in v1.1", "rationale": "No edit actions on wave definitions", "phase": "7"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Run /gsd-plan-phase 8 to create plans for Today & Catalog Upcoming Section UI",
+  "context_notes": "Phase 7 delivered the data layer for scheduled habits (storage, auto-promotion, migration, seed converter). Phase 8 is the UI layer: Catalog Upcoming section, manual promote-to-active action (SCHED-04, SCHED-06), and hiding scheduled habits from Today/active list (SCHED-02). Phase 9 is the Desktop Waveboard. STATE.md has a stale progress block (shows 0% for v1.1) but the phase status text is correct."
+}
