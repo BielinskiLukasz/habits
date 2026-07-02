@@ -45,7 +45,8 @@
     "security_block_on": "high",
     "post_planning_gaps": false,
     "build_command": null,
-    "test_command": null
+    "test_command": null,
+    "_auto_chain_active": false
   },
   "code_quality": {
     "fallow": {
@@ -103,7 +104,7 @@
   },
   "git": {
     "branching_strategy": "none",
-    "create_tag": true,
+    "create_tag": false,
     "phase_branch_template": "gsd/phase-{phase}-{slug}",
     "milestone_branch_template": "gsd/{milestone}-{slug}",
     "quick_branch_template": null
