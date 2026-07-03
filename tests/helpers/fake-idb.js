@@ -191,6 +191,13 @@ export function createFakeRepo() {
     async getAllScoreSnapshots() {
       return Array.from(stores.score_snapshots.values());
     },
+    // Phase 06 quick-fix analytics-columns-empty: typed get by [habitId, date].
+    // Mirrors repo.getSnapshot (A7 contract preserved). Used by the Analytics
+    // view instead of repo.runTx so the result is the actual snapshot row,
+    // not the raw IDBRequest object that runTx body() returns.
+    async getSnapshot(habitId, date) {
+      return stores.score_snapshots.get(JSON.stringify([habitId, date]));
+    },
 
     /**
      * Minimal tx-shape (A7 contract). Downstream apply.js / seed.js / undo.js

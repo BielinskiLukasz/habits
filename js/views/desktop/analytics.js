@@ -438,13 +438,16 @@ export function mountAnalytics(parent, { repo, store }) {
       cachedModel = modelRow?.value ?? 'S1';
 
       // 3. Today's snapshots for each habit.
+      // Uses repo.getSnapshot() — a typed helper that wraps idb.get() with
+      // promisify() — instead of repo.runTx() directly. The runTx body
+      // returns a raw IDBRequest (non-thenable), so `await body(tx)` resolves
+      // to the IDBRequest object itself rather than req.result, causing all
+      // score columns to display '—' even when snapshots exist in IDB.
       const today = todayLocal();
       cachedSnapshots = new Map();
       for (const habit of cachedHabits) {
         try {
-          const snap = await repo.runTx(['score_snapshots'], 'readonly', (tx) =>
-            tx.objectStore('score_snapshots').get([habit.id, today])
-          );
+          const snap = await repo.getSnapshot(habit.id, today);
           if (snap != null) cachedSnapshots.set(habit.id, snap);
         } catch (_e) {
           // Non-fatal — habit simply has no snapshot yet.

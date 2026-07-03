@@ -339,4 +339,51 @@ describe('buildAnalyticsTable — D-116 wave-grouped habit table', () => {
     );
     assert.ok(badge, 'Should find a score-badge with score-badge--healthy class for Healthy status');
   });
+
+  // Regression: UAT-T21 — Rolling %, Mastery, S2 columns showed empty values.
+  // Root cause: analytics.js used repo.runTx() whose body returned a raw
+  // IDBRequest (non-thenable), so await resolved to the request object instead
+  // of req.result. buildAnalyticsTable() itself was correct — this suite guards
+  // the builder side; the data-fetch fix is in analytics.js refresh().
+  test('regression UAT-T21: Rolling % span shows numeric score (not "—") when snapshot has s1Score', () => {
+    const out = buildAnalyticsTable({
+      habitsByWave: [{ waveNumber: 1, waveName: 'Wave 1', habits: [HABITS_WAVE1[0]] }],
+      snapshots: new Map([['h1', SNAPSHOT_H1]]), // s1Score: 95
+      scoringModel: 'S1',
+      showArchived: false,
+    });
+    // The Rolling % cell contains a span with "95%" text — not "—%"
+    const scoreSpan = findDesc(out, d =>
+      d.tag === 'span' && d.text === '95%'
+    );
+    assert.ok(scoreSpan, 'Rolling % cell should show "95%" when s1Score is 95, not "—%"');
+  });
+
+  test('regression UAT-T21: S2 Score cell shows numeric value (not "—") when snapshot has s2Score and model is S2', () => {
+    const out = buildAnalyticsTable({
+      habitsByWave: [{ waveNumber: 1, waveName: 'Wave 1', habits: [HABITS_WAVE1[0]] }],
+      snapshots: new Map([['h1', SNAPSHOT_H1]]), // s2Score: 0.85
+      scoringModel: 'S2',
+      showArchived: false,
+    });
+    // The S2 Score cell should show "0.85", not "—"
+    const s2Cell = findDesc(out, d =>
+      d.tag === 'td' && d.attrs && d.attrs.class === 'analytics-model-score' && d.text === '0.85'
+    );
+    assert.ok(s2Cell, 'S2 Score cell should show "0.85" when s2Score is 0.85, not "—"');
+  });
+
+  test('regression UAT-T21: Rolling % shows "—%" when snapshots Map is empty (no data for habit)', () => {
+    const out = buildAnalyticsTable({
+      habitsByWave: [{ waveNumber: 1, waveName: 'Wave 1', habits: [HABITS_WAVE1[0]] }],
+      snapshots: new Map(), // no snapshot for h1
+      scoringModel: 'S1',
+      showArchived: false,
+    });
+    // When no snapshot exists, Rolling % shows "—%"
+    const dashSpan = findDesc(out, d =>
+      d.tag === 'span' && d.text === '—%'
+    );
+    assert.ok(dashSpan, 'Rolling % cell should show "—%" when no snapshot exists for the habit');
+  });
 });

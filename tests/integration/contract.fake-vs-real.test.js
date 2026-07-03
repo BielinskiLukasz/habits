@@ -43,6 +43,7 @@ const EXPECTED = [
   'putSetting',
   'getAllSettings',
   'getAllScoreSnapshots',
+  'getSnapshot',
   'runTx',
 ];
 

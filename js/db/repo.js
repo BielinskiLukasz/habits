@@ -304,6 +304,24 @@ export async function getAllScoreSnapshots() {
 }
 
 /**
+ * Get a single score_snapshots row by compound key [habitId, date].
+ * Returns `undefined` when no snapshot exists for that (habitId, date) pair.
+ *
+ * Used by the Analytics view (js/views/desktop/analytics.js) to read
+ * today's pre-computed scores per habit without going through runTx —
+ * runTx returns the raw body() return value, which for a bare IDBRequest
+ * (non-thenable) resolves to the request object rather than its result.
+ *
+ * @param {string} habitId
+ * @param {string} date YYYY-MM-DD, local
+ * @returns {Promise<object|undefined>}
+ */
+export async function getSnapshot(habitId, date) {
+  const db = await openDB();
+  return get(db, 'score_snapshots', [habitId, date]);
+}
+
+/**
  * Multi-store readwrite tx — entry point for `apply.js` / `seed.js` /
  * `undo.js`. The `body` receives the raw IDBTransaction; callers compose
  * `tx.objectStore(name).put(row)` etc. and trust the wrapper to `await
