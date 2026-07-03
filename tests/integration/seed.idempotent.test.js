@@ -1,7 +1,7 @@
 /**
  * @file Integration tests for `bootSeed()` idempotency (SEED-03, SEED-04, D-33, D-45).
  *
- * Covers four invariants:
+ * Covers five invariants:
  *
  *   1. **First-run inserts 8 habits + 8 events + meta + D-45 settings.**
  *      The seed loader writes everything in a single tx — habits, one
@@ -20,6 +20,13 @@
  *   4. **Every seeded habit gets exactly one `seed:createHabit` event** —
  *      group by `payload.habitId` and assert each appears once with the
  *      correct type (SEED-04).
+ *
+ *   5. **First-run writes one `habit_versions` row per seeded habit (NFR-10,
+ *      UAT-11 fix).** The version row captures the original definition so that
+ *      `getHabitVersionAtDate` can resolve the correct name for any past date
+ *      before a user edit. Without this row, editing a seeded habit causes all
+ *      historical logs to show the new (post-edit) name, violating the
+ *      "History integrity" hard constraint.
  *
  * Uses the fake-IDB repo and a `configureSeed({ repo, storage, fetch })` DI
  * seam matching `apply.configure()` (RESEARCH §Open Question 2).
@@ -170,5 +177,69 @@ describe('bootSeed: SEED-04 — every seeded habit gets exactly one seed:createH
       assert.equal(typeof evt.at, 'string', `event for habit ${hid} must have an at (ISO timestamp)`);
       assert.equal(evt.inverse, null, `seed events are non-undoable: inverse must be null (literal)`);
     }
+  });
+});
+
+describe('bootSeed: NFR-10 — each seeded habit gets an initial habit_versions row (UAT-11 fix)', () => {
+  test('first-run writes one habit_versions row per seeded habit with name + effectiveFrom', async () => {
+    const repo = createFakeRepo();
+    const fakeStorage = createFakeStorage();
+    const seedMod = await freshSeed();
+    seedMod.configureSeed({ repo, storage: fakeStorage.storage, fetch: makeFetchStub() });
+
+    await seedMod.bootSeed();
+
+    // Every seeded habit must have at least one habit_versions row so that
+    // getHabitVersionAtDate returns the original name for dates before any edit,
+    // honoring the "History integrity" hard constraint (NFR-10, UAT test 11).
+    const seededIdsRow = repo._stores.meta.get('seededIds');
+    assert.ok(seededIdsRow && Array.isArray(seededIdsRow.value), 'meta.seededIds must be written');
+
+    for (const id of seededIdsRow.value) {
+      const version = await repo.getHabitVersionAtDate(id, '9999-12-31');
+      assert.ok(version, `habit ${id}: must have a habit_versions row after seeding (NFR-10)`);
+      assert.equal(version.habitId, id, `habit_versions row must carry habitId = ${id}`);
+      assert.ok(typeof version.name === 'string' && version.name.length > 0,
+        `habit_versions row for ${id} must carry a non-empty name`);
+      assert.ok(typeof version.effectiveFrom === 'string',
+        `habit_versions row for ${id} must carry an effectiveFrom date string`);
+
+      // The initial version's name must match the habit's current name
+      // (before any user edit the names should be identical).
+      const habit = await repo.getHabit(id);
+      assert.equal(version.name, habit.name,
+        `habit_versions initial name must equal habit name for ${id} (no edit yet)`);
+    }
+  });
+
+  test('one-time migration: existing seeded habits with no habit_versions rows get backfilled on next boot', async () => {
+    const repo = createFakeRepo();
+    const fakeStorage = createFakeStorage();
+    const seedMod = await freshSeed();
+    seedMod.configureSeed({ repo, storage: fakeStorage.storage, fetch: makeFetchStub() });
+
+    // First boot: seed habits + events + meta (simulates the pre-fix state by
+    // manually removing all habit_versions rows afterward).
+    await seedMod.bootSeed();
+    repo._stores.habit_versions.clear();
+    // Also clear habitVersionsSeeded so the migration re-runs on next boot.
+    repo._stores.meta.delete('habitVersionsSeeded');
+
+    // Re-run bootSeed (simulates next app open after deploying the fix to an
+    // existing database that has seededIds + persistResult but no habit_versions).
+    const seedMod2 = await freshSeed();
+    seedMod2.configureSeed({ repo, storage: fakeStorage.storage, fetch: makeFetchStub() });
+    await seedMod2.bootSeed();
+
+    const seededIdsRow = repo._stores.meta.get('seededIds');
+    for (const id of seededIdsRow.value) {
+      const version = await repo.getHabitVersionAtDate(id, '9999-12-31');
+      assert.ok(version, `habit ${id}: migration must write a habit_versions row for existing seeded habits`);
+      assert.equal(version.habitId, id, `migrated version must carry habitId = ${id}`);
+    }
+
+    // Migration gate is now set so the next boot is fast-path again.
+    const gate = await repo.getMeta('habitVersionsSeeded');
+    assert.ok(gate, 'meta.habitVersionsSeeded must be set after migration runs');
   });
 });
