@@ -322,6 +322,31 @@ export async function getSnapshot(habitId, date) {
 }
 
 /**
+ * Get the most recent score_snapshots row for `habitId` regardless of date.
+ * Returns the row with the largest date value, or `undefined` when no snapshot
+ * exists for this habit.
+ *
+ * Used by the Analytics view instead of `getSnapshot(habitId, today)` so the
+ * view shows the latest available data even on days when no log was written.
+ * Without this, columns are empty on any day after the last log write because
+ * `writeHabitSnapshots` only runs on log mutation and only writes rows up to
+ * `todayLocal()` at write time — leaving no row for subsequent days.
+ *
+ * Implementation mirrors `getHabitVersionAtDate`: bound the store's compound
+ * primary keypath `[habitId, date]` over the full date alphabet and return the
+ * last element (IDB returns results sorted by key ascending).
+ *
+ * @param {string} habitId
+ * @returns {Promise<object|undefined>}
+ */
+export async function getLatestSnapshot(habitId) {
+  const db = await openDB();
+  const range = IDBKeyRange.bound([habitId, '0000-01-01'], [habitId, '9999-12-31']);
+  const results = await getAll(db, 'score_snapshots', range);
+  return results.length > 0 ? results[results.length - 1] : undefined;
+}
+
+/**
  * Multi-store readwrite tx — entry point for `apply.js` / `seed.js` /
  * `undo.js`. The `body` receives the raw IDBTransaction; callers compose
  * `tx.objectStore(name).put(row)` etc. and trust the wrapper to `await

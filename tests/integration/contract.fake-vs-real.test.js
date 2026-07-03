@@ -44,6 +44,7 @@ const EXPECTED = [
   'getAllSettings',
   'getAllScoreSnapshots',
   'getSnapshot',
+  'getLatestSnapshot',
   'runTx',
 ];
 

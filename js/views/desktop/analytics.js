@@ -27,7 +27,6 @@
  */
 
 import { mount } from '../../util/mount.js';
-import { todayLocal } from '../../util/date.js';
 import { getWave } from '../../domain/wave.js';
 
 // ---------------------------------------------------------------------------
@@ -437,17 +436,20 @@ export function mountAnalytics(parent, { repo, store }) {
       const modelRow = await repo.getSetting('scoringModel');
       cachedModel = modelRow?.value ?? 'S1';
 
-      // 3. Today's snapshots for each habit.
-      // Uses repo.getSnapshot() — a typed helper that wraps idb.get() with
-      // promisify() — instead of repo.runTx() directly. The runTx body
-      // returns a raw IDBRequest (non-thenable), so `await body(tx)` resolves
-      // to the IDBRequest object itself rather than req.result, causing all
-      // score columns to display '—' even when snapshots exist in IDB.
-      const today = todayLocal();
+      // 3. Latest snapshot for each habit — not today's snapshot.
+      // Uses repo.getLatestSnapshot() which returns the most recent
+      // score_snapshots row for the habit regardless of date. This fixes the
+      // UAT-T21-v2 regression where getSnapshot(habitId, today) returned
+      // undefined on any day after the last log write: writeHabitSnapshots
+      // only runs on log mutation and only writes rows through todayLocal() at
+      // write time, so there is no [habitId, today] row on subsequent days.
+      // getLatestSnapshot queries the compound keypath range and returns the
+      // row with the largest date, giving the Analytics view the freshest
+      // available scores even when no log was written today.
       cachedSnapshots = new Map();
       for (const habit of cachedHabits) {
         try {
-          const snap = await repo.getSnapshot(habit.id, today);
+          const snap = await repo.getLatestSnapshot(habit.id);
           if (snap != null) cachedSnapshots.set(habit.id, snap);
         } catch (_e) {
           // Non-fatal — habit simply has no snapshot yet.

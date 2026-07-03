@@ -199,6 +199,20 @@ export function createFakeRepo() {
       return stores.score_snapshots.get(JSON.stringify([habitId, date]));
     },
 
+    // Phase 06 UAT-T21-v2 fix: get the most recent snapshot row for a habit
+    // regardless of date. Mirrors repo.getLatestSnapshot (A7 contract preserved).
+    // Returns the row with the largest date (Map iteration order preserves
+    // insertion order; we scan all entries for the habit and pick max date).
+    async getLatestSnapshot(habitId) {
+      /** @type {object|undefined} */
+      let latest;
+      for (const row of stores.score_snapshots.values()) {
+        if (row.habitId !== habitId) continue;
+        if (!latest || row.date > latest.date) latest = row;
+      }
+      return latest;
+    },
+
     /**
      * Minimal tx-shape (A7 contract). Downstream apply.js / seed.js / undo.js
      * call `runTx(['habits','events','meta'], 'readwrite', async (tx) => {
