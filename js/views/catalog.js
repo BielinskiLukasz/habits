@@ -14,6 +14,8 @@
  *   - Renders catalog header + habit list.
  *   - Wires action handlers via mount() actions map for all CRUD operations.
  *   - Subscribe to store.subscribe(render) for live re-renders.
+ *   - Add/Edit panels open inside `<dialog id="catalog-modal">` via dialog.showModal();
+ *     closed via dialog.close() + clearChildren(dialog) in _closeOpenPanel.
  *
  * Action handlers:
  *   - 'create' → open buildCreatePanel below the header
@@ -297,19 +299,25 @@ function buildCadenceFromType(cadenceType) {
 function buildActions(parent, deps) {
   return {
     /**
-     * Open the create panel below the header.
+     * Open the create panel in the catalog modal dialog.
      */
     create: () => {
-      // Remove any open panel first.
+      const dialog = document.getElementById('catalog-modal');
+      // Remove any open panel first (closes dialog if open).
       _closeOpenPanel(parent);
       const today = todayLocal();
       const panelDesc = buildCreatePanel(today);
       const panelActions = buildActions(parent, deps);
-      mount(panelDesc, parent, panelActions);
+      if (dialog) {
+        clearChildren(dialog);
+        mount(panelDesc, dialog, panelActions);
+        dialog.showModal();
+      }
     },
 
     /**
-     * Open the edit panel for a habit. Reads `data-habit-id` from the button.
+     * Open the edit panel for a habit in the catalog modal dialog.
+     * Reads `data-habit-id` from the button.
      */
     edit: (evt) => {
       const habitId = evt?.currentTarget?.getAttribute('data-habit-id')
@@ -318,10 +326,16 @@ function buildActions(parent, deps) {
       const habits = getCachedHabits ? getCachedHabits() : [];
       const habit = habits.find((h) => h.id === habitId);
       if (!habit) return;
+      const dialog = document.getElementById('catalog-modal');
+      // Remove any open panel first (closes dialog if open).
       _closeOpenPanel(parent);
       const panelDesc = buildEditPanel(habit);
       const panelActions = buildActions(parent, deps);
-      mount(panelDesc, parent, panelActions);
+      if (dialog) {
+        clearChildren(dialog);
+        mount(panelDesc, dialog, panelActions);
+        dialog.showModal();
+      }
     },
 
     /**
@@ -461,11 +475,20 @@ function buildActions(parent, deps) {
 }
 
 /**
- * Remove any open edit/create panel from the catalog panel.
+ * Close the catalog modal dialog and clear its contents. Also removes any
+ * residual inline panel from parent (resilience fallback — after the dialog
+ * refactor this branch is always a noop).
  *
  * @param {object} parent
  */
 function _closeOpenPanel(parent) {
+  const dialog = document.getElementById('catalog-modal');
+  if (dialog?.open) {
+    dialog.close();
+    clearChildren(dialog);
+  }
+  // Resilience fallback: remove any inline panel that may have been mounted
+  // before the dialog refactor (should always be a noop in production).
   const openPanel = parent.querySelector('[data-panel="edit"], [data-panel="create"]');
   if (openPanel && openPanel.parentNode) {
     openPanel.parentNode.removeChild(openPanel);
