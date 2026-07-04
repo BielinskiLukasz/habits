@@ -49,7 +49,7 @@ import { configure as configureApply } from './state/apply.js';
 import { writeHabitSnapshots, rebuildAllSnapshots } from './io/scoreSnapshots.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
-import { hydrate, configureStore, subscribe, notify } from './state/store.js';
+import { hydrate, configureStore, subscribe, notify, getCachedWeekStart, getCachedSettings, getCachedHabits } from './state/store.js';
 import { bootSync, broadcast, onMessage } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 import { configureExport } from './io/export.js';
@@ -63,6 +63,7 @@ import { configureScheduled, bootScheduled } from './domain/scheduled.js';
 import { mountAnalytics } from './views/desktop/analytics.js';
 import { mountWaveboard } from './views/desktop/waveboard.js';
 import { mountPlanning } from './views/desktop/planning.js';
+import { mountSettings } from './views/settings.js';
 
 registerServiceWorker();
 
@@ -128,6 +129,7 @@ try { await bootWaves(); } catch (_e) { /* swallow — wave data non-critical fo
 const analyticsPanel = document.querySelector('section[data-route="analytics"]');
 const waveboardPanel = document.querySelector('section[data-route="waveboard"]');
 const planningPanel  = document.querySelector('section[data-route="planning"]');
+const settingsPanel  = document.querySelector('section[data-route="settings"]');
 const sidebarLinks   = document.querySelectorAll('.desktop-sidebar-link[data-route-link]');
 
 /**
@@ -138,7 +140,7 @@ const sidebarLinks   = document.querySelectorAll('.desktop-sidebar-link[data-rou
  * @returns {void}
  */
 function show(panel) {
-  for (const p of [analyticsPanel, waveboardPanel, planningPanel]) {
+  for (const p of [analyticsPanel, waveboardPanel, planningPanel, settingsPanel]) {
     if (p === panel) p.hidden = false; else p.hidden = true;
   }
 }
@@ -209,6 +211,11 @@ mountRoutes({
       mountPlanning(planningPanel, { repo, store: { subscribe } });
       show(planningPanel);
       focusH1(planningPanel);
+    },
+    '#settings': () => {
+      mountSettings(settingsPanel, { repo, store: { subscribe, getCachedWeekStart, getCachedSettings, getCachedHabits } });
+      show(settingsPanel);
+      focusH1(settingsPanel);
     },
   },
   onChange: (hash) => { updateNav(hash); },
