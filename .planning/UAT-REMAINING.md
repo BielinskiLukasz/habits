@@ -37,8 +37,5 @@ Updated: 2026-07-05
 - **Fix direction:** `event.preventDefault()` on the button click handler
 - **Action:** `/gsd-quick` — add `event.preventDefault()` to "+" button click handler in Today view *(group with T13b — both are multi-occurrence Today fixes)*
 
-### T13b — Multi-occurrence habit has no strikethrough when complete
-- **Where:** Today view
-- **Symptom:** Completed multi-occurrence habit shows green counter but no strikethrough/muted treatment; binary habits do get strikethrough
-- **Fix direction:** Apply same visual completion class to multi-occurrence rows
-- **Action:** `/gsd-quick` — apply completion CSS class to multi-occurrence rows on completion; same fix pass as T13a
+### T13b — Multi-occurrence habit has no strikethrough when complete ✓ RESOLVED 2026-07-05
+- Fixed in quick task 260705-t13b: `today-row--completed` + `today-row-name--completed` now applied to numeric/slot rows when complete
