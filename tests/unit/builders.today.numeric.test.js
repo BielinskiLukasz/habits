@@ -97,6 +97,24 @@ describe('buildNumericRow — numeric counter (D-88, LOG-05)', () => {
     );
   });
 
+  test('row has today-row--completed class when count >= target (T13b)', () => {
+    const out = buildNumericRow({ id: 'h1', name: 'Water', target: 5 }, { count: 5 });
+    assert.ok(
+      String(out.attrs?.class ?? '').includes('today-row--completed'),
+      'today-row--completed present when complete',
+    );
+  });
+
+  test('name span has today-row-name--completed class when count >= target (T13b)', () => {
+    const out = buildNumericRow({ id: 'h1', name: 'Water', target: 5 }, { count: 5 });
+    const nameSpan = findDeep(out, (d) => String(d.attrs?.class ?? '').includes('today-row-name'));
+    assert.ok(nameSpan, 'name span present');
+    assert.ok(
+      String(nameSpan.attrs?.class ?? '').includes('today-row-name--completed'),
+      'today-row-name--completed present on name span when complete',
+    );
+  });
+
   test('shows habit name', () => {
     const out = buildNumericRow({ id: 'h1', name: 'Gratitude', target: 5 }, { count: 3 });
     const nameEl = collectDeep(out, (d) => String(d.text ?? '').includes('Gratitude'));
@@ -184,6 +202,30 @@ describe('buildSlotRow — slot-checklist (D-89, LOG-03)', () => {
     assert.ok(
       String(out.attrs?.class ?? '').includes('habit-row--complete'),
       'complete class present when all slots checked',
+    );
+  });
+
+  test('row has today-row--completed class when all slots checked (T13b)', () => {
+    const out = buildSlotRow(
+      { id: 'h1', name: 'Meals', target: 3, slots: [{ name: 'Breakfast' }, { name: 'Lunch' }, { name: 'Dinner' }] },
+      { slots: [{ name: 'Breakfast', checked: true }, { name: 'Lunch', checked: true }, { name: 'Dinner', checked: true }] },
+    );
+    assert.ok(
+      String(out.attrs?.class ?? '').includes('today-row--completed'),
+      'today-row--completed present when all slots checked',
+    );
+  });
+
+  test('name span has today-row-name--completed class when all slots checked (T13b)', () => {
+    const out = buildSlotRow(
+      { id: 'h1', name: 'Meals', target: 3, slots: [{ name: 'Breakfast' }, { name: 'Lunch' }, { name: 'Dinner' }] },
+      { slots: [{ name: 'Breakfast', checked: true }, { name: 'Lunch', checked: true }, { name: 'Dinner', checked: true }] },
+    );
+    const nameSpan = findDeep(out, (d) => String(d.attrs?.class ?? '').includes('today-row-name'));
+    assert.ok(nameSpan, 'name span present');
+    assert.ok(
+      String(nameSpan.attrs?.class ?? '').includes('today-row-name--completed'),
+      'today-row-name--completed present on name span when all slots checked',
     );
   });
 });
