@@ -236,8 +236,10 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
       const cells = [
         // 1. Habit name
         { tag: 'td', text: habit.name },
-        // 2. Stage
-        { tag: 'td', text: habit.stage >= 1 ? `Etap ${habit.stage}` : '' },
+        // 2. Stage — derived from currentStageIndex (0-based) + stages array.
+        // habit.stage does not exist in the IDB schema; the seed stores
+        // `stages: [{label, target, ...}]` and `currentStageIndex: number`.
+        { tag: 'td', text: (habit.stages?.length > 0 && habit.currentStageIndex != null) ? `Stage ${habit.currentStageIndex + 1}` : '' },
         // 3. Rolling % + S1 badge
         {
           tag: 'td',

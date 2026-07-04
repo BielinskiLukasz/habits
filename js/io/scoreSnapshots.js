@@ -116,20 +116,43 @@ export async function writeHabitSnapshots(habitId, repo) {
 
   // ctx shape expected by scoring functions and cadence.appliesToday.
   // evaluationDate is set per-iteration below.
+  //
+  // weekCompletions / monthCompletions are real for the CURRENT habit being
+  // scored (habitForScoring). For all other habits (used by S3's loadCount
+  // computation), we return 0 as a conservative approximation — this keeps
+  // weekly habits "visible" in the load denominator, which slightly
+  // underestimates S3 but avoids inflating Rolling% (Bug 3 fix).
+  //
+  // Capping at daysFrom(ctx.evaluationDate, -1): on the completion day itself
+  // the habit IS applicable (it hasn't been "done" yet at the start of that
+  // day). We exclude the evaluation day's log so the completion day is still
+  // counted as applicable AND completed in the numerator separately.
   const ctx = {
     appliesToday,
     windowDays,
     globalThreshold,
     weekStart,
-    // weekCompletions / monthCompletions are required by cadence.js resolvers
-    // (weekly and monthly cadence types). The snapshot writer does not have
-    // access to a populated repo during this loop, so we provide a conservative
-    // default of 0 (habit always appears applicable on weekly/monthly days).
-    // This is acceptable for scoring purposes: the cadence gate here affects
-    // the denominator, and a slightly over-estimated denominator is the safe
-    // direction (underestimates score rather than over-inflating it).
-    weekCompletions: () => 0,
-    monthCompletions: () => 0,
+    weekCompletions: (habitId, startYMD, endYMD) => {
+      if (habitId !== habitForScoring.id) return 0;
+      // Cap at the day BEFORE evaluationDate so the evaluation day itself is
+      // not retroactively marked "already done" (which would exclude it from
+      // the applicable-day count even when a completion lands that same day).
+      const prevDay = daysFrom(ctx.evaluationDate, -1);
+      const cap = prevDay < endYMD ? prevDay : endYMD;
+      if (cap < startYMD) return 0;
+      return logsForHabit.filter(
+        log => log.date >= startYMD && log.date <= cap && _logCompleted(log, habitForScoring)
+      ).length;
+    },
+    monthCompletions: (habitId, startYMD, endYMD) => {
+      if (habitId !== habitForScoring.id) return 0;
+      const prevDay = daysFrom(ctx.evaluationDate, -1);
+      const cap = prevDay < endYMD ? prevDay : endYMD;
+      if (cap < startYMD) return 0;
+      return logsForHabit.filter(
+        log => log.date >= startYMD && log.date <= cap && _logCompleted(log, habitForScoring)
+      ).length;
+    },
     evaluationDate: todayLocal(), // overwritten for each day below
   };
 
@@ -232,6 +255,27 @@ export async function rebuildAllSnapshots(repo, onProgress = () => {}) {
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Return true when a log row counts as a completion for the given habit.
+ * Mirrors the LOG_COMPLETED dispatch in scoring.js — duplicated here to keep
+ * scoreSnapshots.js independent of scoring internals while still being able
+ * to count completions for the weekCompletions / monthCompletions ctx helpers.
+ *
+ * @param {object|undefined} log
+ * @param {object} habit IDB habit row
+ * @returns {boolean}
+ */
+function _logCompleted(log, habit) {
+  if (!log) return false;
+  const t = habit.targetType ?? 'binary';
+  if (t === 'binary') return log.completed === true;
+  if (t === 'numeric') return (log.count ?? 0) >= (habit.target ?? 1);
+  if (t === 'slot-checklist') {
+    return Array.isArray(log.slots) && log.slots.length > 0 && log.slots.every(s => s.checked);
+  }
+  return false;
+}
 
 /**
  * Normalize a raw setting value returned by repo.getSetting().

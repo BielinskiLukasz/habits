@@ -22,6 +22,10 @@
 import {
   isInGracePeriod,
   daysFrom,
+  isoWeekStart,
+  isoWeekEnd,
+  getMonthStart,
+  getMonthEnd,
 } from '../util/date.js';
 
 // ---------------------------------------------------------------------------
@@ -66,6 +70,86 @@ function isLogCompleted(log, habit) {
 }
 
 // ---------------------------------------------------------------------------
+// Internal: period-based S1 for weekly / monthly cadences (Bug 3 fix)
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute S1 for weekly or monthly habits by counting PERIODS (not applicable
+ * days). Using appliesToday-based day-counting for these cadences inflates the
+ * denominator because the resolver returns true on every day until a completion
+ * lands — a weekly habit with 1 completion/week gets 10/70 = 14% instead of
+ * the correct 10/10 = 100%.
+ *
+ * Algorithm: iterate period-by-period (ISO week / calendar month) from
+ * windowStart to evaluationDate. For each period, count it as expected if the
+ * habit's startDate allows, and as completed if any completion log exists within
+ * the clamped period range.
+ *
+ * @param {object} habit
+ * @param {object[]} logsForHabit
+ * @param {{ evaluationDate: string, windowDays: number, globalThreshold: number, weekStart: 'mon'|'sun' }} ctx
+ * @returns {{ s1Score: number, s1Status: string }}
+ */
+function _computeS1Periodic(habit, logsForHabit, ctx) {
+  const windowStart = daysFrom(ctx.evaluationDate, -(ctx.windowDays - 1));
+  const isWeekly = habit.cadence.type === 'weekly';
+
+  let expectedPeriods = 0;
+  let completedPeriods = 0;
+
+  let periodPtr = windowStart;
+  while (periodPtr <= ctx.evaluationDate) {
+    const pStart = isWeekly
+      ? isoWeekStart(periodPtr, ctx.weekStart)
+      : getMonthStart(periodPtr);
+    const pEnd = isWeekly
+      ? isoWeekEnd(periodPtr, ctx.weekStart)
+      : getMonthEnd(periodPtr);
+
+    // Clamp period boundaries to the rolling window.
+    const effectiveStart = pStart < windowStart ? windowStart : pStart;
+    const effectiveEnd   = pEnd > ctx.evaluationDate ? ctx.evaluationDate : pEnd;
+
+    // startDate guard: habit hasn't started yet in this period.
+    if (!habit.startDate || habit.startDate <= effectiveEnd) {
+      expectedPeriods++;
+
+      // Check for any completion within [effectiveStart, effectiveEnd].
+      for (const log of logsForHabit) {
+        if (
+          log.date >= effectiveStart &&
+          log.date <= effectiveEnd &&
+          isLogCompleted(log, habit)
+        ) {
+          completedPeriods++;
+          break;
+        }
+      }
+    }
+
+    // Advance past the end of this period.
+    periodPtr = daysFrom(pEnd, 1);
+  }
+
+  if (expectedPeriods === 0) return { s1Score: 0, s1Status: 'Failing' };
+
+  const s1Score = Math.round((completedPeriods / expectedPeriods) * 100);
+
+  let s1Status;
+  if (s1Score >= ctx.globalThreshold) {
+    s1Status = 'Healthy';
+  } else if (s1Score >= 70) {
+    s1Status = 'Watch';
+  } else if (s1Score >= 50) {
+    s1Status = 'At-risk';
+  } else {
+    s1Status = 'Failing';
+  }
+
+  return { s1Score, s1Status };
+}
+
+// ---------------------------------------------------------------------------
 // computeS1 — Rolling Threshold Health (D-110)
 // ---------------------------------------------------------------------------
 
@@ -105,6 +189,15 @@ export function computeS1(habit, logsForHabit, ctx) {
   // Mastered shortcut: always Healthy at 100 (0.3× weighting → always over threshold).
   if (habit.isMastered === true) {
     return { s1Score: 100, s1Status: 'Healthy' };
+  }
+
+  // Weekly / monthly cadences: count periods, not applicable days.
+  // appliesToday returns true every day until a completion arrives, which
+  // inflates the denominator (e.g. 70 days instead of 10 weeks → 14% instead
+  // of 100% for a perfectly completed weekly habit). _computeS1Periodic counts
+  // ISO weeks / calendar months and gives the semantically correct rate.
+  if (habit.cadence?.type === 'weekly' || habit.cadence?.type === 'monthly') {
+    return _computeS1Periodic(habit, logsForHabit, ctx);
   }
 
   // Rolling window: [windowStart, evaluationDate] inclusive.
@@ -267,6 +360,14 @@ export function computeS3(habit, logsForHabit, ctx, allHabits) {
   }
 
   let rawSum = 0;
+  // expectedSum tracks the sum of (1/loadCount) over applicable days — this is
+  // the "full credit" a habit would earn if completed on every applicable day.
+  // Using expectedSum as the denominator (instead of applicableDays) gives a
+  // proper [0,1] range: s3Score = 1.0 for perfect completion, 0.0 for none.
+  // The previous formula (rawSum / applicableDays) divided by loadCount twice —
+  // once per day and once via applicableDays — capping max S3 at 1/loadCount
+  // (≈0.017 for 60 habits) and making all values cluster near 0.00 (Bug 2 fix).
+  let expectedSum = 0;
   let applicableDays = 0;
 
   for (let i = 0; i < ctx.windowDays; i++) {
@@ -281,23 +382,28 @@ export function computeS3(habit, logsForHabit, ctx, allHabits) {
     // Skip days where no habits apply (division-by-zero guard).
     if (loadCount === 0) continue;
 
+    // Each applicable day contributes 1/loadCount to the expected total.
+    const dayExpected = 1 / loadCount;
+    expectedSum += dayExpected;
+
     // Determine this habit's completion contribution for the day.
     let completedContrib;
     if (habit.isMastered === true) {
-      // Mastered habits always contribute 0.3 (SCORING-07).
+      // Mastered habits always contribute 0.3× of the day's expected share
+      // (SCORING-07). s3Score for a fully-mastered habit converges to 0.3.
       completedContrib = 0.3;
     } else {
       completedContrib = isLogCompleted(logByDate.get(dayYMD), habit) ? 1 : 0;
     }
 
-    rawSum += completedContrib / loadCount;
+    rawSum += completedContrib * dayExpected;
     applicableDays++;
   }
 
-  if (applicableDays === 0) {
+  if (expectedSum === 0) {
     return { s3Score: 0 };
   }
 
-  const s3Score = Math.min(1, rawSum / applicableDays);
+  const s3Score = Math.min(1, rawSum / expectedSum);
   return { s3Score };
 }
