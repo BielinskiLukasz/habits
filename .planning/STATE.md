@@ -47,7 +47,7 @@ Archives: `.planning/milestones/`
 **Phase:** 8 — Today & Catalog — Upcoming Section
 **Plan:** Not started
 **Status:** Ready to plan
-**Last activity:** 2026-07-05 — Completed quick task 260705-t13b: apply completion CSS class to multi-occurrence rows (T13b)
+**Last activity:** 2026-07-05 — Completed quick task 260705-1zs: refactor Catalog Add/Edit form into a modal overlay; reuse existing form fields, no logic changes
 
 ```
 v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
@@ -108,6 +108,7 @@ None
 |---|-------------|------|--------|-----------|
 | 260705-0bq | swap deprecated meta tag in index.html | 2026-07-04 | 033cafc | [260705-0bq-swap-deprecated-meta-tag-in-index-html](.planning/quick/260705-0bq-swap-deprecated-meta-tag-in-index-html/) |
 | 260705-t13b | apply completion CSS class to multi-occurrence rows (T13b) | 2026-07-05 | bc74db1 | [260705-t13b-multi-occurrence-completion-css](.planning/quick/260705-t13b-multi-occurrence-completion-css/) |
+| 260705-1zs | refactor Catalog Add/Edit form into a modal overlay; reuse existing form fields, no logic changes | 2026-07-05 | 2cf7640 | [260705-1zs-refactor-catalog-add-edit-form-into-a-mo](.planning/quick/260705-1zs-refactor-catalog-add-edit-form-into-a-mo/) |
 
 ## Session Continuity
 
