@@ -11,12 +11,6 @@ Updated: 2026-07-05
 - **Fix direction:** Check mastery calculation in scoring; ensure UI renders badge when `mastered === true`
 - **Action:** `/gsd-debug` — investigate mastery flag propagation from `score_snapshots` to UI badge render in Today + Catalog
 
-### T20 — Settings panel missing from desktop sidebar
-- **Where:** `desktop.html` sidebar nav
-- **Symptom:** Only 3 items (Analytics, Waveboard, Planning); Settings should be 4th
-- **Fix direction:** Add Settings nav item to sidebar; wire panel show/hide
-- **Action:** `/gsd-quick` — add Settings nav item to `desktop.html` sidebar and wire show/hide to existing settings panel
-
 ### T23 — Waveboard data not loading + rows extremely tall
 - **Where:** Waveboard panel on `desktop.html`
 - **Symptom:** Heat-map grid is empty; row heights are huge (CSS sizing bug)
