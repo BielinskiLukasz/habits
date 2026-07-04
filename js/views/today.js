@@ -253,6 +253,7 @@ const RENDERERS = {
  * @returns {Promise<void>}
  */
 async function handleLogIncrementTap(evt) {
+  evt.preventDefault();
   const btn = evt.currentTarget;
   const habitId = btn.getAttribute('data-habit-id');
   const date = todayLocal();
