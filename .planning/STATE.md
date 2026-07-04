@@ -47,7 +47,7 @@ Archives: `.planning/milestones/`
 **Phase:** 8 — Today & Catalog — Upcoming Section
 **Plan:** Not started
 **Status:** Ready to plan
-**Last activity:** 2026-07-01
+**Last activity:** 2026-07-04 — Completed quick task 260705-0bq: swap deprecated meta tag in index.html
 
 ```
 v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
@@ -101,6 +101,12 @@ v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
 ### Blockers
 
 None
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260705-0bq | swap deprecated meta tag in index.html | 2026-07-04 | 033cafc | [260705-0bq-swap-deprecated-meta-tag-in-index-html](.planning/quick/260705-0bq-swap-deprecated-meta-tag-in-index-html/) |
 
 ## Session Continuity
 
