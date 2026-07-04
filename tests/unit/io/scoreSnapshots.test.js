@@ -222,6 +222,36 @@ describe('writeHabitSnapshots', () => {
     }
   });
 
+  // Regression: UAT-T21-v3 — seeded habits lack `createdAt`; dateRange(undefined,
+  // today) yields zero rows because `undefined <= dateString` is false.
+  test('regression UAT-T21-v3: writes snapshots for habit with no createdAt (uses window fallback)', async () => {
+    // Habit with NO createdAt field, startDate=null — mirrors seeded habits.
+    const habit = { id: 'h-no-creat', cadence: { type: 'daily' }, startDate: null };
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit] });
+
+    await writeHabitSnapshots('h-no-creat', fakeRepo);
+
+    // Must write at least one snapshot row (the fallback to window-start is used).
+    assert.ok(captured.snapshots.length > 0,
+      'should write at least one snapshot row even when createdAt is missing');
+    assert.ok(captured.snapshots.every(r => r.habitId === 'h-no-creat'),
+      'all rows should belong to the correct habitId');
+    assert.strictEqual(captured.runTxCallCount, 1,
+      'must use exactly one IDB transaction (NFR-03)');
+  });
+
+  // Regression: UAT-T21-v3 — habit with createdAt=undefined AND startDate=undefined
+  // (completely missing both fields) should still write snapshots via the window fallback.
+  test('regression UAT-T21-v3: writes snapshots for habit with no createdAt and no startDate', async () => {
+    const habit = { id: 'h-no-dates', cadence: { type: 'daily' } };
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit] });
+
+    await writeHabitSnapshots('h-no-dates', fakeRepo);
+
+    assert.ok(captured.snapshots.length > 0,
+      'should write snapshots when both createdAt and startDate are absent');
+  });
+
   test('returns early (no rows written) when habit is not found', async () => {
     const today = todayYMD();
     const habit = { id: 'h-other', createdAt: addDays(today, -2), cadence: { type: 'daily' } };

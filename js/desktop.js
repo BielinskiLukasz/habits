@@ -46,7 +46,7 @@ import { mountDiagnostics } from './views/diagnostics.js';
 // P2 spine imports (DATA-03/04/07/08, SEED-01..05, DESKTOP-02). All relative per D-19.
 import * as repo from './db/repo.js';
 import { configure as configureApply } from './state/apply.js';
-import { writeHabitSnapshots } from './io/scoreSnapshots.js';
+import { writeHabitSnapshots, rebuildAllSnapshots } from './io/scoreSnapshots.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
 import { hydrate, configureStore, subscribe, notify } from './state/store.js';
@@ -94,6 +94,23 @@ bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
 try { await bootScheduled(); } catch (_e) { /* swallow — promotion/migration non-critical on failure */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
+
+// Boot-time snapshot bootstrap (UAT-T21-v3): if score_snapshots has never
+// been populated, rebuild all snapshots in the background so the Analytics
+// view shows data on first open without requiring a manual log write or a
+// "Recompute Scores" click.  The meta flag 'snapshotsBootstrapped' prevents
+// this from re-running on every subsequent boot.  Fire-and-forget so the
+// shell routes immediately while the rebuild proceeds asynchronously.
+repo.getMeta('snapshotsBootstrapped').then(flag => {
+  if (!flag) {
+    rebuildAllSnapshots(repo)
+      .then(() => Promise.all([
+        repo.putMeta('snapshotsBootstrapped', true),
+        notify({ event: 'snapshot:rebuild' }),
+      ]))
+      .catch(() => {});
+  }
+}).catch(() => {});
 // Cross-tab sync: re-render when another tab mutates or completes a JSON import (DATA-07).
 onMessage(async (msg) => {
   if (msg.type === 'import:done') { location.reload(); return; }

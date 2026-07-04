@@ -134,7 +134,32 @@ export async function writeHabitSnapshots(habitId, repo) {
   };
 
   const todayYMD = todayLocal();
-  const startDate = habit.createdAt;
+
+  // Normalize the snapshot start date (UAT-T21-v3 root-cause fix).
+  //
+  // Problem: habits.json seed data does not include a `createdAt` field, so
+  // seeded habits have `habit.createdAt === undefined` in IDB.  When startDate
+  // is undefined the condition `undefined <= todayYMD` evaluates to false, so
+  // dateRange() yields zero iterations and writeHabitSnapshots silently returns
+  // without writing a single row — leaving score_snapshots perpetually empty.
+  //
+  // Fix: fall back through habit.startDate (also null on most seeded habits,
+  // but may be a valid date for future-scheduled habits), then to the rolling
+  // window start so that at least one full scoring window of snapshot rows is
+  // always written.  The user can later press "Recompute Scores" to extend the
+  // history backwards if they want older data.
+  const effectiveCreatedAt =
+    habit.createdAt ??
+    habit.startDate ??
+    daysFrom(todayYMD, -(windowDays - 1));
+
+  // When createdAt is missing from the stored habit row, pass a normalised
+  // copy of the habit to scoring functions.  Without this, isInGracePeriod()
+  // receives undefined and calls parseLocalYMD(undefined) → TypeError.
+  const habitForScoring =
+    habit.createdAt != null ? habit : { ...habit, createdAt: effectiveCreatedAt };
+
+  const startDate = effectiveCreatedAt;
   const endDate = todayYMD;
 
   // Collect all snapshot rows synchronously (no per-day IDB reads — NFR-03).
@@ -143,9 +168,9 @@ export async function writeHabitSnapshots(habitId, repo) {
     // Update evaluationDate for the current day's computation.
     ctx.evaluationDate = dateYMD;
 
-    const { s1Score, s1Status } = _computeS1(habit, logsForHabit, ctx);
-    const { s2Score } = _computeS2(habit, logsForHabit, ctx);
-    const { s3Score } = _computeS3(habit, logsForHabit, ctx, allHabits);
+    const { s1Score, s1Status } = _computeS1(habitForScoring, logsForHabit, ctx);
+    const { s2Score } = _computeS2(habitForScoring, logsForHabit, ctx);
+    const { s3Score } = _computeS3(habitForScoring, logsForHabit, ctx, allHabits);
 
     snapshotRows.push({
       habitId,
