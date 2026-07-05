@@ -462,13 +462,15 @@ export function mountWaveboard(parent, { repo, store }) {
         const habitMap = cachedCellData.get(row.habitId);
 
         if (!habitMap.has(week)) {
-          habitMap.set(week, { status: row.s1Status, applicable: 1, completed: row.s1Score >= 100 ? 1 : 0 });
+          habitMap.set(week, {
+            status: row.s1Status,
+            applicable: (row.applicableToday ?? true) ? 1 : 0,
+            completed: row.loggedToday ? 1 : 0,
+          });
         } else {
           const existing = habitMap.get(week);
-          // Accumulate applicable day count and completed count
-          existing.applicable += 1;
-          existing.completed += row.s1Score >= 100 ? 1 : 0;
-          // Use worst status for the week
+          existing.applicable += (row.applicableToday ?? true) ? 1 : 0;
+          existing.completed += row.loggedToday ? 1 : 0;
           existing.status = worstStatus(existing.status, row.s1Status);
         }
       }

@@ -218,6 +218,13 @@ export async function writeHabitSnapshots(habitId, repo) {
     // score_snapshots instead of re-running evaluateMastery with empty logs.
     const { isMastered } = _evaluateMastery(habitForScoring, logsForHabit, dateYMD, masteryCtx);
 
+    // Per-day completion and applicability for the waveboard tooltip.
+    // loggedToday: was the habit actually completed on this specific date?
+    // applicableToday: does the habit's cadence say it should happen on this date?
+    const logForDate = logsForHabit.find(l => l.date === dateYMD);
+    const loggedToday = _logCompleted(logForDate, habitForScoring);
+    const applicableToday = appliesToday(habitForScoring, dateYMD, ctx);
+
     snapshotRows.push({
       habitId,
       date: dateYMD,
@@ -226,6 +233,8 @@ export async function writeHabitSnapshots(habitId, repo) {
       s2Score,
       s3Score,
       isMastered,       // MASTERY-03: pre-computed per-date mastery flag
+      loggedToday,      // true if habit was completed on this specific date
+      applicableToday,  // true if habit's cadence applies on this specific date
       scoreVersion: 1,  // SCORING-09: locked at 1 for Phase 6
     });
   }
