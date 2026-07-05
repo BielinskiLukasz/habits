@@ -102,10 +102,10 @@
   /* Wave-board cell */
   .waveboard-cell {
     width: 40px;
+    min-width: 40px;
     height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
+    vertical-align: middle;
     font-size: var(--text-sm);
     cursor: default;
   }
@@ -115,17 +115,18 @@
   .waveboard-cell--failing  { background: var(--color-score-failing); color: #fff; }
   .waveboard-cell--na       { background: var(--color-score-na);      color: #fff; }
 
-  /* Wave-board grid */
+  /* Wave-board grid — renders as a proper HTML table (not a CSS grid) */
   .waveboard-grid {
-    overflow-x: auto;
-    display: grid;
-    /* column count determined by JS */
+    border-collapse: collapse;
   }
   .waveboard-sticky-column {
     position: sticky;
     left: 0;
+    min-width: 160px;
     background: var(--color-surface);
     z-index: 1;
+    text-align: left;
+    padding-right: var(--space-3);
   }
 
   /* Analytics habit table */
