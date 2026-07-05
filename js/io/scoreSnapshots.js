@@ -22,6 +22,7 @@
 import { todayLocal, daysFrom } from '../util/date.js';
 import { appliesToday } from '../domain/cadence.js';
 import { computeS1, computeS2, computeS3 } from '../domain/scoring.js';
+import { evaluateMastery } from '../domain/mastery.js';
 
 // ---------------------------------------------------------------------------
 // DI seam — replaced by tests with mock scoring functions
@@ -33,22 +34,28 @@ let _computeS1;
 let _computeS2;
 /** @type {(habit: object, logs: object[], ctx: object, allHabits: object[]) => {s3Score: number|null}} */
 let _computeS3;
+/** @type {(habit: object, logs: object[], evaluationDate: string, ctx: object) => {isMastered: boolean, isInGracePeriod: boolean}} */
+let _evaluateMastery;
 
 /**
  * Inject scoring function implementations. Called automatically at module load
  * with the real scoring.js exports; tests call this before each test to inject
  * mocks.
  *
- * @param {{ computeS1: Function, computeS2: Function, computeS3: Function }} fns
+ * `evaluateMastery` is optional in the injected object — tests that do not
+ * supply it keep using the real mastery.js function (set at module load).
+ *
+ * @param {{ computeS1: Function, computeS2: Function, computeS3: Function, evaluateMastery?: Function }} fns
  */
-export function configure({ computeS1: s1, computeS2: s2, computeS3: s3 }) {
+export function configure({ computeS1: s1, computeS2: s2, computeS3: s3, evaluateMastery: em }) {
   _computeS1 = s1;
   _computeS2 = s2;
   _computeS3 = s3;
+  if (em !== undefined) _evaluateMastery = em;
 }
 
 // Auto-configure with real scoring functions at module load.
-configure({ computeS1, computeS2, computeS3 });
+configure({ computeS1, computeS2, computeS3, evaluateMastery });
 
 // ---------------------------------------------------------------------------
 // Internal: date range generator
@@ -185,6 +192,18 @@ export async function writeHabitSnapshots(habitId, repo) {
   const startDate = effectiveCreatedAt;
   const endDate = todayYMD;
 
+  // Mastery context for evaluateMastery() — mirrors the scoring ctx but uses
+  // the field names mastery.js expects: globalWindow (not windowDays).
+  // weekCompletions / monthCompletions closures are already bound in ctx above.
+  const masteryCtx = {
+    globalThreshold,
+    globalWindow: windowDays,
+    appliesToday,
+    weekStart,
+    weekCompletions: ctx.weekCompletions,
+    monthCompletions: ctx.monthCompletions,
+  };
+
   // Collect all snapshot rows synchronously (no per-day IDB reads — NFR-03).
   const snapshotRows = [];
   for (const dateYMD of dateRange(startDate, endDate)) {
@@ -194,6 +213,10 @@ export async function writeHabitSnapshots(habitId, repo) {
     const { s1Score, s1Status } = _computeS1(habitForScoring, logsForHabit, ctx);
     const { s2Score } = _computeS2(habitForScoring, logsForHabit, ctx);
     const { s3Score } = _computeS3(habitForScoring, logsForHabit, ctx, allHabits);
+    // Compute isMastered for this date using the rolling-window evaluator.
+    // This is the canonical source of mastery state — the UI reads it from
+    // score_snapshots instead of re-running evaluateMastery with empty logs.
+    const { isMastered } = _evaluateMastery(habitForScoring, logsForHabit, dateYMD, masteryCtx);
 
     snapshotRows.push({
       habitId,
@@ -202,7 +225,8 @@ export async function writeHabitSnapshots(habitId, repo) {
       s1Status,
       s2Score,
       s3Score,
-      scoreVersion: 1, // SCORING-09: locked at 1 for Phase 6
+      isMastered,       // MASTERY-03: pre-computed per-date mastery flag
+      scoreVersion: 1,  // SCORING-09: locked at 1 for Phase 6
     });
   }
 

@@ -9,7 +9,8 @@
  *
  * Architecture:
  *   - Reads all habits from repo (or store cache when warm).
- *   - Evaluates mastery for each habit using `evaluateMastery` from mastery.js.
+ *   - Evaluates mastery for each habit by reading `isMastered` from the latest
+ *     `score_snapshots` row (pre-computed by scoreSnapshots.js at log-write time).
  *   - Sorts: active first, then archived; within each group by wave asc.
  *   - Renders catalog header + habit list.
  *   - Wires action handlers via mount() actions map for all CRUD operations.
@@ -45,14 +46,9 @@ import {
 import { mount } from '../util/mount.js';
 import { apply } from '../state/apply.js';
 import { todayLocal } from '../util/date.js';
-import { evaluateMastery } from '../domain/mastery.js';
-import { appliesToday } from '../domain/cadence.js';
 import {
   subscribe,
   getCachedHabits,
-  getCachedSettings,
-  getCachedWeekStart,
-  getCachedWeekCompletions,
 } from '../state/store.js';
 import { showErrorToast } from './toast.js';
 
@@ -74,50 +70,40 @@ function clearChildren(parent) {
 }
 
 /**
- * Compute the mastery context from current store cache.
+ * Evaluate mastery state for all habits by reading pre-computed `isMastered`
+ * values from the `score_snapshots` IDB store via `repo.getLatestSnapshot`.
  *
- * @returns {{ globalThreshold: number, globalWindow: number, appliesToday: Function, weekStart: string, weekCompletions: Function, monthCompletions: Function }}
- */
-function buildMasteryCtx() {
-  const cachedSettings = getCachedSettings ? getCachedSettings() : {};
-  const weekStart = getCachedWeekStart ? getCachedWeekStart() : 'mon';
-  return {
-    globalThreshold: cachedSettings.masteryThreshold ?? 90,
-    globalWindow: cachedSettings.masteryWindow ?? 70,
-    appliesToday: (habit, date, ctx) => appliesToday(habit, date, ctx),
-    weekStart,
-    weekCompletions: (habitId, start, end) => getCachedWeekCompletions(habitId, start, end),
-    // monthCompletions not in the store cache yet — stub to 0 (safe default)
-    monthCompletions: () => 0,
-  };
-}
-
-/**
- * Evaluate mastery state for all habits. For each habit, we pass an empty logs
- * array because loading all logs for all habits at catalog render time is too
- * expensive. The catalog shows a best-effort mastery state using the cached
- * data only. Full mastery evaluation per log happens in the scoring pass.
+ * Rationale: calling `evaluateMastery(habit, [], today, ctx)` with an empty
+ * logs array always returned `isMastered: false` for every active habit because
+ * `completedCount` is always 0. The correct approach is to read the value that
+ * `scoreSnapshots.js::writeHabitSnapshots` already computed from the real log
+ * history when the user last wrote a completion.
  *
- * For habits that have `status === 'mastered'`, we return isMastered=true
- * directly — the habit is already promoted in the IDB model.
+ * Falls back to `false` for habits that have never had a log written (no
+ * snapshot row exists yet).
+ *
+ * For habits with `status === 'mastered'` (permanently promoted in the IDB
+ * model), we return `isMastered: true` directly — they may not have a
+ * recent snapshot if they were promoted before the scoring system was active.
  *
  * @param {object[]} habits
- * @param {string} today
- * @returns {Map<string, { isMastered: boolean }>}
+ * @param {{ repo: object }} deps
+ * @returns {Promise<Map<string, { isMastered: boolean }>>}
  */
-function evaluateMasteryForCatalog(habits, today) {
-  const ctx = buildMasteryCtx();
+async function evaluateMasteryForCatalog(habits, deps) {
+  const { repo } = deps;
   const results = new Map();
   for (const habit of habits) {
+    // Permanently mastered habits are promoted in the IDB model — shortcut.
     if (habit.status === 'mastered') {
       results.set(habit.id, { isMastered: true });
       continue;
     }
+    // Read the pre-computed isMastered flag from the latest score_snapshot row.
+    // Falls back to false when no snapshot exists (habit has no log history yet).
     try {
-      // We evaluate with an empty logs array as a lightweight fast-path.
-      // Catalog's mastery badge is status-based, not rolling-window-based.
-      const state = evaluateMastery(habit, [], today, ctx);
-      results.set(habit.id, { isMastered: state.isMastered });
+      const snap = await repo.getLatestSnapshot(habit.id);
+      results.set(habit.id, { isMastered: snap?.isMastered === true });
     } catch (_e) {
       results.set(habit.id, { isMastered: false });
     }
@@ -228,8 +214,6 @@ async function renderCatalogInto(parent, deps) {
   const { repo } = deps;
   clearChildren(parent);
 
-  const today = todayLocal();
-
   // Load habits from cache first; fall back to repo if cache is cold.
   let habits = getCachedHabits ? getCachedHabits() : [];
   if (!habits.length && repo && typeof repo.getAllHabits === 'function') {
@@ -240,7 +224,7 @@ async function renderCatalogInto(parent, deps) {
     }
   }
 
-  const masteryMap = evaluateMasteryForCatalog(habits, today);
+  const masteryMap = await evaluateMasteryForCatalog(habits, deps);
   const sorted = sortHabits(habits);
 
   // Build actions map that closures over the live parent + deps.

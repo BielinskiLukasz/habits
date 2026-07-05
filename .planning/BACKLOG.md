@@ -108,6 +108,27 @@ Ideas and issues captured during phase work for consideration in future mileston
 
 ---
 
+## Debug session findings (2026-07-05)
+
+### Today view mastery badge not rendered (Gap 3 from debug/mastery-badge-propagation)
+
+**Issue:** The Today view never displays a mastery badge for habits that have crossed the mastery threshold. `buildTodayRow`, `buildNumericRow`, and `buildSlotRow` in `today/builders.js` accept no `isMastered` parameter and contain zero mastery-related rendering code.
+
+**Root cause (partially fixed):** The write path (`scoreSnapshots.js`) now persists `isMastered` on every snapshot row (fixed in debug session). The read path in Today is the remaining gap: `today.js` does not read `score_snapshots` and the builder functions do not accept or render `isMastered`.
+
+**What needs doing:**
+1. `today.js` — fetch today's snapshot rows (or a per-habitId lookup) and pass `isMastered` through to each builder call.
+2. `buildTodayRow`, `buildNumericRow`, `buildSlotRow` — accept an `isMastered` boolean param and conditionally render a mastery badge (same `.mastery-badge` element used in catalog).
+3. (Optional) Cache snapshot reads alongside habit list to avoid per-habit async overhead in the render loop.
+
+**Related files:** `js/views/today/builders.js`, `js/views/today.js`, `js/io/scoreSnapshots.js` (read side via `repo.getLatestSnapshot`).
+
+**Effort:** Low-Medium — builder changes are mechanical; the main work is wiring the snapshot read into the today render loop without blocking UX.
+
+**Prerequisite for mastery promotion flow:** Mastery badge visibility in Today is required before users can act on promotion suggestions (future phase).
+
+---
+
 ## Unscheduled features
 
 ### Slot collapse behavior after selection
