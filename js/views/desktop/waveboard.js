@@ -442,13 +442,7 @@ export function mountWaveboard(parent, { repo, store }) {
       /** @type {object[]} */
       let snapshotRows = [];
       try {
-        snapshotRows = await repo.runTx(
-          ['score_snapshots'],
-          'readonly',
-          (tx) => tx.objectStore('score_snapshots').index('date').getAll(
-            IDBKeyRange.bound(startDate, endDate)
-          )
-        );
+        snapshotRows = await repo.getSnapshotsInRange(startDate, endDate);
       } catch (_e) {
         // Non-fatal — no snapshots yet.
       }

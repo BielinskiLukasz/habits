@@ -71,6 +71,7 @@ function keyOf(storeName, value) {
  *   getSetting:               (key: string) => Promise<object|undefined>,
  *   getAllSettings:            () => Promise<object[]>,
  *   getAllScoreSnapshots:      () => Promise<object[]>,
+ *   getSnapshotsInRange:      (startYMD: string, endYMD: string) => Promise<object[]>,
  *   runTx:                    (stores: string[], mode: 'readonly'|'readwrite', body: (tx: object) => *|Promise<*>) => Promise<*>,
  *   _stores:                  Record<string, Map<string, object>>,
  * }}
@@ -197,6 +198,17 @@ export function createFakeRepo() {
     // not the raw IDBRequest object that runTx body() returns.
     async getSnapshot(habitId, date) {
       return stores.score_snapshots.get(JSON.stringify([habitId, date]));
+    },
+
+    // Waveboard IDB fix: date-range scan on score_snapshots.
+    // Mirrors repo.getSnapshotsInRange (A7 contract preserved).
+    async getSnapshotsInRange(startYMD, endYMD) {
+      /** @type {object[]} */
+      const out = [];
+      for (const row of stores.score_snapshots.values()) {
+        if (row.date >= startYMD && row.date <= endYMD) out.push(row);
+      }
+      return out;
     },
 
     // Phase 06 UAT-T21-v2 fix: get the most recent snapshot row for a habit

@@ -347,6 +347,21 @@ export async function getLatestSnapshot(habitId) {
 }
 
 /**
+ * Get every score_snapshots row whose `date` falls in the inclusive
+ * `[startYMD, endYMD]` range, via the `date` index on the
+ * `score_snapshots` store. Mirrors `getLogsInRange` exactly.
+ * Used by the Waveboard view to fetch the 12-week heat-map data.
+ *
+ * @param {string} startYMD YYYY-MM-DD, inclusive
+ * @param {string} endYMD YYYY-MM-DD, inclusive
+ * @returns {Promise<object[]>}
+ */
+export async function getSnapshotsInRange(startYMD, endYMD) {
+  const db = await openDB();
+  return indexGetAll(db, 'score_snapshots', 'date', IDBKeyRange.bound(startYMD, endYMD));
+}
+
+/**
  * Multi-store readwrite tx — entry point for `apply.js` / `seed.js` /
  * `undo.js`. The `body` receives the raw IDBTransaction; callers compose
  * `tx.objectStore(name).put(row)` etc. and trust the wrapper to `await
