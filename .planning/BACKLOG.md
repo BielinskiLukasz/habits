@@ -1,202 +1,335 @@
 # Backlog
 
-Ideas and issues captured during phase work for consideration in future milestones. Not commitments.
+Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
+
+Last updated: 2026-07-13 (reformatted all items to B-NN standard; assigned IDs B-01–B-14)
+Last assigned ID: **B-14** — next new item must be **B-15**
+
+---
+
+## How to use this file
+
+- **Adding an item:** increment the "Last assigned ID" counter at the top, then drop a new `### B-NN` block with Source / Status / Earliest slot / What / Why / Open questions / Implementation notes. IDs are monotonic and never reused — even if the previous entry was promoted or removed.
+- **Promoting an item:** `/gsd-review-backlog` (interactive) — moves a chosen item into the active milestone roadmap. Or manually run `/gsd-phase add` and reference the backlog ID in the phase description.
+- **Removing an item:** delete the block or move it under a `## Rejected` heading with a one-line rationale (decisions cost; keep the rationale).
+- **Memory ↔ backlog:** memory captures "this idea exists and here's the context"; this file is the project-level decision queue. Memory is the source for cross-session continuity; this file is the source for milestone planning. Update both when an item lands.
+
+## Related
+
+- `ROADMAP.md` — active milestone phases
+- `milestones/v1.0-REQUIREMENTS.md` — v1.0 archived requirements (all 51 complete)
+- `PROJECT.md` — core constraints (single subject v1, no build step, no frameworks)
+- `CLAUDE.md` — v1/v2 split rules
 
 ---
 
 ## Phase 4 UAT findings (2026-06-05)
 
-### Completion visualization for numeric/slot habits
+### B-01 · Completion visualization for numeric/slot habits
 
-**Issue:** When a numeric or slot-checklist habit reaches its daily target, no visual indicator (checkmark, strikethrough, "complete" styling) shows like binary habits do.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
 
-**Current:** Only binary habits show the `habit-row--complete` class and visual feedback.
+**What:** When a numeric or slot-checklist habit reaches its daily target, show the same visual completion indicator (checkmark, strikethrough, `habit-row--complete` class) that binary habits already display.
 
-**Expected:** Numeric and slot rows should also highlight or show a checkmark when `count >= target`.
+**Why:** Binary habits give clear done-state feedback the moment they're completed; numeric and slot habits silently reach their target with no visual reward. The inconsistency breaks the "finished for today" mental model and leaves the user wondering whether the tap registered.
 
-**Effort:** Low — add `habit-row--complete` logic to `buildNumericRow()` and `buildSlotRow()` in `today/builders.js`.
+**Open questions when this gets planned:**
 
----
+- Should numeric and slot completion also trigger the vibration tap that binary completion does?
+- Is "count ≥ target" the only condition, or should over-logging (count > target) be styled differently?
 
-### Polish name button (ⓘ) missing for numeric/slot habits
+**Implementation notes:**
 
-**Issue:** The ⓘ button to reveal `name_pl` only renders for binary habits (line 168 in `today/builders.js`).
-
-**Current:** `buildTodayRow()` includes the button; `buildNumericRow()` and `buildSlotRow()` omit it.
-
-**Expected:** All habit types should offer Polish name reveal.
-
-**Effort:** Low — refactor button into a shared helper, add to numeric/slot row children.
+- Add `habit-row--complete` logic to `buildNumericRow()` and `buildSlotRow()` in `today/builders.js` — mirror the existing binary check.
+- Effort: Low.
 
 ---
 
-### Create/Edit forms open at bottom (not inline)
+### B-02 · Polish name button (ⓘ) missing for numeric/slot habits
 
-**Issue:** When creating a new habit or editing an existing one, the form slides in below the catalog list instead of appearing inline (like editing does in catalog.js).
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
 
-**Current:** Forms use `data-panel="create"` / `data-panel="edit"` at the top level.
+**What:** The ⓘ button that reveals `name_pl` only renders for binary habits (line 168 in `today/builders.js`). Numeric and slot rows omit it, so those habits have no bilingual name reveal.
 
-**Expected:** Forms should replace the habit row or stack at the top like they do in catalog view.
+**Why:** All habit types carry a `name_pl` field from the seed; hiding the reveal affordance on two of three types creates an arbitrary and unexplained inconsistency in the daily check-in view.
 
-**Effort:** Medium — requires rethinking Today/History form positioning; may need a modal or overlay approach.
+**Open questions when this gets planned:**
 
----
+- Should the shared helper live in `today/builders.js` or a sibling utility module?
 
-### Edit and Archive buttons should be in same row
+**Implementation notes:**
 
-**Issue:** Edit and Archive buttons stack vertically on mobile, taking extra space.
-
-**Current:** `.catalog-habit-actions` uses `flex-direction: column`.
-
-**Expected:** Buttons in one row, or responsive (row on desktop, wrap on mobile).
-
-**Effort:** Low — CSS flexbox change + optional media query.
+- Refactor the ⓘ button construction into a shared helper function.
+- Call the helper from `buildNumericRow()` and `buildSlotRow()` alongside the existing `buildTodayRow()` call.
+- Effort: Low.
 
 ---
 
-### Archive habit styling indistinguishable from other buttons
+### B-03 · Create/Edit forms open at bottom, not inline
 
-**Issue:** Archive button looks identical to Edit button; no visual difference to warn it's a destructive action.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass or a dedicated forms-UX sub-plan
 
-**Current:** Only `catalog-btn--archive` class; no distinct styling.
+**What:** When creating a new habit or editing an existing one, the form slides in below the full catalog list instead of appearing near the habit row being edited or as a focused overlay.
 
-**Expected:** Archive button should be red/warning color to signal destructiveness.
+**Why:** The displaced form position loses visual context — the user can no longer see the habit they are editing once the form renders at the bottom. Inline or modal-anchored editing is the expected pattern for list-item editing.
 
-**Effort:** Low — add CSS rule for `.catalog-btn--archive` with `background: var(--color-error, #ef4444)`.
+**Open questions when this gets planned:**
+
+- Modal overlay vs. inline replacement of the habit row?
+- Should Today view and History view use the same form positioning as Catalog, or is their use-case different enough to warrant separate treatment?
+- Does the fix require a shared form component or can it stay in per-view builders?
+
+**Implementation notes:**
+
+- `data-panel="create"` / `data-panel="edit"` currently render at the top-level panel level; need to move rendering anchor closer to the triggering row.
+- Effort: Medium.
 
 ---
 
-### Cannot add waves
+### B-04 · Edit and Archive buttons should be in the same row
 
-**Issue:** No UI to create or manage waves. User must rely on seed data or manual IDB edits.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
 
-**Current:** Waves are static from seed data; no create/edit/delete waves UI.
+**What:** Edit and Archive buttons in the Catalog habit card stack vertically on mobile, consuming more vertical space than necessary.
 
-**Expected:** Wave management panel (add, edit, delete waves).
+**Why:** Vertical stacking wastes screen real-estate on the primary mobile surface. Side-by-side buttons are the conventional pattern for paired primary/destructive actions and save a full button-height of scroll.
 
-**Effort:** High — requires new IDB schema (waves store), CRUD handlers, UI (catalog subsection or settings panel).
+**Open questions when this gets planned:**
+
+- Wrap on very narrow viewports (< 320 px) or always force one row?
+
+**Implementation notes:**
+
+- Change `.catalog-habit-actions` from `flex-direction: column` to `flex-direction: row`.
+- Add an optional `flex-wrap: wrap` media query for very narrow viewports.
+- Effort: Low.
+
+---
+
+### B-05 · Archive button visually indistinguishable from Edit
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
+
+**What:** The Archive button in the Catalog card looks identical to the Edit button — same size, same color, no destructive-action signaling.
+
+**Why:** Archiving a habit is a consequential action (removes it from the daily view). Without visual differentiation, a user scanning quickly can trigger it accidentally. Destructive actions must look different from safe ones.
+
+**Open questions when this gets planned:**
+
+- Add a confirmation step (e.g., "Are you sure?") in addition to the color change, or rely on color alone?
+- Use the existing `--color-error` token or introduce a `--color-destructive` alias?
+
+**Implementation notes:**
+
+- Add a CSS rule for `.catalog-btn--archive` using `background: var(--color-error, #ef4444)` and a contrasting text color.
+- Effort: Low.
+
+---
+
+### B-06 · Cannot add or manage waves via UI
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** post-B-38 (waves data model must land first); likely a dedicated post-v1 phase
+
+**What:** There is no UI to create, rename, or reorder waves. The user depends entirely on seed data or manual IDB edits to introduce a new wave.
+
+**Why:** Waves are a first-class organizing primitive in the Nawyki system. Adding new habits to new waves is a natural lifecycle event (new wave in 2027, etc.). Having no UI path forces risky manual IDB surgery.
+
+**Open questions when this gets planned:**
+
+- Wave CRUD in Catalog (subsection), in a Settings panel, or as a dedicated Waves admin view?
+- What happens to habits in a deleted wave — reassign to a default wave, or block deletion until wave is empty?
+- Reordering: drag-and-drop or numeric order field?
+
+**Implementation notes:**
+
+- Depends on B-38; without a `waves` IDB store this is not implementable without touching every habit row.
+- Effort: High — new IDB store, CRUD handlers, UI surface.
 
 ---
 
 ## Captured 2026-06-30
 
-### Fix import JSON UI label
+### B-07 · Import JSON control has no visible label
 
-**Issue:** The import control in Settings → Data is a raw `<input type="file">` with no visible label. Browsers render it as "Choose File" — the user has no indication it's for importing a JSON backup.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
 
-**Current:** `builders.js` renders the `<input>` with only an `aria-label="Import JSON backup file"` (screen-reader only). No visible `<label>` or adjacent text.
+**What:** The import control in Settings → Data is a raw `<input type="file">` with only an `aria-label` (screen-reader only). No visible text tells the user what the control does or that it accepts a JSON backup file.
 
-**Expected:** A visible "Import JSON" label or a styled button wrapper so the action is self-explanatory without relying on context.
+**Why:** Without a visible label the import action is opaque to any user who hasn't memorized the layout. The export download has a clear button label; import should match.
 
-**Effort:** Low — add a `<label for="import-file-input">` in `settings/builders.js`.
+**Open questions when this gets planned:**
+
+- Style it as a labeled button wrapper (consistent with export) or a plain `<label>` above the input?
+
+**Implementation notes:**
+
+- Add a `<label for="import-file-input">Import JSON backup</label>` in `settings/builders.js`.
+- Effort: Low.
 
 ---
 
-### Move waves to a first-class data model
+### B-08 · Move waves to a first-class data model
 
-**Issue:** Wave is a plain string field on each habit (e.g. `wave: "Fala 1"`). There is no `waves` IDB store — no wave-level metadata (description, start date, color, order) can be stored, and wave CRUD is impossible without touching every habit row.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** early post-v1 milestone; prerequisite for B-36
 
-**Current:** Wave grouping is purely derived at query time from the `habits.wave` index. Wave identity = the string value.
+**What:** Replace the free-form `wave` string field on each habit with a dedicated `waves` IDB store (UUID, label, order, optional description, color, date range). Habits reference their wave by ID instead of by name string.
 
-**Desired:** A dedicated `waves` IDB store with its own UUID, label, order, optional description/color, and date range. Habits reference a wave by ID. Enables wave creation, editing, reordering, and richer analytics groupings.
+**Why:** Wave identity as a plain string means no metadata, no reordering, no CRUD — any wave management degrades into a mass-edit on every habit row. A proper relational model is the prerequisite for wave creation, renaming, reordering, and richer analytics groupings. Also fixes the current situation where renaming a wave string requires touching every habit in it.
 
-**Dependencies:** Requires a v2 IDB migration (additive — new store only), an update to seed loader, and changes to all habit CRUD paths that currently write the wave string.
+**Open questions when this gets planned:**
 
-**Note:** The existing "Cannot add waves" backlog entry (Phase 4 UAT findings) is a UI gap; this is the underlying data model prerequisite for that feature.
+- What is the migration path for existing habits that carry a raw wave string (seed habits)? Auto-generate wave records from distinct strings on first migration run?
+- Should wave `order` be a float (easy insert between) or an integer (requires re-number on reorder)?
+- Color: free-form hex or a curated palette of tokens?
 
-**Effort:** High — schema migration + seed update + CRUD + all views that group by wave.
+**Implementation notes:**
+
+- Requires a v2 IDB migration (additive — new `waves` store only; habits store gains a `waveId` field).
+- Seed loader must write wave records first, then reference their IDs when inserting habits.
+- All habit CRUD paths that currently write `wave: string` must switch to `waveId: uuid`.
+- All views that group by wave (Catalog, Desktop analytics, CSV export) must join through the new store.
+- Effort: High.
 
 ---
 
 ## Debug session findings (2026-07-05)
 
-### Today view mastery badge not rendered (Gap 3 from debug/mastery-badge-propagation)
+### B-09 · Today view mastery badge not rendered
 
-**Issue:** The Today view never displays a mastery badge for habits that have crossed the mastery threshold. `buildTodayRow`, `buildNumericRow`, and `buildSlotRow` in `today/builders.js` accept no `isMastered` parameter and contain zero mastery-related rendering code.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next feature sprint — prerequisite for mastery promotion flow
 
-**Root cause (partially fixed):** The write path (`scoreSnapshots.js`) now persists `isMastered` on every snapshot row (fixed in debug session). The read path in Today is the remaining gap: `today.js` does not read `score_snapshots` and the builder functions do not accept or render `isMastered`.
+**What:** The Today view never displays a mastery badge for habits that have crossed the mastery threshold. The write path (`scoreSnapshots.js`) now persists `isMastered` on every snapshot row (fixed in debug session 2026-07-05). The read path in Today is the remaining gap: `today.js` does not read `score_snapshots` and the builder functions neither accept nor render `isMastered`.
 
-**What needs doing:**
-1. `today.js` — fetch today's snapshot rows (or a per-habitId lookup) and pass `isMastered` through to each builder call.
-2. `buildTodayRow`, `buildNumericRow`, `buildSlotRow` — accept an `isMastered` boolean param and conditionally render a mastery badge (same `.mastery-badge` element used in catalog).
-3. (Optional) Cache snapshot reads alongside habit list to avoid per-habit async overhead in the render loop.
+**Why:** Users cannot act on mastery promotion suggestions if the daily check-in view gives no indication which habits are mastered. Mastery badge visibility in Today is a prerequisite for the promotion-suggestion flow planned for a later phase.
 
-**Related files:** `js/views/today/builders.js`, `js/views/today.js`, `js/io/scoreSnapshots.js` (read side via `repo.getLatestSnapshot`).
+**Open questions when this gets planned:**
 
-**Effort:** Low-Medium — builder changes are mechanical; the main work is wiring the snapshot read into the today render loop without blocking UX.
+- Cache snapshot reads alongside the habit list fetch to avoid per-habit async overhead in the render loop, or accept a second pass?
+- Should the badge in Today be identical to the one in Catalog, or a smaller/inline variant to avoid cluttering the check-in surface?
 
-**Prerequisite for mastery promotion flow:** Mastery badge visibility in Today is required before users can act on promotion suggestions (future phase).
+**Implementation notes:**
+
+- `today.js` — fetch today's snapshot rows (or a per-habitId lookup via `repo.getLatestSnapshot`) and pass `isMastered` through to each builder call.
+- `buildTodayRow`, `buildNumericRow`, `buildSlotRow` in `js/views/today/builders.js` — accept an `isMastered` boolean and conditionally render `.mastery-badge`.
+- Related files: `js/views/today/builders.js`, `js/views/today.js`, `js/io/scoreSnapshots.js`.
+- Effort: Low–Medium.
 
 ---
 
 ## Unscheduled features
 
-### Slot collapse behavior after selection
+### B-10 · Slot collapse behavior after selection
 
-**Goal:** Captured for future planning.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** needs scoping before it can be slotted
 
-**Description:** When a user selects slots in a slot-checklist habit and reaches the target, define whether the slot row collapses or remains open.
+**What:** Define and implement whether a slot-checklist habit row collapses (or otherwise signals completion) automatically once the user fills enough slots to reach the target count.
 
-**Requirements:** TBD
+**Why:** No behavior is currently specified. Leaving it open risks the slot row staying visually open forever after completion — inconsistent with binary habits, which visually resolve when done, and potentially confusing on a mobile check-in screen.
 
-**Status:** Needs scoping before planning.
+**Open questions when this gets planned:**
 
----
+- Auto-collapse to a compact row (like binary does), or stay open so the user can see which specific slots were filled?
+- Should over-filling (selecting more slots than the target) collapse or resist further selection?
+- Is the desired behavior the same in Today view and in History view?
 
-### Override global mastery settings not working in custom mastery
+**Implementation notes:**
 
-**Goal:** Captured for future planning.
-
-**Description:** Custom per-habit mastery threshold/window settings may not properly override global defaults in some edge cases. Needs investigation and fix.
-
-**Requirements:** TBD
-
-**Status:** Needs scoping before planning.
+- Likely a CSS class toggle on the slot row container, triggered by the same `count >= target` condition used for B-31.
 
 ---
 
-### Add edit history capability for numeric and slot habits
+### B-11 · Custom per-habit mastery settings may not override global defaults
 
-**Goal:** Captured for future planning.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** needs investigation before scoping
 
-**Description:** Numeric and slot-checklist habit logs should support edit history (correct a previously-logged value) similar to the undo capability for binary habits.
+**What:** Custom per-habit mastery threshold and window settings may not reliably override the global defaults in edge cases. Symptoms and exact conditions are not yet pinned down.
 
-**Requirements:** TBD
+**Why:** If the override silently falls back to global defaults, a habit the user specifically tuned has an untrustworthy mastery score — the user would have no way of knowing their custom setting is being ignored.
 
-**Status:** Needs scoping before planning.
+**Open questions when this gets planned:**
+
+- Is this a read-time priority bug (global read before per-habit check) or a write-time bug (custom setting not persisted correctly)?
+- Which edge cases trigger it — only on freshly created habits, or also on imported ones?
+- Does the bug affect `isMastered` in `score_snapshots` (stale snapshot) or only the live read path?
+
+**Implementation notes:**
+
+- Start with a debug session: log the resolved threshold/window values during a snapshot write for a habit with a custom setting, and compare to the habit record in IDB.
 
 ---
 
-### Every-N-days cadence: reset on both completion AND undone
+### B-12 · Edit history for numeric and slot habits
 
-**Goal:** Captured for future planning.
+**Status:** captured · not scheduled
+**Earliest sensible slot:** post-v1; natural companion to binary habit undo
 
-**Description:** For habits with "every N days" cadence, the habit should be considered unfinished/undone if N days have passed since either the last completion OR the last time it was explicitly marked undone. Currently the logic may only track the last completion timestamp, causing habits to incorrectly show as not-yet-due when they should re-appear because they've exceeded the N-day threshold from their last undone state.
+**What:** Numeric and slot-checklist habit logs should support correcting a previously-logged value — comparable to the undo capability binary habits already have. A user who logged "5 reps" but meant "15" should have a correction path.
 
-**Requirements:** TBD
+**Why:** Logging errors happen, especially on a mobile tap surface. Without edit history, numeric and slot data becomes permanently wrong with no correction path. Binary habits have undo; the inconsistency is a usability gap.
 
-**Status:** Needs scoping before planning.
+**Open questions when this gets planned:**
+
+- Correction model: overwrite the log row (simpler, loses the original) or append a correction event to `history_edits` (full audit trail, aligns with the existing binary undo mechanism)?
+- UI: inline edit on the log row, or a dedicated correction modal?
+- Should corrections trigger snapshot recomputation for the affected date range?
+
+**Implementation notes:**
+
+- The `history_edits` store already exists for binary habits; extending the schema to carry `previousCount` / `newCount` for numeric corrections would be the cleanest path.
+
+---
+
+### B-13 · Every-N-days cadence: re-due countdown should reset on undone, not only on completion
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next bug-fix pass
+
+**What:** For habits with an "every N days" cadence, the re-due date should reset when the habit is explicitly marked undone — not only on completion. Currently the logic may track only the last completion timestamp, so a habit can stay "not yet due" even after N days have elapsed since its last undone state.
+
+**Why:** The current behavior makes a habit disappear from the daily view indefinitely if the user skips it: it was never "completed," so the countdown never reset, so it never re-appears. This silently drops habits from the rotation without the user knowing.
+
+**Open questions when this gets planned:**
+
+- "Explicitly marked undone" — does that mean any day the habit was shown but not completed, or only days where the user actively tapped "skip / undone"?
+- Should the reset be to "due from undone date" or "due from next available slot after undone date"?
+
+**Implementation notes:**
+
+- The fix lives in `js/domain/cadence.js` (or wherever `nextDueDate` / slot eligibility is computed).
+- Requires checking the `logs` store for the most recent row with `completed: false` as well as `completed: true` when computing the next slot.
 
 ---
 
 ## Post-v1 explorations
 
-### Install card: predict-and-override platform switch
+### B-14 · Install card: predict-and-override platform switch
 
-**Source:** UAT Phase 3 Test 14 (2026-05-28, lukasz.bielinski).
+**Status:** captured · not scheduled
+**Earliest sensible slot:** post-v1; revisit only if a user complaint or usage signal surfaces
 
-**Idea:** Replace the current "show all three labeled subsections" Install card with a predicted-platform-first card (e.g. show iOS instructions on Safari/iOS UA) + an override control to flip to Android Chrome / Desktop browsers.
+**What:** Replace the current "show all three labeled subsections simultaneously" Install card with a predicted-platform-first display (e.g., surface iOS instructions on Safari/iOS user-agent) plus an override toggle to flip to Android Chrome or Desktop browser instructions.
 
-**Current (locked, D-61 + 03-DISCUSSION-LOG.md Q3):** All three subsections render simultaneously with no detection. User explicitly chose this over "Feature-test first, UA as fallback" or "UA-only switch" during Phase 2 questioning.
+**Why:** Showing all three platform subsections at once is the safe choice but adds scroll noise for a first-time installer on a specific device. A correct platform prediction would surface the right steps immediately with no hunting. The current all-three approach (D-61) was chosen because there was no evidence of user confusion at the time — not because it is optimal UX.
 
-**When to revisit:** If Install help grows so long it becomes hard to scan, or if there's evidence users scroll past the wrong-platform sections. For v1 there's no signal in either direction.
+**Open questions when this gets planned:**
 
-**Cost of switching:**
-- Add UA detection (`navigator.userAgent`) or persistent platform setting in IDB.
-- Add a 3-segment toggle / radio for override.
-- New IDB key for the override (or live in `settings` store).
-- Risk: detection drift (every new device/browser breaks the guess).
+- UA detection (`navigator.userAgent`) or persistent IDB platform setting + override?
+- 3-segment toggle UI or a simple "Switch to: iOS / Android / Desktop" link?
+- How to handle detection drift as new browser/device classes appear and break the UA heuristic?
 
-**Cost of staying:** A few extra inches of vertical scroll on the Install card — only encountered when consulting install help, which is once-per-device.
+**Implementation notes:**
 
-**Disposition:** Park for post-v1. Revisit if a user complaint or instrumentation signal surfaces.
+- Current decision: all-three layout is locked (D-61 + `03-DISCUSSION-LOG.md` Q3); any change requires explicitly superseding that decision.
+- Cost of switching: UA detection logic, 3-segment override toggle, optional IDB key for the override, and ongoing UA maintenance burden.
+- Cost of staying: a few extra inches of vertical scroll on the Install card, encountered at most once per device.
