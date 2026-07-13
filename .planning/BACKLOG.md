@@ -2,14 +2,14 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-07-13 (reformatted all items to B-NN standard; assigned IDs B-01–B-14)
-Last assigned ID: **B-14** — next new item must be **B-15**
+Last updated: 2026-07-13 (reformatted all items to B-NNN standard; assigned IDs B-001–B-014)
+Last assigned ID: **B-014** — next new item must be **B-015**
 
 ---
 
 ## How to use this file
 
-- **Adding an item:** increment the "Last assigned ID" counter at the top, then drop a new `### B-NN` block with Source / Status / Earliest slot / What / Why / Open questions / Implementation notes. IDs are monotonic and never reused — even if the previous entry was promoted or removed.
+- **Adding an item:** increment the "Last assigned ID" counter at the top, then drop a new `### B-NNN` block with Source / Status / Earliest slot / What / Why / Open questions / Implementation notes. IDs are monotonic and never reused — even if the previous entry was promoted or removed.
 - **Promoting an item:** `/gsd-review-backlog` (interactive) — moves a chosen item into the active milestone roadmap. Or manually run `/gsd-phase add` and reference the backlog ID in the phase description.
 - **Removing an item:** delete the block or move it under a `## Rejected` heading with a one-line rationale (decisions cost; keep the rationale).
 - **Memory ↔ backlog:** memory captures "this idea exists and here's the context"; this file is the project-level decision queue. Memory is the source for cross-session continuity; this file is the source for milestone planning. Update both when an item lands.
@@ -25,7 +25,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ## Phase 4 UAT findings (2026-06-05)
 
-### B-01 · Completion visualization for numeric/slot habits
+### B-001 · Completion visualization for numeric/slot habits
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next UI polish pass
@@ -46,7 +46,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-02 · Polish name button (ⓘ) missing for numeric/slot habits
+### B-002 · Polish name button (ⓘ) missing for numeric/slot habits
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next UI polish pass
@@ -67,10 +67,10 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-03 · Create/Edit forms open at bottom, not inline
+### B-003 · Create/Edit forms open at bottom, not inline
 
 **Status:** captured · not scheduled
-**Earliest sensible slot:** next UI polish pass or a dedicated forms-UX sub-plan
+**Earliest sensible slot:** next UI polish pass or a dedicated forms-UX suB-0plan
 
 **What:** When creating a new habit or editing an existing one, the form slides in below the full catalog list instead of appearing near the habit row being edited or as a focused overlay.
 
@@ -89,7 +89,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-04 · Edit and Archive buttons should be in the same row
+### B-004 · Edit and Archive buttons should be in the same row
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next UI polish pass
@@ -110,7 +110,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-05 · Archive button visually indistinguishable from Edit
+### B-005 · Archive button visually indistinguishable from Edit
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next UI polish pass
@@ -131,10 +131,10 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-06 · Cannot add or manage waves via UI
+### B-006 · Cannot add or manage waves via UI
 
 **Status:** captured · not scheduled
-**Earliest sensible slot:** post-B-38 (waves data model must land first); likely a dedicated post-v1 phase
+**Earliest sensible slot:** post-B-038 (waves data model must land first); likely a dedicated post-v1 phase
 
 **What:** There is no UI to create, rename, or reorder waves. The user depends entirely on seed data or manual IDB edits to introduce a new wave.
 
@@ -148,14 +148,14 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 **Implementation notes:**
 
-- Depends on B-38; without a `waves` IDB store this is not implementable without touching every habit row.
+- Depends on B-038; without a `waves` IDB store this is not implementable without touching every habit row.
 - Effort: High — new IDB store, CRUD handlers, UI surface.
 
 ---
 
 ## Captured 2026-06-30
 
-### B-07 · Import JSON control has no visible label
+### B-007 · Import JSON control has no visible label
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next UI polish pass
@@ -175,10 +175,10 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-08 · Move waves to a first-class data model
+### B-008 · Move waves to a first-class data model
 
 **Status:** captured · not scheduled
-**Earliest sensible slot:** early post-v1 milestone; prerequisite for B-36
+**Earliest sensible slot:** early post-v1 milestone; prerequisite for B-036
 
 **What:** Replace the free-form `wave` string field on each habit with a dedicated `waves` IDB store (UUID, label, order, optional description, color, date range). Habits reference their wave by ID instead of by name string.
 
@@ -202,7 +202,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ## Debug session findings (2026-07-05)
 
-### B-09 · Today view mastery badge not rendered
+### B-009 · Today view mastery badge not rendered
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next feature sprint — prerequisite for mastery promotion flow
@@ -227,7 +227,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ## Unscheduled features
 
-### B-10 · Slot collapse behavior after selection
+### B-010 · Slot collapse behavior after selection
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** needs scoping before it can be slotted
@@ -244,11 +244,11 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 **Implementation notes:**
 
-- Likely a CSS class toggle on the slot row container, triggered by the same `count >= target` condition used for B-31.
+- Likely a CSS class toggle on the slot row container, triggered by the same `count >= target` condition used for B-031.
 
 ---
 
-### B-11 · Custom per-habit mastery settings may not override global defaults
+### B-011 · Custom per-habit mastery settings may not override global defaults
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** needs investigation before scoping
@@ -269,7 +269,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-12 · Edit history for numeric and slot habits
+### B-012 · Edit history for numeric and slot habits
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** post-v1; natural companion to binary habit undo
@@ -290,7 +290,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ---
 
-### B-13 · Every-N-days cadence: re-due countdown should reset on undone, not only on completion
+### B-013 · Every-N-days cadence: re-due countdown should reset on undone, not only on completion
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next bug-fix pass
@@ -313,7 +313,7 @@ Last assigned ID: **B-14** — next new item must be **B-15**
 
 ## Post-v1 explorations
 
-### B-14 · Install card: predict-and-override platform switch
+### B-014 · Install card: predict-and-override platform switch
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** post-v1; revisit only if a user complaint or usage signal surfaces
