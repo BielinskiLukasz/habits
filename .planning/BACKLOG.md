@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-07-15 (added B-015–B-018 from Phase 7 UAT)
-Last assigned ID: **B-018** — next new item must be **B-019**
+Last updated: 2026-07-15 (added B-019–B-022 from v1.0 tech-debt review)
+Last assigned ID: **B-022** — next new item must be **B-023**
 
 ---
 
@@ -401,6 +401,98 @@ Last assigned ID: **B-018** — next new item must be **B-019**
 - `js/views/settings.js` import handler (~line 542): add `showSuccessToast('Import complete')` before the broadcast/reload sequence, or restructure so the toast appears and the reload is deferred by ~1.5 s.
 - `showSuccessToast` is already imported at line 90 — no new import needed.
 - Effort: Very low.
+
+---
+
+## v1.0 tech-debt review (2026-07-15)
+
+### B-019 · Phase 2 has no VERIFICATION.md
+
+**Status:** captured · accepted as-is · not scheduled
+**Earliest sensible slot:** only if Phase 2 scope is revisited; otherwise close permanently
+
+**What:** Phase 2 shipped without a `VERIFICATION.md`. The gap was accepted at ship time because UAT returned 10/10 and REQUIREMENTS.md checkboxes provided equivalent coverage.
+
+**Why it is still tracked:** If auditors or future contributors look for `VERIFICATION.md` across all phases they will find a gap here and may draw wrong conclusions. A lightweight retrospective verification document would close the audit trail cleanly.
+
+**Open questions when this gets planned:**
+
+- Is it worth back-filling a VERIFICATION.md for Phase 2, or should a single "Phase 2 verification rationale" note in the milestone archive suffice?
+
+**Implementation notes:**
+
+- If created, it should reference the UAT score (10/10) and the REQUIREMENTS.md checkboxes as the evidence base rather than repeating them.
+- Effort: Very low (doc only).
+
+---
+
+### B-020 · REQUIREMENTS.md Phase 1 checkboxes show `[ ]` (cosmetic)
+
+**Status:** captured · cosmetic · not scheduled
+**Earliest sensible slot:** next doc-hygiene pass
+
+**What:** The Phase 1 requirement checkboxes in `.planning/REQUIREMENTS.md` still display as `[ ]` (unchecked) even though Phase 1 is complete. `VERIFICATION.md` is the authoritative source; this is a cosmetic inconsistency.
+
+**Why:** A reader scanning `REQUIREMENTS.md` will see unchecked boxes and assume Phase 1 requirements are outstanding. The inconsistency erodes trust in the planning artifacts even though implementation is correct.
+
+**Open questions when this gets planned:**
+
+- Tick the checkboxes manually, or add a header note that VERIFICATION.md supersedes the checkbox state?
+
+**Implementation notes:**
+
+- Find and replace `[ ]` → `[x]` for all Phase 1 requirement lines in `.planning/REQUIREMENTS.md`.
+- Effort: Very low (doc only).
+
+---
+
+### B-021 · Two intentional stub failures in test suite
+
+**Status:** captured · accepted as-is · documented
+**Earliest sensible slot:** next test-coverage pass (after mastery promotion flow and wave aggregates are built)
+
+**What:** `mastery-cadence.test.js` and `wave-aggregates.test.js` each contain pre-existing stub tests that intentionally fail. These were Phase 4 stubs left in place as placeholders for features not yet implemented.
+
+**Why it is tracked:** The failures are documented and intentional, but they pollute the test-run output with red and require anyone running the suite to know which failures to ignore. Removing or skipping the stubs with a clear `test.skip` would make the baseline cleaner.
+
+**Open questions when this gets planned:**
+
+- Convert to `test.skip(...)` with an explanatory comment, or implement the missing features and make them pass?
+- If the features (mastery cadence handling, wave aggregates) are scoped into a future phase, skip them until that phase executes.
+
+**Implementation notes:**
+
+- `mastery-cadence.test.js` — mark stub assertions as `test.skip`.
+- `wave-aggregates.test.js` — mark stub assertions as `test.skip`.
+- Effort: Very low (skip annotation only); higher if the underlying feature is implemented.
+
+---
+
+### B-022 · Planning-doc legacy identifier drift (doc-alignment pass)
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next doc-hygiene pass
+
+**What:** Several planning documents still carry stale identifiers that diverge from the locked decisions in CLAUDE.md and the live codebase:
+
+1. `.planning/REQUIREMENTS.md` line 100 — `DATA-07` spec text says `BroadcastChannel('nawyki')`; actual code (`js/platform/sync.js`) uses `'habits'` (locked D-30, Phase 2).
+2. `.planning/research/STACK.md` lines 20 + 512 — same legacy channel name.
+3. `.planning/research/SUMMARY.md` line 22 — same.
+4. `.planning/phases/01-pwa-shell-tooling-hygiene/*` — multiple `python -m http.server 8000` references in archived Phase 1 plans, summaries, and research; CLAUDE.md now documents `node scripts/serve.js` as the canonical dev-server command (D-46, locked Phase 2).
+
+The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to CLAUDE.md / PROJECT.md / README.md / ARCHITECTURE.md / `js/util/version.js`, so these files were knowingly left untouched and flagged for this pass.
+
+**Why:** Requirement-vs-implementation drift in live planning docs misleads contributors who search for the channel name or the serve command. The archived Phase 1 docs are research-era artifacts and lower priority, but the active REQUIREMENTS.md and STACK.md drifts are confusing.
+
+**Open questions when this gets planned:**
+
+- Update the active docs in place, or add a "NOTE: superseded by D-30 / D-46" annotation so the historical context is preserved?
+- The Phase 1 archived docs correctly reflect what Phase 1 specified at the time — leave them annotated rather than rewritten?
+
+**Implementation notes:**
+
+- Priority order: `REQUIREMENTS.md` DATA-07 (active, misleading) → `STACK.md` (active research artifact) → `SUMMARY.md` (active summary) → Phase 1 archives (historical, lowest risk).
+- Effort: Very low (doc edits only).
 
 ---
 
