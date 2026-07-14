@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-07-13 (reformatted all items to B-NNN standard; assigned IDs B-001–B-014)
-Last assigned ID: **B-014** — next new item must be **B-015**
+Last updated: 2026-07-15 (added B-015–B-018 from Phase 7 UAT)
+Last assigned ID: **B-018** — next new item must be **B-019**
 
 ---
 
@@ -333,3 +333,93 @@ Last assigned ID: **B-014** — next new item must be **B-015**
 - Current decision: all-three layout is locked (D-61 + `03-DISCUSSION-LOG.md` Q3); any change requires explicitly superseding that decision.
 - Cost of switching: UA detection logic, 3-segment override toggle, optional IDB key for the override, and ongoing UA maintenance burden.
 - Cost of staying: a few extra inches of vertical scroll on the Install card, encountered at most once per device.
+
+---
+
+## Phase 7 UAT findings (2026-07-15)
+
+### B-015 · Scheduled habits have no distinct visual treatment
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass (after Phase 8 ships the scheduled-habits UX)
+
+**What:** Habits with `status: 'scheduled'` show the same label color and visual treatment as `status: 'active'` habits in the Catalog view. There is no visual signal that a habit is scheduled (i.e., not yet started).
+
+**Why:** A user scanning the catalog cannot distinguish an upcoming habit from one that is already running. Once Phase 8 introduces scheduled-habit management in the UI, the lack of differentiation will cause confusion — the user won't know at a glance which habits are future vs. present.
+
+**Open questions when this gets planned:**
+
+- Should the scheduled indicator be a color change (e.g. muted blue vs active green), a label chip (e.g. "Scheduled · 2027-01-01"), or both?
+- Should the scheduled start date be displayed inline in the catalog row?
+- Phase 8 may define a richer scheduled-habits UX that makes this moot — verify scope before implementing.
+
+**Implementation notes:**
+
+- Add a `habit-row--scheduled` CSS class (or equivalent) to catalog row builders when `habit.status === 'scheduled'`.
+- Effort: Low (CSS + one conditional class in the builder).
+
+---
+
+### B-016 · No "Back to mobile view" link from desktop shell
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
+
+**What:** The mobile shell (index.html) Settings page links the user to the desktop shell (`desktop.html`) via a "Open desktop view →" affordance. But there is no reciprocal link — once on `desktop.html`, there is no button or link to return to `index.html`. The user must manually edit the URL or use browser back.
+
+**Why:** Mobile ↔ desktop navigation should be bidirectional. A user who accidentally navigates to desktop.html on a phone, or who finishes analytics work and wants to return to check-in, has no in-app path back.
+
+**Open questions when this gets planned:**
+
+- Where in the desktop shell should the link live — top-right corner of the header, footer, or as a Settings card item?
+- Should the link be a simple `<a href="./index.html">Back to check-in →</a>` or something more prominent?
+
+**Implementation notes:**
+
+- Add a `<a href="./index.html">Back to mobile view</a>` (or "Back to check-in") in `desktop.html` — likely in the sidebar footer or header area.
+- Mirror the existing "Open desktop view →" affordance in `index.html` settings for consistency.
+- Effort: Very low (one anchor in desktop.html template/builder).
+
+---
+
+### B-017 · No success confirmation after JSON import
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
+
+**What:** After a successful JSON import, the page silently reloads with no toast or confirmation message. The `showSuccessToast` function is imported in `js/views/settings.js` (line 90) but never called on the happy path — only errors show a toast.
+
+**Why:** The user has no way to know whether import succeeded or silently failed. The page reload is the only signal, and it's easy to miss or misinterpret. A "Import complete — N habits, M logs merged" success toast would close the feedback loop.
+
+**Open questions when this gets planned:**
+
+- Should the toast fire before the reload (brief window) or should import success suppress the reload and show the toast instead?
+- Should the toast include a count of merged records (habits, logs) for reassurance?
+
+**Implementation notes:**
+
+- `js/views/settings.js` import handler (~line 542): add `showSuccessToast('Import complete')` before the broadcast/reload sequence, or restructure so the toast appears and the reload is deferred by ~1.5 s.
+- `showSuccessToast` is already imported at line 90 — no new import needed.
+- Effort: Very low.
+
+---
+
+### B-018 · Bottom nav floats up when content is short
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass
+
+**What:** The mobile bottom navigation bar (Today / History / Catalog / Settings) is not pinned to the viewport bottom. When the page content is shorter than the full viewport height (e.g. History on a day with few habits, or Settings), the nav bar floats up and sits directly below the content instead of staying at the bottom edge of the screen.
+
+**Why:** A floating nav bar breaks the standard mobile shell pattern. On a phone, users expect the bottom nav to always occupy the bottom of the screen regardless of content length — this is the convention in every major mobile app. A nav that moves around is disorienting and makes the app feel unpolished.
+
+**Open questions when this gets planned:**
+
+- Is the fix a CSS-only change (`position: fixed; bottom: 0`) or does the layout shell need structural changes (e.g. `min-height: 100vh` + flexbox on the page wrapper)?
+- Does pinning the nav require adding `padding-bottom` to the content area so content isn't hidden behind the fixed bar?
+
+**Implementation notes:**
+
+- The bottom nav element in `index.html` / mobile CSS likely needs `position: fixed; bottom: 0; left: 0; right: 0` (or equivalent).
+- Content wrapper needs matching `padding-bottom` equal to nav height to prevent overlap.
+- Effort: Low.
