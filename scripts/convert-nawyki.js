@@ -234,7 +234,7 @@ function parseCSVRow(line) {
 // Main
 // ---------------------------------------------------------------------------
 function main() {
-  const csvPath = path.join(ROOT, 'Nawyki.csv');
+  const csvPath = path.join(ROOT, 'data/Nawyki.csv');
   // Read as latin1 — the file is CP1250 from Windows Excel; latin1 is byte-safe
   // so commas, digits, and date strings are preserved correctly. Polish characters
   // in Nazwa/Nazwa etapu are not used (name_pl is hardcoded above).
