@@ -773,6 +773,8 @@ function _buildStageRow(stage, idx) {
         tag: 'input',
         attrs: {
           type: 'text',
+          id: `stage-label-${idx}`,
+          name: `stage-label-${idx}`,
           'data-field': 'stage-label',
           'data-stage-index': String(idx),
           value: stage.label ?? '',
@@ -783,6 +785,8 @@ function _buildStageRow(stage, idx) {
         tag: 'input',
         attrs: {
           type: 'number',
+          id: `stage-target-${idx}`,
+          name: `stage-target-${idx}`,
           'data-field': 'stage-target',
           'data-stage-index': String(idx),
           value: stage.target != null ? String(stage.target) : '',
