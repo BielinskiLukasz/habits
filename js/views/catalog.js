@@ -188,6 +188,8 @@ function addStageRowToDom(panelEl) {
 
   const labelInput = doc.createElement('input');
   labelInput.type = 'text';
+  labelInput.id = `stage-label-${currentCount}`;
+  labelInput.name = `stage-label-${currentCount}`;
   labelInput.setAttribute('data-field', 'stage-label');
   labelInput.setAttribute('data-stage-index', String(currentCount));
   labelInput.placeholder = 'Stage label';
@@ -195,6 +197,8 @@ function addStageRowToDom(panelEl) {
 
   const targetInput = doc.createElement('input');
   targetInput.type = 'number';
+  targetInput.id = `stage-target-${currentCount}`;
+  targetInput.name = `stage-target-${currentCount}`;
   targetInput.setAttribute('data-field', 'stage-target');
   targetInput.setAttribute('data-stage-index', String(currentCount));
   targetInput.placeholder = 'Target (optional)';
