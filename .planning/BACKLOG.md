@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-07-15 (added B-019–B-022 from v1.0 tech-debt review)
-Last assigned ID: **B-022** — next new item must be **B-023**
+Last updated: 2026-07-20 (added B-023 — tap-time-based Today ordering)
+Last assigned ID: **B-023** — next new item must be **B-024**
 
 ---
 
@@ -515,3 +515,30 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 - The bottom nav element in `index.html` / mobile CSS likely needs `position: fixed; bottom: 0; left: 0; right: 0` (or equivalent).
 - Content wrapper needs matching `padding-bottom` equal to nav height to prevent overlap.
 - Effort: Low.
+
+---
+
+## Captured 2026-07-20
+
+### B-023 · Today view: order habits by average historical tap time
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** post-Phase 8; requires data-model change before UI work
+
+**What:** When the user taps a habit on the Today screen, record the clock time of the tap (not just the date). Over time, compute each habit's average tap time across recent completions and use that average to sort the Today habit list — habits the user typically does in the morning appear near the top; evening habits sink lower.
+
+**Why:** The current Today sort order is creation order, which is arbitrary with respect to the user's daily routine. A time-of-day sort would naturally surface morning habits first and evening habits last, reducing the cognitive cost of scanning the list and matching the user's actual flow.
+
+**Open questions when this gets planned:**
+
+- How many recent completions to average over (last 14 days? last 30 completions?), and what fallback order to use for habits with no tap-time history?
+- Should non-completed habits (shown because they are due but not yet done) be placed at their predicted average time, or pushed to the bottom?
+- Does the sort apply to all habit types (binary, numeric, slot) equally?
+- User preference: purely automatic sort, or a hybrid where the user can pin specific habits to top/bottom regardless of average?
+
+**Implementation notes:**
+
+- **Data model change (prerequisite):** The current log row shape is `{ habitId, date, completed, definitionVersion }` — no clock-time field. Add a `tappedAt: ISO-8601 timestamp string` (e.g. `"2026-07-20T07:23:11"`) to the row written by `markCompleted`, `logNumeric`, and `logSlot` apply handlers. This is an additive field — existing rows simply lack it and are excluded from the average.
+- **Average computation:** On Today mount, for each active habit, fetch its recent log rows, filter to those with `tappedAt` present, extract the time-of-day component, and compute the mean minute-of-day. Sort ascending by mean minute (or by a fallback sentinel for habits with no history).
+- **Storage:** Compute on read (no separate IDB store needed); result is ephemeral per render.
+- Effort: Medium — schema additive change + three apply handler edits + sort logic in `today.js`.
