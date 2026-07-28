@@ -30,6 +30,7 @@
 export async function handlePromoteHabit(event, repo) {
   const { habitId } = event.payload;
   const habit = await repo.getHabit(habitId);
+  if (!habit) throw new Error(`Habit ${habitId} not found`);
   const updated = { ...habit, status: 'active' };
 
   return {
@@ -40,3 +41,25 @@ export async function handlePromoteHabit(event, repo) {
 }
 
 handlePromoteHabit.broadcastKeys = (event) => ({ habitId: event.payload.habitId });
+
+/**
+ * `demoteHabit` handler — revert habit.status back to 'scheduled' (undo inverse of promoteHabit).
+ *
+ * @param {{ type: 'demoteHabit', payload: { habitId: string } }} event
+ * @param {{ getHabit: (id: string) => Promise<object|undefined> }} repo
+ * @returns {Promise<{ storeNames: string[], writes: Array<{store: string, value: object}>, inverse: { type: string, payload: object } }>}
+ */
+export async function handleDemoteHabit(event, repo) {
+  const { habitId } = event.payload;
+  const habit = await repo.getHabit(habitId);
+  if (!habit) throw new Error(`Habit ${habitId} not found`);
+  const updated = { ...habit, status: 'scheduled' };
+
+  return {
+    storeNames: ['habits'],
+    writes: [{ store: 'habits', value: updated }],
+    inverse: { type: 'promoteHabit', payload: { habitId } },
+  };
+}
+
+handleDemoteHabit.broadcastKeys = (event) => ({ habitId: event.payload.habitId });
