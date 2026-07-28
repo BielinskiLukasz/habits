@@ -279,16 +279,65 @@ Declared values (multiples of 4):
 
 ## UI Considerations
 
-**State coverage resolved for Phase 8:**
+**State coverage resolved for Phase 8 (probe: 33 applicable, 21 covered/dismissed, 4 backstop, 8 dismissed-inapplicable):**
 
-| Category | Element(s) | Status | Resolution |
-|----------|------------|--------|-----------|
-| **empty** | Upcoming section | ✅ covered | Section is hidden entirely when `upcomingHabits.length === 0` (D-10); no empty-state placeholder, no message |
-| **zero-one-many** | Upcoming list | ✅ covered | Single item renders as a single row with action buttons; many items render as scrollable list, each with full visibility (no truncation of badges or buttons per minimum 44×44px constraint) |
-| **long-text** | Habit name in Upcoming item | ✅ covered | `word-break: break-word` applied to `.catalog-habit-name` (existing CSS); wraps to next line if name exceeds container width |
-| **overflow** | Many Upcoming habits (20+ items) | ✅ covered | List is within a scrollable catalog page; no horizontal overflow (text wraps, buttons stack vertically) |
-| **interaction** | Promote button feedback | 🧪 backstop | Direct state change on click (no confirmation); habit disappears from Upcoming, appears in active list within same render cycle. Visual feedback is the re-render, not a toast (D-05, D-09). Verification: behavioral test in plan phase. |
-| **sorted** | Upcoming list order | ✅ covered | Sorted ascending by `startDate` (D-11); soonest habit appears first, most actionable |
+### E1 — Upcoming Section Container
+
+| Category | Status | Resolution |
+|----------|--------|-----------|
+| empty | ✅ covered | Section hidden entirely when `upcomingHabits.length === 0` (D-10); no DOM element rendered; no placeholder copy |
+| loading | 🧪 backstop | IDB reads are async; if read takes >100ms the section may flash in. Verification: behavioral test — catalog page must not render Upcoming section briefly before IDB data resolves |
+| error | dismissed | IDB errors are app-level; no section-level error state. Promote is scoped to E4 error coverage |
+| populated | ✅ covered | Renders as vertical flex column with h2 "Upcoming" (18px/600) and sorted list of habit rows (ascending startDate, D-11) |
+| partial | dismissed | Not applicable — catalog renders from complete IDB data; habits have all required fields at scheduled status |
+| overflow | ✅ covered | Section is within scrollable catalog page; no horizontal overflow; long habit names wrap (word-break: break-word via item spec) |
+| zero-one-many | ✅ covered | 0 items = section not rendered; 1 item = single row fully rendered with buttons; many items = scrollable list, each row independently rendered |
+| long-text | ✅ covered | Via E3 item spec — habit name uses word-break: break-word within flex:1 info block |
+
+### E2 — Upcoming List
+
+| Category | Status | Resolution |
+|----------|--------|-----------|
+| empty | dismissed | List never renders when empty; section-level E1 handles the zero-item case |
+| loading | 🧪 backstop | Same as E1 loading — IDB async; behavioral test: list must not flash before data resolves |
+| error | dismissed | No list-level error state; app-level error handling |
+| populated | ✅ covered | List of 1+ habit rows sorted ascending by startDate; each row has name + wave badge + date badge + Edit + Promote buttons |
+| partial | dismissed | Not applicable; habits at scheduled status have all required fields |
+| overflow | ✅ covered | Page scroll handles 20+ items; no horizontal overflow; badges flex-wrap; buttons stack vertically |
+| zero-one-many | 🧪 backstop | Verify layout at 1 item vs. many: no unexpected spacing collapse or layout shift when list shrinks to a single row |
+
+### E3 — Upcoming List Item
+
+| Category | Status | Resolution |
+|----------|--------|-----------|
+| empty | dismissed | Items always have complete data (id, name, wave, startDate); partial habits cannot reach scheduled status |
+| loading | dismissed | Item renders from IDB data loaded before render; no per-item loading state |
+| error | ✅ covered | When Promote IDB write fails, the item row displays an inline error indicator (error class on row or brief error message below action buttons) |
+| populated | ✅ covered | Name (15px/400, flex:1) + wave badge + date badge (both 13px/400, 4px 8px padding) + Edit + Promote buttons (44×44px min); actions block is flex-shrink: 0 |
+| partial | dismissed | Habits have required fields; incomplete habits cannot reach scheduled status |
+| overflow | ✅ covered | Habit name: word-break: break-word wraps within flex:1 info block; badges: flex-wrap in .catalog-habit-badges; buttons: flex-direction: column stacks vertically |
+| zero-one-many | dismissed | Not applicable at item level; item represents exactly one habit |
+| long-text | ✅ covered | Habit name: word-break: break-word; container is flex:1 with min-width: 0 to allow truncation if needed |
+
+### E4 — Promote Button
+
+| Category | Status | Resolution |
+|----------|--------|-----------|
+| empty | dismissed | Button always renders with text "Promote"; not applicable |
+| loading | dismissed | App uses synchronous IDB writes within a single transaction; no async spinner state on promote |
+| error | ✅ covered | If IDB write fails: show inline error on the parent item row (error class or message below buttons); button returns to normal state |
+| populated | ✅ covered | Label "Promote" (13px/400); base button style (no accent color, matches Archive/Restore); 44×44px min-touch-target; aria-label "Promote {habit.name} to active" |
+| partial | dismissed | Not applicable for a button |
+| overflow | dismissed | Fixed short label "Promote" (7 chars); overflow not possible |
+| zero-one-many | dismissed | Button is per-item, always singular; not applicable |
+| long-text | dismissed | Fixed label "Promote"; long text not applicable |
+
+### E5 — Wave Badge + Date Badge
+
+| Category | Status | Resolution |
+|----------|--------|-----------|
+| overflow | dismissed | Wave badge: "Wave N" (6–7 chars fixed); date badge: YYYY-MM-DD (10 chars fixed); overflow not possible with fixed-length content |
+| long-text | dismissed | Both badges have fixed-length content; long text not applicable |
 
 ---
 
@@ -310,4 +359,4 @@ Declared values (multiples of 4):
 - [x] Dimension 5 Spacing: Badge padding corrected to 4px 8px (was 2px 8px); all values are 4px multiples. REVISED & PASS
 - [x] Dimension 6 Registry Safety: No external libraries or registries in Phase 8 scope. PASS
 
-**Approval:** pending — ready for review
+**Approval:** APPROVED — all 6 dimensions passed; UI Considerations section populated by probe (2026-07-28)
