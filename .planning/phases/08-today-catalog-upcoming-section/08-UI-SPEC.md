@@ -34,8 +34,7 @@ Declared values (multiples of 4):
 | Token | CSS Variable | Value | Usage |
 |-------|---|---|-------|
 | xs | --space-1 | 4px | Icon gaps, inline padding, badge spacing |
-| sm | --space-2 | 8px | Compact element spacing, button padding |
-| md | --space-3 | 12px | Default element spacing, row gaps |
+| sm | --space-2 | 8px | Compact element spacing, button padding, default element spacing |
 | lg | --space-4 | 16px | Default padding, form spacing |
 | xl | --space-5 | 24px | Section padding, card spacing |
 | 2xl | --space-6 | 32px | Layout gaps |
@@ -52,13 +51,13 @@ Declared values (multiples of 4):
 | Role | Token | Size | Weight | Line Height | Usage |
 |------|-------|------|--------|------------|-------|
 | Body | --text-md | 15px | 400 (regular) | 1.5 | Habit names, list body text |
-| Label | --text-sm | 13px | 500 (medium/semibold) | 1.4 | Badge labels, button text, form labels |
+| Label | --text-sm | 13px | 400 (regular) | 1.4 | Badge labels, button text, form labels |
 | Heading 2 | --text-lg | 18px | 600 (semibold) | 1.2 | Section headings ("Upcoming") |
 | Heading 1 | --text-xl | 24px | 600 (semibold) | 1.2 | Page headings ("Catalog") |
 
 **Font weights used in Phase 8:**
-- 400 (regular): Habit names, secondary text
-- 500–600 (semibold): Badges, button labels, section headings
+- 400 (regular): Habit names, secondary text, labels, badges, buttons
+- 600 (semibold): Section headings, page headings
 
 **Line heights:**
 - 1.5 for body content (habit names, dates)
@@ -110,7 +109,7 @@ Declared values (multiples of 4):
 **Styling:**
 - Display as a vertical flex column (stacked list)
 - Margin-top: `var(--space-5)` (24px) — visual separation from active list above
-- Padding: `var(--space-3)` (12px) horizontal, no vertical padding (items handle vertical spacing)
+- Padding: `var(--space-2)` (8px) horizontal, no vertical padding (items handle vertical spacing)
 - Background: transparent (inherits page background)
 - Border-top: optional subtle 1px separator line using `var(--color-border)` (rgba(255, 255, 255, 0.08))
 
@@ -127,7 +126,7 @@ Declared values (multiples of 4):
 - Font size: `var(--text-lg)` (18px)
 - Font weight: 600 (semibold)
 - Line height: 1.2
-- Margin: `0 0 var(--space-3) 0` (bottom margin 12px to next element)
+- Margin: `0 0 var(--space-2) 0` (bottom margin 8px to next element)
 - Padding: 0
 - Color: `var(--color-fg)` (#f5f5f5)
 - Letter-spacing: normal
@@ -158,8 +157,8 @@ Declared values (multiples of 4):
 **Layout:**
 - Display: flex
 - Align-items: flex-start
-- Gap: `var(--space-3)` (12px) — same as active list items (D-82)
-- Padding: `var(--space-3)` (12px) vertical, `var(--space-4)` (16px) horizontal — **same as active list rows**
+- Gap: `var(--space-2)` (8px) — same as active list items (D-82)
+- Padding: `var(--space-2)` (8px) vertical, `var(--space-4)` (16px) horizontal — **same as active list rows**
 - Border-bottom: 1px solid `var(--color-border)` — consistent separator
 - Background: transparent
 
@@ -171,7 +170,7 @@ Declared values (multiples of 4):
 
 **Habit Name (`.catalog-habit-name`)** — reuses existing class
 - Display: block
-- Font-weight: 600
+- Font-weight: 400
 - Font-size: 1rem (15px via CSS)
 - Word-break: break-word
 - Color: `var(--color-fg)` (#f5f5f5)
@@ -188,7 +187,7 @@ Declared values (multiples of 4):
 - Padding: 2px 8px
 - Border-radius: 12px
 - Font-size: 0.75rem (11px)
-- Font-weight: 500
+- Font-weight: 400
 - Background: `var(--color-surface-raised)` (#27272a)
 - Color: `var(--color-fg-muted)` (rgba(245, 245, 245, 0.55))
 
@@ -197,7 +196,7 @@ Declared values (multiples of 4):
 - Padding: 2px 8px
 - Border-radius: 12px
 - Font-size: 0.75rem (11px)
-- Font-weight: 500
+- Font-weight: 400
 - Background: `var(--color-surface-raised)` (#27272a)
 - Color: `var(--color-fg-muted)` (rgba(245, 245, 245, 0.55))
 - **Content:** ISO date format (YYYY-MM-DD) per D-02. Example: `2026-08-15`
@@ -219,13 +218,13 @@ Declared values (multiples of 4):
 - Justify-content: center
 - Min-width: 44px
 - Min-height: 44px (NFR-06, D-79)
-- Padding: `var(--space-2) var(--space-3)` (8px 12px)
+- Padding: `var(--space-2) var(--space-2)` (8px 8px)
 - Border: 1px solid `var(--color-border)`
 - Border-radius: 6px
 - Background: default (will inherit from body or default button background)
 - Color: default (will inherit from text color)
 - Font-size: 0.875rem (13px)
-- Font-weight: 500
+- Font-weight: 400
 - Cursor: pointer
 - White-space: nowrap
 - Touch-action: manipulation
