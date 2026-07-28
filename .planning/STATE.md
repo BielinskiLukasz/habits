@@ -5,8 +5,8 @@ milestone_name: Scheduled Habits — Phases 7–9
 current_phase: 8
 current_phase_name: Today & Catalog — Upcoming Section
 status: planning
-stopped_at: Phase 8 context gathered
-last_updated: "2026-07-20T21:25:00.754Z"
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-07-28T13:43:01.540Z"
 last_activity: 2026-07-05
 last_activity_desc: "Completed quick task 260705-1zs: refactor Catalog Add/Edit form into a modal overlay; reuse existing form fields, no logic changes"
 progress:
@@ -113,9 +113,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-07-20T21:25:00.716Z
-**Stopped at:** Phase 8 context gathered
-**Resume file:** .planning/phases/08-today-catalog-upcoming-section/08-CONTEXT.md
+**Last session:** 2026-07-28T13:43:01.518Z
+**Stopped at:** Phase 8 UI-SPEC approved
+**Resume file:** .planning/phases/08-today-catalog-upcoming-section/08-UI-SPEC.md
 
 Next command: `/gsd-execute-phase 7`
 
