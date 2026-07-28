@@ -5,16 +5,16 @@ milestone_name: Scheduled Habits — Phases 7–9
 current_phase: 08
 current_phase_name: today-catalog-upcoming-section
 status: executing
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-07-28T19:08:37.328Z"
+stopped_at: Phase 8 plan 08-03 complete
+last_updated: "2026-07-28T20:30:00.000Z"
 last_activity: 2026-07-28
-last_activity_desc: Phase 08 execution started
+last_activity_desc: Phase 08 plan 08-03 complete (Upcoming section integration)
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 6
-  completed_plans: 3
-  percent: 33
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -47,8 +47,8 @@ Archives: `.planning/milestones/`
 
 **Phase:** 08 (today-catalog-upcoming-section) — EXECUTING
 **Plan:** 3 of 3
-**Status:** Plan 08-02 complete; executing Phase 08
-**Last activity:** 2026-07-28 — Plan 08-02 (buildUpcomingListItem + CAT-01) COMPLETE
+**Status:** Plan 08-03 complete; Phase 08-03 is final plan complete
+**Last activity:** 2026-07-28 — Plan 08-03 (Upcoming section integration + promote action wiring) COMPLETE
 
 ```
 v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
@@ -72,7 +72,7 @@ v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
 | Phase | Plans | Completed |
 |-------|-------|-----------|
 | 7. Scheduled Status Foundation | 3/3 | 2026-07-28 |
-| 8. Today & Catalog — Upcoming Section | 2/3 | 2026-07-28 (08-02) |
+| 8. Today & Catalog — Upcoming Section | 3/3 | 2026-07-28 (08-03) |
 | 9. Desktop Waveboard | 0/? | - |
 
 ## Accumulated Context
