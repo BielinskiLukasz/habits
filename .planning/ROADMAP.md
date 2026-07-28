@@ -84,7 +84,14 @@ Plans:
   4. Each entry in the Upcoming section displays the habit's startDate and wave name
   5. A "Promote to active" action on any Upcoming entry immediately moves the habit to `status: 'active'` and removes it from the Upcoming section
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+
+- [ ] 08-01-PLAN.md (TDD) — promoteHabit handler (RED/GREEN/REFACTOR)
+- [ ] 08-02-PLAN.md (execute) — buildUpcomingListItem builder + CAT-01 verification test
+- [ ] 08-03-PLAN.md (execute) — Catalog split + Promote wiring + boot configuration
+
 **UI hint**: yes
 
 ### Phase 9: Desktop Waveboard
