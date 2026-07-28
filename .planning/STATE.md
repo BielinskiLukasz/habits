@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Scheduled Habits — Phases 7–9
-current_phase: 8
-current_phase_name: Today & Catalog — Upcoming Section
-status: planning
+current_phase: 08
+current_phase_name: today-catalog-upcoming-section
+status: executing
 stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-07-28T13:43:01.540Z"
-last_activity: 2026-07-05
-last_activity_desc: "Completed quick task 260705-1zs: refactor Catalog Add/Edit form into a modal overlay; reuse existing form fields, no logic changes"
+last_updated: "2026-07-28T19:08:37.328Z"
+last_activity: 2026-07-28
+last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
   percent: 33
 ---
@@ -24,7 +24,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-30)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 07 — scheduled-status-foundation
+**Current focus:** Phase 08 — today-catalog-upcoming-section
 
 ## Milestone Status
 
@@ -45,10 +45,10 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-**Phase:** 8 — Today & Catalog — Upcoming Section
-**Plan:** Not started
-**Status:** Ready to plan
-**Last activity:** 2026-07-05 — Completed quick task 260705-1zs: refactor Catalog Add/Edit form into a modal overlay; reuse existing form fields, no logic changes
+**Phase:** 08 (today-catalog-upcoming-section) — EXECUTING
+**Plan:** 2 of 3
+**Status:** Plan 08-01 complete; executing Phase 08
+**Last activity:** 2026-07-28 — Plan 08-01 (promoteHabit handler) COMPLETE
 
 ```
 v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
@@ -71,8 +71,8 @@ v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
 
 | Phase | Plans | Completed |
 |-------|-------|-----------|
-| 7. Scheduled Status Foundation | 3/3 | - |
-| 8. Today & Catalog — Upcoming Section | 0/? | - |
+| 7. Scheduled Status Foundation | 3/3 | 2026-07-28 |
+| 8. Today & Catalog — Upcoming Section | 1/3 | 2026-07-28 (08-01) |
 | 9. Desktop Waveboard | 0/? | - |
 
 ## Accumulated Context
