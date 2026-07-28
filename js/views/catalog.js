@@ -40,6 +40,7 @@
 import {
   buildCatalogHeader,
   buildHabitListItem,
+  buildUpcomingListItem,
   buildEditPanel,
   buildCreatePanel,
 } from './catalog/builders.js';
@@ -237,23 +238,49 @@ async function renderCatalogInto(parent, deps) {
   // Render header.
   mount(buildCatalogHeader(), parent, actions);
 
-  // Render habit list container.
+  // Split sorted habits into active (status !== 'scheduled') and scheduled (status === 'scheduled').
+  const activeHabits = sorted.filter((h) => h.status !== 'scheduled');
+  const scheduledHabits = sorted.filter((h) => h.status === 'scheduled')
+    .sort((a, b) => (a.startDate ?? '').localeCompare(b.startDate ?? ''));
+
+  // Render habit list container for active habits.
   const doc = parent.ownerDocument;
   const listEl = doc.createElement('ul');
   listEl.setAttribute('class', 'catalog-habit-list');
   listEl.setAttribute('aria-label', 'Habit catalog');
   parent.appendChild(listEl);
 
-  for (const habit of sorted) {
+  for (const habit of activeHabits) {
     const masteryState = masteryMap.get(habit.id) ?? { isMastered: false };
     mount(buildHabitListItem(habit, masteryState), listEl, actions);
   }
 
-  if (sorted.length === 0) {
+  if (activeHabits.length === 0 && scheduledHabits.length === 0) {
     const empty = doc.createElement('li');
     empty.setAttribute('class', 'catalog-empty');
     empty.textContent = 'No habits yet. Tap "New habit" to create one.';
     listEl.appendChild(empty);
+  }
+
+  // Render Upcoming section for scheduled habits if any exist.
+  if (scheduledHabits.length > 0) {
+    const upcomingSection = doc.createElement('section');
+    upcomingSection.setAttribute('class', 'catalog-upcoming-section');
+    parent.appendChild(upcomingSection);
+
+    const upcomingHeading = doc.createElement('h2');
+    upcomingHeading.setAttribute('class', 'catalog-upcoming-heading');
+    upcomingHeading.textContent = 'Upcoming';
+    upcomingSection.appendChild(upcomingHeading);
+
+    const upcomingList = doc.createElement('ul');
+    upcomingList.setAttribute('class', 'catalog-upcoming-list');
+    upcomingList.setAttribute('aria-label', 'Upcoming habits');
+    upcomingSection.appendChild(upcomingList);
+
+    for (const habit of scheduledHabits) {
+      mount(buildUpcomingListItem(habit), upcomingList, actions);
+    }
   }
 }
 
@@ -352,6 +379,21 @@ function buildActions(parent, deps) {
         await apply({ type: 'restoreHabit', payload: { habitId } });
       } catch (_e) {
         showErrorToast("Couldn't restore habit — try again");
+      }
+    },
+
+    /**
+     * Promote a scheduled habit to active.
+     */
+    promote: async (evt) => {
+      const habitId = evt?.currentTarget?.getAttribute('data-habit-id')
+        ?? evt?.target?.getAttribute('data-habit-id');
+      if (!habitId) return;
+      try {
+        await apply({ type: 'promoteHabit', payload: { habitId } });
+        // store.subscribe will trigger re-render.
+      } catch (_e) {
+        showErrorToast("Couldn't promote habit — try again");
       }
     },
 
