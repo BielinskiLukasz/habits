@@ -64,6 +64,8 @@ Declared values (multiples of 4):
 - 1.2 for headings ("Upcoming", "Catalog")
 - 1.4 for compact labels (badges)
 
+**Note:** All badge and button labels use `--text-sm` (13px, weight 400).
+
 ---
 
 ## Color
@@ -84,7 +86,6 @@ Declared values (multiples of 4):
 
 **Accent reserved for (Phase 8 scope):**
 - `.catalog-btn--create` — "New habit" button (existing)
-- `.catalog-btn--promote` — "Promote" button (new, Phase 8)
 
 **No destructive semantic color in Phase 8** — Archive/Restore buttons use default `.catalog-btn` styling (D-79, existing).
 
@@ -184,18 +185,18 @@ Declared values (multiples of 4):
 
 **Wave Badge (`.catalog-habit-wave`)** — reuses existing class
 - Display: inline-block
-- Padding: 2px 8px
+- Padding: 4px 8px
 - Border-radius: 12px
-- Font-size: 0.75rem (11px)
+- Font-size: `var(--text-sm)` (13px)
 - Font-weight: 400
 - Background: `var(--color-surface-raised)` (#27272a)
 - Color: `var(--color-fg-muted)` (rgba(245, 245, 245, 0.55))
 
 **Start Date Badge (`.catalog-upcoming-date`)** — **new class for Phase 8**
 - Display: inline-block
-- Padding: 2px 8px
+- Padding: 4px 8px
 - Border-radius: 12px
-- Font-size: 0.75rem (11px)
+- Font-size: `var(--text-sm)` (13px)
 - Font-weight: 400
 - Background: `var(--color-surface-raised)` (#27272a)
 - Color: `var(--color-fg-muted)` (rgba(245, 245, 245, 0.55))
@@ -223,7 +224,7 @@ Declared values (multiples of 4):
 - Border-radius: 6px
 - Background: default (will inherit from body or default button background)
 - Color: default (will inherit from text color)
-- Font-size: 0.875rem (13px)
+- Font-size: `var(--text-sm)` (13px)
 - Font-weight: 400
 - Cursor: pointer
 - White-space: nowrap
@@ -232,7 +233,7 @@ Declared values (multiples of 4):
 **Promote-specific styling (`.catalog-btn--promote` — new):**
 - Follow the pattern of existing button variants (e.g., `.catalog-btn--archive`, `.catalog-btn--restore`)
 - Background: **base button style** (not accent-colored) — matches Archive/Restore pattern
-- Font-size: 0.8rem (12px) — compact, like Archive button (line 138 in catalog.css)
+- Font-size: `var(--text-sm)` (13px) — standard label size, matches all badge and button labels
 - Color: inherit from `.catalog-btn` default
 
 **Hover/Focus states (inherited from `.catalog-btn`):**
@@ -302,11 +303,11 @@ Declared values (multiples of 4):
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: "Promote" button + section heading "Upcoming" + aria labels all defined; no empty state copy (hidden section). PASS
-- [ ] Dimension 2 Visuals: Upcoming section container, list, item layout, badge styling all specified with existing CSS classes; new `.catalog-upcoming-date` badge styled consistently. PASS
-- [ ] Dimension 3 Color: All colors drawn from locked Phase 1 tokens (css/tokens.css D-16); no new colors introduced. PASS
-- [ ] Dimension 4 Typography: All sizes from locked text scale (--text-xs through --text-2xl); font weights 400/500/600 per existing spec. PASS
-- [ ] Dimension 5 Spacing: All gaps from locked spacing scale (--space-1 through --space-7); 4px multiples enforced. PASS
-- [ ] Dimension 6 Registry Safety: No external libraries or registries in Phase 8 scope. PASS
+- [x] Dimension 1 Copywriting: "Promote" button + section heading "Upcoming" + aria labels all defined; no empty state copy (hidden section). PASS
+- [x] Dimension 2 Visuals: Upcoming section container, list, item layout, badge styling all specified with existing CSS classes; new `.catalog-upcoming-date` badge styled consistently. PASS
+- [x] Dimension 3 Color: `.catalog-btn--promote` removed from accent-reserved list; button uses base style only (matches Archive/Restore pattern). REVISED & PASS
+- [x] Dimension 4 Typography: 4 sizes only (24, 18, 15, 13px); 12px and 11px removed; all badges and buttons use `--text-sm` (13px, weight 400). REVISED & PASS
+- [x] Dimension 5 Spacing: Badge padding corrected to 4px 8px (was 2px 8px); all values are 4px multiples. REVISED & PASS
+- [x] Dimension 6 Registry Safety: No external libraries or registries in Phase 8 scope. PASS
 
-**Approval:** pending
+**Approval:** pending — ready for review
