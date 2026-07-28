@@ -46,9 +46,9 @@ Archives: `.planning/milestones/`
 ## Current Position
 
 **Phase:** 08 (today-catalog-upcoming-section) — EXECUTING
-**Plan:** 2 of 3
-**Status:** Plan 08-01 complete; executing Phase 08
-**Last activity:** 2026-07-28 — Plan 08-01 (promoteHabit handler) COMPLETE
+**Plan:** 3 of 3
+**Status:** Plan 08-02 complete; executing Phase 08
+**Last activity:** 2026-07-28 — Plan 08-02 (buildUpcomingListItem + CAT-01) COMPLETE
 
 ```
 v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
@@ -72,7 +72,7 @@ v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
 | Phase | Plans | Completed |
 |-------|-------|-----------|
 | 7. Scheduled Status Foundation | 3/3 | 2026-07-28 |
-| 8. Today & Catalog — Upcoming Section | 1/3 | 2026-07-28 (08-01) |
+| 8. Today & Catalog — Upcoming Section | 2/3 | 2026-07-28 (08-02) |
 | 9. Desktop Waveboard | 0/? | - |
 
 ## Accumulated Context
@@ -113,10 +113,10 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T13:43:01.518Z
-**Stopped at:** Phase 8 UI-SPEC approved
-**Resume file:** .planning/phases/08-today-catalog-upcoming-section/08-UI-SPEC.md
+**Last session:** 2026-07-28T19:15:55Z
+**Stopped at:** Plan 08-02 execution complete
+**Resume file:** .planning/phases/08-today-catalog-upcoming-section/08-02-SUMMARY.md
 
-Next command: `/gsd-execute-phase 7`
+Next command: Continue with Plan 08-03 (Upcoming section rendering in catalog.js)
 
-*Updated: 2026-07-01 — Phase 7 plans created*
+*Updated: 2026-07-28 — Plan 08-02 complete (buildUpcomingListItem + CAT-01)*

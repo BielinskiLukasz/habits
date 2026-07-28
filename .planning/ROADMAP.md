@@ -89,7 +89,7 @@ Plans:
 Plans:
 
 - [x] 08-01-PLAN.md (TDD) — promoteHabit handler (RED/GREEN/REFACTOR) [completed 2026-07-28]
-- [ ] 08-02-PLAN.md (execute) — buildUpcomingListItem builder + CAT-01 verification test
+- [x] 08-02-PLAN.md (execute) — buildUpcomingListItem builder + CAT-01 verification test [completed 2026-07-28]
 - [ ] 08-03-PLAN.md (execute) — Catalog split + Promote wiring + boot configuration
 
 **UI hint**: yes
@@ -114,7 +114,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Scheduled Status Foundation | 3/3 | Complete    | 2026-07-01 |
-| 8. Today & Catalog — Upcoming Section | 1/3 | In progress | 2026-07-28 (08-01) |
+| 8. Today & Catalog — Upcoming Section | 2/3 | In progress | 2026-07-28 (08-02) |
 | 9. Desktop Waveboard | 0/? | Not started | - |
 
 ---
