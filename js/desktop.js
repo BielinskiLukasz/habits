@@ -55,6 +55,7 @@ import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 import { configureExport } from './io/export.js';
 import { configureImport } from './io/import.js';
 import { configureBackupNag } from './io/backup-nag.js';
+import { configurePromoteHabit } from './state/apply/promoteHabit.js';
 
 // P6 desktop imports (D-115, D-117, D-118, D-121).
 import { mountRoutes } from './router.js';
@@ -86,6 +87,7 @@ configureApply({
 });
 configureUndo({ repo });
 configureScheduled({ repo });
+configurePromoteHabit({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
 configureExport({ repo });
 configureImport({ repo, broadcast });

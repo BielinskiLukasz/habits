@@ -63,6 +63,7 @@ import { configureBackupNag } from './io/backup-nag.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 
 import { writeHabitSnapshots } from './io/scoreSnapshots.js';
+import { configurePromoteHabit } from './state/apply/promoteHabit.js';
 
 // P3 router + Today view wiring (D-60, CORE-01..06).
 import { mountRoutes } from './router.js';
@@ -96,6 +97,7 @@ configureApply({
 });
 configureUndo({ repo });
 configureScheduled({ repo });
+configurePromoteHabit({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
 configureWave({ fetch: globalThis.fetch });
 configureStore({ repo });
