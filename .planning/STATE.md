@@ -4,16 +4,16 @@ milestone: v1.1
 milestone_name: Scheduled Habits — Phases 7–9
 current_phase: 08
 current_phase_name: today-catalog-upcoming-section
-status: executing
-stopped_at: Phase 8 plan 08-03 complete
-last_updated: "2026-07-28T20:30:00.000Z"
+status: complete
+stopped_at: Phase 8 verified complete (2026-07-28)
+last_updated: "2026-07-28T21:00:00.000Z"
 last_activity: 2026-07-28
-last_activity_desc: Phase 08 plan 08-03 complete (Upcoming section integration)
+last_activity_desc: Phase 08 complete — all 5 requirements verified (CAT-01/02/03/04, SCHED-04)
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 6
-  completed_plans: 4
+  completed_phases: 2
+  total_plans: 9
+  completed_plans: 6
   percent: 67
 ---
 
@@ -45,13 +45,13 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-**Phase:** 08 (today-catalog-upcoming-section) — EXECUTING
-**Plan:** 3 of 3
-**Status:** Plan 08-03 complete; Phase 08-03 is final plan complete
-**Last activity:** 2026-07-28 — Plan 08-03 (Upcoming section integration + promote action wiring) COMPLETE
+**Phase:** 08 (today-catalog-upcoming-section) — COMPLETE ✓
+**Plan:** 3 of 3 verified
+**Status:** All requirements verified: CAT-01, CAT-02, CAT-03, CAT-04, SCHED-04
+**Last activity:** 2026-07-28 — Phase 08 complete (code review fixes applied + verification passed)
 
 ```
-v1.1 Progress [░░░░░░░░░░] 0% (0/3 phases)
+v1.1 Progress [██████░░░░] 67% (2/3 phases)
 ```
 
 ## Performance Metrics
