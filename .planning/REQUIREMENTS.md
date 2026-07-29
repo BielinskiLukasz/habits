@@ -11,13 +11,13 @@
 - [x] **SCHED-01**: App supports a `scheduled` status for habits (4th status alongside active/mastered/archived)
 - [x] **SCHED-02**: Habits with `startDate > today` created or imported are stored with `status: 'scheduled'`
 - [x] **SCHED-03**: On app boot, habits whose `startDate` has arrived auto-transition from `scheduled` → `active`
-- [ ] **SCHED-04**: User can manually promote a scheduled habit to active before its startDate
+- [x] **SCHED-04**: User can manually promote a scheduled habit to active before its startDate
 
 ### Catalog / Upcoming
 
-- [ ] **CAT-01**: Today view never shows scheduled habits (regardless of startDate)
-- [ ] **CAT-02**: Active Catalog list excludes scheduled habits
-- [ ] **CAT-03**: Catalog has an "Upcoming" section listing all scheduled habits, sorted by startDate
+- [x] **CAT-01**: Today view never shows scheduled habits (regardless of startDate)
+- [x] **CAT-02**: Active Catalog list excludes scheduled habits
+- [x] **CAT-03**: Catalog has an "Upcoming" section listing all scheduled habits, sorted by startDate
 - [x] **CAT-04**: Each scheduled habit in Upcoming shows its startDate and wave
 
 ### Waveboard
@@ -61,10 +61,10 @@
 | SCHED-01 | Phase 7 | Complete |
 | SCHED-02 | Phase 7 | Complete |
 | SCHED-03 | Phase 7 | Complete |
-| SCHED-04 | Phase 8 | Pending |
-| CAT-01 | Phase 8 | Pending |
-| CAT-02 | Phase 8 | Pending |
-| CAT-03 | Phase 8 | Pending |
+| SCHED-04 | Phase 8 | Complete |
+| CAT-01 | Phase 8 | Complete |
+| CAT-02 | Phase 8 | Complete |
+| CAT-03 | Phase 8 | Complete |
 | CAT-04 | Phase 8 | Complete |
 | WAVE-01 | Phase 9 | Pending |
 | WAVE-02 | Phase 9 | Pending |
