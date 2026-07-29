@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-07-20 (added B-023 — tap-time-based Today ordering)
-Last assigned ID: **B-023** — next new item must be **B-024**
+Last updated: 2026-07-29 (added B-024 — Polish/English language switch)
+Last assigned ID: **B-024** — next new item must be **B-025**
 
 ---
 
@@ -542,3 +542,32 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 - **Average computation:** On Today mount, for each active habit, fetch its recent log rows, filter to those with `tappedAt` present, extract the time-of-day component, and compute the mean minute-of-day. Sort ascending by mean minute (or by a fallback sentinel for habits with no history).
 - **Storage:** Compute on read (no separate IDB store needed); result is ephemeral per render.
 - Effort: Medium — schema additive change + three apply handler edits + sort logic in `today.js`.
+
+---
+
+## Captured 2026-07-29
+
+### B-024 · Polish/English language switch
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** post-v1 milestone; after `name_pl` display work (B-002) lands
+
+**What:** Add a user-controlled language toggle (English ↔ Polish) that switches the visible habit names — and optionally the UI chrome — between English and Polish. The `name_pl` field is already stored on every seed habit (D-40, locked Phase 2); this item is about surfacing a toggle that makes it the active display language app-wide.
+
+**Why:** The underlying data model already carries `name_pl` for all seed habits. The user is Polish-speaking and runs the app personally — an in-app language switch would let them move between English habit names (default, D-35) and the original Polish names without a data migration or seed change. It also aligns the app with the user's native language for habit labels that read naturally in Polish but feel slightly awkward in English.
+
+**Open questions when this gets planned:**
+
+- Scope: habit names only, or also UI chrome strings (tab labels, button text, headings)? Full i18n of UI chrome is significantly more work; habit-name swap alone reuses the existing `name_pl` field with minimal new code.
+- Fallback: if `name_pl` is null (user-created habit with no Polish name), show the English name silently or surface a "(no Polish name)" placeholder?
+- Persistence: store the active language in `localStorage` (tiny UI preference, acceptable per CLAUDE.md) or in the `settings` IDB store?
+- Toggle placement: Settings card, header gear icon, or a flag/globe icon in the bottom nav?
+- Should user-created habits gain an optional "Add Polish name" field in the Create/Edit form once this feature lands?
+
+**Implementation notes:**
+
+- The data layer already supports this: `habit.name_pl` is present for all seed habits and null for user-created ones.
+- A `lang` setting key in `localStorage` (`'en'` / `'pl'`, default `'en'`) is the simplest persistence path.
+- All builder functions that render habit names (`buildTodayRow`, `buildNumericRow`, `buildSlotRow`, catalog row builders) would read `lang` from the setting and select `habit.name_pl ?? habit.name` vs `habit.name`.
+- UI chrome i18n (if included) requires a string table — consider a `js/i18n/` module with `en.js` and `pl.js` exports.
+- Effort: Low for habit-names-only toggle; Medium–High for full UI chrome i18n.
