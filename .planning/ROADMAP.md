@@ -46,7 +46,7 @@ Introduces `scheduled` as a first-class habit status for future-start habits, au
 ## Phases
 
 - [x] **Phase 7: Scheduled Status Foundation** — Domain, storage, boot migration, converter, import (completed 2026-07-01)
-- [x] **Phase 8: Today & Catalog — Upcoming Section** — Filter Today (verify CAT-01), Catalog Upcoming list, promoteHabit handler (completed 2026-07-28)
+- [x] **Phase 8: Today & Catalog — Upcoming Section** — Filter Today (verify CAT-01), Catalog Upcoming list, promoteHabit handler, CSS styling (completed 2026-07-29)
 - [ ] **Phase 9: Desktop Waveboard** — Wave rows with startDates, scheduled/active counts, habit lists
 
 ## Phase Details
@@ -84,13 +84,14 @@ Plans:
   4. Each entry in the Upcoming section displays the habit's startDate and wave name
   5. A "Promote to active" action on any Upcoming entry immediately moves the habit to `status: 'active'` and removes it from the Upcoming section
 
-**Plans**: 3 plans
+**Plans**: 4/4 plans executed
 
 Plans:
 
 - [x] 08-01-PLAN.md (TDD) — promoteHabit handler (RED/GREEN/REFACTOR) [completed 2026-07-28]
 - [x] 08-02-PLAN.md (execute) — buildUpcomingListItem builder + CAT-01 verification test [completed 2026-07-28]
 - [x] 08-03-PLAN.md (execute) — Catalog split + Promote wiring + boot configuration [completed 2026-07-28]
+- [x] 08-04-PLAN.md (execute) — CSS rules for Upcoming section (gap G-08-4 closure) [completed 2026-07-29]
 
 **UI hint**: yes
 
@@ -114,7 +115,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Scheduled Status Foundation | 3/3 | Complete    | 2026-07-01 |
-| 8. Today & Catalog — Upcoming Section | 3/3 | Complete    | 2026-07-28 (08-03) |
+| 8. Today & Catalog — Upcoming Section | 4/4 | Complete    | 2026-07-29 |
 | 9. Desktop Waveboard | 0/? | Not started | - |
 
 ---
