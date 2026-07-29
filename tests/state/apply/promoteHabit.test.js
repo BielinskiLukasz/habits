@@ -7,7 +7,7 @@
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { handlePromoteHabit } from '../../../js/state/apply/promoteHabit.js';
+import { handlePromoteHabit, handleDemoteHabit } from '../../../js/state/apply/promoteHabit.js';
 
 describe('promoteHabit handler (SCHED-04)', () => {
   // Test 1: handlePromoteHabit accepts event with habitId and reads habit
@@ -155,6 +155,153 @@ describe('promoteHabit handler (SCHED-04)', () => {
     };
 
     const result = await handlePromoteHabit(event, mockRepo);
+    const updated = result.writes[0].value;
+
+    assert.strictEqual(updated.id, 'habit-preserve-test', 'id preserved');
+    assert.strictEqual(updated.name, 'Preserve this', 'name preserved');
+    assert.strictEqual(updated.wave, 3, 'wave preserved');
+    assert.strictEqual(updated.stage, 1, 'stage preserved');
+    assert.strictEqual(updated.cadence, 'daily', 'cadence preserved');
+    assert.strictEqual(updated.startDate, '2026-08-15', 'startDate preserved');
+    assert.strictEqual(updated.customField, 'should-persist', 'custom fields preserved');
+  });
+});
+
+describe('demoteHabit handler (inverse of promoteHabit)', () => {
+  // Test 1: handleDemoteHabit accepts event with habitId and reads habit
+  test('reads habit from repo and returns structured result', async () => {
+    const mockRepo = {
+      getHabit: async (id) => ({
+        id: 'habit-123',
+        name: 'Morning walk',
+        status: 'active',
+        wave: 1,
+        startDate: '2026-08-01',
+      }),
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-123' },
+    };
+
+    const result = await handleDemoteHabit(event, mockRepo);
+
+    assert(result, 'handler returns a result object');
+    assert(result.storeNames, 'result has storeNames property');
+    assert(result.writes, 'result has writes property');
+    assert(result.inverse, 'result has inverse property');
+  });
+
+  // Test 2: habit.status is set to 'scheduled'
+  test('sets habit.status to scheduled', async () => {
+    const mockRepo = {
+      getHabit: async () => ({
+        id: 'habit-456',
+        name: 'Evening routine',
+        status: 'active',
+        wave: 2,
+      }),
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-456' },
+    };
+
+    const result = await handleDemoteHabit(event, mockRepo);
+
+    assert.strictEqual(result.writes[0].value.status, 'scheduled', 'status is scheduled');
+  });
+
+  // Test 3: inverse type is 'promoteHabit' (round-trip closure)
+  test('inverse type is promoteHabit', async () => {
+    const mockRepo = {
+      getHabit: async () => ({
+        id: 'habit-789',
+        name: 'Test habit',
+        status: 'active',
+      }),
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-789' },
+    };
+
+    const result = await handleDemoteHabit(event, mockRepo);
+
+    assert.strictEqual(result.inverse.type, 'promoteHabit', 'inverse type is promoteHabit');
+    assert.strictEqual(
+      result.inverse.payload.habitId,
+      'habit-789',
+      'inverse carries same habitId'
+    );
+  });
+
+  // Test 4: error handling when habit not found
+  test('throws when habit not found', async () => {
+    const mockRepo = {
+      getHabit: async () => undefined,
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'nonexistent' },
+    };
+
+    await assert.rejects(
+      () => handleDemoteHabit(event, mockRepo),
+      /Habit nonexistent not found/,
+      'throws error with habitId'
+    );
+  });
+
+  // Test 5: broadcastKeys function returns object with habitId key
+  test('broadcastKeys returns object with habitId', () => {
+    assert(
+      typeof handleDemoteHabit.broadcastKeys === 'function',
+      'broadcastKeys is a function'
+    );
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-broadcast-test' },
+    };
+
+    const keys = handleDemoteHabit.broadcastKeys(event);
+
+    assert(keys, 'broadcastKeys returns truthy result');
+    assert.strictEqual(
+      keys.habitId,
+      'habit-broadcast-test',
+      'keys has habitId property'
+    );
+  });
+
+  // Test 6: handler preserves other habit properties when setting status
+  test('preserves all other habit properties', async () => {
+    const originalHabit = {
+      id: 'habit-preserve-test',
+      name: 'Preserve this',
+      status: 'active',
+      wave: 3,
+      stage: 1,
+      cadence: 'daily',
+      startDate: '2026-08-15',
+      customField: 'should-persist',
+    };
+
+    const mockRepo = {
+      getHabit: async () => originalHabit,
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-preserve-test' },
+    };
+
+    const result = await handleDemoteHabit(event, mockRepo);
     const updated = result.writes[0].value;
 
     assert.strictEqual(updated.id, 'habit-preserve-test', 'id preserved');
