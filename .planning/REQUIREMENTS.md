@@ -18,7 +18,7 @@
 - [ ] **CAT-01**: Today view never shows scheduled habits (regardless of startDate)
 - [ ] **CAT-02**: Active Catalog list excludes scheduled habits
 - [ ] **CAT-03**: Catalog has an "Upcoming" section listing all scheduled habits, sorted by startDate
-- [ ] **CAT-04**: Each scheduled habit in Upcoming shows its startDate and wave
+- [x] **CAT-04**: Each scheduled habit in Upcoming shows its startDate and wave
 
 ### Waveboard
 
@@ -65,7 +65,7 @@
 | CAT-01 | Phase 8 | Pending |
 | CAT-02 | Phase 8 | Pending |
 | CAT-03 | Phase 8 | Pending |
-| CAT-04 | Phase 8 | Pending |
+| CAT-04 | Phase 8 | Complete |
 | WAVE-01 | Phase 9 | Pending |
 | WAVE-02 | Phase 9 | Pending |
 | WAVE-03 | Phase 9 | Pending |
