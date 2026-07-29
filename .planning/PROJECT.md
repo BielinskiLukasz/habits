@@ -16,6 +16,15 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Validated
 
+<!-- v1.1 Scheduled Habits — Phases 7–8 -->
+
+- ✓ SCHED-01 — New `scheduled` status (4th, alongside active/mastered/archived) for future-start habits — Phase 7
+- ✓ SCHED-02 — Scheduled habits hidden from Today view and active Catalog list — Phase 7 (impl) / Phase 8 (CAT-01 verification test)
+- ✓ SCHED-03 — Catalog shows scheduled habits in a dedicated "Upcoming" section — Phase 8
+- ✓ SCHED-05 — Auto-transition: `scheduled` → `active` when startDate is reached (on app boot) — Phase 7
+- ✓ SCHED-06 — Manual promote-to-active action available from the Upcoming section — Phase 8
+- ✓ SCHED-07 — Converter (`scripts/convert-nawyki.js`) sets `status: 'scheduled'` for habits with `startDate > today` — Phase 7
+
 <!-- Shipped and confirmed valuable — v1.0 (2026-06-30) -->
 
 - ✓ CORE — Daily check-in view (Today), mobile-first, single-tap mark/unmark, multi-occurrence logging — v1.0
@@ -35,15 +44,9 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Active
 
-<!-- v1.1 Scheduled Habits — defined 2026-06-30 -->
+<!-- v1.1 Scheduled Habits — remaining -->
 
-- SCHED-01 — New `scheduled` status (4th, alongside active/mastered/archived) for future-start habits
-- SCHED-02 — Scheduled habits hidden from Today view and active Catalog list
-- SCHED-03 — Catalog shows scheduled habits in a dedicated "Upcoming" section
 - SCHED-04 — Desktop Waveboard surfaces scheduled habits per wave with their startDate
-- SCHED-05 — Auto-transition: `scheduled` → `active` when startDate is reached (on app boot)
-- SCHED-06 — Manual promote-to-active action available from the Upcoming section
-- SCHED-07 — Converter (`scripts/convert-nawyki.js`) sets `status: 'scheduled'` for habits with `startDate > today`
 
 ### Out of Scope
 
@@ -160,4 +163,4 @@ This document evolves at phase transitions and milestone boundaries.
 - Converter update: future-start habits imported as `scheduled`
 
 ---
-*Last updated: 2026-07-01 — Phase 7 complete: scheduled status foundation shipped (SCHED-01, SCHED-02, SCHED-03, DATA-01, DATA-02, DATA-03)*
+*Last updated: 2026-07-30 — Phase 8 complete: Catalog Upcoming section + promote action shipped (SCHED-02 verified, SCHED-03, SCHED-06 validated)*
