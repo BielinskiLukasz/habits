@@ -579,21 +579,21 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** next UI polish pass; pairs naturally with B-004 (same-row layout) and B-005 (archive visual differentiation)
 
-**What:** Replace the text-labelled action buttons in the Catalog habit card — "Edit", "Archive", and "Advance stage" — with icon-only buttons (or icon + compact label).
+**What:** Replace the text-labelled action buttons in the Catalog habit card — "Edit", "Archive", "Advance stage", and "Promote" — with icon-only buttons (or icon + compact label). Active habits carry Edit + Archive + Advance stage; scheduled (upcoming) habits carry Edit + Promote.
 
-**Why:** Text buttons consume horizontal space and force the card to grow vertically. Icon buttons let the three actions sit in a compact row while remaining tappable on mobile. The catalog is scanned repeatedly; familiar icons (pencil, archive box, chevron-up) are faster to parse at a glance than reading full words.
+**Why:** Text buttons consume horizontal space and force the card to grow vertically. Icon buttons let the three actions sit in a compact row while remaining tappable on mobile. The catalog is scanned repeatedly; familiar icons (pencil, archive box, chevron-up, play/arrow-right) are faster to parse at a glance than reading full words.
 
 **Open questions when this gets planned:**
 
 - Icon source: inline SVG sprites, CSS-drawn icons, or Unicode glyphs (e.g. ✏️ 📥 ⬆)? Inline SVG is cleanest for accessibility and theming; Unicode glyphs are zero-dependency but less controllable.
 - Icon-only vs. icon + short label (e.g. icon above/beside "Edit")? Pure icon-only requires a `title` / `aria-label` for accessibility; short labels add context but partially defeat the space saving.
 - Should the "Advance stage" button use a different visual metaphor from "Archive" to avoid confusion (both imply state change)?
-- Confirm the full set of per-habit actions — verify whether any additional buttons exist beyond Edit, Archive, and Advance stage.
+- The full confirmed button set: active habits → Edit, Archive, Advance stage; scheduled habits → Edit, Promote. Icon choices for Promote: play triangle (▶), right-pointing arrow, or a "start" glyph — must feel distinct from Advance stage (upward chevron) to avoid confusion.
 
 **Implementation notes:**
 
 - Replace button text content with `<svg>` (or `<span aria-hidden>icon</span>`) in the catalog row builder.
-- Every icon button must carry an accessible name: `aria-label="Edit habit"`, `aria-label="Archive habit"`, `aria-label="Advance stage"`.
+- Every icon button must carry an accessible name: `aria-label="Edit habit"`, `aria-label="Archive habit"`, `aria-label="Advance stage"`, `aria-label="Promote to active"`.
 - Add a CSS `title` tooltip or visible `<span class="sr-only">` for screen readers.
 - With B-004 already captured (same-row layout), consider tackling both together — row layout and icon swap are a natural combined pass.
 - With B-005 already captured (archive destructive styling), apply the red/destructive treatment to the archive icon at the same time.
