@@ -4,16 +4,16 @@ milestone: v1.1
 milestone_name: Scheduled Habits — Phases 7–9
 current_phase: 08
 current_phase_name: today-catalog-upcoming-section
-status: complete
+status: executing
 stopped_at: Phase 8 verified complete (2026-07-28)
-last_updated: "2026-07-28T21:00:00.000Z"
-last_activity: 2026-07-28
-last_activity_desc: Phase 08 complete — all 5 requirements verified (CAT-01/02/03/04, SCHED-04)
+last_updated: "2026-07-29T20:27:07.387Z"
+last_activity: 2026-07-29
+last_activity_desc: Phase 08 execution started
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
   percent: 67
 ---
 
@@ -45,13 +45,13 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-**Phase:** 08 (today-catalog-upcoming-section) — COMPLETE ✓
-**Plan:** 3 of 3 verified
-**Status:** All requirements verified: CAT-01, CAT-02, CAT-03, CAT-04, SCHED-04
-**Last activity:** 2026-07-28 — Phase 08 complete (code review fixes applied + verification passed)
+**Phase:** 08 (today-catalog-upcoming-section) — COMPLETE
+**Plans:** 4 of 4 complete
+**Status:** Phase 08 execution complete
+**Last activity:** 2026-07-29 — Plan 08-04 (CSS Upcoming section) complete
 
 ```
-v1.1 Progress [██████░░░░] 67% (2/3 phases)
+v1.1 Progress [██████████] 67% (2/3 phases)
 ```
 
 ## Performance Metrics
@@ -72,7 +72,7 @@ v1.1 Progress [██████░░░░] 67% (2/3 phases)
 | Phase | Plans | Completed |
 |-------|-------|-----------|
 | 7. Scheduled Status Foundation | 3/3 | 2026-07-28 |
-| 8. Today & Catalog — Upcoming Section | 3/3 | 2026-07-28 (08-03) |
+| 8. Today & Catalog — Upcoming Section | 4/4 | 2026-07-29 (08-04) |
 | 9. Desktop Waveboard | 0/? | - |
 
 ## Accumulated Context
@@ -113,10 +113,10 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T19:15:55Z
-**Stopped at:** Plan 08-02 execution complete
-**Resume file:** .planning/phases/08-today-catalog-upcoming-section/08-02-SUMMARY.md
+**Last session:** 2026-07-29T20:30:40Z
+**Stopped at:** Plan 08-04 execution complete
+**Resume file:** .planning/phases/08-today-catalog-upcoming-section/08-04-SUMMARY.md
 
-Next command: Continue with Plan 08-03 (Upcoming section rendering in catalog.js)
+Next command: Phase 08 complete — ready for Phase 09 (Desktop Waveboard) planning and execution
 
-*Updated: 2026-07-28 — Plan 08-02 complete (buildUpcomingListItem + CAT-01)*
+*Updated: 2026-07-29 — Phase 08 complete (all 4 plans: 08-01, 08-02, 08-03, 08-04)*
