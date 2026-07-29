@@ -540,6 +540,7 @@ function _closeOpenPanel(parent) {
 export async function mountCatalog(parent, deps) {
   if (_unsub) {
     // Already mounted — re-render against the live parent.
+    _currentParent = parent;
     _currentDeps = deps;
     await renderCatalogInto(parent, deps);
     return _createUnmount(parent);
