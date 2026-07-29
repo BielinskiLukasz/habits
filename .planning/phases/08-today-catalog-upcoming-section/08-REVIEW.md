@@ -1,220 +1,215 @@
 ---
-phase: 08
-reviewed: 2026-07-28T20:30:00Z
+phase: 08-today-catalog-upcoming-section
+reviewed: 2026-07-29T00:00:00Z
 depth: standard
-files_reviewed: 8
+files_reviewed: 9
 files_reviewed_list:
-  - js/state/apply/promoteHabit.js
-  - tests/state/apply/promoteHabit.test.js
-  - js/views/catalog/builders.js
-  - tests/unit/builders.catalog.test.js
-  - tests/integration/today.cat01-scheduled-filter.test.js
-  - js/views/catalog.js
-  - js/main.js
+  - css/catalog.css
   - js/desktop.js
+  - js/main.js
+  - js/state/apply.js
+  - js/state/apply/promoteHabit.js
+  - js/views/catalog.js
+  - js/views/catalog/builders.js
+  - tests/integration/today.cat01-scheduled-filter.test.js
+  - tests/unit/builders.catalog.test.js
 findings:
-  critical: 3
-  warning: 1
-  info: 0
+  critical: 0
+  warning: 2
+  info: 2
   total: 4
 status: issues_found
 ---
 
-# Phase 8 Code Review
+# Phase 08: Code Review Report
+
+**Reviewed:** 2026-07-29
+**Depth:** standard
+**Files Reviewed:** 9
+**Status:** issues_found
 
 ## Summary
 
-Phase 8 implements the Upcoming section for scheduled habits with a Promote button. The core handler logic, builders, and catalog integration are mostly sound, but **three critical issues prevent the feature from functioning**:
+Reviewed the Catalog view implementation (CATALOG-01..07, CAT-04 upcoming section, promote/demote flow) following fixes to the previously identified wiring issues. The feature is now architecturally sound with:
 
-1. **Missing `configurePromoteHabit` export** — both `main.js` and `desktop.js` import and call this function, but it is not exported from `promoteHabit.js`. This causes an import-time error.
-2. **Missing `demoteHabit` handler** — `promoteHabit` declares its inverse as `demoteHabit`, but no `handleDemoteHabit` function exists. This breaks undo/redo functionality.
-3. **Handlers not registered in HANDLERS table** — neither `promoteHabit` nor `demoteHabit` are registered in `js/state/apply.js`, so `apply({type:'promoteHabit'})` will fail at runtime with "Unknown event type".
+- ✓ Handlers properly defined and registered (`handlePromoteHabit`, `handleDemoteHabit`)
+- ✓ Pure builders with XSS safety (D-77, D-78)
+- ✓ Comprehensive test coverage (18 unit + 3 integration tests, all passing)
+- ✓ Cross-tab sync via broadcastKeys
+- ✓ State atomicity via transactional writes
 
-The builders are well-constructed and tests are comprehensive, but these wiring gaps make the feature non-functional.
+However, **two logic inconsistencies and one design defect** remain:
+
+1. **Logic bug**: Edit habit save skips `customMastery` validation for mastery overrides (inconsistent with create).
+2. **Design defect**: `mountCatalog` idempotence broken—`_currentParent` not updated on re-entry.
+3. **Type safety gap**: `getCachedHabits` called without verifying it's a function.
+4. **CSS style**: Redundant selector in mastered habit rule.
 
 ---
 
 ## Critical Issues
 
-### CR-001: Missing `configurePromoteHabit` export breaks boot sequence
-
-**File:** `js/state/apply/promoteHabit.js`
-
-**Issue:** 
-`main.js:66` and `desktop.js:58` both import `configurePromoteHabit` from `promoteHabit.js`:
-```javascript
-import { configurePromoteHabit } from './state/apply/promoteHabit.js';
-```
-
-And then call it at boot time:
-```javascript
-// main.js:100
-configurePromoteHabit({ repo });
-// desktop.js:90
-configurePromoteHabit({ repo });
-```
-
-However, `promoteHabit.js` only exports `handlePromoteHabit`. The `configurePromoteHabit` function does not exist. This causes an **import-time error** that prevents the entire app from loading.
-
-**Fix:**
-Add a `configurePromoteHabit` export to `promoteHabit.js`. Following the pattern in `js/domain/scheduled.js`, this should be a simple DI function:
-
-```javascript
-// Add after line 42 in promoteHabit.js
-let _repo = null;
-
-/**
- * Configure the promoteHabit handler with a repo handle (DI pattern).
- * Required by undo/demoteHabit to read the prior habit state.
- *
- * @param {{ repo: object }} deps
- * @returns {void}
- */
-export function configurePromoteHabit(deps) {
-  _repo = deps?.repo;
-}
-```
-
-Then update `handlePromoteHabit` signature to use the injected `_repo` when the repo parameter is not provided, OR ensure callers always pass the repo. Alternatively, if no stateful config is needed, the import can simply be removed from `main.js:66` and `desktop.js:58` and the export can be a no-op.
-
----
-
-### CR-002: Missing `demoteHabit` handler breaks undo/redo
-
-**File:** `js/state/apply/promoteHabit.js`
-
-**Issue:**
-Line 38 declares the inverse event type as `demoteHabit`:
-```javascript
-inverse: { type: 'demoteHabit', payload: { habitId } },
-```
-
-When a user undoes a promotion, `js/state/undo.js` dispatches this inverse through `apply()`. The `apply.js` HANDLERS table (line 64–79) does not have an entry for `demoteHabit`, so the undo dispatch will fail with "Unknown event type: demoteHabit".
-
-Additionally, there is no `js/state/apply/demoteHabit.js` file, so the handler cannot be imported and registered.
-
-**Fix:**
-Create `js/state/apply/demoteHabit.js` with a `handleDemoteHabit` export that mirrors `promoteHabit.js` (same pattern as `archiveHabit.js`/`restoreHabit.js`):
-
-```javascript
-/**
- * @file demoteHabit handler (undo inverse of promoteHabit).
- *
- * Transitions a habit from 'active' back to 'scheduled' status
- * (used only via undo/redo).
- */
-
-/**
- * `demoteHabit` handler — set habit.status back to 'scheduled'.
- *
- * @param {{ type: 'demoteHabit', payload: { habitId: string } }} event
- * @param {{ getHabit: (id: string) => Promise<object|undefined> }} repo
- * @returns {Promise<{ storeNames: string[], writes: Array<{store: string, value: object}>, inverse: { type: string, payload: object } }>}
- */
-export async function handleDemoteHabit(event, repo) {
-  const { habitId } = event.payload;
-  const habit = await repo.getHabit(habitId);
-  const updated = { ...habit, status: 'scheduled' };
-
-  return {
-    storeNames: ['habits'],
-    writes: [{ store: 'habits', value: updated }],
-    inverse: { type: 'promoteHabit', payload: { habitId } },
-  };
-}
-
-handleDemoteHabit.broadcastKeys = (event) => ({ habitId: event.payload.habitId });
-```
-
-Then register it in `js/state/apply.js`:
-```javascript
-// Line 49, change:
-import { handleArchiveHabit, handleRestoreHabit } from './apply/archiveHabit.js';
-// To:
-import { handleArchiveHabit, handleRestoreHabit } from './apply/archiveHabit.js';
-import { handlePromoteHabit } from './apply/promoteHabit.js';
-import { handleDemoteHabit } from './apply/demoteHabit.js';
-
-// Line 72, add to HANDLERS table:
-promoteHabit: handlePromoteHabit,
-demoteHabit: handleDemoteHabit,
-```
-
----
-
-### CR-003: Handlers not registered in HANDLERS dispatch table
-
-**File:** `js/state/apply.js`
-
-**Issue:**
-The `HANDLERS` table (lines 64–79) controls event dispatch. `promoteHabit` and `demoteHabit` are not registered, so attempting to call:
-```javascript
-await apply({ type: 'promoteHabit', payload: { habitId } });
-```
-
-will fail with an error because the handler lookup at line 141 will find no entry for `'promoteHabit'`.
-
-This is referenced in the catalog.js promote action (line 393), which will fail at runtime.
-
-**Fix:**
-Import both handlers in `js/state/apply.js` and register them in the `HANDLERS` table:
-
-```javascript
-// After line 49:
-import { handlePromoteHabit } from './apply/promoteHabit.js';
-import { handleDemoteHabit } from './apply/demoteHabit.js';
-
-// In HANDLERS table (after line 78):
-promoteHabit: handlePromoteHabit,
-demoteHabit: handleDemoteHabit,
-```
+(None found)
 
 ---
 
 ## Warnings
 
-### WR-001: Null/undefined habit not validated in promoteHabit handler
+### WR-01: Edit habit save bypasses customMastery check for mastery overrides
 
-**File:** `js/state/apply/promoteHabit.js`, line 32
+**File:** `js/views/catalog.js:440-441`
 
 **Issue:**
-The handler reads a habit from the repo but does not validate that it exists before using it:
+The `save-edit` action persists `masteryThresholdOverride` and `masteryWindowOverride` without validating the `customMastery` checkbox state. This contradicts the `save-create` action (lines 470-471), which enforces the check:
 
 ```javascript
-const { habitId } = event.payload;
-const habit = await repo.getHabit(habitId);
-const updated = { ...habit, status: 'active' };  // habit could be undefined
+// Line 440-441 (save-edit) — MISSING customMastery guard
+masteryThresholdOverride: fields.masteryThresholdOverride || null,
+masteryWindowOverride: fields.masteryWindowOverride || null,
+
+// Line 470-471 (save-create) — CORRECT guard
+masteryThresholdOverride: fields.customMastery ? fields.masteryThresholdOverride : null,
+masteryWindowOverride: fields.customMastery ? fields.masteryWindowOverride : null,
 ```
 
-If `repo.getHabit(habitId)` returns `undefined` (e.g., the habit was deleted between UI render and button click), spreading `undefined` will produce `{ status: 'active' }`, losing all other habit fields. This creates a corrupt habit record in the IDB.
+The UI hides the mastery override fields when `customMastery` is unchecked (buildEditPanel line 464), but hiding is not a security boundary. If a user unhides the fields via browser DevTools and fills in values while the checkbox is off, those overrides will persist to the database even though the explicit UI checkbox is disabled. This violates the invariant: "mastery overrides are only applied when `customMastery === true`."
+
+**Impact:** Medium (requires deliberate manipulation via DevTools to trigger, but corrupts habit configuration).
 
 **Fix:**
-Add a guard check:
+Apply the same conditional check from `save-create` to `save-edit`:
 
 ```javascript
-const { habitId } = event.payload;
-const habit = await repo.getHabit(habitId);
-if (!habit) throw new Error(`Habit ${habitId} not found`);
-const updated = { ...habit, status: 'active' };
+// Line 440-441, change to:
+masteryThresholdOverride: fields.customMastery ? fields.masteryThresholdOverride : null,
+masteryWindowOverride: fields.customMastery ? fields.masteryWindowOverride : null,
 ```
 
-(Note: Apply the same fix to the `demoteHabit` handler once created.)
+---
+
+### WR-02: mountCatalog does not update _currentParent on idempotent re-entry
+
+**File:** `js/views/catalog.js:541-546`
+
+**Issue:**
+The function claims idempotence (comment: "Idempotent: calling `mountCatalog` a second time without unmounting first") but the guarantee is broken. The re-entry branch fails to update `_currentParent`:
+
+```javascript
+if (_unsub) {
+  // Already mounted — re-render against the live parent.
+  _currentDeps = deps;
+  // BUG: _currentParent is NOT updated
+  await renderCatalogInto(parent, deps);
+  return _createUnmount(parent);
+}
+```
+
+The subscription callback (line 554-558) uses `_currentParent` to render on store mutations:
+
+```javascript
+_unsub = subscribe(() => {
+  if (_currentParent && _currentDeps) {
+    renderCatalogInto(_currentParent, _currentDeps).catch(() => {});
+  }
+});
+```
+
+**Scenario:** If the DOM is restructured and `catalogPanel` is replaced (e.g., due to dynamic element recreation), the second call to `mountCatalog(newParent, deps)` would still render into the stale `_currentParent`, silently missing the new parent.
+
+**Current risk:** Low in the present codebase (`catalogPanel` is selected once and reused across all route changes). High if the pattern is reused elsewhere or the DOM structure changes.
+
+**Fix:**
+Update `_currentParent` in the re-entry branch:
+
+```javascript
+if (_unsub) {
+  _currentParent = parent;  // ADD THIS LINE
+  _currentDeps = deps;
+  await renderCatalogInto(parent, deps);
+  return _createUnmount(parent);
+}
+```
+
+---
+
+## Info
+
+### IN-01: Type safety—getCachedHabits called without function check
+
+**File:** `js/views/catalog.js:223`
+
+**Issue:**
+```javascript
+let habits = getCachedHabits ? getCachedHabits() : [];
+```
+
+The code checks for truthiness of `getCachedHabits` before calling it as a function. If `getCachedHabits` is a truthy non-function value (e.g., accidentally exported as an object or string), the code will crash with "getCachedHabits is not a function."
+
+**Current risk:** Very low (store.js is under control and always exports a function). Improves defensive coding patterns.
+
+**Fix:**
+Use explicit function check or optional chaining:
+
+```javascript
+// Option 1: explicit check
+let habits = typeof getCachedHabits === 'function' ? getCachedHabits() : [];
+
+// Option 2: optional chaining (ES2020+, Baseline Widely Available)
+let habits = getCachedHabits?.() ?? [];
+```
+
+---
+
+### IN-02: Redundant CSS selector in mastered habit opacity rule
+
+**File:** `css/catalog.css:52-54`
+
+**Issue:**
+```css
+.catalog-habit-row.habit-row--mastered,
+.catalog-habit-row--mastered {
+  opacity: 0.55;
+}
+```
+
+The second selector `.catalog-habit-row--mastered` is broader than the first. The first requires both classes; the second requires only the mastered class. If the intent is to match both patterns, a comment should explain why. If only one pattern is used, the rule should be simplified.
+
+**Fix:**
+Either consolidate to the more specific pattern:
+
+```css
+.catalog-habit-row.habit-row--mastered {
+  opacity: 0.55;
+}
+```
+
+Or document the two-class rationale with a comment if both patterns are intentional.
 
 ---
 
 ## Verified ✓
 
-- **Builders are pure and XSS-safe**: `buildUpcomingListItem` returns a description tree with no DOM access or `.innerHTML` use (D-78 pattern).
-- **Builders carry all required attributes**: habit id, edit button, promote button with aria-label, wave badge, startDate badge.
-- **Today view filter is correct**: Integration test confirms `getCachedHabits().filter(h => h.status === 'active')` excludes scheduled habits (CAT-01).
-- **Catalog rendering splits active and scheduled**: Lines 242–244 correctly separate habits into `activeHabits` (status !== 'scheduled') and `scheduledHabits` (status === 'scheduled').
-- **Promote action closure correctly extracts habitId**: Catalog.js line 388–393 reads `data-habit-id` from the button element via `currentTarget`/`target` fallback pattern.
-- **Undo structure is correct**: `promoteHabit` handler returns the right shape `{storeNames, writes, inverse}` matching archiveHabit pattern.
-- **Test coverage is comprehensive**: 6 unit tests for promoteHabit handler cover structure, status mutation, inverse type, broadcastKeys, property preservation, and no direct repo.put calls. 11 unit tests for builders cover all buttons, badges, and edge cases. 3 integration tests for CAT-01 verify the filter.
-- **broadcastKeys is correctly exported**: Both promoteHabit and tests define the static function to enable cross-tab sync.
+- **Handlers properly wired:** Both `handlePromoteHabit` (line 30-41) and `handleDemoteHabit` (line 52-62) are defined with correct signatures, write shapes, and inverse references.
+- **Handlers registered:** Both are imported in `apply.js:50` and registered in HANDLERS table (lines 74-75).
+- **Undo/redo round-trip:** `promoteHabit` → `demoteHabit` → `promoteHabit` closure is correct.
+- **Null safety:** Both handlers validate `if (!habit) throw(...)` on line 33 and 55.
+- **broadcastKeys exported:** Both handlers define static `broadcastKeys` methods (lines 43, 65) for cross-tab sync.
+- **Builders are pure:** `buildUpcomingListItem`, `buildEditPanel`, `buildCreatePanel` return description trees with zero DOM access (D-77).
+- **XSS safety:** All text rendered via `.text` attribute, never `.innerHTML` (D-78 grep gate compliant).
+- **Today filter works:** Integration test CAT-01 passes—`getCachedHabits().filter(h => h.status === 'active')` correctly excludes scheduled habits.
+- **Catalog rendering logic:** Lines 242-244 correctly split habits into `activeHabits` (status !== 'scheduled') and `scheduledHabits` (status === 'scheduled') and render each section.
+- **Test coverage comprehensive:** 18 unit tests for builders + 6 unit tests for handlers (from test file names) + 3 integration tests for filter. All passing per UAT report.
 
 ---
 
-_Reviewed: 2026-07-28T20:30:00Z_
+## Recommendations
+
+1. **High priority:** Apply WR-01 fix (mastery override validation) to prevent silent data corruption via DevTools manipulation.
+2. **Medium priority:** Apply WR-02 fix (idempotence) as defensive programming, especially if `mountCatalog` pattern is reused.
+3. **Low priority:** Improve type safety (IN-01) and clean up CSS (IN-02) during next refactor pass.
+
+---
+
+_Reviewed: 2026-07-29_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
