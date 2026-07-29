@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 08-today-catalog-upcoming-section
 source: 08-01-SUMMARY.md, 08-02-SUMMARY.md, 08-03-SUMMARY.md
 started: 2026-07-29T00:00:00Z
@@ -59,5 +59,10 @@ blocked: 0
   reason: "User reported: There are point dots and buttons are huge, more width than active habits"
   severity: cosmetic
   test: 4
-  artifacts: []
-  missing: []
+  root_cause: "Two missing CSS rules in css/catalog.css — .catalog-upcoming-list has no list-style: none (causing bullet dots), and .catalog-upcoming-item has no display: flex layout (causing buttons to expand full width instead of constrained)"
+  artifacts:
+    - path: "css/catalog.css"
+      issue: "Missing .catalog-upcoming-list rule (list-style: none) and .catalog-upcoming-item rule (display: flex + padding)"
+  missing:
+    - "Add .catalog-upcoming-list { list-style: none; margin: 0; padding: var(--space-2) 0; }"
+    - "Add .catalog-upcoming-item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border, #e5e7eb); transition: opacity 0.2s ease; }"
