@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 08-today-catalog-upcoming-section
 source: 08-01-SUMMARY.md, 08-02-SUMMARY.md, 08-03-SUMMARY.md
 started: 2026-07-29T00:00:00Z
-updated: 2026-07-29T00:20:00Z
+updated: 2026-07-30T00:00:00Z
 ---
 
 ## Current Test
@@ -25,10 +25,8 @@ expected: When no habits have status "scheduled", the Upcoming section and its h
 result: pass
 
 ### 4. Upcoming Items Show Name, Wave, Start Date, Edit & Promote Buttons
-expected: Each item in the Upcoming section displays: the habit name, a Wave badge, an ISO start date (format YYYY-MM-DD), an Edit button, and a Promote button. There is no mastery badge, no stage info, and no Archive button on these items.
-result: issue
-reported: "There are point dots and buttons are huge, more width than active habits"
-severity: cosmetic
+expected: Each item in the Upcoming section displays: the habit name, a Wave badge, an ISO start date (format YYYY-MM-DD), an Edit button, and a Promote button. There is no mastery badge, no stage info, and no Archive button on these items. No bullet dots. Buttons are compact and sized consistently with active habit rows.
+result: pass
 
 ### 5. Upcoming Items Sorted Chronologically (Soonest First)
 expected: When multiple habits are in the Upcoming section, they appear in ascending order by start date — the habit with the earliest start date is listed first.
@@ -45,8 +43,8 @@ result: pass
 ## Summary
 
 total: 7
-passed: 6
-issues: 1
+passed: 7
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -55,7 +53,9 @@ blocked: 0
 
 - gap_id: G-08-4
   truth: "Upcoming items render with consistent styling — no bullet dots, buttons sized to match active list"
-  status: failed
+  status: resolved
+  resolved_by: 08-04-PLAN.md
+  resolved_at: 2026-07-29
   reason: "User reported: There are point dots and buttons are huge, more width than active habits"
   severity: cosmetic
   test: 4
