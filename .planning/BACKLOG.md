@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-07-29 (added B-024 — Polish/English language switch)
-Last assigned ID: **B-024** — next new item must be **B-025**
+Last updated: 2026-07-29 (added B-025 — catalog icon buttons)
+Last assigned ID: **B-025** — next new item must be **B-026**
 
 ---
 
@@ -571,3 +571,30 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 - All builder functions that render habit names (`buildTodayRow`, `buildNumericRow`, `buildSlotRow`, catalog row builders) would read `lang` from the setting and select `habit.name_pl ?? habit.name` vs `habit.name`.
 - UI chrome i18n (if included) requires a string table — consider a `js/i18n/` module with `en.js` and `pl.js` exports.
 - Effort: Low for habit-names-only toggle; Medium–High for full UI chrome i18n.
+
+---
+
+### B-025 · Catalog action buttons: replace text with icons
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass; pairs naturally with B-004 (same-row layout) and B-005 (archive visual differentiation)
+
+**What:** Replace the text-labelled action buttons in the Catalog habit card — "Edit", "Archive", and "Advance stage" — with icon-only buttons (or icon + compact label).
+
+**Why:** Text buttons consume horizontal space and force the card to grow vertically. Icon buttons let the three actions sit in a compact row while remaining tappable on mobile. The catalog is scanned repeatedly; familiar icons (pencil, archive box, chevron-up) are faster to parse at a glance than reading full words.
+
+**Open questions when this gets planned:**
+
+- Icon source: inline SVG sprites, CSS-drawn icons, or Unicode glyphs (e.g. ✏️ 📥 ⬆)? Inline SVG is cleanest for accessibility and theming; Unicode glyphs are zero-dependency but less controllable.
+- Icon-only vs. icon + short label (e.g. icon above/beside "Edit")? Pure icon-only requires a `title` / `aria-label` for accessibility; short labels add context but partially defeat the space saving.
+- Should the "Advance stage" button use a different visual metaphor from "Archive" to avoid confusion (both imply state change)?
+- Confirm the full set of per-habit actions — verify whether any additional buttons exist beyond Edit, Archive, and Advance stage.
+
+**Implementation notes:**
+
+- Replace button text content with `<svg>` (or `<span aria-hidden>icon</span>`) in the catalog row builder.
+- Every icon button must carry an accessible name: `aria-label="Edit habit"`, `aria-label="Archive habit"`, `aria-label="Advance stage"`.
+- Add a CSS `title` tooltip or visible `<span class="sr-only">` for screen readers.
+- With B-004 already captured (same-row layout), consider tackling both together — row layout and icon swap are a natural combined pass.
+- With B-005 already captured (archive destructive styling), apply the red/destructive treatment to the archive icon at the same time.
+- Effort: Low.
