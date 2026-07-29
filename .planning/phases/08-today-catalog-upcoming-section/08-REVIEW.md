@@ -1,18 +1,14 @@
 ---
 phase: 08-today-catalog-upcoming-section
-reviewed: 2026-07-29T00:00:00Z
+reviewed: 2026-07-29T12:00:00Z
 depth: standard
-files_reviewed: 9
+files_reviewed: 5
 files_reviewed_list:
-  - css/catalog.css
-  - js/desktop.js
-  - js/main.js
-  - js/state/apply.js
   - js/state/apply/promoteHabit.js
+  - tests/state/apply/promoteHabit.test.js
   - js/views/catalog.js
-  - js/views/catalog/builders.js
-  - tests/integration/today.cat01-scheduled-filter.test.js
-  - tests/unit/builders.catalog.test.js
+  - js/main.js
+  - js/desktop.js
 findings:
   critical: 0
   warning: 2
@@ -25,86 +21,49 @@ status: issues_found
 
 **Reviewed:** 2026-07-29
 **Depth:** standard
-**Files Reviewed:** 9
-**Status:** issues_found
+**Files Reviewed:** 5
+**Status:** Issues found
 
 ## Summary
 
-Reviewed the Catalog view implementation (CATALOG-01..07, CAT-04 upcoming section, promote/demote flow) following fixes to the previously identified wiring issues. The feature is now architecturally sound with:
+Reviewed the core implementation for Phase 08 (Upcoming section, promote/demote workflow). The code demonstrates strong architectural patterns with proper handler registration, error handling, and state management. However, two functional bugs and two quality concerns were identified:
 
-- ✓ Handlers properly defined and registered (`handlePromoteHabit`, `handleDemoteHabit`)
-- ✓ Pure builders with XSS safety (D-77, D-78)
-- ✓ Comprehensive test coverage (18 unit + 3 integration tests, all passing)
-- ✓ Cross-tab sync via broadcastKeys
-- ✓ State atomicity via transactional writes
-
-However, **two logic inconsistencies and one design defect** remain:
-
-1. **Logic bug**: Edit habit save skips `customMastery` validation for mastery overrides (inconsistent with create).
-2. **Design defect**: `mountCatalog` idempotence broken—`_currentParent` not updated on re-entry.
-3. **Type safety gap**: `getCachedHabits` called without verifying it's a function.
-4. **CSS style**: Redundant selector in mastered habit rule.
+- **Functional bug (idempotence):** `mountCatalog` does not update `_currentParent` on re-entry, causing re-renders from subscriptions to target the wrong parent element.
+- **Test coverage gap:** The undo handler (`handleDemoteHabit`) lacks direct test coverage despite being a critical component of the promotion/demotion round-trip.
 
 ---
 
 ## Critical Issues
 
-(None found)
+None found.
 
 ---
 
 ## Warnings
 
-### WR-01: Edit habit save bypasses customMastery check for mastery overrides
-
-**File:** `js/views/catalog.js:440-441`
-
-**Issue:**
-The `save-edit` action persists `masteryThresholdOverride` and `masteryWindowOverride` without validating the `customMastery` checkbox state. This contradicts the `save-create` action (lines 470-471), which enforces the check:
-
-```javascript
-// Line 440-441 (save-edit) — MISSING customMastery guard
-masteryThresholdOverride: fields.masteryThresholdOverride || null,
-masteryWindowOverride: fields.masteryWindowOverride || null,
-
-// Line 470-471 (save-create) — CORRECT guard
-masteryThresholdOverride: fields.customMastery ? fields.masteryThresholdOverride : null,
-masteryWindowOverride: fields.customMastery ? fields.masteryWindowOverride : null,
-```
-
-The UI hides the mastery override fields when `customMastery` is unchecked (buildEditPanel line 464), but hiding is not a security boundary. If a user unhides the fields via browser DevTools and fills in values while the checkbox is off, those overrides will persist to the database even though the explicit UI checkbox is disabled. This violates the invariant: "mastery overrides are only applied when `customMastery === true`."
-
-**Impact:** Medium (requires deliberate manipulation via DevTools to trigger, but corrupts habit configuration).
-
-**Fix:**
-Apply the same conditional check from `save-create` to `save-edit`:
-
-```javascript
-// Line 440-441, change to:
-masteryThresholdOverride: fields.customMastery ? fields.masteryThresholdOverride : null,
-masteryWindowOverride: fields.customMastery ? fields.masteryWindowOverride : null,
-```
-
----
-
-### WR-02: mountCatalog does not update _currentParent on idempotent re-entry
+### WR-01: mountCatalog does not update _currentParent on idempotent re-entry
 
 **File:** `js/views/catalog.js:541-546`
 
-**Issue:**
-The function claims idempotence (comment: "Idempotent: calling `mountCatalog` a second time without unmounting first") but the guarantee is broken. The re-entry branch fails to update `_currentParent`:
+**Issue:** The `mountCatalog` function claims to be idempotent (docstring line 533: "Idempotent: calling `mountCatalog` a second time without unmounting first returns the existing unmount closure"), but the re-entry logic fails to update `_currentParent`:
 
 ```javascript
-if (_unsub) {
-  // Already mounted — re-render against the live parent.
+export async function mountCatalog(parent, deps) {
+  if (_unsub) {
+    // Already mounted — re-render against the live parent.
+    _currentDeps = deps;                            // ← Updated
+    await renderCatalogInto(parent, deps);          // ← Uses new parent for initial render
+    return _createUnmount(parent);
+    // ← BUG: _currentParent is NOT updated
+  }
+
+  _currentParent = parent;                          // ← Set here only on first call
   _currentDeps = deps;
-  // BUG: _currentParent is NOT updated
-  await renderCatalogInto(parent, deps);
-  return _createUnmount(parent);
+  // ...
 }
 ```
 
-The subscription callback (line 554-558) uses `_currentParent` to render on store mutations:
+The stored `_currentParent` is used by the subscription callback (lines 554-558) to re-render when the store notifies:
 
 ```javascript
 _unsub = subscribe(() => {
@@ -114,12 +73,11 @@ _unsub = subscribe(() => {
 });
 ```
 
-**Scenario:** If the DOM is restructured and `catalogPanel` is replaced (e.g., due to dynamic element recreation), the second call to `mountCatalog(newParent, deps)` would still render into the stale `_currentParent`, silently missing the new parent.
+**Scenario:** If `mountCatalog(newParent, deps)` is called after initial mount with a different parent element, the initial render on line 544 targets the new parent, but subsequent store notifications will continue rendering into the old `_currentParent`. This creates a silent desync where mutations update a stale element.
 
-**Current risk:** Low in the present codebase (`catalogPanel` is selected once and reused across all route changes). High if the pattern is reused elsewhere or the DOM structure changes.
+**Current risk:** Low in the present codebase (in `main.js:182-187`, `catalogPanel` is queried once at boot and reused). High risk if this pattern is copied to other mount functions or if the DOM structure becomes more dynamic.
 
-**Fix:**
-Update `_currentParent` in the re-entry branch:
+**Fix:** Update `_currentParent` in the re-entry branch:
 
 ```javascript
 if (_unsub) {
@@ -132,81 +90,202 @@ if (_unsub) {
 
 ---
 
+### WR-02: Missing test coverage for handleDemoteHabit (undo handler)
+
+**File:** `tests/state/apply/promoteHabit.test.js`
+
+**Issue:** The test file imports and exercises only `handlePromoteHabit` (line 10):
+
+```javascript
+import { handlePromoteHabit } from '../../../js/state/apply/promoteHabit.js';
+```
+
+The paired undo handler `handleDemoteHabit` (exported from the same module, line 52 of `js/state/apply/promoteHabit.js`) is **never tested**. It is properly registered in the HANDLERS table in `js/state/apply/apply.js` (lines 50, 75) and is critical to the undo/redo workflow, but has zero test coverage.
+
+Both handlers are symmetric:
+- `handlePromoteHabit`: reads habit, sets `status: 'active'`, returns inverse `{ type: 'demoteHabit', ... }`
+- `handleDemoteHabit`: reads habit, sets `status: 'scheduled'`, returns inverse `{ type: 'promoteHabit', ... }`
+
+Since undo is a first-class feature of this system and state round-trips are critical to data integrity, both directions must be tested.
+
+**Fix:** Add test suite for `handleDemoteHabit` at the end of the file:
+
+```javascript
+describe('demoteHabit handler (inverse of promoteHabit)', () => {
+  // Test 1: handleDemoteHabit accepts event with habitId and reads habit
+  test('reads habit from repo and returns structured result', async () => {
+    const mockRepo = {
+      getHabit: async (id) => ({
+        id: 'habit-123',
+        name: 'Morning walk',
+        status: 'active',
+        wave: 1,
+        startDate: '2026-08-01',
+      }),
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-123' },
+    };
+
+    const result = await handleDemoteHabit(event, mockRepo);
+
+    assert(result, 'handler returns a result object');
+    assert(result.storeNames, 'result has storeNames property');
+    assert(result.writes, 'result has writes property');
+    assert(result.inverse, 'result has inverse property');
+  });
+
+  // Test 2: habit.status is set to 'scheduled'
+  test('sets habit.status to scheduled', async () => {
+    const mockRepo = {
+      getHabit: async () => ({
+        id: 'habit-456',
+        name: 'Evening routine',
+        status: 'active',
+        wave: 2,
+      }),
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-456' },
+    };
+
+    const result = await handleDemoteHabit(event, mockRepo);
+
+    assert.strictEqual(result.writes[0].value.status, 'scheduled', 'status is scheduled');
+  });
+
+  // Test 3: inverse type is 'promoteHabit' (round-trip closure)
+  test('inverse type is promoteHabit', async () => {
+    const mockRepo = {
+      getHabit: async () => ({
+        id: 'habit-789',
+        name: 'Test habit',
+        status: 'active',
+      }),
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'habit-789' },
+    };
+
+    const result = await handleDemoteHabit(event, mockRepo);
+
+    assert.strictEqual(result.inverse.type, 'promoteHabit', 'inverse type is promoteHabit');
+    assert.strictEqual(
+      result.inverse.payload.habitId,
+      'habit-789',
+      'inverse carries same habitId'
+    );
+  });
+
+  // Test 4: error handling when habit not found
+  test('throws when habit not found', async () => {
+    const mockRepo = {
+      getHabit: async () => undefined,
+    };
+
+    const event = {
+      type: 'demoteHabit',
+      payload: { habitId: 'nonexistent' },
+    };
+
+    await assert.rejects(
+      () => handleDemoteHabit(event, mockRepo),
+      /Habit nonexistent not found/,
+      'throws error with habitId'
+    );
+  });
+});
+```
+
+Also add the missing import at the top:
+
+```javascript
+import { handlePromoteHabit, handleDemoteHabit } from '../../../js/state/apply/promoteHabit.js';
+```
+
+---
+
 ## Info
 
-### IN-01: Type safety—getCachedHabits called without function check
+### IN-01: Misleading comment on accessibility behavior
+
+**File:** `js/main.js:127-130`
+
+**Issue:** The docstring for the `show()` function contains contradictory phrasing regarding accessibility:
+
+```javascript
+/**
+ * Show one route panel and hide the others. Uses the `hidden` HTML attribute
+ * rather than a CSS-class toggle so the panels stay accessible to keyboard
+ * navigation by default (browsers treat `hidden` as removed from the a11y
+ * tree).
+ */
+```
+
+The phrase "so the panels stay accessible" contradicts the parenthetical explanation that `hidden` removes them from the a11y tree. The code correctly uses `hidden` to hide panels, but the comment is poorly written and could confuse future maintainers about the intended behavior.
+
+**Fix:** Clarify the comment to explain the actual intent:
+
+```javascript
+/**
+ * Show one route panel and hide the others. Uses the `hidden` HTML attribute
+ * (which properly removes hidden panels from keyboard navigation and the a11y tree)
+ * rather than a CSS-class toggle (which might leave hidden panels tab-focusable).
+ */
+```
+
+---
+
+### IN-02: Defensive truthiness check on getCachedHabits
 
 **File:** `js/views/catalog.js:223`
 
-**Issue:**
+**Issue:** The code uses a truthiness check instead of an explicit function type check:
+
 ```javascript
 let habits = getCachedHabits ? getCachedHabits() : [];
 ```
 
-The code checks for truthiness of `getCachedHabits` before calling it as a function. If `getCachedHabits` is a truthy non-function value (e.g., accidentally exported as an object or string), the code will crash with "getCachedHabits is not a function."
+If `getCachedHabits` is accidentally exported as a non-function truthy value (e.g., an object, string, or number), the code will crash at runtime with "getCachedHabits is not a function." This is a minor defensive-coding pattern improvement.
 
-**Current risk:** Very low (store.js is under control and always exports a function). Improves defensive coding patterns.
+**Current risk:** Very low (the import is from a module under control, and store.js consistently exports a function). Does not block shipping.
 
-**Fix:**
-Use explicit function check or optional chaining:
+**Recommendation:** For consistency with other repo.* type checks in the file (line 224: `typeof repo.getAllHabits === 'function'`), improve the check using optional chaining (ES2020+, Baseline Widely Available since 2022):
 
 ```javascript
-// Option 1: explicit check
-let habits = typeof getCachedHabits === 'function' ? getCachedHabits() : [];
-
-// Option 2: optional chaining (ES2020+, Baseline Widely Available)
 let habits = getCachedHabits?.() ?? [];
 ```
 
 ---
 
-### IN-02: Redundant CSS selector in mastered habit opacity rule
-
-**File:** `css/catalog.css:52-54`
-
-**Issue:**
-```css
-.catalog-habit-row.habit-row--mastered,
-.catalog-habit-row--mastered {
-  opacity: 0.55;
-}
-```
-
-The second selector `.catalog-habit-row--mastered` is broader than the first. The first requires both classes; the second requires only the mastered class. If the intent is to match both patterns, a comment should explain why. If only one pattern is used, the rule should be simplified.
-
-**Fix:**
-Either consolidate to the more specific pattern:
-
-```css
-.catalog-habit-row.habit-row--mastered {
-  opacity: 0.55;
-}
-```
-
-Or document the two-class rationale with a comment if both patterns are intentional.
-
----
-
 ## Verified ✓
 
-- **Handlers properly wired:** Both `handlePromoteHabit` (line 30-41) and `handleDemoteHabit` (line 52-62) are defined with correct signatures, write shapes, and inverse references.
-- **Handlers registered:** Both are imported in `apply.js:50` and registered in HANDLERS table (lines 74-75).
-- **Undo/redo round-trip:** `promoteHabit` → `demoteHabit` → `promoteHabit` closure is correct.
-- **Null safety:** Both handlers validate `if (!habit) throw(...)` on line 33 and 55.
-- **broadcastKeys exported:** Both handlers define static `broadcastKeys` methods (lines 43, 65) for cross-tab sync.
-- **Builders are pure:** `buildUpcomingListItem`, `buildEditPanel`, `buildCreatePanel` return description trees with zero DOM access (D-77).
-- **XSS safety:** All text rendered via `.text` attribute, never `.innerHTML` (D-78 grep gate compliant).
-- **Today filter works:** Integration test CAT-01 passes—`getCachedHabits().filter(h => h.status === 'active')` correctly excludes scheduled habits.
-- **Catalog rendering logic:** Lines 242-244 correctly split habits into `activeHabits` (status !== 'scheduled') and `scheduledHabits` (status === 'scheduled') and render each section.
-- **Test coverage comprehensive:** 18 unit tests for builders + 6 unit tests for handlers (from test file names) + 3 integration tests for filter. All passing per UAT report.
+- **Handler contract compliance:** Both `handlePromoteHabit` and `handleDemoteHabit` follow the required contract: accept `(event, repo)`, return `{ storeNames, writes, inverse }`, define `broadcastKeys` static method.
+- **Null safety:** Both handlers validate `if (!habit) throw(...)` on lines 33 and 55.
+- **Atomic writes:** Both return `storeNames: ['habits']` for transactional commit via `apply.js` (lines 37, 59).
+- **Undo round-trip:** `promoteHabit` → `demoteHabit` → `promoteHabit` inverse chain is correct and symmetric.
+- **Handler registration:** Both handlers are imported in `apply.js:50` and registered in HANDLERS table (lines 74-75).
+- **Bootstrap order:** Boot sequence in `main.js` (configureApply → bootSeed → bootScheduled → hydrate → bootWaves) is correct per T-02-BOOT. Desktop.js follows same pattern (lines 79-126).
+- **Cross-tab sync:** `broadcastKeys` on line 43 and 65 return ID-only payloads, compliant with Pitfall 8 design (D-08, T-02-11).
+- **Error handling:** Top-level try/catch blocks in main.js (lines 107-109) and desktop.js (lines 95-97, 105-114) with documented swallows.
+- **Fire-and-forget async:** `mountCatalog` in main.js:187 is intentionally not awaited (comment line 184-186) to allow progressive rendering.
 
 ---
 
-## Recommendations
+## Summary of Findings
 
-1. **High priority:** Apply WR-01 fix (mastery override validation) to prevent silent data corruption via DevTools manipulation.
-2. **Medium priority:** Apply WR-02 fix (idempotence) as defensive programming, especially if `mountCatalog` pattern is reused.
-3. **Low priority:** Improve type safety (IN-01) and clean up CSS (IN-02) during next refactor pass.
+| Severity | Count | Issue |
+|----------|-------|-------|
+| Critical | 0 | — |
+| Warning | 2 | Idempotence bug (WR-01), Missing demotion test (WR-02) |
+| Info | 2 | Misleading comment (IN-01), Defensive check pattern (IN-02) |
+| **Total** | **4** | — |
 
 ---
 
