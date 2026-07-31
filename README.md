@@ -65,6 +65,8 @@ Habits is a static web app — the same minimalist approach as `mindful-breathin
 - **Wave organization** — 10 themed waves (Fala 0–9); habits grouped and color-coded by wave
 - **Stage progression** — manual or auto-advance after N consecutive days; composable OR logic between triggers
 - **Mastery evaluation** — rolling threshold model (default 90% in 70 days) with per-habit overrides
+- **Scheduled habits** — habits with a future `startDate` appear in an "Upcoming" section below the active list, sorted by start date; auto-promoted to active on boot when their start date arrives
+- **Promote to active** — one-tap promotion of any upcoming habit; promoted habits appear in Today's check-in immediately within the same session
 
 ### Desktop Analytics
 
@@ -149,15 +151,15 @@ habits/
 │   ├── main.js         # Mobile entry point
 │   ├── desktop.js      # Desktop entry point
 │   ├── router.js       # Hash-based client router
-│   ├── cadence.js      # Cadence filtering (shared: Today + CSV export)
-│   ├── mastery.js      # Mastery threshold evaluation
-│   ├── scoring.js      # Three scoring models (S1/S2/S3)
-│   ├── stage.js        # Stage progression logic
-│   ├── wave.js         # Wave metadata
-│   ├── waveAggregates.js
-│   ├── scheduled.js
 │   ├── db/             # IndexedDB wrapper (~80-line promise helper)
 │   ├── domain/         # Pure domain logic (no DOM dependency)
+│   │   ├── cadence.js      # Cadence filtering (shared: Today + CSV export)
+│   │   ├── mastery.js      # Mastery threshold evaluation
+│   │   ├── scoring.js      # Three scoring models (S1/S2/S3)
+│   │   ├── scheduled.js    # Scheduled status boot promotion
+│   │   ├── stage.js        # Stage progression logic
+│   │   ├── wave.js         # Wave metadata
+│   │   └── waveAggregates.js
 │   ├── io/             # Export (JSON + CSV) and import
 │   ├── platform/       # SW registration, BroadcastChannel, lifecycle flush
 │   ├── state/          # Single-mutator apply() chokepoint
@@ -188,7 +190,7 @@ habits/
 **Key architectural choices:**
 
 - `js/domain/` contains pure logic with no DOM imports — usable from both shells and testable without a browser.
-- `cadence.js` is the single source of truth for "is this habit applicable on this day" — shared by the Today view and CSV export.
+- `js/domain/cadence.js` is the single source of truth for "is this habit applicable on this day" — shared by the Today view and CSV export.
 - All CSS is loaded via `@import url(…) layer(…)` in the shell files, using Cascade Layers for deterministic specificity without a preprocessor.
 
 ---
