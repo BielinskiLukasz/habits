@@ -1,3 +1,24 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+```sh
+# Serve the app locally (Node 20+ required; no npm install needed)
+node scripts/serve.js
+# Open http://localhost:8080/   or   PORT=9000 node scripts/serve.js
+
+# Run all tests (Node built-in test runner, no npm install)
+node --test tests/
+
+# Run a single test file
+node --test tests/unit/cadence.test.js
+
+# Run tests matching a name pattern
+node --test --test-name-pattern="cadence"
+```
+
 <!-- GSD:project-start source:PROJECT.md -->
 
 ## Project
@@ -364,7 +385,97 @@ JSDoc gives editor type hints + structured API docs without a TypeScript compile
 
 ## Architecture
 
-Architecture not yet mapped. Follow existing patterns found in the codebase.
+### Two Entry Points
+
+The app has two HTML shells that share the same JS spine but serve different purposes:
+
+- `index.html` → `js/main.js` — **mobile check-in shell**. Hash routes: `#today` (default), `#settings`, `#history`, `#catalog`.
+- `desktop.html` → `js/desktop.js` — **desktop analytics shell**. Hash routes: `#analytics` (default), `#waveboard`, `#planning`.
+
+Both shells run the same P2 boot sequence: configure DI seams → `bootSync()` → `bootLifecycle()` → `await bootSeed()` → `await bootScheduled()` → `await hydrate()`. The hash router (`js/router.js`) is the same module; routes differ per shell.
+
+### DB Layer (three files, strict boundary)
+
+```
+js/db/idb.js     ← ONLY file that calls indexedDB directly. ~80-line promise wrapper.
+js/db/repo.js    ← Typed CRUD facade. All stores have get/put helpers here. Anti-Pattern 1: views NEVER import idb.js.
+js/db/schema.js  ← DB_VERSION + MIGRATIONS dispatch table. Schema is additive-only (no deleteObjectStore ever).
+```
+
+The v1 schema has 7 stores: `habits`, `habit_versions`, `logs`, `events`, `meta`, `settings`, `score_snapshots`.
+
+### Single Mutator Chokepoint
+
+**All writes go through `apply(event)` in `js/state/apply.js`** — views, IO modules, and undo all dispatch through here. The chokepoint enforces four invariants atomically:
+
+1. Data writes + `events` row + `meta.undoToken` commit in a single IDB transaction.
+2. `BroadcastChannel` message fires only after the tx resolves (never before).
+3. Broadcast payload is keys-only (`{ habitId, date }`) — receivers re-read from IDB.
+4. No `switch` statement — events dispatch via a `HANDLERS` table to per-event modules in `js/state/apply/*.js`.
+
+Adding a new mutation type means: create `js/state/apply/myEvent.js` exporting `handleMyEvent` + `handleMyEvent.broadcastKeys`, then register it in the `HANDLERS` table in `apply.js`.
+
+### In-Memory Cache + Pub/Sub (`js/state/store.js`)
+
+`hydrate()` pre-warms three slices at boot:
+- `cache.habits` — `Map<habitId, habit>` (full active catalog)
+- `cache.logs` — `Map<"habitId::date", log>` (current ISO week only, bounded by NFR-01)
+- `cache.settings` — `Map<key, value>` (weekStart, masteryThreshold, masteryWindow, scoringModel)
+
+After every `apply()` call, `notify({event, keys})` refreshes only the affected cache entries from the repo, then fans out to `subscribe(fn)` callbacks. Views subscribe to re-render; they read via `getCachedHabits()` / `getCachedLog()` / `getCachedSettings()` selectors, never via `cache` directly.
+
+### Dependency Injection Pattern
+
+Platform-leaning modules (repo, broadcast, fetch, storage) are never statically imported by domain/IO modules. Instead every module exposes `configure({...})` called once at boot in `main.js`/`desktop.js`:
+
+```js
+configureApply({ repo, broadcast, trackTx, onLogWrite });
+configureUndo({ repo });
+configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
+configureStore({ repo });
+```
+
+Tests call the same `configure()` with fakes. `_resetXxxForTest()` functions (exported, underscore-prefixed) wipe module-level state between tests.
+
+### Domain Layer (pure functions, no IDB)
+
+`js/domain/` modules contain pure logic with no DOM and no IndexedDB access:
+
+| Module | Responsibility |
+|---|---|
+| `cadence.js` | `appliesToday(habit, date, ctx)` — 5 cadence types via `RESOLVERS` dispatch table (no `switch`) |
+| `mastery.js` | Mastery threshold evaluation from score snapshots |
+| `scoring.js` | S1/S2/S3 scoring model computations |
+| `stage.js` | Stage advancement logic |
+| `wave.js` | Wave catalog loading and boot |
+| `waveAggregates.js` | Per-wave aggregate computations |
+| `scheduled.js` | Scheduled habit promotion (`startDate <= today`) on every boot |
+
+### CSS Layer Order
+
+`css/main.css` is the single composer. Layer order (lowest → highest specificity):
+```
+reset → tokens → base → (layout) → components → view → (utilities)
+```
+All view-specific styles (`today.css`, `settings.css`, `catalog.css`, `history.css`, `desktop.css`) land in the `view` layer. Tokens (custom properties for palette, spacing, radii, z-indices) live in `css/tokens.css`.
+
+### Score Snapshots Write Path
+
+`js/io/scoreSnapshots.js` is wired as `onLogWrite` in `apply.js`. After every log mutation, it writes one `score_snapshots` row per `(habitId, date)` for the rolling 70-day window. Bulk rebuild is triggered from the Settings "Recompute Scores" action. Views read snapshots; they never recompute.
+
+### Testing Approach
+
+Tests use Node's built-in `node:test` + `node:assert` — no test framework installed. Two tiers:
+- `tests/unit/` — pure module tests; no IDB. Module state is reset via `_resetXxxForTest()` exports.
+- `tests/integration/` — use `tests/helpers/fake-idb.js` (an in-memory IDB-shaped fake) + `tests/helpers/fake-broadcast-channel.js`. The contract test (`tests/integration/contract.fake-vs-real.test.js`) enforces that the fake's surface matches `repo.js` exactly.
+
+### Hardcoded Prohibitions (enforced by tests/CI)
+
+- No `.innerHTML` anywhere — D-78. Grep gate catches violations.
+- No `switch` on event or cadence types — Anti-Pattern 4. Unit tests assert the `RESOLVERS` / `HANDLERS` identifiers exist and no `switch (` appears in those files.
+- No `indexedDB.*` outside `js/db/idb.js` — Anti-Pattern 1.
+- No `history.pushState` in the router — file://-hostile; hash routing only.
+
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
