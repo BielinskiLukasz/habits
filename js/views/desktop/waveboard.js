@@ -61,7 +61,7 @@ function getISOWeek(dateYMD) {
  * @param {string} dateYMD
  * @returns {string} e.g. "2026-W26"
  */
-function isoWeekKey(dateYMD) {
+export function isoWeekKey(dateYMD) {
   const { year, week } = getISOWeek(dateYMD);
   return `${year}-W${String(week).padStart(2, '0')}`;
 }
@@ -153,7 +153,7 @@ const STATUS_RANK = { Healthy: 1, Watch: 2, 'At-risk': 3, Failing: 4 };
  * @param {string|null} b
  * @returns {string|null}
  */
-function worstStatus(a, b) {
+export function worstStatus(a, b) {
   return (STATUS_RANK[a] ?? 0) >= (STATUS_RANK[b] ?? 0) ? a : b;
 }
 
@@ -164,7 +164,7 @@ function worstStatus(a, b) {
  * @param {string|null|undefined} status
  * @returns {string}
  */
-function statusSlug(status) {
+export function statusSlug(status) {
   return ({ Healthy: 'healthy', Watch: 'watch', 'At-risk': 'atrisk', Failing: 'failing' })[status] ?? 'na';
 }
 
