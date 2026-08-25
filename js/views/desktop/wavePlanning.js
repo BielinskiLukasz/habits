@@ -12,7 +12,12 @@
  *   - `switch` on cadence or event type — use dispatch tables (Anti-Pattern 4).
  */
 
-import { worstStatus, statusSlug } from './waveboard.js';
+import { worstStatus, statusSlug, isoWeekKey } from './waveboard.js';
+import { apply } from '../../state/apply.js';
+import { getCachedHabits } from '../../state/store.js';
+import { getAllWaves } from '../../domain/wave.js';
+import { todayLocal } from '../../util/date.js';
+import { mount } from '../../util/mount.js';
 
 // ---------------------------------------------------------------------------
 // Cadence summary — dispatch table, no switch (Anti-Pattern 4)
@@ -241,4 +246,120 @@ export function buildWavePlanningSection({ waves, habits, currentWeekKey, snapsh
       ...waveItems,
     ],
   };
+}
+
+// ---------------------------------------------------------------------------
+// Live mount
+// ---------------------------------------------------------------------------
+
+/**
+ * Mounts the Wave Planning accordion section into parent element.
+ * @param {HTMLElement} parent
+ * @param {{ repo: object, store: object }} deps
+ */
+export function mountWavePlanning(parent, { repo, store }) {
+  // Idempotency guard
+  if (parent.dataset.wavePlanningMounted) return;
+  parent.dataset.wavePlanningMounted = 'true';
+
+  // Container + separator
+  const container = document.createElement('div');
+  container.className = 'waveplanning-wrapper';
+  parent.appendChild(container);
+
+  const sep = document.createElement('hr');
+  sep.className = 'waveplanning-heatmap-separator';
+  parent.appendChild(sep);
+
+  // Delegated accordion listener (attached ONCE)
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('button.waveplanning-wave-header');
+    if (!btn) return;
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    const listId = btn.getAttribute('aria-controls');
+    const list = document.getElementById(listId);
+    if (!list) return;
+    if (expanded) {
+      list.setAttribute('hidden', '');
+    } else {
+      list.removeAttribute('hidden');
+    }
+  });
+
+  // Delegated promote listener (attached ONCE)
+  container.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button.waveplanning-promote-btn');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    const habitId = btn.dataset.habitId;
+    try {
+      await apply({ type: 'promoteHabit', payload: { habitId } });
+    } catch (_err) {
+      btn.disabled = false;
+      const errSpan = document.createElement('span');
+      errSpan.className = 'waveplanning-promote-error';
+      errSpan.textContent = 'Failed — try again';
+      btn.parentNode.insertBefore(errSpan, btn.nextSibling);
+      setTimeout(() => errSpan.remove(), 3000);
+    }
+  });
+
+  function saveExpandedState() {
+    const state = new Map();
+    container.querySelectorAll('button.waveplanning-wave-header').forEach(btn => {
+      state.set(btn.dataset.waveNumber, btn.getAttribute('aria-expanded') === 'true');
+    });
+    return state;
+  }
+
+  function restoreExpandedState(state) {
+    container.querySelectorAll('button.waveplanning-wave-header').forEach(btn => {
+      if (state.get(btn.dataset.waveNumber) === true) {
+        btn.setAttribute('aria-expanded', 'true');
+        const list = document.getElementById(btn.getAttribute('aria-controls'));
+        if (list) list.removeAttribute('hidden');
+      }
+    });
+  }
+
+  function clearChildren(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+  }
+
+  async function rerenderSection() {
+    const expandedState = saveExpandedState();
+    clearChildren(container);
+
+    const waves = getAllWaves();
+    const habits = getCachedHabits().filter(h => h.status !== 'archived');
+
+    const today = todayLocal();
+    const sevenDaysAgoDate = new Date(today);
+    sevenDaysAgoDate.setDate(sevenDaysAgoDate.getDate() - 6);
+    const sevenDaysAgo = sevenDaysAgoDate.toISOString().slice(0, 10);
+
+    let snapshotRows = [];
+    try {
+      snapshotRows = await repo.getSnapshotsInRange(sevenDaysAgo, today);
+    } catch (_e) {
+      snapshotRows = [];
+    }
+
+    // Build snapshotsByWeek: Map<habitId, Map<weekKey, s1Status>>
+    const snapshotsByWeek = new Map();
+    for (const row of snapshotRows) {
+      if (!snapshotsByWeek.has(row.habitId)) snapshotsByWeek.set(row.habitId, new Map());
+      snapshotsByWeek.get(row.habitId).set(isoWeekKey(row.date), row.s1Status);
+    }
+
+    const currentWeekKey = isoWeekKey(today);
+    const desc = buildWavePlanningSection({ waves, habits, currentWeekKey, snapshotsByWeek });
+    mount(desc, container);
+    restoreExpandedState(expandedState);
+  }
+
+  store.subscribe(async () => { await rerenderSection(); });
+
+  rerenderSection(); // fire-and-forget initial render
 }

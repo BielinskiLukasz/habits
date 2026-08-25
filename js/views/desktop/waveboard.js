@@ -31,6 +31,7 @@
 
 import { mount } from '../../util/mount.js';
 import { todayLocal } from '../../util/date.js';
+import { mountWavePlanning } from './wavePlanning.js';
 
 // ---------------------------------------------------------------------------
 // ISO week helpers (internal, not exported)
@@ -327,6 +328,8 @@ export function mountWaveboard(parent, { repo, store }) {
   // Idempotency guard — skeleton is built only once (D-115 pattern).
   if (parent.dataset.mounted === 'waveboard') return;
   parent.dataset.mounted = 'waveboard';
+
+  mountWavePlanning(parent, { repo, store });
 
   let showArchived = false;
 
