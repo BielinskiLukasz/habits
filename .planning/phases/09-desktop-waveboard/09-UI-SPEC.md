@@ -47,7 +47,12 @@ All values are pre-declared in `css/tokens.css`. No new spacing tokens are intro
 | xl | --space-6 | 32px | Separator margin between Wave Planning and heat-map |
 | 2xl | --space-7 | 48px | Not used in this phase |
 
-Exceptions: none. All spacing uses the existing 4/8/12/16/24/32 scale from tokens.css.
+Exception — `--space-3 (12px)`: `--space-3: 12px` is declared in `css/tokens.css` (line 31) as a
+pre-existing project token used across every phase. 12px falls outside the standard 8-point scale
+{4, 8, 16, 24, 32, 48, 64} but is embedded throughout the codebase; replacing it would require
+cross-cutting changes to all phases. This phase inherits `--space-3` as-is for wave header vertical
+padding, scheduled sub-header padding, habit row gap, and promote button padding. No new out-of-scale
+values are introduced.
 
 ---
 
@@ -57,7 +62,7 @@ All sizes are pre-declared in `css/tokens.css`. Four roles are used in this phas
 
 | Role | CSS Variable | Value | Weight | Line Height | Usage |
 |------|-------------|-------|--------|-------------|-------|
-| Label / badge | --text-sm | 13px | 500 | 1.4 | Count text, date, cadence, status label, badge text, scheduled sub-header |
+| Label / badge | --text-sm | 13px | 400 | 1.4 | Count text, date, cadence, status label, badge text, scheduled sub-header |
 | Body | --text-md | 15px | 400 | 1.5 | Habit name in expanded list |
 | Wave heading | --text-md | 15px | 600 | 1.3 | Wave name + theme in header row |
 | Section heading | --text-lg | 18px | 600 | 1.2 | "Wave Planning" section title |
@@ -93,6 +98,15 @@ in the Wave Planning section uses accent color.
 
 "Upcoming" badge (D-06): background `--color-surface-raised`, text `--color-fg-muted`.
 No border, no colored background — visually neutral to distinguish it from the health badge set.
+
+---
+
+## Visual Hierarchy
+
+Primary visual anchor: the Wave Planning section title ("Wave Planning") and the health badge column
+draw the eye first; the existing 12-week S1 heat-map is secondary and appears below after scrolling.
+Within each expanded wave row, the wave name and health badge are the focal points; cadence/date
+metadata is visually subordinate (rendered in `--color-fg-muted`).
 
 ---
 
