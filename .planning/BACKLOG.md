@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-07-29 (added B-025 — catalog icon buttons)
-Last assigned ID: **B-025** — next new item must be **B-026**
+Last updated: 2026-08-25 (added B-026 — UI density; enriched B-024 with little-words reference)
+Last assigned ID: **B-026** — next new item must be **B-027**
 
 ---
 
@@ -551,6 +551,7 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 
 **Status:** captured · not scheduled
 **Earliest sensible slot:** post-v1 milestone; after `name_pl` display work (B-002) lands
+**Reference implementation:** `../little-words` — see `src/i18n/index.ts` (i18next + localStorage key `little-words-lang`, defaults to `'pl'`) and `src/features/settings/components/LanguageSwitcher.tsx` (PL/EN pill-button toggle in Settings)
 
 **What:** Add a user-controlled language toggle (English ↔ Polish) that switches the visible habit names — and optionally the UI chrome — between English and Polish. The `name_pl` field is already stored on every seed habit (D-40, locked Phase 2); this item is about surfacing a toggle that makes it the active display language app-wide.
 
@@ -567,10 +568,11 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 **Implementation notes:**
 
 - The data layer already supports this: `habit.name_pl` is present for all seed habits and null for user-created ones.
-- A `lang` setting key in `localStorage` (`'en'` / `'pl'`, default `'en'`) is the simplest persistence path.
+- A `lang` setting key in `localStorage` (`'en'` / `'pl'`, default `'en'`) is the simplest persistence path — mirrors little-words' `LANG_KEY` pattern without requiring i18next (no npm constraint).
 - All builder functions that render habit names (`buildTodayRow`, `buildNumericRow`, `buildSlotRow`, catalog row builders) would read `lang` from the setting and select `habit.name_pl ?? habit.name` vs `habit.name`.
-- UI chrome i18n (if included) requires a string table — consider a `js/i18n/` module with `en.js` and `pl.js` exports.
-- Effort: Low for habit-names-only toggle; Medium–High for full UI chrome i18n.
+- For full UI chrome i18n (little-words approach): a `js/i18n/en.js` + `js/i18n/pl.js` string-table module replaces i18next — plain ES module export of a keyed object, no library needed. A `t(key)` helper reads the active lang from localStorage and returns the translation string.
+- The PL/EN toggle UI is two pill-buttons in Settings (same pattern as `LanguageSwitcher.tsx` in little-words, but implemented as plain DOM in `settings/builders.js`).
+- Effort: Low for habit-names-only toggle; Medium for full UI chrome i18n (string tables + `t()` helper + updating all builders).
 
 ---
 
@@ -598,3 +600,38 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 - With B-004 already captured (same-row layout), consider tackling both together — row layout and icon swap are a natural combined pass.
 - With B-005 already captured (archive destructive styling), apply the red/destructive treatment to the archive icon at the same time.
 - Effort: Low.
+
+---
+
+## Captured 2026-08-25
+
+### B-026 · UI density pass — tighter layout without framework migration
+
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next UI polish pass; can land independently of any feature work
+**Reference implementations:** `../little-words` (React + Tailwind compact card layout), `../med-stock` (Tailwind utility-class density)
+
+**What:** Reduce the visual footprint of all views — Today check-in, Catalog, History, Settings, desktop analytics — by shrinking font sizes, line heights, and margins so more habits are visible without scrolling. The goal is to display the same data in roughly 70–80 % of the current vertical space, matching the density feel of the little-words and med-stock sibling apps.
+
+**Why:** The current layout feels spacious-bordering-on-sparse on a modern phone screen. The Today view shows ~8–10 habits before scroll; little-words shows 15+ items in the same viewport with no sense of crowding. Daily check-in friction drops when the user can see their full list (or close to it) without scrolling.
+
+**Open questions when this gets planned:**
+
+- Which views are highest priority? Today (daily use, highest impact) → Catalog → History → Settings → Desktop.
+- Specific target sizes: drop base habit-row height from current to ~40–44 px? Drop `--space-3` tokens by 25–30 %? Benchmark against little-words at the same viewport.
+- Typography: reduce base font size from current root size (check `css/tokens.css`) or only tighten specific components?
+- Is a global token rescale (edit `css/tokens.css`) the right lever, or per-component CSS tweaks? Token rescale is lower effort and more consistent; per-component tweaks are safer but repetitive.
+- Should density be a user preference (compact / comfortable toggle in Settings) or a flat change? The user is single-user so a flat change is simpler; a toggle is extra UI for no audience.
+
+**React migration question:** No. The no-framework constraint (CLAUDE.md) is firm and motivated by zero-dependency longevity, not just aesthetics. Little-words achieves its density with Tailwind utility classes on small components — the same density is reachable in this app by adjusting CSS custom properties in `css/tokens.css` and trimming padding/margin rules in per-component CSS files. No migration is needed or wanted.
+
+**Implementation notes:**
+
+- Start with `css/tokens.css`: audit `--space-*`, `--font-size-*`, `--line-height-*` token values. A 20–25 % reduction in spacing tokens and a step down in base font size is likely the 80/20 move.
+- Cross-check against minimum tap-target size (44 × 44 px per WCAG 2.5.5) — tapping accuracy on mobile must not regress.
+- Today view habit rows: target 40–44 px row height. Current state: audit `css/today.css` and the `buildTodayRow` builder for hardcoded heights or paddings.
+- Catalog card: reduce card padding and inter-card gap; check `css/catalog.css`.
+- History list: same token-driven reduction.
+- Settings: reduce section header margins and form element spacing.
+- Test on a real phone at 375 px viewport width before shipping — desktop DevTools emulation misses tap-target ergonomics.
+- Effort: Low–Medium (mostly CSS token tuning + visual QA on device).
