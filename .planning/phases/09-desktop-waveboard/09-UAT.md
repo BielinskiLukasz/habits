@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: gap-closure-complete
 phase: 09-desktop-waveboard
 source: 09-01-SUMMARY.md, 09-02-SUMMARY.md
 started: 2026-08-25T00:00:00Z
-updated: 2026-08-25T01:00:00Z
+updated: 2026-08-25T02:00:00Z
 ---
 
 ## Current Test
@@ -61,35 +61,21 @@ blocked: 0
 
 - gap_id: G-09-2
   truth: "Wave headers show correct habit counts — N active · N scheduled per wave"
-  status: failed
-  reason: "User reported: cannot test, now I have only zeros there - maybe my data don't have connection between habit and wave"
+  status: fixed
+  fix: "Added waveFieldSeeded one-time backfill migration to seed.js (commit c77923d). On next boot, bootSeed() fetches habits.json, builds id→wave map, and writes wave field to any habit missing it via a single IDB tx."
   severity: major
   test: 2
-  root_cause: "Habits in IDB were seeded before the `wave` field was added to habits.json. The seed loader never overwrites existing rows (data-trust invariant T-02-03), so existing habits have wave: undefined. wavePlanning.js:179 filters `h.wave === wave.number`, which never matches."
-  artifacts:
-    - path: "js/views/desktop/wavePlanning.js"
-      issue: "line 179: h.wave === wave.number returns false for all habits seeded before wave field was added"
-    - path: "js/io/seed.js"
-      issue: "seed loader does not backfill missing fields on existing habits"
-  missing:
-    - "IDB migration or seed-patch step that backfills wave field on habits missing it"
 
 - gap_id: G-09-4
   truth: "Expanded wave shows active/mastered habits with status, stage, and cadence"
-  status: failed
-  reason: "User reported: I see: No habits in this wave."
+  status: fixed
+  fix: "Same fix as G-09-2 — wave field now present so wavePlanning.js:179 filter matches."
   severity: major
   test: 4
-  root_cause: "Same root cause as G-09-2: habits missing wave field in IDB."
-  artifacts: []
-  missing: []
 
 - gap_id: G-09-5
   truth: "Scheduled habits appear with a Promote button in expanded wave"
-  status: failed
-  reason: "User reported: No habits shown — same 'No habits in this wave' result as test 4"
+  status: fixed
+  fix: "Same fix as G-09-2 — wave field now present so wavePlanning.js:179 filter matches."
   severity: major
   test: 5
-  root_cause: "Same root cause as G-09-2: habits missing wave field in IDB."
-  artifacts: []
-  missing: []

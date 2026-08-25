@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: Scheduled Habits — Phases 7–9
 current_phase: 9
 current_phase_name: Desktop Waveboard
-status: executed
-stopped_at: Phase 9 execution complete — ready for verification
+status: gap-closure-complete
+stopped_at: Phase 9 gap closure complete — 3 gaps fixed; ready for re-verification
 last_updated: "2026-08-25T00:00:00.000Z"
 last_activity: 2026-08-25
 progress:
@@ -117,6 +117,6 @@ None
 **Stopped at:** Phase 9 execution complete — both plans executed
 **Resume file:** .planning/phases/09-desktop-waveboard/
 
-Next command: `/gsd-verify-work 9` or `/gsd-ship`
+Next command: `/gsd-verify-work 9` (re-run UAT for G-09-2/4/5) or `/gsd-ship`
 
-*Updated: 2026-08-25 — Phase 09 execution complete; Wave Planning accordion built, wired, and styled*
+*Updated: 2026-08-25 — Gap closure: wave field backfill migration added to seed.js; refresh IDB (clear storage or use fresh profile) before re-testing*
