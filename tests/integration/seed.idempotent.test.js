@@ -243,3 +243,54 @@ describe('bootSeed: NFR-10 — each seeded habit gets an initial habit_versions 
     assert.ok(gate, 'meta.habitVersionsSeeded must be set after migration runs');
   });
 });
+
+describe('bootSeed: wave field backfill (G-09-2/4/5 — 2026-08-25)', () => {
+  test('first-run inserts habits that already carry the wave field', async () => {
+    const repo = createFakeRepo();
+    const fakeStorage = createFakeStorage();
+    const seedMod = await freshSeed();
+    seedMod.configureSeed({ repo, storage: fakeStorage.storage, fetch: makeFetchStub() });
+
+    await seedMod.bootSeed();
+
+    for (const h of repo._stores.habits.values()) {
+      assert.equal(typeof h.wave, 'number', `habit ${h.id}: wave must be a number after first boot`);
+    }
+    const gate = await repo.getMeta('waveFieldSeeded');
+    assert.ok(gate, 'meta.waveFieldSeeded must be set after first boot');
+  });
+
+  test('migration: existing habits missing wave field get backfilled on next boot', async () => {
+    const repo = createFakeRepo();
+    const fakeStorage = createFakeStorage();
+    const seedMod = await freshSeed();
+    seedMod.configureSeed({ repo, storage: fakeStorage.storage, fetch: makeFetchStub() });
+
+    // First boot — habits inserted with wave field.
+    await seedMod.bootSeed();
+
+    // Simulate pre-P9 state: strip wave from all habits, clear migration gate.
+    for (const [id, h] of repo._stores.habits.entries()) {
+      const { wave: _w, ...rest } = h;
+      repo._stores.habits.set(id, rest);
+    }
+    repo._stores.meta.delete('waveFieldSeeded');
+
+    // Re-run (simulates next app open after deploying the fix).
+    const seedMod2 = await freshSeed();
+    seedMod2.configureSeed({ repo, storage: fakeStorage.storage, fetch: makeFetchStub() });
+    await seedMod2.bootSeed();
+
+    // All seeded habits must now carry the wave field.
+    const seededIdsRow = repo._stores.meta.get('seededIds');
+    for (const id of seededIdsRow.value) {
+      const h = await repo.getHabit(id);
+      assert.ok(h, `habit ${id} must still exist after migration`);
+      assert.equal(typeof h.wave, 'number', `habit ${id}: wave must be a number after migration`);
+    }
+
+    // Gate is set so the next boot short-circuits.
+    const gate = await repo.getMeta('waveFieldSeeded');
+    assert.ok(gate, 'meta.waveFieldSeeded must be set after migration runs');
+  });
+});

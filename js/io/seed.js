@@ -104,13 +104,14 @@ export async function bootSeed() {
   const fetchFn = _fetch ?? globalThis.fetch ?? null;
 
   // Fast-path no-op (steady-state on every boot after the first).
-  // All three flags must be present to short-circuit: habitVersionsSeeded
-  // guards the one-time backfill migration (2026-07-03) so existing databases
-  // that pre-date habit_versions seeding still run the migration on next boot.
+  // All four flags must be present to short-circuit: habitVersionsSeeded guards
+  // the habit_versions backfill (2026-07-03); waveFieldSeeded guards the wave
+  // backfill (2026-08-25) so databases missing the wave field re-run once.
   const seededIds = await repo.getMeta('seededIds');
   const persistResult = await repo.getMeta('persistResult');
   const habitVersionsSeeded = await repo.getMeta('habitVersionsSeeded');
-  if (seededIds !== undefined && persistResult !== undefined && habitVersionsSeeded) {
+  const waveFieldSeeded = await repo.getMeta('waveFieldSeeded');
+  if (seededIds !== undefined && persistResult !== undefined && habitVersionsSeeded && waveFieldSeeded) {
     return;
   }
 
@@ -260,6 +261,41 @@ export async function bootSeed() {
         tx.objectStore('meta').put({ key: 'habitVersionsSeeded', value: true });
       },
     );
+  }
+
+  // One-time backfill: wave field missing from IDB for habits seeded before
+  // wave was added to habits.json (UAT G-09-2/4/5 — 2026-08-25).
+  // waveFieldSeeded is read at the top (fast-path guard); if falsy, the
+  // migration has not yet run for this database.
+  if (!waveFieldSeeded) {
+    // seed may already be loaded above (first-run path). For existing databases
+    // where seededIds was present, seed is null — fetch it now to get id→wave.
+    let seedForWave = seed;
+    if (!seedForWave && fetchFn) {
+      const res = await fetchFn('./seed/habits.json');
+      seedForWave = await res.json();
+    }
+    /** @type {object[]} */
+    const toUpdate = [];
+    if (seedForWave && Array.isArray(seedForWave.habits)) {
+      /** @type {Map<string, number>} */
+      const waveById = new Map(seedForWave.habits.map((h) => [h.id, h.wave]));
+      const allSeededIds = await repo.getMeta('seededIds') ?? [];
+      for (const id of allSeededIds) {
+        const waveNum = waveById.get(id);
+        if (waveNum === undefined) continue;
+        const habit = await repo.getHabit(id);
+        if (habit && (habit.wave === undefined || habit.wave === null)) {
+          toUpdate.push({ ...habit, wave: waveNum });
+        }
+      }
+    }
+    await repo.runTx(['habits', 'meta'], 'readwrite', async (tx) => {
+      for (const h of toUpdate) {
+        tx.objectStore('habits').put(h);
+      }
+      tx.objectStore('meta').put({ key: 'waveFieldSeeded', value: true });
+    });
   }
 
   // Persist gate (Pitfall 11). Only fire when meta.persistResult is still
