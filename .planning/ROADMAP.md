@@ -107,7 +107,13 @@ Plans:
   3. A user can expand (or always see) per-wave habit lists: scheduled habits show their individual startDate
   4. Active and mastered habits are listed per wave with their current status label (active / mastered)
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] 09-01-PLAN.md (execute/TDD) — buildWavePlanningSection pure builder + unit tests (WAVE-01 tracer + WAVE-02/03/04 expand)
+- [ ] 09-02-PLAN.md (execute) — mountWavePlanning wiring + .waveplanning-* CSS styles
+
 **UI hint**: yes
 
 ## Progress Table
