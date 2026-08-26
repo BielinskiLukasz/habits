@@ -22,10 +22,10 @@
 
 ### Waveboard
 
-- [ ] **WAVE-01**: Desktop Waveboard shows each wave with its planned startDate
-- [ ] **WAVE-02**: Each wave row shows counts: active habits vs scheduled habits
-- [ ] **WAVE-03**: Scheduled habits are listed per wave with their startDate in the Waveboard
-- [ ] **WAVE-04**: Active habits are listed per wave with their current status (active/mastered)
+- [x] **WAVE-01**: Desktop Waveboard shows each wave with its planned startDate
+- [x] **WAVE-02**: Each wave row shows counts: active habits vs scheduled habits
+- [x] **WAVE-03**: Scheduled habits are listed per wave with their startDate in the Waveboard
+- [x] **WAVE-04**: Active habits are listed per wave with their current status (active/mastered)
 
 ### Data / Migration
 
@@ -66,10 +66,10 @@
 | CAT-02 | Phase 8 | Complete |
 | CAT-03 | Phase 8 | Complete |
 | CAT-04 | Phase 8 | Complete |
-| WAVE-01 | Phase 9 | Pending |
-| WAVE-02 | Phase 9 | Pending |
-| WAVE-03 | Phase 9 | Pending |
-| WAVE-04 | Phase 9 | Pending |
+| WAVE-01 | Phase 9 | Complete |
+| WAVE-02 | Phase 9 | Complete |
+| WAVE-03 | Phase 9 | Complete |
+| WAVE-04 | Phase 9 | Complete |
 | DATA-01 | Phase 7 | Complete |
 | DATA-02 | Phase 7 | Complete |
 | DATA-03 | Phase 7 | Complete |

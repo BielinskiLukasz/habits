@@ -47,7 +47,7 @@ Introduces `scheduled` as a first-class habit status for future-start habits, au
 
 - [x] **Phase 7: Scheduled Status Foundation** — Domain, storage, boot migration, converter, import (completed 2026-07-01)
 - [x] **Phase 8: Today & Catalog — Upcoming Section** — Filter Today (verify CAT-01), Catalog Upcoming list, promoteHabit handler, CSS styling (completed 2026-07-29)
-- [ ] **Phase 9: Desktop Waveboard** — Wave rows with startDates, scheduled/active counts, habit lists
+- [x] **Phase 9: Desktop Waveboard** — Wave rows with startDates, scheduled/active counts, habit lists (completed 2026-08-26)
 
 ## Phase Details
 
@@ -111,8 +111,8 @@ Plans:
 
 Plans:
 
-- [ ] 09-01-PLAN.md (execute/TDD) — buildWavePlanningSection pure builder + unit tests (WAVE-01 tracer + WAVE-02/03/04 expand)
-- [ ] 09-02-PLAN.md (execute) — mountWavePlanning wiring + .waveplanning-* CSS styles
+- [x] 09-01-PLAN.md (execute/TDD) — buildWavePlanningSection pure builder + unit tests (WAVE-01 tracer + WAVE-02/03/04 expand)
+- [x] 09-02-PLAN.md (execute) — mountWavePlanning wiring + .waveplanning-* CSS styles
 
 **UI hint**: yes
 
@@ -122,7 +122,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 7. Scheduled Status Foundation | 3/3 | Complete    | 2026-07-01 |
 | 8. Today & Catalog — Upcoming Section | 4/4 | Complete    | 2026-07-29 |
-| 9. Desktop Waveboard | 0/? | Not started | - |
+| 9. Desktop Waveboard | 2/2 | Complete    | 2026-08-26 |
 
 ---
 
