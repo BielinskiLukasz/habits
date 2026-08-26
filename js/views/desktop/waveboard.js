@@ -333,6 +333,12 @@ export function mountWaveboard(parent, { repo, store }) {
 
   let showArchived = false;
 
+  // Score Matrix heading.
+  const heatmapHeading = parent.ownerDocument.createElement('h2');
+  heatmapHeading.setAttribute('class', 'waveboard-heatmap-heading');
+  heatmapHeading.textContent = 'Score Matrix';
+  parent.appendChild(heatmapHeading);
+
   // "Show archived" toggle above the grid.
   const toggleLabel = parent.ownerDocument.createElement('label');
   toggleLabel.setAttribute('class', 'waveboard-archived-toggle');

@@ -332,7 +332,15 @@ export function mountWavePlanning(parent, { repo, store }) {
     clearChildren(container);
 
     const waves = getAllWaves();
-    const habits = getCachedHabits().filter(h => h.status !== 'archived');
+    // Read directly from repo (same as the heatmap) — bypasses cache timing
+    // issues that caused all wave counts to show 0 while the heatmap was correct.
+    let allHabits;
+    try {
+      allHabits = await repo.getAllHabits();
+    } catch (_e) {
+      allHabits = getCachedHabits();
+    }
+    const habits = allHabits.filter(h => h.status !== 'archived');
 
     const today = todayLocal();
     const sevenDaysAgoDate = new Date(today);
