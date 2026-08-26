@@ -28,9 +28,7 @@ result: pass
 
 ### 4. Active/mastered habits shown in expanded wave
 expected: Expanding a wave that has active or mastered habits shows each habit as a row with three pieces of information: its status (active/mastered), its current stage, and its cadence summary (e.g. "daily", "Mon/Thu").
-result: issue
-reported: "I see name, status and cadence, without current stage"
-severity: minor
+result: pass
 
 ### 5. Scheduled habits with promote button
 expected: A wave with scheduled habits (habits whose startDate hasn't passed yet) shows those habits in a separate list with a "Promote" button next to each. Clicking Promote promotes that habit to active.
@@ -47,8 +45,8 @@ result: pass
 ## Summary
 
 total: 7
-passed: 6
-issues: 1
+passed: 7
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -70,16 +68,15 @@ blocked: 0
 
 - gap_id: G-09-4
   truth: "Expanded wave shows active/mastered habits with status, stage, and cadence"
-  status: failed
+  status: fixed
   reason: "User reported: I see name, status and cadence, without current stage"
   severity: minor
   test: 4
-  root_cause: "habit.stage is null/undefined for all habits — stage field not set in seed data or not yet tracked. String(habit.stage ?? '') renders as empty. Name, status, cadence all render correctly."
+  root_cause: "buildActiveHabitRow used habit.stage (undefined) instead of habit.stages[habit.currentStageIndex ?? 0]?.label — the same pattern the catalog uses."
   artifacts:
     - path: "js/views/desktop/wavePlanning.js"
-      issue: "stage span renders empty when habit.stage is null/undefined"
-  missing:
-    - "Decide whether to show stage number, a dash/placeholder, or omit the stage column when no stage data exists"
+      issue: "habit.stage → stages[currentStageIndex].label (commit c0592ef)"
+  missing: []
   debug_session: ""
 
 - gap_id: G-09-5
