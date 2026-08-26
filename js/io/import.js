@@ -138,6 +138,6 @@ export async function mergeImportedStores(imported) {
 
   // D-100: Broadcast reload signal AFTER tx commits (Pitfall 3 guard).
   if (_broadcast) {
-    _broadcast({ type: 'import:done' });
+    _broadcast.postMessage({ type: 'import:done' });
   }
 }
