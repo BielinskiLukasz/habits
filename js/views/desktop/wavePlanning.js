@@ -93,13 +93,16 @@ function buildHealthBadge(waveHabits, currentWeekKey, snapshotsByWeek) {
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
 function buildActiveHabitRow(habit) {
+  const stages = habit.stages ?? [];
+  const stageIndex = habit.currentStageIndex ?? 0;
+  const stageLabel = stages[stageIndex]?.label ?? '';
   return {
     tag: 'li',
     attrs: { class: 'waveplanning-habit-row' },
     children: [
       { tag: 'span', attrs: { class: 'waveplanning-habit-name' }, text: habit.name },
       { tag: 'span', attrs: { class: 'waveplanning-habit-status' }, text: habit.status },
-      { tag: 'span', attrs: { class: 'waveplanning-habit-stage' }, text: String(habit.stage ?? '') },
+      { tag: 'span', attrs: { class: 'waveplanning-habit-stage' }, text: stageLabel },
       { tag: 'span', attrs: { class: 'waveplanning-habit-cadence' }, text: cadenceSummary(habit.cadence) },
     ],
   };
