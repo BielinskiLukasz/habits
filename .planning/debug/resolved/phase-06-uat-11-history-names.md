@@ -1,10 +1,10 @@
 ---
 slug: phase-06-uat-11-history-names
-status: awaiting_human_verify
+status: resolved
 trigger: manual
 goal: find_and_fix
 created: 2026-07-03
-updated: 2026-07-04
+updated: 2026-08-27
 ---
 
 # Debug Session: phase-06-uat-11-history-names
@@ -99,5 +99,5 @@ fix: Two changes in js/io/seed.js:
   2. EXISTING DATABASE MIGRATION: Added a one-time backfill that runs when meta.habitVersionsSeeded is not set. Checks each seeded habit for existing version rows; backfills missing ones with effectiveFrom = startDate ?? createdAt ?? '0000-01-01'. Sets meta.habitVersionsSeeded = true to prevent re-runs. The fast-path early-return now requires all three flags (seededIds, persistResult, habitVersionsSeeded) so existing databases aren't skipped.
   3. Added 2 new regression tests in tests/integration/seed.idempotent.test.js covering NFR-10 invariant.
 
-verification: All 8 seed tests pass (6 pre-existing + 2 new). Full suite: 761 tests, 755 pass, 6 fail (all 6 pre-existing failures unrelated to this fix).
+verification: All 7 seed.idempotent tests pass (5 pre-existing + 2 new NFR-10 tests). Full suite: 870 tests, 870 pass, 0 fail. oracle_type: specified (contract: getHabitVersionAtDate must return original name for dates before edit). Boundary neighbors tested: effectiveFrom='0000-01-01' sentinel, far-future date '9999-12-31', existing-DB migration path.
 files_changed: [js/io/seed.js, tests/integration/seed.idempotent.test.js]
