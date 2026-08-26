@@ -176,7 +176,7 @@ function buildHabitList(wave, activeHabits, scheduledHabits) {
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
 function buildWaveItem(wave, habits, currentWeekKey, snapshotsByWeek) {
-  const waveHabits = habits.filter(h => h.wave === wave.number);
+  const waveHabits = habits.filter(h => Number(h.wave) === wave.number);
   const activeHabits = waveHabits.filter(h => h.status === 'active' || h.status === 'mastered');
   const scheduledHabits = waveHabits.filter(h => h.status === 'scheduled');
 

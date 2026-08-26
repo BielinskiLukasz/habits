@@ -104,14 +104,16 @@ export async function bootSeed() {
   const fetchFn = _fetch ?? globalThis.fetch ?? null;
 
   // Fast-path no-op (steady-state on every boot after the first).
-  // All four flags must be present to short-circuit: habitVersionsSeeded guards
-  // the habit_versions backfill (2026-07-03); waveFieldSeeded guards the wave
-  // backfill (2026-08-25) so databases missing the wave field re-run once.
+  // All five flags must be present to short-circuit: habitVersionsSeeded guards
+  // the habit_versions backfill (2026-07-03); waveFieldSeeded guards the v1
+  // wave backfill (seededIds-only, 2026-08-25); waveFieldV2 guards the v2
+  // wave backfill (all habits, 2026-08-26 — fixes imported habits missed by v1).
   const seededIds = await repo.getMeta('seededIds');
   const persistResult = await repo.getMeta('persistResult');
   const habitVersionsSeeded = await repo.getMeta('habitVersionsSeeded');
   const waveFieldSeeded = await repo.getMeta('waveFieldSeeded');
-  if (seededIds !== undefined && persistResult !== undefined && habitVersionsSeeded && waveFieldSeeded) {
+  const waveFieldV2 = await repo.getMeta('waveFieldV2');
+  if (seededIds !== undefined && persistResult !== undefined && habitVersionsSeeded && waveFieldSeeded && waveFieldV2) {
     return;
   }
 
@@ -295,6 +297,39 @@ export async function bootSeed() {
         tx.objectStore('habits').put(h);
       }
       tx.objectStore('meta').put({ key: 'waveFieldSeeded', value: true });
+    });
+  }
+
+  // V2 wave-field backfill: scans ALL habits (not just seededIds) so imported
+  // habits that were restored from a pre-wave JSON backup also get their wave
+  // field set. The v1 backfill only covered seededIds, leaving imported habits
+  // with wave === undefined — causing wave planning to show 0 counts while
+  // the heatmap still worked (it falls back to wave ?? 0).
+  if (!waveFieldV2) {
+    let seedForWaveV2 = seed;
+    if (!seedForWaveV2 && fetchFn) {
+      const res = await fetchFn('./seed/habits.json');
+      seedForWaveV2 = await res.json();
+    }
+    /** @type {object[]} */
+    const toUpdateV2 = [];
+    if (seedForWaveV2 && Array.isArray(seedForWaveV2.habits)) {
+      /** @type {Map<string, number>} */
+      const waveByIdV2 = new Map(seedForWaveV2.habits.map((h) => [h.id, h.wave]));
+      const allHabitsForWave = await repo.getAllHabits();
+      for (const habit of allHabitsForWave) {
+        const waveNum = waveByIdV2.get(habit.id);
+        if (waveNum === undefined) continue;
+        if (habit.wave === undefined || habit.wave === null) {
+          toUpdateV2.push({ ...habit, wave: waveNum });
+        }
+      }
+    }
+    await repo.runTx(['habits', 'meta'], 'readwrite', async (tx) => {
+      for (const h of toUpdateV2) {
+        tx.objectStore('habits').put(h);
+      }
+      tx.objectStore('meta').put({ key: 'waveFieldV2', value: true });
     });
   }
 
