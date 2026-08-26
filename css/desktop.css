@@ -115,6 +115,14 @@
   .waveboard-cell--failing  { background: var(--color-score-failing); color: #fff; }
   .waveboard-cell--na       { background: var(--color-score-na);      color: #fff; }
 
+  /* Score Matrix section heading */
+  .waveboard-heatmap-heading {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--color-fg);
+    margin: var(--space-6) 0 var(--space-3) 0;
+  }
+
   /* Wave-board grid — renders as a proper HTML table (not a CSS grid) */
   .waveboard-grid {
     border-collapse: collapse;
