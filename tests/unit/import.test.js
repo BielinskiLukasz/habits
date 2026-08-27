@@ -334,14 +334,12 @@ describe('mergeImportedStores — all 7 stores', () => {
 });
 
 describe('mergeImportedStores — broadcast', () => {
-  test('Test broadcast: configureImport with broadcast calls postMessage after tx', async () => {
+  test('Test broadcast: configureImport with broadcast calls broadcast fn after tx', async () => {
     const repo = createFakeRepo();
     let broadcastCalled = false;
-    const fakeBroadcast = {
-      postMessage(msg) {
-        broadcastCalled = true;
-        assert.deepEqual(msg, { type: 'import:done' });
-      },
+    const fakeBroadcast = (msg) => {
+      broadcastCalled = true;
+      assert.deepEqual(msg, { type: 'import:done' });
     };
 
     configureImport({ repo, broadcast: fakeBroadcast });
@@ -349,7 +347,7 @@ describe('mergeImportedStores — broadcast', () => {
     const imported = makeImportPayload({ habits: [makeHabit('h-bc')] });
     await mergeImportedStores(imported);
 
-    assert.ok(broadcastCalled, 'broadcast.postMessage should be called with {type: "import:done"}');
+    assert.ok(broadcastCalled, 'broadcast should be called with {type: "import:done"}');
 
     // Reset: reconfigure without broadcast for subsequent tests
     configureImport({ repo: createFakeRepo() });

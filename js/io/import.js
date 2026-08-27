@@ -3,8 +3,8 @@
  * (IMPORT-01, IMPORT-02, IMPORT-03, D-98, D-99, D-100).
  *
  * Mirrors the `js/io/seed.js` DI pattern: `configureImport({repo, broadcast})`
- * injects dependencies; production boot wires the real repo and a real
- * BroadcastChannel; tests inject fakes.
+ * injects dependencies; production boot wires the real repo and the real
+ * broadcast function from js/platform/sync.js; tests inject fakes.
  *
  * Merge semantics (D-98):
  *   - For every store, imported rows are written via `tx.objectStore(s).put()`.
@@ -22,9 +22,9 @@
  *     for very old exports that predate the field).
  *
  * Broadcast (D-100):
- *   - After the transaction commits, if a `broadcast` object was injected,
- *     `broadcast.postMessage({type: 'import:done'})` is sent to notify other
- *     tabs to reload. This happens AFTER the tx — never before (Pitfall 3 /
+ *   - After the transaction commits, if a `broadcast` function was injected,
+ *     `broadcast({type: 'import:done'})` is sent to notify other tabs to
+ *     reload. This happens AFTER the tx — never before (Pitfall 3 /
  *     anti-pattern: broadcasting while tx is still pending lets a receiving
  *     tab read stale state).
  *
@@ -46,11 +46,10 @@ import { DB_VERSION } from '../db/schema.js';
 let _repo = null;
 
 /**
- * Optional BroadcastChannel-shaped object — must expose `postMessage(msg)`.
- * If null/undefined, no broadcast is sent after import (safe default; the
- * UI plan (05-05) wires a real channel).
+ * Optional broadcast callable — called with a plain message object.
+ * If null/undefined, no broadcast is sent after import.
  *
- * @type {{postMessage: (msg: object) => void}|null}
+ * @type {((msg: object) => void)|null}
  */
 let _broadcast = null;
 
@@ -76,7 +75,7 @@ const STORE_NAMES = [
  *
  * @param {{
  *   repo?: object,
- *   broadcast?: {postMessage: (msg: object) => void}
+ *   broadcast?: (msg: object) => void
  * }} deps
  * @returns {void}
  */
@@ -138,6 +137,6 @@ export async function mergeImportedStores(imported) {
 
   // D-100: Broadcast reload signal AFTER tx commits (Pitfall 3 guard).
   if (_broadcast) {
-    _broadcast.postMessage({ type: 'import:done' });
+    _broadcast({ type: 'import:done' });
   }
 }
