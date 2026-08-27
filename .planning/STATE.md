@@ -48,7 +48,7 @@ Archives: `.planning/milestones/`
 Phase: Milestone v1.1 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-08-27 — Milestone v1.1 completed and archived
+Last activity: 2026-08-27 - Completed quick task 260827-otr: Fix import.js broadcast call: treat broadcast as a function matching apply.js pattern
 
 ## Performance Metrics
 
@@ -103,6 +103,7 @@ None
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 260827-otr | Fix import.js broadcast call: treat broadcast as a function matching apply.js pattern | 2026-08-27 | 83590a2 | [260827-otr-fix-import-js-broadcast-call-treat-broad](.planning/quick/260827-otr-fix-import-js-broadcast-call-treat-broad/) |
 
 ## Session Continuity
 
