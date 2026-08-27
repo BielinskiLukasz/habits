@@ -1,7 +1,7 @@
 # Habits — Personal Habit Tracker
 
-![Status](https://img.shields.io/badge/status-v1.0_shipped-brightgreen)
-![Version](https://img.shields.io/badge/version-0.5.0-blue)
+![Status](https://img.shields.io/badge/status-stable-brightgreen)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![HTML5](https://img.shields.io/badge/HTML-5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS-3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/ECMAScript-2023-F7DF1E?logo=javascript&logoColor=black)
@@ -71,7 +71,7 @@ Habits is a static web app — the same minimalist approach as `mindful-breathin
 ### Desktop Analytics
 
 - **Analytics panel** — per-habit stats grouped by wave, S1 status badge, and active model score column
-- **Wave-board** — 12-week heat-map grid (habit × ISO week) with S1 status color coding
+- **Wave-board** — 12-week heat-map grid (habit × ISO week) with S1 status color coding; per-wave scheduled/active habit counts with drillable habit lists
 - **Planning view** — forward-looking 12-week grid of scheduled habits, linked to the catalog
 - **Three scoring models** — S1 Rolling Threshold Health, S2 Day-Weighted, S3 Load-Adjusted Capacity
 
@@ -358,7 +358,14 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/). The curre
 
 **Release history:**
 
-| Version | Name | Date |
+| Milestone | Name | Date |
+|---|---|---|
+| v1.1 | Scheduled Habits | 2026-08-27 |
+| v1.0 | MVP (Phases 1–6) | 2026-06-30 |
+
+**App version history (APP_VERSION):**
+
+| Version | Phase | Date |
 |---|---|---|
 | v0.5.0 | Desktop Analytics & Scoring | 2026-06-29 |
 | v0.4.0 | Domain Model | 2026-06-05 |
