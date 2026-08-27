@@ -23,14 +23,24 @@
  */
 
 import { parseLocalYMD } from '../../util/date.js';
+import { t, getLang } from '../../i18n/index.js';
 
-/** Locale-deterministic short weekday names indexed by `Date#getDay()` (0=Sun). */
+/** English short weekday names indexed by `Date#getDay()` (0=Sun). */
 const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-/** Locale-deterministic short month names indexed by `Date#getMonth()` (0=Jan). */
+/** English short month names indexed by `Date#getMonth()` (0=Jan). */
 const MONTH_SHORT = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/** Polish short weekday names indexed by `Date#getDay()` (0=Sun). */
+const PL_WEEKDAY_SHORT = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'];
+
+/** Polish short month names indexed by `Date#getMonth()` (0=Jan). */
+const PL_MONTH_SHORT = [
+  'sty', 'lut', 'mar', 'kwi', 'maj', 'cze',
+  'lip', 'sie', 'wrz', 'paź', 'lis', 'gru',
 ];
 
 /**
@@ -43,7 +53,9 @@ const MONTH_SHORT = [
  */
 export function _formatTodayDate(ymd) {
   const d = parseLocalYMD(ymd);
-  return `${WEEKDAY_SHORT[d.getDay()]} ${d.getDate()} ${MONTH_SHORT[d.getMonth()]}`;
+  const weekdays = getLang() === 'pl' ? PL_WEEKDAY_SHORT : WEEKDAY_SHORT;
+  const months = getLang() === 'pl' ? PL_MONTH_SHORT : MONTH_SHORT;
+  return `${weekdays[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
 }
 
 /**
@@ -64,7 +76,7 @@ export function buildTodayHeader({ date, wave }) {
     tag: 'header',
     attrs: { class: 'today-header' },
     children: [
-      { tag: 'h1', attrs: { 'data-app-title': '' }, text: 'Habits' },
+      { tag: 'h1', attrs: { 'data-app-title': '' }, text: t('today.title') },
       { tag: 'span', attrs: { class: 'today-date' }, text: _formatTodayDate(date) },
       { tag: 'span', attrs: { class: 'today-wave' }, text: wave?.name ?? '' },
     ],
@@ -85,10 +97,10 @@ export function buildTodayHeader({ date, wave }) {
  */
 export function buildFooterNav({ activeHash }) {
   const linkDefs = [
-    { href: '#today', text: 'today' },
-    { href: '#history', text: 'history' },
-    { href: '#catalog', text: 'catalog' },
-    { href: '#settings', text: 'settings' },
+    { href: '#today', text: t('nav.today') },
+    { href: '#history', text: t('nav.history') },
+    { href: '#catalog', text: t('nav.catalog') },
+    { href: '#settings', text: t('nav.settings') },
   ];
 
   return {
@@ -101,7 +113,7 @@ export function buildFooterNav({ activeHash }) {
       if (link.disabled) {
         attrs['aria-disabled'] = 'true';
         attrs['tabindex'] = '-1';
-        attrs['title'] = 'Coming in Phase 4';
+        attrs['title'] = t('today.phaseTooltip');
       }
       return { tag: 'a', attrs, text: link.text };
     }),
@@ -130,6 +142,9 @@ export function buildFooterNav({ activeHash }) {
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
 export function buildTodayRow({ habit, completed }) {
+  // Display name: show Polish name when PL lang is active and name_pl exists.
+  const displayName = getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name;
+
   /** @type {object[]} */
   const tapChildren = [];
   if (completed) {
@@ -141,13 +156,13 @@ export function buildTodayRow({ habit, completed }) {
     tapChildren.push({
       tag: 'span',
       attrs: { class: 'today-row-name today-row-name--completed' },
-      text: habit.name,
+      text: displayName,
     });
   } else {
     tapChildren.push({
       tag: 'span',
       attrs: { class: 'today-row-name' },
-      text: habit.name,
+      text: displayName,
     });
   }
 
@@ -170,7 +185,7 @@ export function buildTodayRow({ habit, completed }) {
       tag: 'button',
       attrs: {
         class: 'today-row-info',
-        'aria-label': 'Show original Polish name',
+        'aria-label': t('today.showPolish'),
         'aria-expanded': 'false',
         'data-action': 'togglePolish',
         'data-habit-id': habit.id,
@@ -348,7 +363,7 @@ export function buildTodayList({ habits, allCompleted = false, totalApplicable =
     return {
       tag: 'div',
       attrs: { class: 'today-empty' },
-      text: 'No habits scheduled today.',
+      text: t('today.empty'),
     };
   }
   if (habits.length === 0 && allCompleted) {
@@ -356,11 +371,11 @@ export function buildTodayList({ habits, allCompleted = false, totalApplicable =
       tag: 'div',
       attrs: { class: 'today-empty today-empty--done' },
       children: [
-        { tag: 'p', text: 'All done today — see you tomorrow.' },
+        { tag: 'p', text: t('today.allDone') },
         {
           tag: 'p',
           attrs: { class: 'today-counter' },
-          text: `${totalApplicable} of ${totalApplicable}`,
+          text: t('today.count', { done: totalApplicable, total: totalApplicable }),
         },
       ],
     };

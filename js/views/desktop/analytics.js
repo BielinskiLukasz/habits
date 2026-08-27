@@ -28,6 +28,7 @@
 
 import { mount } from '../../util/mount.js';
 import { getWave } from '../../domain/wave.js';
+import { t } from '../../i18n/index.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -149,7 +150,7 @@ export function buildAnalyticsHeader({ statusCounts, scoringModel }) {
         tag: 'div',
         attrs: { class: 'analytics-model-selector' },
         children: [
-          { tag: 'span', text: 'Scoring Model: ' },
+          { tag: 'span', text: t('desktop.analytics.scoringModel') },
           ...modelRadioLabels,
         ],
       },
@@ -184,7 +185,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
   const colCount = hasModelCol ? 5 : 4;
 
   // Build thead
-  const theadCols = ['Habit', 'Stage', 'Rolling %', 'Mastery'];
+  const theadCols = [t('desktop.analytics.habit'), 'Stage', 'Rolling %', 'Mastery'];
   if (hasModelCol) {
     theadCols.push(`${scoringModel} Score`);
   }
@@ -239,7 +240,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
         // 2. Stage — derived from currentStageIndex (0-based) + stages array.
         // habit.stage does not exist in the IDB schema; the seed stores
         // `stages: [{label, target, ...}]` and `currentStageIndex: number`.
-        { tag: 'td', text: (habit.stages?.length > 0 && habit.currentStageIndex != null) ? `Stage ${habit.currentStageIndex + 1}` : '' },
+        { tag: 'td', text: (habit.stages?.length > 0 && habit.currentStageIndex != null) ? t('desktop.analytics.stage', { n: habit.currentStageIndex + 1 }) : '' },
         // 3. Rolling % + S1 badge
         {
           tag: 'td',
@@ -253,7 +254,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
           ],
         },
         // 4. Mastery
-        { tag: 'td', text: habit.status === 'mastered' ? 'Mastered' : '' },
+        { tag: 'td', text: habit.status === 'mastered' ? t('desktop.analytics.mastered') : '' },
       ];
 
       // 5. Active model score (S2 or S3 column only)

@@ -30,6 +30,7 @@
  */
 
 import { mount } from '../../util/mount.js';
+import { t } from '../../i18n/index.js';
 import { todayLocal, formatLocalYMD } from '../../util/date.js';
 import { mountWavePlanning } from './wavePlanning.js';
 
@@ -189,7 +190,7 @@ export function buildWaveboardHeader({ weeks }) {
   const habitTh = {
     tag: 'th',
     attrs: { class: 'waveboard-sticky-column' },
-    text: 'Habit',
+    text: t('desktop.waveboard.habit'),
   };
 
   const weekThs = weeks.map(w => ({

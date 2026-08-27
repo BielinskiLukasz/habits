@@ -61,6 +61,7 @@
 
 import { mount } from '../util/mount.js';
 import { apply } from '../state/apply.js';
+import { setLang as applyLang, getLang } from '../i18n/index.js';
 import { undo } from '../state/undo.js';
 import { showErrorToast } from './toast.js';
 import { APP_VERSION } from '../util/version.js';
@@ -71,6 +72,7 @@ import {
   getCachedSettings,
 } from '../state/store.js';
 import {
+  buildLanguageCard,
   buildStorageCard,
   buildScheduleCard,
   buildInstallCard,
@@ -340,6 +342,17 @@ async function readDataCardInputs(repo, store) {
 function buildActions() {
   return {
     /**
+     * Language select change — calls setLang() which writes to localStorage
+     * and reloads the page (D-35, full-page-reload strategy).
+     *
+     * @param {Event} evt
+     */
+    setLang: (evt) => {
+      const value = evt?.currentTarget?.value ?? evt?.target?.value;
+      if (value === 'en' || value === 'pl') applyLang(value);
+    },
+
+    /**
      * navigator.storage.persist() retry (D-62). Shows an error toast when
      * the browser declines.
      */
@@ -608,8 +621,8 @@ function buildActions() {
       // Set loading state — re-render Data card with isRecomputing: true.
       if (_panelEl) {
         const cards = _panelEl.querySelectorAll('.settings-card');
-        // Card order: Storage[0] / Schedule[1] / Install[2] / Data[3] / About[4] / Mastery[5] / ScoringModel[6]
-        const dataCard = cards[3];
+        // Card order: Language[0] / Storage[1] / Schedule[2] / Install[3] / Data[4] / About[5] / Mastery[6] / ScoringModel[7]
+        const dataCard = cards[4];
         if (dataCard) {
           const actions = buildActions();
           replaceCardChildren(
@@ -700,6 +713,22 @@ function wireScoringModelCard(cardEl, actions) {
 }
 
 /**
+ * Wire the `change` event listener on the language select inside `cardEl`.
+ * `mount.js` wires only `click` via `data-action`; `<select>` fires `change`.
+ * Called after the Language card is mounted.
+ *
+ * @param {object} cardEl — the language card element
+ * @param {Record<string, Function>} actions — the shared actions map
+ */
+function wireLangSelect(cardEl, actions) {
+  if (!cardEl) return;
+  const select = cardEl.querySelector('[data-action="setLang"]');
+  if (select && typeof actions.setLang === 'function') {
+    select.addEventListener('change', actions.setLang);
+  }
+}
+
+/**
  * Refresh the Data card + Schedule card after a notify event. Both cards
  * read from cache (canonical post-notify state — Pitfall 2 / D-72). The
  * other three cards are static or async-resolved once at mount and don't
@@ -713,10 +742,10 @@ async function refreshLiveCards() {
   const { repo, store } = _currentDeps;
   const actions = buildActions();
   const cards = _panelEl.querySelectorAll('.settings-card');
-  // Order: Storage[0] / Schedule[1] / Install[2] / Data[3] / About[4] / Mastery[5] / ScoringModel[6]
-  const scheduleCard = cards[1];
-  const dataCard = cards[3];
-  const scoringModelCard = cards[6];
+  // Order: Language[0] / Storage[1] / Schedule[2] / Install[3] / Data[4] / About[5] / Mastery[6] / ScoringModel[7]
+  const scheduleCard = cards[2];
+  const dataCard = cards[4];
+  const scoringModelCard = cards[7];
 
   if (scheduleCard) {
     const newSchedule = buildScheduleCard({
@@ -792,6 +821,13 @@ export function mountSettings(parent, deps) {
   // We just append the cards.
 
   const actions = buildActions();
+
+  // Language card (D-35) — first card so language selection is immediately
+  // discoverable. Passes current lang so the select pre-selects correctly.
+  const langCardEl = mount(buildLanguageCard(getLang()), _panelEl, actions);
+  if (langCardEl) {
+    wireLangSelect(langCardEl, actions);
+  }
 
   // Storage card.
   const storageInputs = initialStorageSnapshot();

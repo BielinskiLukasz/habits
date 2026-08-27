@@ -13,6 +13,8 @@
  *   - Calls to `apply`, `repo`, or `store` — pure description trees only.
  */
 
+import { t, getLang } from '../../i18n/index.js';
+
 /**
  * Build the Catalog header description: a `<header class="catalog-header">`
  * containing `<h1>Catalog</h1>` and a "New habit" button (`data-action="create"`).
@@ -25,7 +27,7 @@ export function buildCatalogHeader() {
     tag: 'header',
     attrs: { class: 'catalog-header' },
     children: [
-      { tag: 'h1', text: 'Catalog' },
+      { tag: 'h1', text: t('catalog.title') },
       {
         tag: 'button',
         attrs: {
@@ -33,7 +35,7 @@ export function buildCatalogHeader() {
           'data-action': 'create',
           'aria-label': 'Create new habit',
         },
-        text: 'New habit',
+        text: t('catalog.newHabit'),
       },
     ],
   };
@@ -78,10 +80,13 @@ export function buildHabitListItem(habit, masteryState) {
   /** @type {object[]} */
   const children = [];
 
+  // Display name: show Polish when PL lang active and name_pl exists.
+  const displayName = getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name;
+
   // Primary info block: name + badges.
   const badgeChildren = [
-    { tag: 'span', attrs: { class: 'catalog-habit-wave' }, text: `Wave ${habit.wave}` },
-    { tag: 'span', attrs: { class: 'catalog-habit-status' }, text: habit.status },
+    { tag: 'span', attrs: { class: 'catalog-habit-wave' }, text: t('catalog.wave', { n: habit.wave }) },
+    { tag: 'span', attrs: { class: 'catalog-habit-status' }, text: t('catalog.status.' + habit.status) },
   ];
   if (stageLabel) {
     badgeChildren.push({
@@ -94,7 +99,7 @@ export function buildHabitListItem(habit, masteryState) {
     badgeChildren.push({
       tag: 'span',
       attrs: { class: 'catalog-habit-mastered-badge' },
-      text: 'Mastered',
+      text: t('catalog.mastered'),
     });
   }
 
@@ -102,7 +107,7 @@ export function buildHabitListItem(habit, masteryState) {
     tag: 'div',
     attrs: { class: 'catalog-habit-info' },
     children: [
-      { tag: 'span', attrs: { class: 'catalog-habit-name' }, text: habit.name },
+      { tag: 'span', attrs: { class: 'catalog-habit-name' }, text: displayName },
       { tag: 'div', attrs: { class: 'catalog-habit-badges' }, children: badgeChildren },
     ],
   });
@@ -120,7 +125,7 @@ export function buildHabitListItem(habit, masteryState) {
       'data-habit-id': habit.id,
       'aria-label': `Edit ${habit.name}`,
     },
-    text: 'Edit',
+    text: t('catalog.edit'),
   });
 
   // Archive or Restore based on status.
@@ -133,7 +138,7 @@ export function buildHabitListItem(habit, masteryState) {
         'data-habit-id': habit.id,
         'aria-label': `Restore ${habit.name}`,
       },
-      text: 'Restore',
+      text: t('catalog.restore'),
     });
   } else {
     actionBtns.push({
@@ -144,7 +149,7 @@ export function buildHabitListItem(habit, masteryState) {
         'data-habit-id': habit.id,
         'aria-label': `Archive ${habit.name}`,
       },
-      text: 'Archive',
+      text: t('catalog.archive'),
     });
   }
 
@@ -158,7 +163,7 @@ export function buildHabitListItem(habit, masteryState) {
         'data-habit-id': habit.id,
         'aria-label': `Advance stage for ${habit.name}`,
       },
-      text: 'Advance stage',
+      text: t('catalog.advanceStage'),
     });
   }
 
@@ -207,7 +212,7 @@ export function buildUpcomingListItem(habit) {
         tag: 'div',
         attrs: { class: 'catalog-habit-badges' },
         children: [
-          { tag: 'span', attrs: { class: 'catalog-habit-wave' }, text: `Wave ${habit.wave}` },
+          { tag: 'span', attrs: { class: 'catalog-habit-wave' }, text: t('catalog.wave', { n: habit.wave }) },
           { tag: 'span', attrs: { class: 'catalog-upcoming-date' }, text: habit.startDate },
         ],
       },
@@ -227,7 +232,7 @@ export function buildUpcomingListItem(habit) {
       'data-habit-id': habit.id,
       'aria-label': `Edit ${habit.name}`,
     },
-    text: 'Edit',
+    text: t('catalog.edit'),
   });
 
   // Promote button.
@@ -239,7 +244,7 @@ export function buildUpcomingListItem(habit) {
       'data-habit-id': habit.id,
       'aria-label': `Promote ${habit.name} to active`,
     },
-    text: 'Promote',
+    text: t('catalog.promote'),
   });
 
   children.push({
@@ -294,14 +299,14 @@ export function buildEditPanel(habit) {
     tag: 'div',
     attrs: { class: 'catalog-edit-panel', 'data-panel': 'edit', 'data-habit-id': habit.id },
     children: [
-      { tag: 'h2', text: 'Edit habit' },
+      { tag: 'h2', text: t('catalog.edit.title') },
 
       // Name.
       {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'edit-name' }, text: 'Name' },
+          { tag: 'label', attrs: { for: 'edit-name' }, text: t('catalog.edit.name') },
           {
             tag: 'input',
             attrs: {
@@ -319,7 +324,7 @@ export function buildEditPanel(habit) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'edit-name-pl' }, text: 'Polish name (optional)' },
+          { tag: 'label', attrs: { for: 'edit-name-pl' }, text: t('catalog.edit.namePl') },
           {
             tag: 'input',
             attrs: {
@@ -337,7 +342,7 @@ export function buildEditPanel(habit) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'edit-wave' }, text: 'Wave' },
+          { tag: 'label', attrs: { for: 'edit-wave' }, text: t('catalog.edit.wave') },
           {
             tag: 'input',
             attrs: {
@@ -357,7 +362,7 @@ export function buildEditPanel(habit) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'edit-cadence-type' }, text: 'Cadence type' },
+          { tag: 'label', attrs: { for: 'edit-cadence-type' }, text: t('catalog.edit.cadenceType') },
           _buildCadenceTypeSelect(habit.cadence ?? { type: 'daily' }, 'edit-cadence-type'),
         ],
       },
@@ -367,7 +372,7 @@ export function buildEditPanel(habit) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'edit-target-type' }, text: 'Target type' },
+          { tag: 'label', attrs: { for: 'edit-target-type' }, text: t('catalog.edit.targetType') },
           _buildTargetTypeSelect(habit.targetType ?? 'binary', 'edit-target-type'),
         ],
       },
@@ -379,7 +384,7 @@ export function buildEditPanel(habit) {
               tag: 'div',
               attrs: { class: 'catalog-form-row' },
               children: [
-                { tag: 'label', attrs: { for: 'edit-target' }, text: 'Target count' },
+                { tag: 'label', attrs: { for: 'edit-target' }, text: t('catalog.edit.targetCount') },
                 {
                   tag: 'input',
                   attrs: {
@@ -400,7 +405,7 @@ export function buildEditPanel(habit) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'edit-start-date' }, text: 'Start date' },
+          { tag: 'label', attrs: { for: 'edit-start-date' }, text: t('catalog.edit.startDate') },
           {
             tag: 'input',
             attrs: {
@@ -418,7 +423,7 @@ export function buildEditPanel(habit) {
         tag: 'div',
         attrs: { class: 'catalog-stages-section' },
         children: [
-          { tag: 'h3', text: 'Stages' },
+          { tag: 'h3', text: t('catalog.edit.stages') },
           {
             tag: 'ul',
             attrs: { class: 'catalog-stages-list' },
@@ -430,7 +435,7 @@ export function buildEditPanel(habit) {
               class: 'catalog-btn catalog-btn--add-stage',
               'data-action': 'add-stage',
             },
-            text: 'Add stage',
+            text: t('catalog.edit.addStage'),
           },
         ],
       },
@@ -440,7 +445,7 @@ export function buildEditPanel(habit) {
         tag: 'div',
         attrs: { class: 'catalog-mastery-override' },
         children: [
-          { tag: 'h3', text: 'Custom mastery' },
+          { tag: 'h3', text: t('catalog.edit.customMastery') },
           {
             tag: 'label',
             attrs: { class: 'catalog-form-row catalog-form-row--checkbox' },
@@ -454,7 +459,7 @@ export function buildEditPanel(habit) {
                   ...(hasCustomMastery ? { checked: '' } : {}),
                 },
               },
-              { tag: 'span', text: 'Override global mastery settings' },
+              { tag: 'span', text: t('catalog.edit.overrideGlobal') },
             ],
           },
           {
@@ -471,7 +476,7 @@ export function buildEditPanel(habit) {
                   {
                     tag: 'label',
                     attrs: { for: 'edit-mastery-threshold' },
-                    text: 'Threshold (%)',
+                    text: t('catalog.edit.threshold'),
                   },
                   {
                     tag: 'input',
@@ -496,7 +501,7 @@ export function buildEditPanel(habit) {
                   {
                     tag: 'label',
                     attrs: { for: 'edit-mastery-window' },
-                    text: 'Window (days)',
+                    text: t('catalog.edit.window'),
                   },
                   {
                     tag: 'input',
@@ -562,14 +567,14 @@ export function buildCreatePanel(todayYMD) {
     tag: 'div',
     attrs: { class: 'catalog-edit-panel catalog-create-panel', 'data-panel': 'create' },
     children: [
-      { tag: 'h2', text: 'New habit' },
+      { tag: 'h2', text: t('catalog.newHabit') },
 
       // Name.
       {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'create-name' }, text: 'Name' },
+          { tag: 'label', attrs: { for: 'create-name' }, text: t('catalog.edit.name') },
           {
             tag: 'input',
             attrs: {
@@ -587,7 +592,7 @@ export function buildCreatePanel(todayYMD) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'create-name-pl' }, text: 'Polish name (optional)' },
+          { tag: 'label', attrs: { for: 'create-name-pl' }, text: t('catalog.edit.namePl') },
           {
             tag: 'input',
             attrs: {
@@ -605,7 +610,7 @@ export function buildCreatePanel(todayYMD) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'create-wave' }, text: 'Wave' },
+          { tag: 'label', attrs: { for: 'create-wave' }, text: t('catalog.edit.wave') },
           {
             tag: 'input',
             attrs: {
@@ -625,7 +630,7 @@ export function buildCreatePanel(todayYMD) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'create-cadence-type' }, text: 'Cadence type' },
+          { tag: 'label', attrs: { for: 'create-cadence-type' }, text: t('catalog.edit.cadenceType') },
           _buildCadenceTypeSelect({ type: 'daily' }, 'create-cadence-type'),
         ],
       },
@@ -635,7 +640,7 @@ export function buildCreatePanel(todayYMD) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'create-target-type' }, text: 'Target type' },
+          { tag: 'label', attrs: { for: 'create-target-type' }, text: t('catalog.edit.targetType') },
           _buildTargetTypeSelect('binary', 'create-target-type'),
         ],
       },
@@ -645,7 +650,7 @@ export function buildCreatePanel(todayYMD) {
         tag: 'div',
         attrs: { class: 'catalog-form-row' },
         children: [
-          { tag: 'label', attrs: { for: 'create-start-date' }, text: 'Start date' },
+          { tag: 'label', attrs: { for: 'create-start-date' }, text: t('catalog.edit.startDate') },
           {
             tag: 'input',
             attrs: {
@@ -663,7 +668,7 @@ export function buildCreatePanel(todayYMD) {
         tag: 'div',
         attrs: { class: 'catalog-stages-section' },
         children: [
-          { tag: 'h3', text: 'Stages' },
+          { tag: 'h3', text: t('catalog.edit.stages') },
           { tag: 'ul', attrs: { class: 'catalog-stages-list' }, children: [] },
           {
             tag: 'button',
@@ -671,7 +676,7 @@ export function buildCreatePanel(todayYMD) {
               class: 'catalog-btn catalog-btn--add-stage',
               'data-action': 'add-stage',
             },
-            text: 'Add stage',
+            text: t('catalog.edit.addStage'),
           },
         ],
       },
@@ -681,7 +686,7 @@ export function buildCreatePanel(todayYMD) {
         tag: 'div',
         attrs: { class: 'catalog-mastery-override' },
         children: [
-          { tag: 'h3', text: 'Custom mastery' },
+          { tag: 'h3', text: t('catalog.edit.customMastery') },
           {
             tag: 'label',
             attrs: { class: 'catalog-form-row catalog-form-row--checkbox' },
@@ -694,7 +699,7 @@ export function buildCreatePanel(todayYMD) {
                   'data-field': 'customMastery',
                 },
               },
-              { tag: 'span', text: 'Override global mastery settings' },
+              { tag: 'span', text: t('catalog.edit.overrideGlobal') },
             ],
           },
           {
@@ -708,7 +713,7 @@ export function buildCreatePanel(todayYMD) {
                   {
                     tag: 'label',
                     attrs: { for: 'create-mastery-threshold' },
-                    text: 'Threshold (%)',
+                    text: t('catalog.edit.threshold'),
                   },
                   {
                     tag: 'input',
@@ -730,7 +735,7 @@ export function buildCreatePanel(todayYMD) {
                   {
                     tag: 'label',
                     attrs: { for: 'create-mastery-window' },
-                    text: 'Window (days)',
+                    text: t('catalog.edit.window'),
                   },
                   {
                     tag: 'input',

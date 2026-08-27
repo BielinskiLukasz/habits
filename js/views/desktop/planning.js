@@ -27,6 +27,7 @@
 
 import { mount } from '../../util/mount.js';
 import { todayLocal, daysFrom } from '../../util/date.js';
+import { t } from '../../i18n/index.js';
 
 // ---------------------------------------------------------------------------
 // ISO week helpers (internal, not exported)
@@ -101,7 +102,7 @@ function computeNextNWeeks(n, fromYMD) {
 export function buildPlanningHeader({ weeks }) {
   const labelTh = {
     tag: 'th',
-    text: 'Wave / Habit',
+    text: t('desktop.planning.waveHabit'),
   };
 
   const weekThs = weeks.map(w => ({
@@ -208,22 +209,22 @@ export function buildPlanningEmpty() {
     tag: 'div',
     attrs: { class: 'planning-empty' },
     children: [
-      { tag: 'h2', text: 'No upcoming habit starts' },
+      { tag: 'h2', text: t('desktop.planning.noUpcoming') },
       {
         tag: 'p',
         children: [
           {
             tag: 'span',
-            text: 'Habits you plan to start in the future will appear here. Schedule them in the ',
+            text: t('desktop.planning.scheduleHint'),
           },
           {
             tag: 'a',
             attrs: { href: './index.html#catalog' },
-            text: 'Catalog view',
+            text: t('desktop.planning.catalogView'),
           },
           {
             tag: 'span',
-            text: '.',
+            text: t('desktop.planning.scheduleHintEnd'),
           },
         ],
       },

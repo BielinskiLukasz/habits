@@ -37,7 +37,10 @@
  *   - `.innerHTML` family — D-78 grep gate.
  */
 
+import { t } from '../../i18n/index.js';
+
 /* Stable per-card heading IDs for `aria-labelledby`. */
+const LANGUAGE_LABEL_ID = 'settings-language-h2';
 const STORAGE_LABEL_ID = 'settings-storage-h2';
 const SCHEDULE_LABEL_ID = 'settings-schedule-h2';
 const INSTALL_LABEL_ID = 'settings-install-h2';
@@ -45,6 +48,50 @@ const DATA_LABEL_ID = 'settings-data-h2';
 const ABOUT_LABEL_ID = 'settings-about-h2';
 const MASTERY_LABEL_ID = 'settings-mastery-h2';
 const SCORING_MODEL_LABEL_ID = 'settings-scoring-model-h2';
+
+/**
+ * Build the Language card description — a select for `en`/`pl` that calls
+ * `setLang()` on change (full-page reload strategy, D-35). Card is always
+ * first so language selection is immediately discoverable.
+ *
+ * @param {'en'|'pl'} [currentLang='en'] - The currently active locale.
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildLanguageCard(currentLang = 'en') {
+  /** @param {'en'|'pl'} value */
+  function opt(value, label) {
+    /** @type {Record<string, string>} */
+    const attrs = { value };
+    if (currentLang === value) attrs.selected = '';
+    return { tag: 'option', attrs, text: label };
+  }
+
+  return {
+    tag: 'section',
+    attrs: {
+      class: 'settings-card',
+      'aria-labelledby': LANGUAGE_LABEL_ID,
+    },
+    children: [
+      { tag: 'h2', attrs: { id: LANGUAGE_LABEL_ID }, text: t('settings.language.title') },
+      {
+        tag: 'div',
+        attrs: { class: 'settings-language-row' },
+        children: [
+          { tag: 'label', attrs: { for: 'lang-select' }, text: t('settings.language.label') },
+          {
+            tag: 'select',
+            attrs: { id: 'lang-select', 'data-action': 'setLang' },
+            children: [
+              opt('en', t('settings.language.en')),
+              opt('pl', t('settings.language.pl')),
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
 
 /**
  * Build the Storage card description (D-62, PWA-07 partial).
@@ -69,13 +116,13 @@ export function buildStorageCard({
 } = {}) {
   /** @type {object[]} */
   const body = [
-    { tag: 'h2', attrs: { id: STORAGE_LABEL_ID }, text: 'Storage' },
+    { tag: 'h2', attrs: { id: STORAGE_LABEL_ID }, text: t('settings.storage.title') },
   ];
 
   if (!supported) {
     body.push({
       tag: 'p',
-      text: 'Storage status unsupported on this browser.',
+      text: t('settings.storage.unsupported'),
     });
     return {
       tag: 'section',
@@ -89,11 +136,11 @@ export function buildStorageCard({
 
   // Status row.
   const persistedText =
-    persisted === 'loading…' ? 'loading…' : persisted === true ? 'yes' : 'no';
+    persisted === 'loading…' ? t('settings.storage.loading') : persisted === true ? t('settings.storage.yes') : t('settings.storage.no');
   body.push({
     tag: 'dl',
     children: [
-      { tag: 'dt', text: 'Persistent' },
+      { tag: 'dt', text: t('settings.storage.persistent') },
       { tag: 'dd', text: persistedText },
     ],
   });
@@ -109,19 +156,19 @@ export function buildStorageCard({
         class: 'settings-card--destructive',
         'data-action': 'requestPersistence',
       },
-      text: 'Request persistence',
+      text: t('settings.storage.requestPersistence'),
     });
   }
 
   // Estimate row.
   const estimateText =
     estimateUsedMB === 'loading…' || estimateQuotaMB === 'loading…'
-      ? 'loading…'
-      : `Using ${estimateUsedMB} MB of ~${estimateQuotaMB} MB`;
+      ? t('settings.storage.loading')
+      : t('settings.storage.using', { usedMB: String(estimateUsedMB), quotaMB: String(estimateQuotaMB) });
   body.push({
     tag: 'dl',
     children: [
-      { tag: 'dt', text: 'Storage' },
+      { tag: 'dt', text: t('settings.storage.storageRow') },
       { tag: 'dd', text: estimateText },
     ],
   });
@@ -175,14 +222,14 @@ export function buildScheduleCard({ weekStart }) {
       'aria-labelledby': SCHEDULE_LABEL_ID,
     },
     children: [
-      { tag: 'h2', attrs: { id: SCHEDULE_LABEL_ID }, text: 'Schedule' },
+      { tag: 'h2', attrs: { id: SCHEDULE_LABEL_ID }, text: t('settings.schedule.title') },
       {
         tag: 'fieldset',
         attrs: { class: 'settings-radio-group' },
         children: [
-          { tag: 'legend', text: 'Week starts on' },
-          radio('mon', 'Monday'),
-          radio('sun', 'Sunday'),
+          { tag: 'legend', text: t('settings.schedule.weekStartsOn') },
+          radio('mon', t('settings.schedule.monday')),
+          radio('sun', t('settings.schedule.sunday')),
         ],
       },
     ],
@@ -206,18 +253,18 @@ export function buildInstallCard() {
       'aria-labelledby': INSTALL_LABEL_ID,
     },
     children: [
-      { tag: 'h2', attrs: { id: INSTALL_LABEL_ID }, text: 'Install' },
+      { tag: 'h2', attrs: { id: INSTALL_LABEL_ID }, text: t('settings.install.title') },
       {
         tag: 'section',
         attrs: { 'aria-labelledby': 'settings-install-ios' },
         children: [
-          { tag: 'h3', attrs: { id: 'settings-install-ios' }, text: 'iOS Safari' },
+          { tag: 'h3', attrs: { id: 'settings-install-ios' }, text: t('settings.install.ios') },
           {
             tag: 'p',
             children: [
-              { tag: 'span', text: 'Tap the Share button, then ' },
-              { tag: 'strong', text: 'Add to Home Screen' },
-              { tag: 'span', text: '.' },
+              { tag: 'span', text: t('settings.install.iosTap') },
+              { tag: 'strong', text: t('settings.install.iosAdd') },
+              { tag: 'span', text: t('settings.install.iosEnd') },
             ],
           },
         ],
@@ -226,13 +273,13 @@ export function buildInstallCard() {
         tag: 'section',
         attrs: { 'aria-labelledby': 'settings-install-android' },
         children: [
-          { tag: 'h3', attrs: { id: 'settings-install-android' }, text: 'Android Chrome' },
+          { tag: 'h3', attrs: { id: 'settings-install-android' }, text: t('settings.install.android') },
           {
             tag: 'p',
             children: [
-              { tag: 'span', text: 'Open the menu, then ' },
-              { tag: 'strong', text: 'Install app' },
-              { tag: 'span', text: '.' },
+              { tag: 'span', text: t('settings.install.androidMenu') },
+              { tag: 'strong', text: t('settings.install.androidInstall') },
+              { tag: 'span', text: t('settings.install.androidEnd') },
             ],
           },
         ],
@@ -241,10 +288,10 @@ export function buildInstallCard() {
         tag: 'section',
         attrs: { 'aria-labelledby': 'settings-install-desktop' },
         children: [
-          { tag: 'h3', attrs: { id: 'settings-install-desktop' }, text: 'Desktop browsers' },
+          { tag: 'h3', attrs: { id: 'settings-install-desktop' }, text: t('settings.install.desktop') },
           {
             tag: 'p',
-            text: 'Look for the install icon in the URL bar, or use the browser menu.',
+            text: t('settings.install.desktopInfo'),
           },
         ],
       },
@@ -295,7 +342,7 @@ export function buildDataCard({
 }) {
   /** @type {object[]} */
   const cardChildren = [
-    { tag: 'h2', attrs: { id: DATA_LABEL_ID }, text: 'Data' },
+    { tag: 'h2', attrs: { id: DATA_LABEL_ID }, text: t('settings.data.title') },
   ];
 
   // --- Backup section (SETTINGS-03, EXPORT-08) ---
@@ -335,7 +382,7 @@ export function buildDataCard({
   backupChildren.push({
     tag: 'dl',
     children: [
-      { tag: 'dt', text: 'Last backup' },
+      { tag: 'dt', text: t('settings.data.lastBackup') },
       {
         tag: 'dd',
         text:
@@ -352,7 +399,7 @@ export function buildDataCard({
       'aria-label': 'Export JSON backup',
       class: 'settings-export-btn',
     },
-    text: 'Export JSON',
+    text: t('settings.data.exportJson'),
   });
   backupChildren.push({
     tag: 'button',
@@ -361,7 +408,7 @@ export function buildDataCard({
       'aria-label': 'Export CSV',
       class: 'settings-export-btn',
     },
-    text: 'Export CSV',
+    text: t('settings.data.exportCsv'),
   });
 
   // Import file input — carries data-action so the mounter can locate it
@@ -399,7 +446,7 @@ export function buildDataCard({
       {
         tag: 'button',
         attrs: recomputeAttrs,
-        text: isRecomputing ? 'Recomputing…' : 'Recompute Scores',
+        text: isRecomputing ? t('settings.data.recomputing') : t('settings.data.recomputeScores'),
       },
     ],
   });
@@ -411,7 +458,7 @@ export function buildDataCard({
   if (hasUndoToken) {
     undoChildren.push({
       tag: 'p',
-      text: `Last: ${lastEvent} · ${relativeTime}`,
+      text: t('settings.data.last', { event: lastEvent, relativeTime }),
     });
     undoChildren.push({
       tag: 'button',
@@ -419,10 +466,10 @@ export function buildDataCard({
         'data-action': 'undoLastAction',
         'aria-label': 'Undo last action',
       },
-      text: 'Undo last action',
+      text: t('settings.data.undoBtn'),
     });
   } else {
-    undoChildren.push({ tag: 'p', text: 'Nothing to undo.' });
+    undoChildren.push({ tag: 'p', text: t('settings.data.nothingToUndo') });
     undoChildren.push({
       tag: 'button',
       attrs: {
@@ -452,9 +499,9 @@ export function buildDataCard({
           'data-action': 'resetData',
           'aria-label': 'Reset data',
         },
-        text: 'Reset data',
+        text: t('settings.data.resetData'),
       },
-      { tag: 'p', text: 'This deletes everything stored on this device.' },
+      { tag: 'p', text: t('settings.data.resetWarning') },
     ],
   });
 
@@ -486,18 +533,18 @@ export function buildAboutCard({ appVersion, schemaVersion, cacheName, swState }
       'aria-labelledby': ABOUT_LABEL_ID,
     },
     children: [
-      { tag: 'h2', attrs: { id: ABOUT_LABEL_ID }, text: 'About' },
+      { tag: 'h2', attrs: { id: ABOUT_LABEL_ID }, text: t('settings.about.title') },
       {
         tag: 'dl',
         attrs: { class: 'settings-about' },
         children: [
-          { tag: 'dt', text: 'App version' },
+          { tag: 'dt', text: t('settings.about.appVersion') },
           { tag: 'dd', text: String(appVersion) },
-          { tag: 'dt', text: 'Schema version' },
+          { tag: 'dt', text: t('settings.about.schemaVersion') },
           { tag: 'dd', text: String(schemaVersion) },
-          { tag: 'dt', text: 'Cache name' },
+          { tag: 'dt', text: t('settings.about.cacheName') },
           { tag: 'dd', text: String(cacheName) },
-          { tag: 'dt', text: 'Service worker' },
+          { tag: 'dt', text: t('settings.about.serviceWorker') },
           { tag: 'dd', text: String(swState) },
         ],
       },
@@ -548,15 +595,15 @@ export function buildScoringModelCard({ scoringModel = 'S1' } = {}) {
       'aria-labelledby': SCORING_MODEL_LABEL_ID,
     },
     children: [
-      { tag: 'h2', attrs: { id: SCORING_MODEL_LABEL_ID }, text: 'Scoring Model' },
+      { tag: 'h2', attrs: { id: SCORING_MODEL_LABEL_ID }, text: t('settings.scoring.title') },
       {
         tag: 'fieldset',
         attrs: { class: 'settings-radio-group' },
         children: [
-          { tag: 'legend', text: 'Scoring model' },
-          radio('S1', 'S1 — Rolling Threshold'),
-          radio('S2', 'S2 — Day-Weighted'),
-          radio('S3', 'S3 — Load-Adjusted'),
+          { tag: 'legend', text: t('settings.scoring.legend') },
+          radio('S1', t('settings.scoring.s1')),
+          radio('S2', t('settings.scoring.s2')),
+          radio('S3', t('settings.scoring.s3')),
         ],
       },
     ],
@@ -591,7 +638,7 @@ export function buildMasteryCard({ masteryThreshold, masteryWindow } = {}) {
       'data-card': 'mastery',
     },
     children: [
-      { tag: 'h2', attrs: { id: MASTERY_LABEL_ID }, text: 'Mastery' },
+      { tag: 'h2', attrs: { id: MASTERY_LABEL_ID }, text: t('settings.mastery.title') },
       {
         tag: 'div',
         attrs: { class: 'mastery-row' },
@@ -599,7 +646,7 @@ export function buildMasteryCard({ masteryThreshold, masteryWindow } = {}) {
           {
             tag: 'label',
             attrs: { for: 'mastery-threshold-input' },
-            text: 'Completion threshold',
+            text: t('settings.mastery.threshold'),
           },
           {
             tag: 'div',
@@ -616,10 +663,10 @@ export function buildMasteryCard({ masteryThreshold, masteryWindow } = {}) {
                   value: String(thresholdValue),
                   'data-key': 'masteryThreshold',
                   'data-action': 'setMasteryThreshold',
-                  'aria-label': 'Mastery completion threshold %',
+                  'aria-label': t('settings.mastery.thresholdAria'),
                 },
               },
-              { tag: 'span', text: '%' },
+              { tag: 'span', text: t('settings.mastery.pct') },
             ],
           },
         ],
@@ -631,7 +678,7 @@ export function buildMasteryCard({ masteryThreshold, masteryWindow } = {}) {
           {
             tag: 'label',
             attrs: { for: 'mastery-window-input' },
-            text: 'Rolling window',
+            text: t('settings.mastery.window'),
           },
           {
             tag: 'div',
@@ -648,10 +695,10 @@ export function buildMasteryCard({ masteryThreshold, masteryWindow } = {}) {
                   value: String(windowValue),
                   'data-key': 'masteryWindow',
                   'data-action': 'setMasteryWindow',
-                  'aria-label': 'Mastery rolling window days',
+                  'aria-label': t('settings.mastery.windowAria'),
                 },
               },
-              { tag: 'span', text: 'days' },
+              { tag: 'span', text: t('settings.mastery.days') },
             ],
           },
         ],

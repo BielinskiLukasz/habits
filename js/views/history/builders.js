@@ -1,5 +1,6 @@
 /**
  * @file Pure history view builders (HISTORY-01..06, D-90). No DOM ops.
+ * All user-visible strings are routed through `t()` (i18n, D-35).
  *
  * Every builder returns `{tag, attrs?, text?, children?}` — the same shape
  * the `mount()` helper (D-77) consumes. NO DOM access; that lives in
@@ -14,6 +15,8 @@
  *   - Any DOM access (createElement, document.*, etc.) — builders are pure.
  *   - `.innerHTML` family — D-78 grep gate.
  */
+
+import { t } from '../../i18n/index.js';
 
 /**
  * Build the History view header: date stepper with ← → navigation buttons,
@@ -52,7 +55,7 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
           'data-action': 'prev-day',
           'aria-label': 'Previous day',
         },
-        text: '←',
+        text: t('history.prev'),
       },
       {
         tag: 'span',
@@ -62,7 +65,7 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
       {
         tag: 'button',
         attrs: nextAttrs,
-        text: '→',
+        text: t('history.next'),
       },
       {
         tag: 'button',
@@ -71,7 +74,7 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
           'data-action': 'toggle-calendar',
           'aria-expanded': 'false',
         },
-        text: 'Jump to date ▼',
+        text: t('history.jumpToDate'),
       },
       {
         tag: 'div',
@@ -157,7 +160,7 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
       {
         tag: 'button',
         attrs: toggleAttrs,
-        text: 'Toggle',
+        text: t('history.toggle'),
       },
     ],
   };
@@ -232,7 +235,7 @@ export function buildBulkActionBar() {
           class: 'bulk-action-btn',
           'data-action': 'bulk-mark-uncompleted',
         },
-        text: 'Mark all not-completed',
+        text: t('history.markAllNotCompleted'),
       },
     ],
   };

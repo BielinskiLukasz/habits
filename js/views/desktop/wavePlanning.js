@@ -18,6 +18,7 @@ import { getCachedHabits } from '../../state/store.js';
 import { getAllWaves } from '../../domain/wave.js';
 import { todayLocal } from '../../util/date.js';
 import { mount } from '../../util/mount.js';
+import { t } from '../../i18n/index.js';
 
 // ---------------------------------------------------------------------------
 // Cadence summary — dispatch table, no switch (Anti-Pattern 4)
@@ -66,7 +67,7 @@ const STATUS_LABEL = { Healthy: 'Healthy', Watch: 'Watch', 'At-risk': 'At Risk',
 function buildHealthBadge(waveHabits, currentWeekKey, snapshotsByWeek) {
   const activeOnly = waveHabits.filter(h => h.status === 'active');
   if (activeOnly.length === 0) {
-    return { tag: 'span', attrs: { class: 'waveplanning-badge waveplanning-badge--upcoming' }, text: 'Upcoming' };
+    return { tag: 'span', attrs: { class: 'waveplanning-badge waveplanning-badge--upcoming' }, text: t('desktop.wavePlanning.upcoming') };
   }
   let worst = null;
   for (const h of activeOnly) {
@@ -75,7 +76,7 @@ function buildHealthBadge(waveHabits, currentWeekKey, snapshotsByWeek) {
     worst = worstStatus(worst, s1);
   }
   if (worst === null) {
-    return { tag: 'span', attrs: { class: 'waveplanning-badge waveplanning-badge--na' }, text: 'No data' };
+    return { tag: 'span', attrs: { class: 'waveplanning-badge waveplanning-badge--na' }, text: t('desktop.wavePlanning.noData') };
   }
   const slug = statusSlug(worst);
   const label = STATUS_LABEL[worst] ?? worst;
@@ -128,7 +129,7 @@ function buildScheduledHabitRow(habit) {
           'aria-label': `Promote ${habit.name} to active`,
           'data-habit-id': habit.id,
         },
-        text: 'Promote to active',
+        text: t('desktop.wavePlanning.promoteToActive'),
       },
     ],
   };
@@ -150,12 +151,12 @@ function buildHabitList(wave, activeHabits, scheduledHabits) {
   const children = [...activeHabits.map(buildActiveHabitRow)];
 
   if (scheduledHabits.length > 0) {
-    children.push({ tag: 'h3', attrs: { class: 'waveplanning-scheduled-heading' }, text: 'Scheduled' });
+    children.push({ tag: 'h3', attrs: { class: 'waveplanning-scheduled-heading' }, text: t('desktop.wavePlanning.scheduled') });
     children.push(...scheduledHabits.map(buildScheduledHabitRow));
   }
 
   if (activeHabits.length + scheduledHabits.length === 0) {
-    children.push({ tag: 'li', attrs: { class: 'waveplanning-empty' }, text: 'No habits in this wave.' });
+    children.push({ tag: 'li', attrs: { class: 'waveplanning-empty' }, text: t('desktop.wavePlanning.noHabitsInWave') });
   }
 
   return {
