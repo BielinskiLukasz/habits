@@ -48,7 +48,7 @@ Archives: `.planning/milestones/`
 Phase: Milestone v1.1 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-08-27 - Completed quick task 260827-otr: Fix import.js broadcast call: treat broadcast as a function matching apply.js pattern
+Last activity: 2026-08-28 - Completed quick task 260828-00l: Add full EN/PL i18n to the habits app
 
 ## Performance Metrics
 
@@ -104,6 +104,7 @@ None
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260827-otr | Fix import.js broadcast call: treat broadcast as a function matching apply.js pattern | 2026-08-27 | 83590a2 | [260827-otr-fix-import-js-broadcast-call-treat-broad](.planning/quick/260827-otr-fix-import-js-broadcast-call-treat-broad/) |
+| 260828-00l | Add full EN/PL i18n to the habits app | 2026-08-28 | 1c53d4e | [260828-00l-add-full-en-pl-i18n-to-the-habits-app](.planning/quick/260828-00l-add-full-en-pl-i18n-to-the-habits-app/) |
 
 ## Session Continuity
 
