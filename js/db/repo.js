@@ -304,6 +304,64 @@ export async function getAllScoreSnapshots() {
 }
 
 /**
+ * Get a single score_snapshots row by compound key [habitId, date].
+ * Returns `undefined` when no snapshot exists for that (habitId, date) pair.
+ *
+ * Used by the Analytics view (js/views/desktop/analytics.js) to read
+ * today's pre-computed scores per habit without going through runTx —
+ * runTx returns the raw body() return value, which for a bare IDBRequest
+ * (non-thenable) resolves to the request object rather than its result.
+ *
+ * @param {string} habitId
+ * @param {string} date YYYY-MM-DD, local
+ * @returns {Promise<object|undefined>}
+ */
+export async function getSnapshot(habitId, date) {
+  const db = await openDB();
+  return get(db, 'score_snapshots', [habitId, date]);
+}
+
+/**
+ * Get the most recent score_snapshots row for `habitId` regardless of date.
+ * Returns the row with the largest date value, or `undefined` when no snapshot
+ * exists for this habit.
+ *
+ * Used by the Analytics view instead of `getSnapshot(habitId, today)` so the
+ * view shows the latest available data even on days when no log was written.
+ * Without this, columns are empty on any day after the last log write because
+ * `writeHabitSnapshots` only runs on log mutation and only writes rows up to
+ * `todayLocal()` at write time — leaving no row for subsequent days.
+ *
+ * Implementation mirrors `getHabitVersionAtDate`: bound the store's compound
+ * primary keypath `[habitId, date]` over the full date alphabet and return the
+ * last element (IDB returns results sorted by key ascending).
+ *
+ * @param {string} habitId
+ * @returns {Promise<object|undefined>}
+ */
+export async function getLatestSnapshot(habitId) {
+  const db = await openDB();
+  const range = IDBKeyRange.bound([habitId, '0000-01-01'], [habitId, '9999-12-31']);
+  const results = await getAll(db, 'score_snapshots', range);
+  return results.length > 0 ? results[results.length - 1] : undefined;
+}
+
+/**
+ * Get every score_snapshots row whose `date` falls in the inclusive
+ * `[startYMD, endYMD]` range, via the `date` index on the
+ * `score_snapshots` store. Mirrors `getLogsInRange` exactly.
+ * Used by the Waveboard view to fetch the 12-week heat-map data.
+ *
+ * @param {string} startYMD YYYY-MM-DD, inclusive
+ * @param {string} endYMD YYYY-MM-DD, inclusive
+ * @returns {Promise<object[]>}
+ */
+export async function getSnapshotsInRange(startYMD, endYMD) {
+  const db = await openDB();
+  return indexGetAll(db, 'score_snapshots', 'date', IDBKeyRange.bound(startYMD, endYMD));
+}
+
+/**
  * Multi-store readwrite tx — entry point for `apply.js` / `seed.js` /
  * `undo.js`. The `body` receives the raw IDBTransaction; callers compose
  * `tx.objectStore(name).put(row)` etc. and trust the wrapper to `await

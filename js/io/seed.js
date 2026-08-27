@@ -104,9 +104,16 @@ export async function bootSeed() {
   const fetchFn = _fetch ?? globalThis.fetch ?? null;
 
   // Fast-path no-op (steady-state on every boot after the first).
+  // All five flags must be present to short-circuit: habitVersionsSeeded guards
+  // the habit_versions backfill (2026-07-03); waveFieldSeeded guards the v1
+  // wave backfill (seededIds-only, 2026-08-25); waveFieldV2 guards the v2
+  // wave backfill (all habits, 2026-08-26 — fixes imported habits missed by v1).
   const seededIds = await repo.getMeta('seededIds');
   const persistResult = await repo.getMeta('persistResult');
-  if (seededIds !== undefined && persistResult !== undefined) {
+  const habitVersionsSeeded = await repo.getMeta('habitVersionsSeeded');
+  const waveFieldSeeded = await repo.getMeta('waveFieldSeeded');
+  const waveFieldV2 = await repo.getMeta('waveFieldV2');
+  if (seededIds !== undefined && persistResult !== undefined && habitVersionsSeeded && waveFieldSeeded && waveFieldV2) {
     return;
   }
 
@@ -157,11 +164,38 @@ export async function bootSeed() {
     const seededList = seed.habits.map((h) => h.id);
 
     await repo.runTx(
-      ['habits', 'events', 'meta', 'settings'],
+      ['habits', 'habit_versions', 'events', 'meta', 'settings'],
       'readwrite',
       async (tx) => {
         for (const h of toInsert) {
           tx.objectStore('habits').put({ ...h, slots: normalizeSlotsToArray(h.slots) });
+
+          // Write initial habit_versions row so getHabitVersionAtDate can
+          // resolve the original name for any date >= effectiveFrom (NFR-10,
+          // HISTORY integrity). Without this row, editing a seeded habit
+          // produces a version row dated today (effectiveFrom = editDate),
+          // leaving pre-edit history with no matching version → fallback to
+          // the current (new) name instead of the original.
+          //
+          // effectiveFrom sentinel: use the habit's explicit startDate if set
+          // (scheduled/future habits); otherwise use '0000-01-01'. The
+          // sentinel ensures this initial row's compound key [habitId,
+          // '0000-01-01'] is ALWAYS different from any future edit row
+          // [habitId, editDate], so the edit put() never overwrites the
+          // original-name row even when the user edits on the same calendar
+          // day as seeding.
+          const effectiveFrom = h.startDate ?? '0000-01-01';
+          tx.objectStore('habit_versions').put({
+            habitId: h.id,
+            effectiveFrom,
+            name: h.name,
+            name_pl: h.name_pl ?? null,
+            cadence: h.cadence,
+            targetType: h.targetType ?? 'binary',
+            target: h.target ?? null,
+            stages: h.stages ?? [],
+          });
+
           tx.objectStore('events').put({
             id: newId(),
             // events.at uses ISO timestamp (DATA-06 only constrains date KEYS
@@ -174,6 +208,8 @@ export async function bootSeed() {
         }
         // Full list (not just newly inserted) so subsequent boots short-circuit.
         tx.objectStore('meta').put({ key: 'seededIds', value: seededList });
+        // Mark habit_versions backfill as done for this install path.
+        tx.objectStore('meta').put({ key: 'habitVersionsSeeded', value: true });
 
         // D-45 settings defaults (separate put calls — settings rows are
         // {key, value} per store keypath).
@@ -182,6 +218,119 @@ export async function bootSeed() {
         tx.objectStore('settings').put({ key: 'schemaVersion', value: 1 });
       },
     );
+  }
+
+  // One-time backfill migration for existing seeded databases that pre-date
+  // habit_versions row creation in seed.js (UAT remediation 2026-07-03).
+  // habitVersionsSeeded is read at the top (fast-path guard); if falsy here,
+  // the migration has not yet run for this database.
+  if (!habitVersionsSeeded) {
+    const existingSeededIds = await repo.getMeta('seededIds') ?? [];
+    /** @type {object[]} */
+    const habitsToBackfill = [];
+    for (const id of existingSeededIds) {
+      // Check whether any habit_versions row exists for this habit.
+      // getHabitVersionAtDate with a far-future date returns the most recent
+      // version if any exist; returns undefined when none exist.
+      const existingVersion = await repo.getHabitVersionAtDate(id, '9999-12-31');
+      if (!existingVersion) {
+        const habit = await repo.getHabit(id);
+        if (habit) habitsToBackfill.push(habit);
+      }
+    }
+
+    await repo.runTx(
+      ['habit_versions', 'meta'],
+      'readwrite',
+      async (tx) => {
+        for (const habit of habitsToBackfill) {
+          // Use the habit's explicit startDate/createdAt if present; fall back
+          // to '0000-01-01' so this row's key predates all possible log dates.
+          // The sentinel date also prevents a future edit (effectiveFrom=editDate)
+          // from overwriting this row via the compound key [habitId, effectiveFrom].
+          const effectiveFrom = habit.startDate ?? habit.createdAt ?? '0000-01-01';
+          tx.objectStore('habit_versions').put({
+            habitId: habit.id,
+            effectiveFrom,
+            name: habit.name,
+            name_pl: habit.name_pl ?? null,
+            cadence: habit.cadence,
+            targetType: habit.targetType ?? 'binary',
+            target: habit.target ?? null,
+            stages: habit.stages ?? [],
+          });
+        }
+        tx.objectStore('meta').put({ key: 'habitVersionsSeeded', value: true });
+      },
+    );
+  }
+
+  // One-time backfill: wave field missing from IDB for habits seeded before
+  // wave was added to habits.json (UAT G-09-2/4/5 — 2026-08-25).
+  // waveFieldSeeded is read at the top (fast-path guard); if falsy, the
+  // migration has not yet run for this database.
+  if (!waveFieldSeeded) {
+    // seed may already be loaded above (first-run path). For existing databases
+    // where seededIds was present, seed is null — fetch it now to get id→wave.
+    let seedForWave = seed;
+    if (!seedForWave && fetchFn) {
+      const res = await fetchFn('./seed/habits.json');
+      seedForWave = await res.json();
+    }
+    /** @type {object[]} */
+    const toUpdate = [];
+    if (seedForWave && Array.isArray(seedForWave.habits)) {
+      /** @type {Map<string, number>} */
+      const waveById = new Map(seedForWave.habits.map((h) => [h.id, h.wave]));
+      const allSeededIds = await repo.getMeta('seededIds') ?? [];
+      for (const id of allSeededIds) {
+        const waveNum = waveById.get(id);
+        if (waveNum === undefined) continue;
+        const habit = await repo.getHabit(id);
+        if (habit && (habit.wave === undefined || habit.wave === null)) {
+          toUpdate.push({ ...habit, wave: waveNum });
+        }
+      }
+    }
+    await repo.runTx(['habits', 'meta'], 'readwrite', async (tx) => {
+      for (const h of toUpdate) {
+        tx.objectStore('habits').put(h);
+      }
+      tx.objectStore('meta').put({ key: 'waveFieldSeeded', value: true });
+    });
+  }
+
+  // V2 wave-field backfill: scans ALL habits (not just seededIds) so imported
+  // habits that were restored from a pre-wave JSON backup also get their wave
+  // field set. The v1 backfill only covered seededIds, leaving imported habits
+  // with wave === undefined — causing wave planning to show 0 counts while
+  // the heatmap still worked (it falls back to wave ?? 0).
+  if (!waveFieldV2) {
+    let seedForWaveV2 = seed;
+    if (!seedForWaveV2 && fetchFn) {
+      const res = await fetchFn('./seed/habits.json');
+      seedForWaveV2 = await res.json();
+    }
+    /** @type {object[]} */
+    const toUpdateV2 = [];
+    if (seedForWaveV2 && Array.isArray(seedForWaveV2.habits)) {
+      /** @type {Map<string, number>} */
+      const waveByIdV2 = new Map(seedForWaveV2.habits.map((h) => [h.id, h.wave]));
+      const allHabitsForWave = await repo.getAllHabits();
+      for (const habit of allHabitsForWave) {
+        const waveNum = waveByIdV2.get(habit.id);
+        if (waveNum === undefined) continue;
+        if (habit.wave === undefined || habit.wave === null) {
+          toUpdateV2.push({ ...habit, wave: waveNum });
+        }
+      }
+    }
+    await repo.runTx(['habits', 'meta'], 'readwrite', async (tx) => {
+      for (const h of toUpdateV2) {
+        tx.objectStore('habits').put(h);
+      }
+      tx.objectStore('meta').put({ key: 'waveFieldV2', value: true });
+    });
   }
 
   // Persist gate (Pitfall 11). Only fire when meta.persistResult is still

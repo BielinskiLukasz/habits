@@ -205,11 +205,11 @@ export function buildNumericRow(habit, log) {
 
   return {
     tag: 'li',
-    attrs: { class: isComplete ? 'today-row today-row--numeric habit-row--complete' : 'today-row today-row--numeric' },
+    attrs: { class: isComplete ? 'today-row today-row--numeric habit-row--complete today-row--completed' : 'today-row today-row--numeric' },
     children: [
       {
         tag: 'span',
-        attrs: { class: 'today-row-name' },
+        attrs: { class: isComplete ? 'today-row-name today-row-name--completed' : 'today-row-name' },
         text: habit.name,
       },
       {
@@ -296,11 +296,11 @@ export function buildSlotRow(habit, log) {
 
   return {
     tag: 'li',
-    attrs: { class: isComplete ? 'today-row today-row--slot habit-row--complete' : 'today-row today-row--slot' },
+    attrs: { class: isComplete ? 'today-row today-row--slot habit-row--complete today-row--completed' : 'today-row today-row--slot' },
     children: [
       {
         tag: 'span',
-        attrs: { class: 'today-row-name' },
+        attrs: { class: isComplete ? 'today-row-name today-row-name--completed' : 'today-row-name' },
         text: habit.name,
       },
       {

@@ -16,6 +16,16 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Validated
 
+<!-- v1.1 Scheduled Habits — Phases 7–9 (shipped 2026-08-27) -->
+
+- ✓ SCHED-01 — New `scheduled` status (4th, alongside active/mastered/archived) for future-start habits — Phase 7 — v1.1
+- ✓ SCHED-02 — Scheduled habits hidden from Today view and active Catalog list — Phase 7 (impl) / Phase 8 (CAT-01 verification test) — v1.1
+- ✓ SCHED-03 — Catalog shows scheduled habits in a dedicated "Upcoming" section — Phase 8 — v1.1
+- ✓ SCHED-04 — Desktop Waveboard surfaces scheduled habits per wave with their startDate — Phase 9 — v1.1
+- ✓ SCHED-05 — Auto-transition: `scheduled` → `active` when startDate is reached (on app boot) — Phase 7 — v1.1
+- ✓ SCHED-06 — Manual promote-to-active action available from the Upcoming section — Phase 8 — v1.1
+- ✓ SCHED-07 — Converter (`scripts/convert-nawyki.js`) sets `status: 'scheduled'` for habits with `startDate > today` — Phase 7 — v1.1
+
 <!-- Shipped and confirmed valuable — v1.0 (2026-06-30) -->
 
 - ✓ CORE — Daily check-in view (Today), mobile-first, single-tap mark/unmark, multi-occurrence logging — v1.0
@@ -35,9 +45,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Active
 
-<!-- Next milestone hypotheses — see /gsd-new-milestone to define v1.1 requirements -->
-
-(None yet — run `/gsd-new-milestone` to define v1.1 requirements)
+<!-- Next milestone TBD — run /gsd-new-milestone to define v1.2 requirements -->
 
 ### Out of Scope
 
@@ -112,6 +120,11 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 | Scoring model: 3 alternatives → user picks | The xlsx's "WYNIK SKORYGOWANY" is a candidate but not the only good answer; deserves deliberate redesign | Shipped v1.0 — S1 (Rolling Threshold Health), S2 (Day-Weighted Wave Score), S3 (Load-Adjusted Capacity Score); S1 default; Settings toggle. |
 | Ongoing tool, multi-year (waves are seed plan, not a hard endpoint) | The 47-week plan is the first wave plan, not the whole product | Confirmed v1.0 — wave model extensible; no hard endpoint in schema. |
 | Reminders/notifications OUT of v1 | User explicitly opted out for now; revisit later | Confirmed out of v1 — no notification code shipped. |
+| `scheduled` is the 4th habit status (not a boolean or separate flag) | Keeps status a single field throughout IDB, export, and display logic; no dual-state ambiguity | Shipped v1.1 — stored in `habits.status`; 4-value enum: active/mastered/archived/scheduled. |
+| Auto-transition fires on boot (not a background timer) | No background timer needed; boot is the natural checkpoint when a new day starts | Shipped v1.1 — `bootScheduled()` runs before `hydrate()` in both shells. |
+| One-time migration (active→scheduled) at boot, guarded by `scheduledMigrationV1` meta key | Idempotent — safe to ship to existing data without re-triggering on every boot | Shipped v1.1 — `runMigration()` in `scheduled.js`; meta key prevents replay. |
+| Waveboard informational-only in v1.1 (no wave editing) | Minimal scope to ship value without complexity of wave CRUD | Shipped v1.1 — WAVE-01–04 satisfied; wave editing deferred to future milestone. |
+| Promote action wired through `apply()` chokepoint (same as all other mutations) | Consistent with Anti-Pattern 1 — no direct IDB writes in views; undo/broadcast/events all free | Shipped v1.1 — `handlePromoteHabit` in `apply/promoteHabit.js`, registered in HANDLERS table. |
 | D-23: Unit tests use Node's built-in `node --test` runner; tests live in `tests/` (excluded from SW shell and GH Pages deploy); cover pure-function modules only (domain logic, db migrations, utils); browser-driven integration testing remains manual via DevTools | Zero npm/build dependency matches anti-stack rule; pure ES modules already import-compatible with Node; tests must never reach the browser (no app-shell impact, GH Pages stays vanilla) | Locked 2026-05-26; introduce starting Phase 2 (first phase with testable logic — schema migrations, date utils, cadence engine) |
 | D-24: GitHub Actions CI runs `node --test tests/` on push to `main` and on every PR; single `.github/workflows/test.yml`, `actions/setup-node@v4`, no other automation in v1 | Single-source automated regression gate; free for personal/public repos; ~10 s/run; matches D-23 (Node tests only, no browser, no install) | Locked 2026-05-26; ships in Phase 2 alongside the first testable module |
 | D-25: Integration tests live in Node alongside unit tests; module composition (seed → schema → repo → derived view-model; JSON export ↔ import round-trip) uses a hand-written ~30-line in-memory fake IDB repo with same surface as the real `js/db/repo.js`. Real-IDB integration testing stays in `tests-browser.html` (manual, excluded from SW SHELL) | Catches cross-module invariants without a DOM polyfill or IDB shim from npm; mirrors the project's "small hand-written wrappers" pattern; keeps CI deterministic | Locked 2026-05-26; Phase 2 (storage spine) is the first consumer |
@@ -142,5 +155,19 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+## Last Shipped: v1.1 Scheduled Habits
+
+**Shipped:** 2026-08-27 · Phases 7–9 · 9 plans · 169 commits · 57 days
+
+**Delivered:**
+- `scheduled` as a 4th first-class habit status (alongside active/mastered/archived)
+- Auto-transition on boot: `scheduled` → `active` when startDate ≤ today
+- One-time migration: existing habits with `status:'active'` and future startDate reclassified
+- Catalog Upcoming section: scheduled habits sorted by startDate, each showing wave + startDate
+- Manual promote-to-active from Catalog Upcoming and desktop Waveboard
+- Desktop Waveboard: per-wave rows showing active/scheduled counts + drillable habit lists with startDates
+- Converter (`convert-nawyki.js`) updated to emit `status:'scheduled'` for future-start habits
+- JSON import preserves `status:'scheduled'` through mergeImportedStores
+
 ---
-*Last updated: 2026-06-30 — v1.0 milestone complete (309 commits, 52 JS files, 756 tests, 123/123 requirements shipped)*
+*Last updated: 2026-08-27 after v1.1 Scheduled Habits milestone*

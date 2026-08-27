@@ -73,3 +73,58 @@
 ---
 
 *Written: 2026-06-30 at v1.0 milestone completion.*
+
+---
+
+## Milestone: v1.1 — Scheduled Habits
+
+**Shipped:** 2026-08-27
+**Phases:** 3 (7–9) | **Plans:** 9 | **Commits:** 169 | **Timeline:** 57 days (2026-07-01 → 2026-08-27)
+
+### What Was Built
+
+- `scheduled.js` domain service: one-time migration (active→scheduled for future startDate) + every-boot promotion (scheduled→active when startDate ≤ today)
+- `createHabit` status derivation: lexicographic date comparison sets `'scheduled'` for future startDate
+- Boot wiring in both HTML shells; `convert-nawyki.js` updated to emit correct status
+- `promoteHabit` handler (TDD RED/GREEN/REFACTOR) — state mutation through apply() chokepoint
+- Catalog Upcoming section: `buildUpcomingListItem`, split active/scheduled lists, CSS for consistent layout
+- Desktop Waveboard: `buildWavePlanningSection` pure builder (WAVE-01–04), `mountWavePlanning` wiring, promote-from-waveboard, accordion state preservation across re-renders
+- One debug cycle (waveboard-idb-databinding): IDBRequest-non-iterable bug fixed via `repo.getSnapshotsInRange()`
+
+### What Worked
+
+**Pattern fidelity was high.** The apply/notify/subscribe chain for `promoteHabit` was dropped in with zero surprises — Phase 7 followed the same DI pattern as all v1.0 handlers. No architectural decisions needed revisiting.
+
+**TDD on the domain layer paid off again.** `scheduled.js` and `promoteHabit.js` were written RED→GREEN→REFACTOR before any wiring — both passed verification cleanly. The one non-TDD piece (waveboard wiring) required a debug cycle to fix a data-binding bug, which was caught by a regression test immediately after.
+
+**Phased scope containment worked.** Phases 7 and 8 were clean (no gaps at UAT). Phase 9 had 3 UAT gaps but all were caught and closed within the same session (wave field backfill, stage label, waveboard data-binding). The milestone audit passed with 0 unresolved gaps.
+
+### What Was Inefficient
+
+**Waveboard data took two passes.** Phase 09 initially used `repo.runTx()` with a body returning a raw `IDBRequest` (not a Promise). The bug was caught during UAT rather than a pre-wire unit test — a waveboard data-query integration test would have caught it before UAT began.
+
+**Wave field missing in imported habits.** Habits loaded from a real IDB (via `convert-nawyki.js` + JSON import) were missing the `wave` field because the field was never backfilled by `seed.js`. This caused 3 UAT gaps that required an additional plan (wave field backfill migration in `seed.js`).
+
+**The 57-day timeline included a ~25-day pause** between Phase 7 completion (2026-07-01) and Phase 8 resumption (2026-07-20+) due to unrelated work. Effective execution time was ~30 days.
+
+### Patterns Established
+
+- `repo.getXxxInRange()` pattern: read all rows in an index range by `[startKey, endKey]` using `indexGetAll` — returns `Promise<object[]>`, safe for `for-of`. Documented in `repo.js` JSDoc, guarded by a regression test.
+- Accordion state preservation on store re-render: `rerenderSection()` saves open `<details>` slugs before `replaceChildren()`, restores them after — prevents UX jank on `promoteHabit` feedback.
+- `buildUpcomingListItem` pattern: pure builder (no DOM) returning a description object, tested in Node — same shape as `buildHabitRow` and `buildWavePlanningSection`.
+
+### Key Lessons
+
+- **Import data needs field completeness checks.** A seed migration (`seed.js`) should defensively backfill any fields added after initial seed creation — the `wave` field gap would have been caught at seed load time, not UAT.
+- **Waveboard (and any complex view) benefits from a data-query integration test** before wiring — the IDBRequest-non-iterable bug would have been caught in ~2 minutes, not during UAT.
+- **Phase scope felt right.** 3 phases was the correct granularity: domain service (P7), UI layer (P8), new view (P9). Each phase delivered a testable, verifiable slice with clear success criteria.
+
+### Cost Observations
+
+- Model mix: sonnet-4 throughout (budget profile)
+- Sessions: ~8–10 across 3 phases + 1 debug cycle
+- Notable: The debug cycle (waveboard-idb-databinding) was the highest-value single intervention — caught a subtle IDBRequest/Promise confusion that would have silently produced empty cells forever.
+
+---
+
+*Written: 2026-08-27 at v1.1 milestone completion.*

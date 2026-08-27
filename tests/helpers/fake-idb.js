@@ -71,6 +71,7 @@ function keyOf(storeName, value) {
  *   getSetting:               (key: string) => Promise<object|undefined>,
  *   getAllSettings:            () => Promise<object[]>,
  *   getAllScoreSnapshots:      () => Promise<object[]>,
+ *   getSnapshotsInRange:      (startYMD: string, endYMD: string) => Promise<object[]>,
  *   runTx:                    (stores: string[], mode: 'readonly'|'readwrite', body: (tx: object) => *|Promise<*>) => Promise<*>,
  *   _stores:                  Record<string, Map<string, object>>,
  * }}
@@ -190,6 +191,38 @@ export function createFakeRepo() {
     // Will be empty in P5; populated in P6 when scoring runs.
     async getAllScoreSnapshots() {
       return Array.from(stores.score_snapshots.values());
+    },
+    // Phase 06 quick-fix analytics-columns-empty: typed get by [habitId, date].
+    // Mirrors repo.getSnapshot (A7 contract preserved). Used by the Analytics
+    // view instead of repo.runTx so the result is the actual snapshot row,
+    // not the raw IDBRequest object that runTx body() returns.
+    async getSnapshot(habitId, date) {
+      return stores.score_snapshots.get(JSON.stringify([habitId, date]));
+    },
+
+    // Waveboard IDB fix: date-range scan on score_snapshots.
+    // Mirrors repo.getSnapshotsInRange (A7 contract preserved).
+    async getSnapshotsInRange(startYMD, endYMD) {
+      /** @type {object[]} */
+      const out = [];
+      for (const row of stores.score_snapshots.values()) {
+        if (row.date >= startYMD && row.date <= endYMD) out.push(row);
+      }
+      return out;
+    },
+
+    // Phase 06 UAT-T21-v2 fix: get the most recent snapshot row for a habit
+    // regardless of date. Mirrors repo.getLatestSnapshot (A7 contract preserved).
+    // Returns the row with the largest date (Map iteration order preserves
+    // insertion order; we scan all entries for the habit and pick max date).
+    async getLatestSnapshot(habitId) {
+      /** @type {object|undefined} */
+      let latest;
+      for (const row of stores.score_snapshots.values()) {
+        if (row.habitId !== habitId) continue;
+        if (!latest || row.date > latest.date) latest = row;
+      }
+      return latest;
     },
 
     /**

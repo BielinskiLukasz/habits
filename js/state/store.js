@@ -136,6 +136,14 @@ export async function hydrate(_legacyRepo) {
     cache.settings.set('masteryWindow', masteryWindowRow.value);
   }
 
+  // Load scoringModel setting (D-122, SETTINGS-02). Default applied at
+  // read-time by consumers ('S1'); we store undefined when absent so
+  // mountSettings falls back to 'S1' via null-coalesce.
+  const scoringModelRow = await repo.getSetting('scoringModel');
+  if (scoringModelRow !== undefined) {
+    cache.settings.set('scoringModel', scoringModelRow.value);
+  }
+
   // 2. Single bounded log read for this ISO week (NFR-01 cold-paint budget).
   const wkStart = isoWeekStart(today, weekStart);
   const wkEnd = isoWeekEnd(today, weekStart);
@@ -286,6 +294,7 @@ export function getCachedSettings() {
     weekStart: cache.settings.get('weekStart') ?? 'mon',
     masteryThreshold: cache.settings.get('masteryThreshold'),
     masteryWindow: cache.settings.get('masteryWindow'),
+    scoringModel: cache.settings.get('scoringModel'),
   };
 }
 

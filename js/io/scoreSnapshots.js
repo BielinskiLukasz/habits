@@ -22,6 +22,7 @@
 import { todayLocal, daysFrom } from '../util/date.js';
 import { appliesToday } from '../domain/cadence.js';
 import { computeS1, computeS2, computeS3 } from '../domain/scoring.js';
+import { evaluateMastery } from '../domain/mastery.js';
 
 // ---------------------------------------------------------------------------
 // DI seam — replaced by tests with mock scoring functions
@@ -33,22 +34,28 @@ let _computeS1;
 let _computeS2;
 /** @type {(habit: object, logs: object[], ctx: object, allHabits: object[]) => {s3Score: number|null}} */
 let _computeS3;
+/** @type {(habit: object, logs: object[], evaluationDate: string, ctx: object) => {isMastered: boolean, isInGracePeriod: boolean}} */
+let _evaluateMastery;
 
 /**
  * Inject scoring function implementations. Called automatically at module load
  * with the real scoring.js exports; tests call this before each test to inject
  * mocks.
  *
- * @param {{ computeS1: Function, computeS2: Function, computeS3: Function }} fns
+ * `evaluateMastery` is optional in the injected object — tests that do not
+ * supply it keep using the real mastery.js function (set at module load).
+ *
+ * @param {{ computeS1: Function, computeS2: Function, computeS3: Function, evaluateMastery?: Function }} fns
  */
-export function configure({ computeS1: s1, computeS2: s2, computeS3: s3 }) {
+export function configure({ computeS1: s1, computeS2: s2, computeS3: s3, evaluateMastery: em }) {
   _computeS1 = s1;
   _computeS2 = s2;
   _computeS3 = s3;
+  if (em !== undefined) _evaluateMastery = em;
 }
 
 // Auto-configure with real scoring functions at module load.
-configure({ computeS1, computeS2, computeS3 });
+configure({ computeS1, computeS2, computeS3, evaluateMastery });
 
 // ---------------------------------------------------------------------------
 // Internal: date range generator
@@ -116,26 +123,86 @@ export async function writeHabitSnapshots(habitId, repo) {
 
   // ctx shape expected by scoring functions and cadence.appliesToday.
   // evaluationDate is set per-iteration below.
+  //
+  // weekCompletions / monthCompletions are real for the CURRENT habit being
+  // scored (habitForScoring). For all other habits (used by S3's loadCount
+  // computation), we return 0 as a conservative approximation — this keeps
+  // weekly habits "visible" in the load denominator, which slightly
+  // underestimates S3 but avoids inflating Rolling% (Bug 3 fix).
+  //
+  // Capping at daysFrom(ctx.evaluationDate, -1): on the completion day itself
+  // the habit IS applicable (it hasn't been "done" yet at the start of that
+  // day). We exclude the evaluation day's log so the completion day is still
+  // counted as applicable AND completed in the numerator separately.
   const ctx = {
     appliesToday,
     windowDays,
     globalThreshold,
     weekStart,
-    // weekCompletions / monthCompletions are required by cadence.js resolvers
-    // (weekly and monthly cadence types). The snapshot writer does not have
-    // access to a populated repo during this loop, so we provide a conservative
-    // default of 0 (habit always appears applicable on weekly/monthly days).
-    // This is acceptable for scoring purposes: the cadence gate here affects
-    // the denominator, and a slightly over-estimated denominator is the safe
-    // direction (underestimates score rather than over-inflating it).
-    weekCompletions: () => 0,
-    monthCompletions: () => 0,
+    weekCompletions: (habitId, startYMD, endYMD) => {
+      if (habitId !== habitForScoring.id) return 0;
+      // Cap at the day BEFORE evaluationDate so the evaluation day itself is
+      // not retroactively marked "already done" (which would exclude it from
+      // the applicable-day count even when a completion lands that same day).
+      const prevDay = daysFrom(ctx.evaluationDate, -1);
+      const cap = prevDay < endYMD ? prevDay : endYMD;
+      if (cap < startYMD) return 0;
+      return logsForHabit.filter(
+        log => log.date >= startYMD && log.date <= cap && _logCompleted(log, habitForScoring)
+      ).length;
+    },
+    monthCompletions: (habitId, startYMD, endYMD) => {
+      if (habitId !== habitForScoring.id) return 0;
+      const prevDay = daysFrom(ctx.evaluationDate, -1);
+      const cap = prevDay < endYMD ? prevDay : endYMD;
+      if (cap < startYMD) return 0;
+      return logsForHabit.filter(
+        log => log.date >= startYMD && log.date <= cap && _logCompleted(log, habitForScoring)
+      ).length;
+    },
     evaluationDate: todayLocal(), // overwritten for each day below
   };
 
   const todayYMD = todayLocal();
-  const startDate = habit.createdAt;
+
+  // Normalize the snapshot start date (UAT-T21-v3 root-cause fix).
+  //
+  // Problem: habits.json seed data does not include a `createdAt` field, so
+  // seeded habits have `habit.createdAt === undefined` in IDB.  When startDate
+  // is undefined the condition `undefined <= todayYMD` evaluates to false, so
+  // dateRange() yields zero iterations and writeHabitSnapshots silently returns
+  // without writing a single row — leaving score_snapshots perpetually empty.
+  //
+  // Fix: fall back through habit.startDate (also null on most seeded habits,
+  // but may be a valid date for future-scheduled habits), then to the rolling
+  // window start so that at least one full scoring window of snapshot rows is
+  // always written.  The user can later press "Recompute Scores" to extend the
+  // history backwards if they want older data.
+  const effectiveCreatedAt =
+    habit.createdAt ??
+    habit.startDate ??
+    daysFrom(todayYMD, -(windowDays - 1));
+
+  // When createdAt is missing from the stored habit row, pass a normalised
+  // copy of the habit to scoring functions.  Without this, isInGracePeriod()
+  // receives undefined and calls parseLocalYMD(undefined) → TypeError.
+  const habitForScoring =
+    habit.createdAt != null ? habit : { ...habit, createdAt: effectiveCreatedAt };
+
+  const startDate = effectiveCreatedAt;
   const endDate = todayYMD;
+
+  // Mastery context for evaluateMastery() — mirrors the scoring ctx but uses
+  // the field names mastery.js expects: globalWindow (not windowDays).
+  // weekCompletions / monthCompletions closures are already bound in ctx above.
+  const masteryCtx = {
+    globalThreshold,
+    globalWindow: windowDays,
+    appliesToday,
+    weekStart,
+    weekCompletions: ctx.weekCompletions,
+    monthCompletions: ctx.monthCompletions,
+  };
 
   // Collect all snapshot rows synchronously (no per-day IDB reads — NFR-03).
   const snapshotRows = [];
@@ -143,9 +210,20 @@ export async function writeHabitSnapshots(habitId, repo) {
     // Update evaluationDate for the current day's computation.
     ctx.evaluationDate = dateYMD;
 
-    const { s1Score, s1Status } = _computeS1(habit, logsForHabit, ctx);
-    const { s2Score } = _computeS2(habit, logsForHabit, ctx);
-    const { s3Score } = _computeS3(habit, logsForHabit, ctx, allHabits);
+    const { s1Score, s1Status } = _computeS1(habitForScoring, logsForHabit, ctx);
+    const { s2Score } = _computeS2(habitForScoring, logsForHabit, ctx);
+    const { s3Score } = _computeS3(habitForScoring, logsForHabit, ctx, allHabits);
+    // Compute isMastered for this date using the rolling-window evaluator.
+    // This is the canonical source of mastery state — the UI reads it from
+    // score_snapshots instead of re-running evaluateMastery with empty logs.
+    const { isMastered } = _evaluateMastery(habitForScoring, logsForHabit, dateYMD, masteryCtx);
+
+    // Per-day completion and applicability for the waveboard tooltip.
+    // loggedToday: was the habit actually completed on this specific date?
+    // applicableToday: does the habit's cadence say it should happen on this date?
+    const logForDate = logsForHabit.find(l => l.date === dateYMD);
+    const loggedToday = _logCompleted(logForDate, habitForScoring);
+    const applicableToday = appliesToday(habitForScoring, dateYMD, ctx);
 
     snapshotRows.push({
       habitId,
@@ -154,7 +232,10 @@ export async function writeHabitSnapshots(habitId, repo) {
       s1Status,
       s2Score,
       s3Score,
-      scoreVersion: 1, // SCORING-09: locked at 1 for Phase 6
+      isMastered,       // MASTERY-03: pre-computed per-date mastery flag
+      loggedToday,      // true if habit was completed on this specific date
+      applicableToday,  // true if habit's cadence applies on this specific date
+      scoreVersion: 1,  // SCORING-09: locked at 1 for Phase 6
     });
   }
 
@@ -207,6 +288,27 @@ export async function rebuildAllSnapshots(repo, onProgress = () => {}) {
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Return true when a log row counts as a completion for the given habit.
+ * Mirrors the LOG_COMPLETED dispatch in scoring.js — duplicated here to keep
+ * scoreSnapshots.js independent of scoring internals while still being able
+ * to count completions for the weekCompletions / monthCompletions ctx helpers.
+ *
+ * @param {object|undefined} log
+ * @param {object} habit IDB habit row
+ * @returns {boolean}
+ */
+function _logCompleted(log, habit) {
+  if (!log) return false;
+  const t = habit.targetType ?? 'binary';
+  if (t === 'binary') return log.completed === true;
+  if (t === 'numeric') return (log.count ?? 0) >= (habit.target ?? 1);
+  if (t === 'slot-checklist') {
+    return Array.isArray(log.slots) && log.slots.length > 0 && log.slots.every(s => s.checked);
+  }
+  return false;
+}
 
 /**
  * Normalize a raw setting value returned by repo.getSetting().

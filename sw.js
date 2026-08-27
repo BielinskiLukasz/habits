@@ -23,11 +23,10 @@
  *           APP_VERSION in js/util/version.js is the only operation needed
  *           to invalidate.
  *   - D-11: Strategy router — cache-first for the shell asset list (HTML,
- *           CSS, manifest, icon, pinned JS entry points) and
- *           stale-while-revalidate for everything under /js/. SWR honors
- *           D-10 (JS module changes do NOT need a cache-name bump because
- *           SWR refreshes on every fetch) while still satisfying NFR-04
- *           (fully offline on cache fallback).
+ *           CSS, manifest, icon, pinned JS entry points) and network-first
+ *           for everything under /js/. Network-first ensures JS changes take
+ *           effect on the very next reload without a double-reload, while
+ *           still satisfying NFR-04 (offline fallback to cached copy).
  *   - D-12: Single source of truth for the version constant. Imported from
  *           `js/util/version.js` as an ES module (same as the window context).
  *   - D-19: Every URL in this file is relative (`./…`); no absolute paths
@@ -38,9 +37,9 @@
  *     `url.origin !== self.location.origin`. Cross-origin requests are never
  *     intercepted, never cached, never produce opaque responses.
  *   - T-01-StaleCache: Versioned cache name + activate cleanup.
- *   - T-01-OfflineFail: `staleWhileRevalidate` catches network errors and
- *     falls back to the cached copy. Cache-first branch never depends on the
- *     network when the cache is populated.
+ *   - T-01-OfflineFail: `networkFirst` catches network errors and falls back
+ *     to the cached copy. Cache-first branch never depends on the network
+ *     when the cache is populated.
  *   - T-01-NoNet: Zero off-origin URLs in this file. The only network
  *     destinations are same-origin GETs derived from `e.request.url`.
  */
@@ -185,10 +184,11 @@ self.addEventListener('fetch', e => {
   // (opaque responses bloat storage and break offline-detection heuristics).
   if (url.origin !== self.location.origin) return;
 
-  // js/** — stale-while-revalidate so JS module changes propagate within one
-  // reload without forcing an APP_VERSION bump (D-10, D-11).
+  // js/** — network-first so JS module changes take effect on the very next
+  // reload without a double-reload or APP_VERSION bump (D-10, D-11).
+  // Falls back to the cached copy when offline (NFR-04 / PWA-06).
   if (url.pathname.includes('/js/')) {
-    e.respondWith(staleWhileRevalidate(e.request));
+    e.respondWith(networkFirst(e.request));
     return;
   }
 
@@ -199,20 +199,22 @@ self.addEventListener('fetch', e => {
 });
 
 /**
- * Stale-while-revalidate strategy for /js/ requests. Returns the cached copy
- * immediately if present; revalidates from the network in the background and
- * updates the cache. Falls back to the cached copy if the network is offline
- * (NFR-04 / PWA-06).
+ * Network-first strategy for /js/ requests. Always attempts a live fetch so
+ * code changes appear on the very next reload; updates the cache on success;
+ * falls back to the cached copy when offline (NFR-04 / PWA-06).
  *
  * @param {Request} request - Same-origin GET request to handle.
  * @returns {Promise<Response>} The response to serve.
  */
-async function staleWhileRevalidate(request) {
+async function networkFirst(request) {
   const cache = await caches.open(CACHE);
-  const cached = await cache.match(request);
-  const networkPromise = fetch(request).then(response => {
-    if (response && response.ok) cache.put(request, response.clone());
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) await cache.put(request, response.clone());
     return response;
-  }).catch(() => cached); // offline → fall back to cached copy (NFR-04 / PWA-06).
-  return cached || networkPromise;
+  } catch (_e) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw _e;
+  }
 }

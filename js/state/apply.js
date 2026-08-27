@@ -47,6 +47,7 @@ import { handleSetSetting } from './apply/setSetting.js';
 import { handleCreateHabit } from './apply/createHabit.js';
 import { handleEditHabit } from './apply/editHabit.js';
 import { handleArchiveHabit, handleRestoreHabit } from './apply/archiveHabit.js';
+import { handlePromoteHabit, handleDemoteHabit } from './apply/promoteHabit.js';
 import { handleAdvanceStage, handleDemoteStage } from './apply/advanceStage.js';
 import { handleLogNumeric } from './apply/logNumeric.js';
 import { handleLogSlot } from './apply/logSlot.js';
@@ -70,6 +71,8 @@ const HANDLERS = {
   editHabit: handleEditHabit,
   archiveHabit: handleArchiveHabit,
   restoreHabit: handleRestoreHabit,
+  promoteHabit: handlePromoteHabit,
+  demoteHabit: handleDemoteHabit,
   advanceStage: handleAdvanceStage,
   demoteStage: handleDemoteStage,
   logNumeric: handleLogNumeric,

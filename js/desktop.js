@@ -17,7 +17,10 @@
  *     6. bootSync()
  *     7. bootLifecycle()
  *     8. await bootSeed()
- *     9. await hydrate()
+ *     9. await bootScheduled() — migrate active+future habits to scheduled (one-time,
+ *        DATA-03) and promote scheduled habits whose startDate <= today (every boot,
+ *        SCHED-03). Must run before hydrate() so cache sees final correct statuses.
+ *    10. await hydrate()
  *
  *   P6 desktop wiring (D-115 — sidebar + hash-routed panels):
  *    10. configureWave({fetch}) + configureStore({repo})
@@ -43,19 +46,24 @@ import { mountDiagnostics } from './views/diagnostics.js';
 // P2 spine imports (DATA-03/04/07/08, SEED-01..05, DESKTOP-02). All relative per D-19.
 import * as repo from './db/repo.js';
 import { configure as configureApply } from './state/apply.js';
-import { writeHabitSnapshots } from './io/scoreSnapshots.js';
+import { writeHabitSnapshots, rebuildAllSnapshots } from './io/scoreSnapshots.js';
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
-import { hydrate, configureStore, subscribe, notify } from './state/store.js';
+import { hydrate, configureStore, subscribe, notify, getCachedWeekStart, getCachedSettings, getCachedHabits } from './state/store.js';
 import { bootSync, broadcast, onMessage } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
+import { configureExport } from './io/export.js';
+import { configureImport } from './io/import.js';
+import { configureBackupNag } from './io/backup-nag.js';
 
 // P6 desktop imports (D-115, D-117, D-118, D-121).
 import { mountRoutes } from './router.js';
 import { configureWave, bootWaves } from './domain/wave.js';
+import { configureScheduled, bootScheduled } from './domain/scheduled.js';
 import { mountAnalytics } from './views/desktop/analytics.js';
 import { mountWaveboard } from './views/desktop/waveboard.js';
 import { mountPlanning } from './views/desktop/planning.js';
+import { mountSettings } from './views/settings.js';
 
 registerServiceWorker();
 
@@ -77,11 +85,33 @@ configureApply({
   },
 });
 configureUndo({ repo });
+configureScheduled({ repo });
 configureSeed({ repo, storage: navigator.storage, fetch: globalThis.fetch });
+configureExport({ repo });
+configureImport({ repo, broadcast });
+configureBackupNag({ repo });
 bootSync();
 bootLifecycle();
 try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persistence state separately in P3 */ }
+try { await bootScheduled(); } catch (_e) { /* swallow — promotion/migration non-critical on failure */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
+
+// Boot-time snapshot bootstrap (UAT-T21-v3): if score_snapshots has never
+// been populated, rebuild all snapshots in the background so the Analytics
+// view shows data on first open without requiring a manual log write or a
+// "Recompute Scores" click.  The meta flag 'snapshotsBootstrapped' prevents
+// this from re-running on every subsequent boot.  Fire-and-forget so the
+// shell routes immediately while the rebuild proceeds asynchronously.
+repo.getMeta('snapshotsBootstrapped').then(flag => {
+  if (!flag) {
+    rebuildAllSnapshots(repo)
+      .then(() => Promise.all([
+        repo.putMeta('snapshotsBootstrapped', true),
+        notify({ event: 'snapshot:rebuild' }),
+      ]))
+      .catch(() => {});
+  }
+}).catch(() => {});
 // Cross-tab sync: re-render when another tab mutates or completes a JSON import (DATA-07).
 onMessage(async (msg) => {
   if (msg.type === 'import:done') { location.reload(); return; }
@@ -99,6 +129,7 @@ try { await bootWaves(); } catch (_e) { /* swallow — wave data non-critical fo
 const analyticsPanel = document.querySelector('section[data-route="analytics"]');
 const waveboardPanel = document.querySelector('section[data-route="waveboard"]');
 const planningPanel  = document.querySelector('section[data-route="planning"]');
+const settingsPanel  = document.querySelector('section[data-route="settings"]');
 const sidebarLinks   = document.querySelectorAll('.desktop-sidebar-link[data-route-link]');
 
 /**
@@ -109,7 +140,7 @@ const sidebarLinks   = document.querySelectorAll('.desktop-sidebar-link[data-rou
  * @returns {void}
  */
 function show(panel) {
-  for (const p of [analyticsPanel, waveboardPanel, planningPanel]) {
+  for (const p of [analyticsPanel, waveboardPanel, planningPanel, settingsPanel]) {
     if (p === panel) p.hidden = false; else p.hidden = true;
   }
 }
@@ -180,6 +211,11 @@ mountRoutes({
       mountPlanning(planningPanel, { repo, store: { subscribe } });
       show(planningPanel);
       focusH1(planningPanel);
+    },
+    '#settings': () => {
+      mountSettings(settingsPanel, { repo, store: { subscribe, getCachedWeekStart, getCachedSettings, getCachedHabits } });
+      show(settingsPanel);
+      focusH1(settingsPanel);
     },
   },
   onChange: (hash) => { updateNav(hash); },

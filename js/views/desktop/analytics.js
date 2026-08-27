@@ -27,7 +27,6 @@
  */
 
 import { mount } from '../../util/mount.js';
-import { todayLocal } from '../../util/date.js';
 import { getWave } from '../../domain/wave.js';
 
 // ---------------------------------------------------------------------------
@@ -237,8 +236,10 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
       const cells = [
         // 1. Habit name
         { tag: 'td', text: habit.name },
-        // 2. Stage
-        { tag: 'td', text: habit.stage >= 1 ? `Etap ${habit.stage}` : '' },
+        // 2. Stage — derived from currentStageIndex (0-based) + stages array.
+        // habit.stage does not exist in the IDB schema; the seed stores
+        // `stages: [{label, target, ...}]` and `currentStageIndex: number`.
+        { tag: 'td', text: (habit.stages?.length > 0 && habit.currentStageIndex != null) ? `Stage ${habit.currentStageIndex + 1}` : '' },
         // 3. Rolling % + S1 badge
         {
           tag: 'td',
@@ -437,14 +438,20 @@ export function mountAnalytics(parent, { repo, store }) {
       const modelRow = await repo.getSetting('scoringModel');
       cachedModel = modelRow?.value ?? 'S1';
 
-      // 3. Today's snapshots for each habit.
-      const today = todayLocal();
+      // 3. Latest snapshot for each habit — not today's snapshot.
+      // Uses repo.getLatestSnapshot() which returns the most recent
+      // score_snapshots row for the habit regardless of date. This fixes the
+      // UAT-T21-v2 regression where getSnapshot(habitId, today) returned
+      // undefined on any day after the last log write: writeHabitSnapshots
+      // only runs on log mutation and only writes rows through todayLocal() at
+      // write time, so there is no [habitId, today] row on subsequent days.
+      // getLatestSnapshot queries the compound keypath range and returns the
+      // row with the largest date, giving the Analytics view the freshest
+      // available scores even when no log was written today.
       cachedSnapshots = new Map();
       for (const habit of cachedHabits) {
         try {
-          const snap = await repo.runTx(['score_snapshots'], 'readonly', (tx) =>
-            tx.objectStore('score_snapshots').get([habit.id, today])
-          );
+          const snap = await repo.getLatestSnapshot(habit.id);
           if (snap != null) cachedSnapshots.set(habit.id, snap);
         } catch (_e) {
           // Non-fatal — habit simply has no snapshot yet.

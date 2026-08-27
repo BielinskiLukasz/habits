@@ -81,6 +81,8 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
             tag: 'input',
             attrs: {
               type: 'date',
+              id: 'history-date-picker',
+              name: 'history-date-picker',
               'data-action': 'pick-date',
             },
           },

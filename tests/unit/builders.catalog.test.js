@@ -23,6 +23,7 @@ import {
   buildHabitListItem,
   buildEditPanel,
   buildCreatePanel,
+  buildUpcomingListItem,
 } from '../../js/views/catalog/builders.js';
 
 /** Recursively find all nodes matching a predicate in a description tree. */
@@ -343,5 +344,132 @@ describe('buildCreatePanel — empty defaults form', () => {
     );
     assert.ok(startDateInput, 'startDate input present');
     assert.equal(startDateInput.attrs?.value, '2026-06-05', 'startDate defaults to today');
+  });
+});
+
+describe('buildUpcomingListItem — scheduled habit row (CAT-04)', () => {
+  const baseUpcoming = {
+    id: 'h-uuid-upcoming-1',
+    name: 'Morning walk',
+    wave: 0,
+    startDate: '2026-08-15',
+  };
+
+  test('returns a li element with class "catalog-upcoming-item"', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    assert.equal(out.tag, 'li', 'top-level tag is li');
+    assert.ok(out.attrs?.class?.includes('catalog-upcoming-item'), 'has catalog-upcoming-item class');
+  });
+
+  test('has data-habit-id attribute on the li element', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    assert.equal(out.attrs?.['data-habit-id'], 'h-uuid-upcoming-1', 'data-habit-id matches habit id');
+  });
+
+  test('displays habit name in a span with class "catalog-habit-name"', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    const nameSpan = findFirst(
+      out,
+      (n) => n.tag === 'span' && n.attrs?.class?.includes('catalog-habit-name'),
+    );
+    assert.ok(nameSpan, 'name span present');
+    assert.equal(nameSpan.text, 'Morning walk', 'name text matches');
+  });
+
+  test('displays wave badge with text "Wave N"', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    const texts = allText(out);
+    assert.ok(texts.some((t) => /wave\s*0/i.test(t)), 'wave badge with "Wave 0" present');
+  });
+
+  test('displays ISO startDate badge with YYYY-MM-DD format', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    const dateSpan = findFirst(
+      out,
+      (n) => n.tag === 'span' && n.attrs?.class?.includes('catalog-upcoming-date'),
+    );
+    assert.ok(dateSpan, 'date badge present');
+    assert.equal(dateSpan.text, '2026-08-15', 'date text matches ISO format');
+  });
+
+  test('has Edit button with data-action="edit" and data-habit-id', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    const editBtn = findFirst(
+      out,
+      (n) => n.tag === 'button' && n.attrs?.['data-action'] === 'edit',
+    );
+    assert.ok(editBtn, 'edit button present');
+    assert.equal(editBtn.attrs?.['data-habit-id'], 'h-uuid-upcoming-1', 'edit button has correct habit id');
+    const editText = allText(editBtn);
+    assert.ok(editText.some((t) => /edit/i.test(t)), 'edit button text contains "Edit"');
+  });
+
+  test('has Promote button with data-action="promote" and data-habit-id', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    const promoteBtn = findFirst(
+      out,
+      (n) => n.tag === 'button' && n.attrs?.['data-action'] === 'promote',
+    );
+    assert.ok(promoteBtn, 'promote button present');
+    assert.equal(promoteBtn.attrs?.['data-habit-id'], 'h-uuid-upcoming-1', 'promote button has correct habit id');
+    const promoteText = allText(promoteBtn);
+    assert.ok(promoteText.some((t) => /promote/i.test(t)), 'promote button text contains "Promote"');
+  });
+
+  test('has aria-label on promote button with habit name context', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    const promoteBtn = findFirst(
+      out,
+      (n) => n.tag === 'button' && n.attrs?.['data-action'] === 'promote',
+    );
+    assert.ok(promoteBtn, 'promote button present');
+    const ariaLabel = promoteBtn.attrs?.['aria-label'] ?? '';
+    assert.ok(/Promote.*Morning walk.*active/i.test(ariaLabel), `aria-label has context: ${ariaLabel}`);
+  });
+
+  test('has no DOM access (pure builder returns description tree only)', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    // Verify no properties that indicate DOM access
+    assert.ok(!out.document, 'no document property');
+    assert.ok(!out.ownerDocument, 'no ownerDocument property');
+    assert.ok(!out.appendChild, 'no appendChild property');
+    assert.ok(!out.createElement, 'no createElement property');
+  });
+
+  test('handles long habit names without truncation (word-break handled by CSS)', () => {
+    const longNameHabit = {
+      ...baseUpcoming,
+      name: 'This is a very long habit name that should still display correctly in the UI even with truncation',
+    };
+    const out = buildUpcomingListItem(longNameHabit);
+    const texts = allText(out);
+    assert.ok(
+      texts.some((t) => t.includes('This is a very long')),
+      'long name preserved in output tree',
+    );
+  });
+
+  test('does not include stage info (no mastery badge, no archive button)', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    const texts = allText(out);
+    // Should not have "Stage", "Mastered", or "Archive"
+    assert.ok(!texts.some((t) => /stage\s+\d/i.test(t)), 'no stage info present');
+    assert.ok(!texts.some((t) => /mastered/i.test(t)), 'no mastery badge present');
+    // Check for archive/restore buttons
+    const archiveBtn = findFirst(
+      out,
+      (n) => n.tag === 'button' && (n.attrs?.['data-action'] === 'archive' || n.attrs?.['data-action'] === 'restore'),
+    );
+    assert.equal(archiveBtn, undefined, 'no archive/restore button for scheduled habit');
+  });
+
+  test('returns complete tree structure with all required attributes', () => {
+    const out = buildUpcomingListItem(baseUpcoming);
+    assert.ok(out.children && out.children.length > 0, 'has children');
+    // Should have info div and actions div
+    const infoDivs = findAll(out, (n) => n.tag === 'div' && n.attrs?.class?.includes('catalog-habit-info'));
+    assert.ok(infoDivs.length > 0, 'has info div');
+    const actionDivs = findAll(out, (n) => n.tag === 'div' && n.attrs?.class?.includes('catalog-habit-actions'));
+    assert.ok(actionDivs.length > 0, 'has actions div');
   });
 });

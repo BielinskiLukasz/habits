@@ -1,5 +1,5 @@
-# local source spreadsheets
-Nawyki*
+# Local data files
+data/
 
 # Per-developer Claude Code permission overrides — never commit personal allows.
 .claude/settings.local.json

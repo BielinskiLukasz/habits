@@ -179,6 +179,86 @@ export function buildHabitListItem(habit, masteryState) {
 }
 
 /**
+ * Build a simplified description for one scheduled habit row in the Upcoming list (CAT-04, D-01, D-02, D-03).
+ *
+ * Displays: habit name (primary), Wave N badge, ISO startDate, Edit button, Promote button.
+ * No stage info, mastery badge, or archive button — the habit hasn't started yet.
+ * Pure builder, returns `{tag, attrs, children}` description tree — no DOM access (D-77, D-78).
+ *
+ * @param {{
+ *   id: string,
+ *   name: string,
+ *   wave: number,
+ *   startDate: string,
+ * }} habit
+ * @returns {{ tag: string, attrs: object, children: object[] }}
+ */
+export function buildUpcomingListItem(habit) {
+  /** @type {object[]} */
+  const children = [];
+
+  // Primary info block: name + wave badge + startDate badge.
+  children.push({
+    tag: 'div',
+    attrs: { class: 'catalog-habit-info' },
+    children: [
+      { tag: 'span', attrs: { class: 'catalog-habit-name' }, text: habit.name },
+      {
+        tag: 'div',
+        attrs: { class: 'catalog-habit-badges' },
+        children: [
+          { tag: 'span', attrs: { class: 'catalog-habit-wave' }, text: `Wave ${habit.wave}` },
+          { tag: 'span', attrs: { class: 'catalog-upcoming-date' }, text: habit.startDate },
+        ],
+      },
+    ],
+  });
+
+  // Action buttons block: Edit + Promote.
+  /** @type {object[]} */
+  const actionBtns = [];
+
+  // Edit button.
+  actionBtns.push({
+    tag: 'button',
+    attrs: {
+      class: 'catalog-btn catalog-btn--edit',
+      'data-action': 'edit',
+      'data-habit-id': habit.id,
+      'aria-label': `Edit ${habit.name}`,
+    },
+    text: 'Edit',
+  });
+
+  // Promote button.
+  actionBtns.push({
+    tag: 'button',
+    attrs: {
+      class: 'catalog-btn catalog-btn--promote',
+      'data-action': 'promote',
+      'data-habit-id': habit.id,
+      'aria-label': `Promote ${habit.name} to active`,
+    },
+    text: 'Promote',
+  });
+
+  children.push({
+    tag: 'div',
+    attrs: { class: 'catalog-habit-actions' },
+    children: actionBtns,
+  });
+
+  return {
+    tag: 'li',
+    attrs: {
+      class: 'catalog-upcoming-item',
+      'data-habit-id': habit.id,
+    },
+    children,
+  };
+}
+
+/**
  * Build the edit panel description pre-populated with an existing habit's fields.
  *
  * Renders form fields for: name (text), name_pl (text, optional), wave (number),
@@ -773,6 +853,8 @@ function _buildStageRow(stage, idx) {
         tag: 'input',
         attrs: {
           type: 'text',
+          id: `stage-label-${idx}`,
+          name: `stage-label-${idx}`,
           'data-field': 'stage-label',
           'data-stage-index': String(idx),
           value: stage.label ?? '',
@@ -783,6 +865,8 @@ function _buildStageRow(stage, idx) {
         tag: 'input',
         attrs: {
           type: 'number',
+          id: `stage-target-${idx}`,
+          name: `stage-target-${idx}`,
           'data-field': 'stage-target',
           'data-stage-index': String(idx),
           value: stage.target != null ? String(stage.target) : '',

@@ -31,6 +31,7 @@
 
 import { mount } from '../../util/mount.js';
 import { todayLocal } from '../../util/date.js';
+import { mountWavePlanning } from './wavePlanning.js';
 
 // ---------------------------------------------------------------------------
 // ISO week helpers (internal, not exported)
@@ -61,7 +62,7 @@ function getISOWeek(dateYMD) {
  * @param {string} dateYMD
  * @returns {string} e.g. "2026-W26"
  */
-function isoWeekKey(dateYMD) {
+export function isoWeekKey(dateYMD) {
   const { year, week } = getISOWeek(dateYMD);
   return `${year}-W${String(week).padStart(2, '0')}`;
 }
@@ -153,7 +154,7 @@ const STATUS_RANK = { Healthy: 1, Watch: 2, 'At-risk': 3, Failing: 4 };
  * @param {string|null} b
  * @returns {string|null}
  */
-function worstStatus(a, b) {
+export function worstStatus(a, b) {
   return (STATUS_RANK[a] ?? 0) >= (STATUS_RANK[b] ?? 0) ? a : b;
 }
 
@@ -164,7 +165,7 @@ function worstStatus(a, b) {
  * @param {string|null|undefined} status
  * @returns {string}
  */
-function statusSlug(status) {
+export function statusSlug(status) {
   return ({ Healthy: 'healthy', Watch: 'watch', 'At-risk': 'atrisk', Failing: 'failing' })[status] ?? 'na';
 }
 
@@ -328,7 +329,15 @@ export function mountWaveboard(parent, { repo, store }) {
   if (parent.dataset.mounted === 'waveboard') return;
   parent.dataset.mounted = 'waveboard';
 
+  mountWavePlanning(parent, { repo, store });
+
   let showArchived = false;
+
+  // Score Matrix heading.
+  const heatmapHeading = parent.ownerDocument.createElement('h2');
+  heatmapHeading.setAttribute('class', 'waveboard-heatmap-heading');
+  heatmapHeading.textContent = 'Score Matrix';
+  parent.appendChild(heatmapHeading);
 
   // "Show archived" toggle above the grid.
   const toggleLabel = parent.ownerDocument.createElement('label');
@@ -442,13 +451,7 @@ export function mountWaveboard(parent, { repo, store }) {
       /** @type {object[]} */
       let snapshotRows = [];
       try {
-        snapshotRows = await repo.runTx(
-          ['score_snapshots'],
-          'readonly',
-          (tx) => tx.objectStore('score_snapshots').index('date').getAll(
-            IDBKeyRange.bound(startDate, endDate)
-          )
-        );
+        snapshotRows = await repo.getSnapshotsInRange(startDate, endDate);
       } catch (_e) {
         // Non-fatal — no snapshots yet.
       }
@@ -468,13 +471,15 @@ export function mountWaveboard(parent, { repo, store }) {
         const habitMap = cachedCellData.get(row.habitId);
 
         if (!habitMap.has(week)) {
-          habitMap.set(week, { status: row.s1Status, applicable: 1, completed: row.s1Score >= 100 ? 1 : 0 });
+          habitMap.set(week, {
+            status: row.s1Status,
+            applicable: (row.applicableToday ?? true) ? 1 : 0,
+            completed: row.loggedToday ? 1 : 0,
+          });
         } else {
           const existing = habitMap.get(week);
-          // Accumulate applicable day count and completed count
-          existing.applicable += 1;
-          existing.completed += row.s1Score >= 100 ? 1 : 0;
-          // Use worst status for the week
+          existing.applicable += (row.applicableToday ?? true) ? 1 : 0;
+          existing.completed += row.loggedToday ? 1 : 0;
           existing.status = worstStatus(existing.status, row.s1Status);
         }
       }

@@ -1,12 +1,13 @@
 /**
  * @file Integration tests for `apply({ type: 'createHabit' })` end-to-end
- * (CATALOG-01, CATALOG-07, Phase 04 plan 05 Task 2).
+ * (CATALOG-01, CATALOG-07, Phase 04 plan 05 Task 2; SCHED-01, SCHED-02 Phase 07 plan 02).
  *
  * Verifies:
  *   - createHabit atomically writes habits row + habit_versions row + events row
  *   - startDate payload is respected (effectiveFrom = startDate)
  *   - default startDate = today when omitted
  *   - returned value is a UUID event id
+ *   - status is derived from startDate: future startDate → 'scheduled', past/today → 'active'
  */
 
 import { test, describe, beforeEach } from 'node:test';
@@ -161,5 +162,66 @@ describe('apply(createHabit) — single-tx write to habits + habit_versions + ev
     assert.equal(habit.name_pl, null);
     assert.equal(habit.target, null);
     assert.equal(habit.targetType, 'binary');
+  });
+
+  // SCHED-01, SCHED-02 — status derived from startDate
+  test('createHabit with future startDate stores habit as scheduled', async () => {
+    const apply = await freshApply();
+    apply.configure({ repo, broadcast: () => {}, trackTx: () => {} });
+
+    await apply.apply({
+      type: 'createHabit',
+      payload: {
+        name: 'Future habit',
+        wave: 5,
+        cadence: { type: 'daily' },
+        targetType: 'binary',
+        startDate: '2099-06-01',
+      },
+    });
+
+    const habits = Array.from(repo._stores.habits.values());
+    assert.equal(habits.length, 1);
+    assert.equal(habits[0].status, 'scheduled');
+  });
+
+  test('createHabit with past startDate stores habit as active', async () => {
+    const apply = await freshApply();
+    apply.configure({ repo, broadcast: () => {}, trackTx: () => {} });
+
+    await apply.apply({
+      type: 'createHabit',
+      payload: {
+        name: 'Past habit',
+        wave: 1,
+        cadence: { type: 'daily' },
+        targetType: 'binary',
+        startDate: '2020-01-01',
+      },
+    });
+
+    const habits = Array.from(repo._stores.habits.values());
+    assert.equal(habits.length, 1);
+    assert.equal(habits[0].status, 'active');
+  });
+
+  test('createHabit with startDate equal to today stores habit as active', async () => {
+    const apply = await freshApply();
+    apply.configure({ repo, broadcast: () => {}, trackTx: () => {} });
+
+    await apply.apply({
+      type: 'createHabit',
+      payload: {
+        name: 'Today habit',
+        wave: 1,
+        cadence: { type: 'daily' },
+        targetType: 'binary',
+        startDate: todayYMD(),
+      },
+    });
+
+    const habits = Array.from(repo._stores.habits.values());
+    assert.equal(habits.length, 1);
+    assert.equal(habits[0].status, 'active');
   });
 });

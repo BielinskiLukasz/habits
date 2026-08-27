@@ -20,7 +20,8 @@
  *
  * Locked decisions: D-82 (catalog route), CATALOG-01 (creation fields),
  * CATALOG-07 (future startDate), D-27 (JSDoc comments), D-42 (UUID identity),
- * history integrity rule (new version effectiveFrom = startDate).
+ * history integrity rule (new version effectiveFrom = startDate),
+ * SCHED-01 (scheduled status supported), SCHED-02 (future startDate → status:'scheduled').
  *
  * Forbidden constructs in this file:
  *   - Direct calls to `js/db/repo.js` write helpers (DATA-04 — apply.js owns writes)
@@ -83,7 +84,7 @@ export async function handleCreateHabit(event, _repo) {
     name,
     name_pl,
     wave,
-    status: 'active',
+    status: sd > todayLocal() ? 'scheduled' : 'active',
     cadence,
     targetType,
     target,

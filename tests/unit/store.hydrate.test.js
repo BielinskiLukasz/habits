@@ -370,3 +370,78 @@ describe('notify refreshes cache for affected keys (D-52, D-72, Pitfall 2)', () 
     assert.equal(getAllCalls, 1, 'hydrate is still idempotent post-Task-2');
   });
 });
+
+describe('scoringModel persistence — UAT-T7 regression (D-122)', () => {
+  test('hydrate loads scoringModel from IDB into cache (cold-start restore)', async () => {
+    const store = await freshStore();
+    const repo = createFakeRepo();
+    await repo.putSetting({ key: 'scoringModel', value: 'S2' });
+
+    store.configureStore({ repo });
+    await store.hydrate();
+
+    const settings = store.getCachedSettings();
+    assert.equal(
+      settings.scoringModel,
+      'S2',
+      'getCachedSettings().scoringModel should reflect the IDB value after hydrate',
+    );
+  });
+
+  test('getCachedSettings returns undefined for scoringModel when never set (falls back to S1 in consumer)', async () => {
+    const store = await freshStore();
+    const repo = createFakeRepo();
+    // No scoringModel row seeded.
+    store.configureStore({ repo });
+    await store.hydrate();
+
+    const settings = store.getCachedSettings();
+    assert.equal(
+      settings.scoringModel,
+      undefined,
+      'scoringModel is undefined (absent from IDB) so consumer null-coalesces to S1',
+    );
+  });
+
+  test('notify after setSetting refreshes scoringModel in cache so getCachedSettings reflects the new value (UAT-T7)', async () => {
+    const { store, applyMod } = await freshStoreAndApply();
+    const repo = createFakeRepo();
+    store.configureStore({ repo });
+    applyMod.configure({ repo, broadcast: () => {}, trackTx: () => {}, notify: store.notify });
+    await store.hydrate();
+
+    // Baseline — no scoringModel set yet.
+    assert.equal(store.getCachedSettings().scoringModel, undefined);
+
+    // Simulate user selecting S2 — dispatched through the apply chokepoint.
+    await applyMod.apply({
+      type: 'setSetting',
+      payload: { key: 'scoringModel', value: 'S2' },
+    });
+
+    // After notify, the cache must reflect the new model without a page reload.
+    assert.equal(
+      store.getCachedSettings().scoringModel,
+      'S2',
+      'cache updated synchronously before subscribers fire (Pitfall 2 / D-72)',
+    );
+  });
+
+  test('getCachedSettings includes scoringModel alongside other settings keys', async () => {
+    const store = await freshStore();
+    const repo = createFakeRepo();
+    await repo.putSetting({ key: 'weekStart', value: 'sun' });
+    await repo.putSetting({ key: 'masteryThreshold', value: 85 });
+    await repo.putSetting({ key: 'masteryWindow', value: 60 });
+    await repo.putSetting({ key: 'scoringModel', value: 'S3' });
+
+    store.configureStore({ repo });
+    await store.hydrate();
+
+    const settings = store.getCachedSettings();
+    assert.equal(settings.weekStart, 'sun', 'weekStart cached');
+    assert.equal(settings.masteryThreshold, 85, 'masteryThreshold cached');
+    assert.equal(settings.masteryWindow, 60, 'masteryWindow cached');
+    assert.equal(settings.scoringModel, 'S3', 'scoringModel cached alongside other settings');
+  });
+});

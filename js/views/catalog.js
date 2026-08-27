@@ -9,11 +9,14 @@
  *
  * Architecture:
  *   - Reads all habits from repo (or store cache when warm).
- *   - Evaluates mastery for each habit using `evaluateMastery` from mastery.js.
+ *   - Evaluates mastery for each habit by reading `isMastered` from the latest
+ *     `score_snapshots` row (pre-computed by scoreSnapshots.js at log-write time).
  *   - Sorts: active first, then archived; within each group by wave asc.
  *   - Renders catalog header + habit list.
  *   - Wires action handlers via mount() actions map for all CRUD operations.
  *   - Subscribe to store.subscribe(render) for live re-renders.
+ *   - Add/Edit panels open inside `<dialog id="catalog-modal">` via dialog.showModal();
+ *     closed via dialog.close() + clearChildren(dialog) in _closeOpenPanel.
  *
  * Action handlers:
  *   - 'create' → open buildCreatePanel below the header
@@ -37,20 +40,16 @@
 import {
   buildCatalogHeader,
   buildHabitListItem,
+  buildUpcomingListItem,
   buildEditPanel,
   buildCreatePanel,
 } from './catalog/builders.js';
 import { mount } from '../util/mount.js';
 import { apply } from '../state/apply.js';
 import { todayLocal } from '../util/date.js';
-import { evaluateMastery } from '../domain/mastery.js';
-import { appliesToday } from '../domain/cadence.js';
 import {
   subscribe,
   getCachedHabits,
-  getCachedSettings,
-  getCachedWeekStart,
-  getCachedWeekCompletions,
 } from '../state/store.js';
 import { showErrorToast } from './toast.js';
 
@@ -72,50 +71,40 @@ function clearChildren(parent) {
 }
 
 /**
- * Compute the mastery context from current store cache.
+ * Evaluate mastery state for all habits by reading pre-computed `isMastered`
+ * values from the `score_snapshots` IDB store via `repo.getLatestSnapshot`.
  *
- * @returns {{ globalThreshold: number, globalWindow: number, appliesToday: Function, weekStart: string, weekCompletions: Function, monthCompletions: Function }}
- */
-function buildMasteryCtx() {
-  const cachedSettings = getCachedSettings ? getCachedSettings() : {};
-  const weekStart = getCachedWeekStart ? getCachedWeekStart() : 'mon';
-  return {
-    globalThreshold: cachedSettings.masteryThreshold ?? 90,
-    globalWindow: cachedSettings.masteryWindow ?? 70,
-    appliesToday: (habit, date, ctx) => appliesToday(habit, date, ctx),
-    weekStart,
-    weekCompletions: (habitId, start, end) => getCachedWeekCompletions(habitId, start, end),
-    // monthCompletions not in the store cache yet — stub to 0 (safe default)
-    monthCompletions: () => 0,
-  };
-}
-
-/**
- * Evaluate mastery state for all habits. For each habit, we pass an empty logs
- * array because loading all logs for all habits at catalog render time is too
- * expensive. The catalog shows a best-effort mastery state using the cached
- * data only. Full mastery evaluation per log happens in the scoring pass.
+ * Rationale: calling `evaluateMastery(habit, [], today, ctx)` with an empty
+ * logs array always returned `isMastered: false` for every active habit because
+ * `completedCount` is always 0. The correct approach is to read the value that
+ * `scoreSnapshots.js::writeHabitSnapshots` already computed from the real log
+ * history when the user last wrote a completion.
  *
- * For habits that have `status === 'mastered'`, we return isMastered=true
- * directly — the habit is already promoted in the IDB model.
+ * Falls back to `false` for habits that have never had a log written (no
+ * snapshot row exists yet).
+ *
+ * For habits with `status === 'mastered'` (permanently promoted in the IDB
+ * model), we return `isMastered: true` directly — they may not have a
+ * recent snapshot if they were promoted before the scoring system was active.
  *
  * @param {object[]} habits
- * @param {string} today
- * @returns {Map<string, { isMastered: boolean }>}
+ * @param {{ repo: object }} deps
+ * @returns {Promise<Map<string, { isMastered: boolean }>>}
  */
-function evaluateMasteryForCatalog(habits, today) {
-  const ctx = buildMasteryCtx();
+async function evaluateMasteryForCatalog(habits, deps) {
+  const { repo } = deps;
   const results = new Map();
   for (const habit of habits) {
+    // Permanently mastered habits are promoted in the IDB model — shortcut.
     if (habit.status === 'mastered') {
       results.set(habit.id, { isMastered: true });
       continue;
     }
+    // Read the pre-computed isMastered flag from the latest score_snapshot row.
+    // Falls back to false when no snapshot exists (habit has no log history yet).
     try {
-      // We evaluate with an empty logs array as a lightweight fast-path.
-      // Catalog's mastery badge is status-based, not rolling-window-based.
-      const state = evaluateMastery(habit, [], today, ctx);
-      results.set(habit.id, { isMastered: state.isMastered });
+      const snap = await repo.getLatestSnapshot(habit.id);
+      results.set(habit.id, { isMastered: snap?.isMastered === true });
     } catch (_e) {
       results.set(habit.id, { isMastered: false });
     }
@@ -200,6 +189,8 @@ function addStageRowToDom(panelEl) {
 
   const labelInput = doc.createElement('input');
   labelInput.type = 'text';
+  labelInput.id = `stage-label-${currentCount}`;
+  labelInput.name = `stage-label-${currentCount}`;
   labelInput.setAttribute('data-field', 'stage-label');
   labelInput.setAttribute('data-stage-index', String(currentCount));
   labelInput.placeholder = 'Stage label';
@@ -207,6 +198,8 @@ function addStageRowToDom(panelEl) {
 
   const targetInput = doc.createElement('input');
   targetInput.type = 'number';
+  targetInput.id = `stage-target-${currentCount}`;
+  targetInput.name = `stage-target-${currentCount}`;
   targetInput.setAttribute('data-field', 'stage-target');
   targetInput.setAttribute('data-stage-index', String(currentCount));
   targetInput.placeholder = 'Target (optional)';
@@ -226,8 +219,6 @@ async function renderCatalogInto(parent, deps) {
   const { repo } = deps;
   clearChildren(parent);
 
-  const today = todayLocal();
-
   // Load habits from cache first; fall back to repo if cache is cold.
   let habits = getCachedHabits ? getCachedHabits() : [];
   if (!habits.length && repo && typeof repo.getAllHabits === 'function') {
@@ -238,7 +229,7 @@ async function renderCatalogInto(parent, deps) {
     }
   }
 
-  const masteryMap = evaluateMasteryForCatalog(habits, today);
+  const masteryMap = await evaluateMasteryForCatalog(habits, deps);
   const sorted = sortHabits(habits);
 
   // Build actions map that closures over the live parent + deps.
@@ -247,23 +238,49 @@ async function renderCatalogInto(parent, deps) {
   // Render header.
   mount(buildCatalogHeader(), parent, actions);
 
-  // Render habit list container.
+  // Split sorted habits into active (status !== 'scheduled') and scheduled (status === 'scheduled').
+  const activeHabits = sorted.filter((h) => h.status !== 'scheduled');
+  const scheduledHabits = sorted.filter((h) => h.status === 'scheduled')
+    .sort((a, b) => (a.startDate ?? '').localeCompare(b.startDate ?? ''));
+
+  // Render habit list container for active habits.
   const doc = parent.ownerDocument;
   const listEl = doc.createElement('ul');
   listEl.setAttribute('class', 'catalog-habit-list');
   listEl.setAttribute('aria-label', 'Habit catalog');
   parent.appendChild(listEl);
 
-  for (const habit of sorted) {
+  for (const habit of activeHabits) {
     const masteryState = masteryMap.get(habit.id) ?? { isMastered: false };
     mount(buildHabitListItem(habit, masteryState), listEl, actions);
   }
 
-  if (sorted.length === 0) {
+  if (activeHabits.length === 0 && scheduledHabits.length === 0) {
     const empty = doc.createElement('li');
     empty.setAttribute('class', 'catalog-empty');
     empty.textContent = 'No habits yet. Tap "New habit" to create one.';
     listEl.appendChild(empty);
+  }
+
+  // Render Upcoming section for scheduled habits if any exist.
+  if (scheduledHabits.length > 0) {
+    const upcomingSection = doc.createElement('section');
+    upcomingSection.setAttribute('class', 'catalog-upcoming-section');
+    parent.appendChild(upcomingSection);
+
+    const upcomingHeading = doc.createElement('h2');
+    upcomingHeading.setAttribute('class', 'catalog-upcoming-heading');
+    upcomingHeading.textContent = 'Upcoming';
+    upcomingSection.appendChild(upcomingHeading);
+
+    const upcomingList = doc.createElement('ul');
+    upcomingList.setAttribute('class', 'catalog-upcoming-list');
+    upcomingList.setAttribute('aria-label', 'Upcoming habits');
+    upcomingSection.appendChild(upcomingList);
+
+    for (const habit of scheduledHabits) {
+      mount(buildUpcomingListItem(habit), upcomingList, actions);
+    }
   }
 }
 
@@ -297,19 +314,25 @@ function buildCadenceFromType(cadenceType) {
 function buildActions(parent, deps) {
   return {
     /**
-     * Open the create panel below the header.
+     * Open the create panel in the catalog modal dialog.
      */
     create: () => {
-      // Remove any open panel first.
+      const dialog = document.getElementById('catalog-modal');
+      // Remove any open panel first (closes dialog if open).
       _closeOpenPanel(parent);
       const today = todayLocal();
       const panelDesc = buildCreatePanel(today);
       const panelActions = buildActions(parent, deps);
-      mount(panelDesc, parent, panelActions);
+      if (dialog) {
+        clearChildren(dialog);
+        mount(panelDesc, dialog, panelActions);
+        dialog.showModal();
+      }
     },
 
     /**
-     * Open the edit panel for a habit. Reads `data-habit-id` from the button.
+     * Open the edit panel for a habit in the catalog modal dialog.
+     * Reads `data-habit-id` from the button.
      */
     edit: (evt) => {
       const habitId = evt?.currentTarget?.getAttribute('data-habit-id')
@@ -318,10 +341,16 @@ function buildActions(parent, deps) {
       const habits = getCachedHabits ? getCachedHabits() : [];
       const habit = habits.find((h) => h.id === habitId);
       if (!habit) return;
+      const dialog = document.getElementById('catalog-modal');
+      // Remove any open panel first (closes dialog if open).
       _closeOpenPanel(parent);
       const panelDesc = buildEditPanel(habit);
       const panelActions = buildActions(parent, deps);
-      mount(panelDesc, parent, panelActions);
+      if (dialog) {
+        clearChildren(dialog);
+        mount(panelDesc, dialog, panelActions);
+        dialog.showModal();
+      }
     },
 
     /**
@@ -350,6 +379,21 @@ function buildActions(parent, deps) {
         await apply({ type: 'restoreHabit', payload: { habitId } });
       } catch (_e) {
         showErrorToast("Couldn't restore habit — try again");
+      }
+    },
+
+    /**
+     * Promote a scheduled habit to active.
+     */
+    promote: async (evt) => {
+      const habitId = evt?.currentTarget?.getAttribute('data-habit-id')
+        ?? evt?.target?.getAttribute('data-habit-id');
+      if (!habitId) return;
+      try {
+        await apply({ type: 'promoteHabit', payload: { habitId } });
+        // store.subscribe will trigger re-render.
+      } catch (_e) {
+        showErrorToast("Couldn't promote habit — try again");
       }
     },
 
@@ -461,11 +505,20 @@ function buildActions(parent, deps) {
 }
 
 /**
- * Remove any open edit/create panel from the catalog panel.
+ * Close the catalog modal dialog and clear its contents. Also removes any
+ * residual inline panel from parent (resilience fallback — after the dialog
+ * refactor this branch is always a noop).
  *
  * @param {object} parent
  */
 function _closeOpenPanel(parent) {
+  const dialog = document.getElementById('catalog-modal');
+  if (dialog?.open) {
+    dialog.close();
+    clearChildren(dialog);
+  }
+  // Resilience fallback: remove any inline panel that may have been mounted
+  // before the dialog refactor (should always be a noop in production).
   const openPanel = parent.querySelector('[data-panel="edit"], [data-panel="create"]');
   if (openPanel && openPanel.parentNode) {
     openPanel.parentNode.removeChild(openPanel);
@@ -487,6 +540,7 @@ function _closeOpenPanel(parent) {
 export async function mountCatalog(parent, deps) {
   if (_unsub) {
     // Already mounted — re-render against the live parent.
+    _currentParent = parent;
     _currentDeps = deps;
     await renderCatalogInto(parent, deps);
     return _createUnmount(parent);
