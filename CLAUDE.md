@@ -51,8 +51,6 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ## Technology Stack
 
-## TL;DR — The Stack in One Page
-
 | Layer | Choice | Rationale |
 |---|---|---|
 | **Markup** | Plain HTML5, one `index.html` shell + one auxiliary `desktop.html` | Static, GitHub-Pages-hostable, file://-friendly |
@@ -65,150 +63,14 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 | **Export — CSV** | Single wide matrix: rows = habits, columns = days, cells = `1` / `0` / `x` | Locked: human-readable in Excel, no separate file per entity |
 | **Import** | JSON only, **merge-by-id** semantics | Locked: existing records updated in place, new records added, untouched records preserved |
 | **PWA shell** | `manifest.json` + `sw.js` registered with silent `.catch()` (same pattern as `mindful-breathing`) | Service worker silent-fails on file:// so direct-open still works |
-| **SW strategy** | Cache-first for app shell; no special handling for exports (they never hit fetch) | Single-user offline-first; no remote data |
+| **SW strategy** | Cache-first for app shell; `/js/` through stale-while-revalidate | Single-user offline-first; no remote data |
 | **CSS architecture** | Cascade Layers (`@layer`) + CSS Custom Properties + per-component files joined with `@import url(...) layer(...)` | Native, build-free, deterministic specificity |
 | **Layout split (mobile vs desktop)** | Two separate top-level HTML entry points (`index.html` + `desktop.html`) | Mobile = check-in, desktop = analytics — different DOM, not just a wide responsive layout |
 | **Scoring snapshots** | Persisted in a dedicated `score_snapshots` IDB store, written on every log change for the affected date(s) | Locked: snapshots are first-class data, not recomputed on every render |
 | **Mobile UX extras** | Vibration API, Touch pointer events | Native; mirrors `mindful-breathing` patterns |
 | **No dev tooling** | No npm, no Prettier-via-node, no TypeScript, no JSDoc compiler step | Constraint; zero-build longevity |
 
-## Recommended Stack
-
-### Core Runtime
-
-| Technology | Version | Purpose | Why |
-|---|---|---|---|
-| HTML5 | living standard | Document structure, shell pages | Universally supported, no transpilation |
-| CSS3 (Baseline 2024+) | living standard | Styling, layout, layered cascade | `@layer`, container queries, `:has()`, custom properties all Baseline Widely Available |
-| JavaScript (ES2023, native modules) | ES2023 | All logic | Match `mindful-breathing` badge; no transpile step |
-| Web App Manifest | W3C Manifest spec | Installability metadata | Required for "Add to Home Screen" + standalone display |
-| Service Worker API | W3C SW spec | Offline cache | Required for offline PWA on HTTP(S); silent-failed on file:// |
-
-### Storage
-
-| Technology | Version | Purpose | Why |
-|---|---|---|---|
-| IndexedDB | living spec | Primary persistence (habits, logs, settings, history edits, score snapshots) | Gigabytes of quota, indexed queries, transactional. Matches the "years of daily logs" requirement. |
-| `localStorage` | living spec | A tiny "ui preferences" slot only (e.g. last-viewed date, theme) | Synchronous, trivial; do NOT use for habit data |
-| BroadcastChannel | living spec | Cross-tab invalidation so two open tabs don't desync | Native and tiny; no library |
-
-### Browser APIs Used Directly
-
-| API | Use in Nawyki | Notes |
-|---|---|---|
-| IndexedDB | Habit catalog, daily logs, edit history, settings, score snapshots | Wrap manually; see `db/idb.js` pattern below |
-| Service Worker | Offline app shell | Same silent-`.catch()` pattern as `mindful-breathing/sw.js` |
-| Web App Manifest | Install + standalone display | `manifest.json` with maskable SVG icon |
-| BroadcastChannel | Cross-tab data sync after write | Single channel `'habits'` (D-30, locked Phase 2) |
-| Page Visibility (`visibilitychange`) | Flush pending writes when PWA is backgrounded | Reliable on mobile; `beforeunload` is NOT |
-| File / Blob / URL | Export download (JSON + CSV) and import upload | Universal, file://-safe |
-| `<input type="file">` | Import JSON | Native picker; no File System Access API required |
-| Vibration API | Optional check-in tap feedback (mobile) | Same pattern as `mindful-breathing` |
-| Wake Lock | NOT used (v1) | No long-running session in habit tracker |
-| Notifications / Push | NOT used (v1) | Explicit constraint: no reminders in v1 |
-| File System Access API | NOT used (v1) | Not available on file://; the Blob+anchor pattern works everywhere |
-
-### Supporting Libraries
-
-| Library | Version | Purpose | When to Use |
-|---|---|---|---|
-| (none) | — | — | Constraint: no npm, no CDN |
-
-## Recommended File / Directory Layout
-
-- Mirrors `mindful-breathing` (`index.html`, `manifest.json`, `sw.js`, `icon.svg` at the root) — same hosting model.
-- Splits the two layouts at the HTML level (`index.html` vs `desktop.html`), matching the locked constraint that mobile and desktop are *different* layouts, not one responsive sheet.
-- Keeps domain logic free of DOM (`js/domain/`) so the same modules can be imported from both shells and unit-reasoned without a test runner.
-- `cadence.js` is shared between Today (deciding which habits to show) and CSV export (deciding which cells are `x`) — a single source of truth.
-- All directories are flat and only one level deep where possible — easy to grep, easy to read.
-
-## IndexedDB Approach: Raw + Hand-Written ~80-Line Wrapper
-
-### Decision
-
-### Rationale
-
-### The Hand-Written Wrapper (shape, not code)
-
-### Schema (illustrative, not exhaustive)
-
-- `habits` — keyPath `id`, indexes on `wave`, `status` (active/mastered/archived)
-- `logs` — keyPath `[habitId, date]`, indexes on `date` (for "show me everything on day X") and `habitId` (for "show me history of habit Y")
-- `history_edits` — keyPath autoincrement, index on `at` (for undo/redo and audit)
-- `settings` — keyPath `key` (singleton-ish; thresholds, etc.)
-- `seed_meta` — keyPath `key` (records which seed version was loaded)
-- **`score_snapshots`** — keyPath `[habitId, date]`, indexes on `date` (daily totals, wave aggregates) and `habitId` (rolling per-habit scores). **One row per (habit, day) carrying the precomputed score values that scoring.js produced.** See "Scoring Snapshots" section below.
-
-### Migration Pattern
-
-## Scoring Snapshots (Locked Decision)
-
-### Decision
-
-### Why
-
-### Write Path
-
-### Read Path
-
-- **Today view** reads `score_snapshots` for `[*, today]` to render the mastery badges and per-habit scores.
-- **Analytics view** reads `score_snapshots` by `date` range, aggregates in memory, and renders charts.
-- **History view** reads snapshots for the selected day.
-
-### Snapshot Schema
-
-### Recomputation Triggers
-
-- Its `logs` row changes.
-- Any `logs` row within the rolling window (default 70 days back) changes.
-- The habit's definition changes (threshold, window, cadence).
-- The global settings (default threshold / window) change → bulk re-run, gated behind a confirmation.
-- `scoreVersion` bumps → opportunistic re-run on next read, or batched "rebuild snapshots" admin action.
-
-## Service Worker Strategy
-
-### Decision
-
-### Pattern
-
-### Registration (silent-fail-safe)
-
-### Cache Versioning
-
-### What Is NOT Cached
-
-- Nothing dynamic — there are no API calls.
-- Exports are not network responses; they're client-side blobs and never hit the service worker.
-
-## CSS Architecture
-
-### Decision
-
-### Pattern
-
-### Why Cascade Layers
-
-- **Baseline Widely Available since March 2022** — supported in every browser the user runs in 2026.
-- **Removes specificity wars** without a preprocessor.
-- **No bundler required** — `@import` is the native composer and layers make order deterministic.
-- **Multi-file friendly** — each layer is its own file; the order is declared once.
-
-### Why Custom Properties
-
-- Native theming primitive (`--color-fg`, `--space-3`, `--radius-card`).
-- Reactive: change `--color-bg` on `:root.dark` and the whole UI flips.
-- Visible in DevTools — no preprocessor obscurity.
-
-### Mobile-vs-Desktop Layouts
-
-- `index.html` is the mobile check-in.
-- `desktop.html` is the analytics view, linked from a "Open desktop view →" affordance on desktop browsers.
-- Each shell links its own view-specific CSS and JS entry.
-- Honors "truly different layouts" verbatim.
-
 ## Export / Import (Locked Decisions)
-
-### JSON Export — Full Backup
 
 ### CSV Export — Wide Habit×Day Matrix (Locked)
 
@@ -241,53 +103,12 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 - A backup file is purely additive in the absence of conflicts; the user can import it confidently after an experimental session without losing the experimental data (though it *will* be overwritten where keys collide — that's the locked tradeoff).
 - Habit identity is preserved by `id` (which is a UUID, never derived from the habit name). Renaming a habit on device A and importing a backup that still has the old name **will overwrite the new name** if the `id` matches. This is documented behavior, not a bug — and is why the export filename includes the date.
 
-### Why NOT File System Access API
-
-- Not available on file://.
-- Not supported in Safari (still, as of 2026).
-- The Blob+anchor pattern works everywhere and is one fewer code path.
-
 ## Cross-Tab Sync
 
 - `{ type: 'log:put', habitId, date }` — log changed; affected snapshots already rewritten.
 - `{ type: 'habit:put', habitId }` — habit definition changed.
 - `{ type: 'snapshot:rebuild', range }` — bulk snapshot recompute happened.
 - `{ type: 'import:done' }` — full reload signal.
-
-## Lifecycle Hook
-
-## Web App Manifest
-
-- `scope` — explicit (defends against accidental navigation outside the app).
-- `lang: "en"` — UI is English even though habit data is Polish.
-- `description` — populated for the Chrome install dialog.
-
-## Alternatives Considered
-
-| Category | Recommended | Alternative | Why Not |
-|---|---|---|---|
-| Storage | Raw IndexedDB + hand-written wrapper | `idb-keyval` (inlined) | Key-value shape is wrong for structured habit/log data with indexes |
-| Storage | Raw IndexedDB + hand-written wrapper | `idb` (inlined) | Too large to honestly "inline as one file"; carries TypeScript build artifacts |
-| Storage | Raw IndexedDB + hand-written wrapper | Dexie.js | npm/CDN dependency; explicitly forbidden by constraints |
-| Storage | Raw IndexedDB + hand-written wrapper | `localStorage` only | Quota and sync-blocking; insufficient for years of daily logs |
-| Storage | Raw IndexedDB + hand-written wrapper | OPFS (Origin Private File System) | Not available on file://; overkill; less queryable |
-| Scoring | Persisted snapshots in `score_snapshots` | Recompute on every render | Wasteful on mobile; not debuggable in DevTools; no audit trail |
-| Scoring | Persisted snapshots in `score_snapshots` | Materialized view via SQL | No SQL in browsers; Web SQL is deprecated |
-| CSV export | Single wide habit×day matrix with `1` / `0` / `x` | Two CSVs (habits + logs) | Locked: completion-only matrix is what the user wants in Excel |
-| CSV export | Single wide matrix | Long-format CSV (one row per habit×day) | Long-format is harder to scan in Excel; rejected per user preference |
-| Import | Merge-by-id | Clear-and-replay (wipe + reload) | Loses local-only edits since last export; rejected per user preference |
-| Import | Merge-by-id | Three-way merge with conflict resolution | Out of v1 scope; revisit if cloud sync added |
-| Module system | Native ES modules | Bundler (esbuild/Vite) | Forbidden; also unnecessary at this scale |
-| Module system | Native ES modules | Import maps | Useful when remapping bare specifiers; we use only `./` relative paths so unneeded |
-| CSS | Cascade Layers + `@import` | Sass/PostCSS | Forbidden (build step); cascade layers cover the use case natively |
-| CSS | Cascade Layers + `@import` | One giant `style.css` | Hard to maintain at the file count Nawyki will have |
-| CSS | Cascade Layers + `@import` | CSS Modules / Shadow DOM scoping | Unneeded; cascade layers + BEM-ish naming is sufficient |
-| Cross-tab sync | BroadcastChannel | `storage` event | Requires localStorage writes we don't want |
-| Cross-tab sync | BroadcastChannel | Service Worker `postMessage` | More plumbing; BC is one line |
-| Export download | Blob + anchor `download` | File System Access API | Not available on file://; Safari support gaps |
-| Lifecycle flush | `visibilitychange` → hidden | `beforeunload` | Unreliable on mobile; MDN explicitly advises against |
-| Layout split | Two HTML shells | Single responsive layout | Constraint says they are different layouts, not different breakpoints |
-| Layout split | Two HTML shells | Client-side router (hash/history) | Adds complexity; two static files is simpler and GitHub-Pages-friendlier |
 
 ## What NOT to Use (Explicit Anti-Stack)
 
@@ -315,53 +136,6 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 - **CSV as an import format** — CSV is read-only; round-trip is JSON-only.
 - **Clear-and-replay JSON import** — would silently delete local edits made since the export; we are merge-by-id instead.
 - **Recomputing scores on every read** — scores are snapshotted in `score_snapshots`; views read, they do not compute.
-
-## Installation
-
-# Option A: open directly
-
-Double-click `index.html` (works on `file://` in Firefox + Safari; Chromium refuses ES modules from `file://` by browser policy — use Option B for Chromium-family browsers).
-
-# Option B: serve locally if you want to test the service worker
-
-```sh
-node scripts/serve.js
-```
-
-Then open `http://localhost:8080/`. Override the port with `PORT=9000 node scripts/serve.js`. The vanilla-Node dev server is the canonical local-dev command (D-46, locked Phase 2 — replaces the previous `python -m http.server` recipe; Node 20+ is the only runtime requirement per D-47).
-
-# Option C: ship to GitHub Pages — push to main, enable Pages
-
-## Confidence Summary
-
-| Decision | Confidence | Source |
-|---|---|---|
-| Native ES modules with `./` relative imports | HIGH | MDN ES modules; reference project pattern |
-| Raw IndexedDB + hand-written wrapper | HIGH | MDN IndexedDB; principle of least dependency |
-| `score_snapshots` store + write-time recompute | HIGH | Standard denormalized-projection pattern; locked by user |
-| Cache-first SW with silent `.catch()` | HIGH | MDN CycleTracker tutorial + `mindful-breathing/sw.js` directly inspected |
-| Cascade Layers + `@import` for CSS | HIGH | MDN `@layer` Baseline status |
-| `visibilitychange` → hidden for flushes | HIGH | MDN explicitly recommends over `beforeunload` |
-| BroadcastChannel for cross-tab sync | HIGH | MDN; Baseline Widely Available |
-| Blob+anchor download for exports | HIGH | Universal pattern; no API gates; works on file:// |
-| Two-HTML-shell layout split | HIGH | Constraint-driven, simplest faithful reading; reinforced by locked decision |
-| Single wide habit×day CSV with `1`/`0`/`x` | HIGH | Locked by user; mechanics are pure string-building |
-| Merge-by-id JSON import | HIGH | Locked by user; pure IDB transactional logic |
-| Excel BOM-prefixed CSV | HIGH | Well-known Windows-Excel UTF-8 quirk |
-| Web App Manifest minimum | HIGH | MDN current installability checklist |
-
-## Sources
-
-- MDN — Using IndexedDB (best practices, version handling, transactions): https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-- MDN — Service Workers in CycleTracker PWA tutorial (install / activate / fetch cache-first): https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Service_workers
-- MDN — Web App Manifest (minimum installable, icons, display modes): https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Manifest_file
-- MDN — `@layer` (CSS Cascade Layers, Baseline status, `@import` with `layer()`): https://developer.mozilla.org/en-US/docs/Web/CSS/@layer
-- MDN — BroadcastChannel (cross-tab messaging, Baseline status): https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel
-- MDN — `visibilitychange` event (recommended over beforeunload for state persistence): https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event
-- MDN — File System Access API (browser support, secure-context-only, file:// restriction): https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API
-- Reference project `mindful-breathing` — `sw.js`, `manifest.json`, README "Design Decisions" section (directly inspected in `../mindful-breathing/`)
-- Project context — `.planning/PROJECT.md` (constraints and feature surface)
-- User-locked decisions (2026-05-26): single CSV (wide habit×day matrix with `1`/`0`/`x`), JSON import = merge-by-id, scoring snapshots persisted in IDB
 
 <!-- GSD:stack-end -->
 
@@ -443,13 +217,21 @@ Tests call the same `configure()` with fakes. `_resetXxxForTest()` functions (ex
 
 | Module | Responsibility |
 |---|---|
-| `cadence.js` | `appliesToday(habit, date, ctx)` — 5 cadence types via `RESOLVERS` dispatch table (no `switch`) |
+| `cadence.js` | `appliesToday(habit, date, ctx)` — 5 cadence types via `RESOLVERS` dispatch table (no `switch`). Shared by Today view and CSV export — single source of truth for "is this habit applicable on this day." |
 | `mastery.js` | Mastery threshold evaluation from score snapshots |
 | `scoring.js` | S1/S2/S3 scoring model computations |
 | `stage.js` | Stage advancement logic |
 | `wave.js` | Wave catalog loading and boot |
 | `waveAggregates.js` | Per-wave aggregate computations |
 | `scheduled.js` | Scheduled habit promotion (`startDate <= today`) on every boot |
+
+### Habit Status Lifecycle
+
+Habits have four statuses: `active` | `mastered` | `archived` | `scheduled`.
+
+- `scheduled` habits have a future `startDate`; they appear in the Catalog "Upcoming" section and are excluded from Today's check-in list.
+- `bootScheduled()` (called at boot in both shells) auto-promotes `scheduled` → `active` when `startDate <= today`.
+- `seed/habits.json` converter emits `status: 'scheduled'` for any habit whose `startDate` is in the future at seed load time.
 
 ### CSS Layer Order
 
