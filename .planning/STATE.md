@@ -2,29 +2,29 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Scheduled Habits — Phases 7–9 (in progress)
-current_phase: 9
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 9 complete — all phases complete
-last_updated: "2026-08-26T21:28:23.503Z"
-last_activity: 2026-08-26
-state_head: 1f3e382f1d0fe02b07c82b1e9f52645236a2e997
+last_updated: "2026-08-27T10:22:02.550Z"
+last_activity: 2026-08-27
+last_activity_desc: Milestone v1.1 completed and archived
+state_head: 001e524eada38168ebc3b8ebeeb3df1f14f20ea5
 progress:
   total_phases: 3
   completed_phases: 3
   total_plans: 9
   completed_plans: 9
   percent: 100
-last_activity_desc: Phase 09 execution complete — 2 plans executed
+current_phase: 9
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-30)
+See: .planning/PROJECT.md (updated 2026-08-27)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 09 — Desktop Waveboard
+**Current focus:** Planning next milestone — run `/gsd-new-milestone` to define v1.2
 
 ## Milestone Status
 
@@ -45,14 +45,10 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-**Phase:** 9
-**Plans:** 2/2 complete
-**Status:** All phases complete
-**Last activity:** 2026-08-26
-
-```
-v1.1 Progress [████████████████████] 9/9 plans (3/3 phases executed)
-```
+Phase: Milestone v1.1 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-27 — Milestone v1.1 completed and archived
 
 ## Performance Metrics
 
@@ -107,12 +103,6 @@ None
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260705-0bq | swap deprecated meta tag in index.html | 2026-07-04 | 033cafc | [260705-0bq-swap-deprecated-meta-tag-in-index-html](.planning/quick/260705-0bq-swap-deprecated-meta-tag-in-index-html/) |
-| 260704-analytics-columns-empty | fix Analytics panel empty columns (Rolling%, Mastery, S2, Stage) | 2026-07-04 | 43ad561 7bc7c99 | [260704-analytics-columns-empty](.planning/quick/260704-analytics-columns-empty/) |
-| 260704-scoring-model-persist | fix scoring model selection not persisting across navigation | 2026-07-04 | 60e4a73 | [260704-scoring-model-persist](.planning/quick/260704-scoring-model-persist/) |
-| 260705-t13b | apply completion CSS class to multi-occurrence rows (T13b) | 2026-07-05 | bc74db1 | [260705-t13b-multi-occurrence-completion-css](.planning/quick/260705-t13b-multi-occurrence-completion-css/) |
-| 260705-1zs | refactor Catalog Add/Edit form into a modal overlay; reuse existing form fields, no logic changes | 2026-07-05 | 2cf7640 | [260705-1zs-refactor-catalog-add-edit-form-into-a-mo](.planning/quick/260705-1zs-refactor-catalog-add-edit-form-into-a-mo/) |
-| 260705-settings-nav-desktop | add Settings nav item and route to desktop.html | 2026-07-05 | 4bd644e | [260705-settings-nav-desktop](.planning/quick/260705-settings-nav-desktop/) |
 
 ## Session Continuity
 
@@ -123,3 +113,18 @@ None
 Next command: `/gsd-verify-work 9` (re-run UAT for G-09-2/4/5) or `/gsd-ship`
 
 *Updated: 2026-08-25 — Gap closure: wave field backfill migration added to seed.js; refresh IDB (clear storage or use fresh profile) before re-testing*
+
+## Deferred Items
+
+Items acknowledged and deferred at milestone close, most recent first:
+
+| Category | Item | Status | Deferred At | Milestone |
+|----------|------|--------|-------------|-----------|
+| uat_gaps | 06/06-UAT.md | testing (0 pending scenarios, archived v1.0) | 2026-08-27 | v1.1 |
+| uat_gaps | 03/03-UAT.md | verified (0 pending scenarios, archived v1.0) | 2026-08-27 | v1.1 |
+| quick_tasks | 260705-fix-sw-waves-version-bump | missing (empty dir, task completed in-line) | 2026-08-27 | v1.1 |
+| debug_sessions | knowledge-base | unknown (knowledge-base docs file, not an open session) | 2026-08-27 | v1.1 |
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
