@@ -1,7 +1,7 @@
 ---
 slug: scoring-model-persist
 created: 2026-07-04
-status: in-progress
+status: complete
 source: UAT Test 7
 ---
 

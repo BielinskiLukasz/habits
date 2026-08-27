@@ -1,7 +1,7 @@
 ---
 slug: 260705-settings-nav-desktop
 date: 2026-07-05
-status: in-progress
+status: complete
 ---
 
 # Add Settings nav item to desktop.html sidebar

@@ -1,7 +1,7 @@
 ---
 slug: analytics-columns-empty
 created: 2026-07-04
-status: in-progress
+status: complete
 source: UAT Test 21
 ---
 

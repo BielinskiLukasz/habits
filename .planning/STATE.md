@@ -108,8 +108,11 @@ None
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260705-0bq | swap deprecated meta tag in index.html | 2026-07-04 | 033cafc | [260705-0bq-swap-deprecated-meta-tag-in-index-html](.planning/quick/260705-0bq-swap-deprecated-meta-tag-in-index-html/) |
+| 260704-analytics-columns-empty | fix Analytics panel empty columns (Rolling%, Mastery, S2, Stage) | 2026-07-04 | 43ad561 7bc7c99 | [260704-analytics-columns-empty](.planning/quick/260704-analytics-columns-empty/) |
+| 260704-scoring-model-persist | fix scoring model selection not persisting across navigation | 2026-07-04 | 60e4a73 | [260704-scoring-model-persist](.planning/quick/260704-scoring-model-persist/) |
 | 260705-t13b | apply completion CSS class to multi-occurrence rows (T13b) | 2026-07-05 | bc74db1 | [260705-t13b-multi-occurrence-completion-css](.planning/quick/260705-t13b-multi-occurrence-completion-css/) |
 | 260705-1zs | refactor Catalog Add/Edit form into a modal overlay; reuse existing form fields, no logic changes | 2026-07-05 | 2cf7640 | [260705-1zs-refactor-catalog-add-edit-form-into-a-mo](.planning/quick/260705-1zs-refactor-catalog-add-edit-form-into-a-mo/) |
+| 260705-settings-nav-desktop | add Settings nav item and route to desktop.html | 2026-07-05 | 4bd644e | [260705-settings-nav-desktop](.planning/quick/260705-settings-nav-desktop/) |
 
 ## Session Continuity
 
