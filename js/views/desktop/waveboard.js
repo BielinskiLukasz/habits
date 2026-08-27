@@ -30,7 +30,7 @@
  */
 
 import { mount } from '../../util/mount.js';
-import { todayLocal } from '../../util/date.js';
+import { todayLocal, formatLocalYMD } from '../../util/date.js';
 import { mountWavePlanning } from './wavePlanning.js';
 
 // ---------------------------------------------------------------------------
@@ -92,7 +92,7 @@ function last12Weeks(todayYMD) {
   for (let i = 11; i >= 0; i--) {
     const target = new Date(cursor);
     target.setDate(cursor.getDate() - i * 7);
-    const ymd = target.toISOString().slice(0, 10);
+    const ymd = formatLocalYMD(target);
     keys.push(isoWeekKey(ymd));
   }
   // Remove duplicate keys (can happen near year boundaries due to ISO week math)
@@ -118,7 +118,7 @@ function weekMonday(key) {
   // Monday of target week
   const result = new Date(w1Monday);
   result.setDate(w1Monday.getDate() + (week - 1) * 7);
-  return result.toISOString().slice(0, 10);
+  return formatLocalYMD(result);
 }
 
 /**
@@ -134,7 +134,7 @@ function weekDays(key) {
   const days = [];
   for (let i = 0; i < 7; i++) {
     const dt = new Date(y, m - 1, d + i);
-    days.push(dt.toISOString().slice(0, 10));
+    days.push(formatLocalYMD(dt));
   }
   return days;
 }
@@ -282,7 +282,7 @@ export function buildWaveboardRows({ habitsByWave, cellData, weeks, showArchived
           tag: 'td',
           attrs: {
             class: `waveboard-cell waveboard-cell--${slug}`,
-            title: `${weekCell.status} (${weekCell.completed}/${weekCell.applicable} days)`,
+            title: `${weekCell.status ?? 'Grace period'} (${weekCell.completed}/${weekCell.applicable} days)`,
           },
           text: '',
         };
@@ -461,7 +461,7 @@ export function mountWaveboard(parent, { repo, store }) {
       // cellData: Map<habitId, Map<isoWeekKey, { status, applicable, completed }>>
       cachedCellData = new Map();
       for (const row of snapshotRows) {
-        if (!row.habitId || !row.date || !row.s1Status) continue;
+        if (!row.habitId || !row.date) continue;
         const week = isoWeekKey(row.date);
         if (!cachedWeeks.includes(week)) continue;
 

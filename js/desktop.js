@@ -50,6 +50,7 @@ import { writeHabitSnapshots, rebuildAllSnapshots } from './io/scoreSnapshots.js
 import { configureUndo } from './state/undo.js';
 import { configureSeed, bootSeed } from './io/seed.js';
 import { hydrate, configureStore, subscribe, notify, getCachedWeekStart, getCachedSettings, getCachedHabits } from './state/store.js';
+import { todayLocal } from './util/date.js';
 import { bootSync, broadcast, onMessage } from './platform/sync.js';
 import { bootLifecycle, trackTx } from './platform/lifecycle.js';
 import { configureExport } from './io/export.js';
@@ -96,17 +97,16 @@ try { await bootSeed(); } catch (_e) { /* swallow — diagnostics surfaces persi
 try { await bootScheduled(); } catch (_e) { /* swallow — promotion/migration non-critical on failure */ }
 try { await hydrate(); } catch (_e) { /* swallow */ }
 
-// Boot-time snapshot bootstrap (UAT-T21-v3): if score_snapshots has never
-// been populated, rebuild all snapshots in the background so the Analytics
-// view shows data on first open without requiring a manual log write or a
-// "Recompute Scores" click.  The meta flag 'snapshotsBootstrapped' prevents
-// this from re-running on every subsequent boot.  Fire-and-forget so the
-// shell routes immediately while the rebuild proceeds asynchronously.
-repo.getMeta('snapshotsBootstrapped').then(flag => {
-  if (!flag) {
+// Boot-time snapshot rebuild: rebuild all snapshots once per calendar day so
+// that habits logged on the mobile shell (which shares the same IDB origin)
+// are reflected here without requiring a manual "Recompute Scores" click.
+// Fire-and-forget — shell routes immediately while the rebuild runs in the
+// background; notify() triggers a re-render when it finishes.
+repo.getMeta('snapshotsLastRebuildDate').then(lastDate => {
+  if (lastDate !== todayLocal()) {
     rebuildAllSnapshots(repo)
       .then(() => Promise.all([
-        repo.putMeta('snapshotsBootstrapped', true),
+        repo.putMeta('snapshotsLastRebuildDate', todayLocal()),
         notify({ event: 'snapshot:rebuild' }),
       ]))
       .catch(() => {});
