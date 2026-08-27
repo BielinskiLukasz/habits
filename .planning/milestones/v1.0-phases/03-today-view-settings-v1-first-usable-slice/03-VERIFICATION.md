@@ -1,8 +1,8 @@
 ---
 phase: 03-today-view-settings-v1-first-usable-slice
 verified: 2026-05-28T12:27:56Z
-status: human_needed
-score: 5/5 must-haves verified (structural); 1 deferred to P5; 4 require human UAT
+status: accepted
+score: 5/5 must-haves verified (structural); 1 deferred to P5; 4 NFR items accepted as deferred (v1.0 shipped 2026-06-30)
 overrides_applied: 0
 re_verification: null
 deferred:
