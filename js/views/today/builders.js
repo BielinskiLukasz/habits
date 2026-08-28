@@ -78,7 +78,7 @@ export function buildTodayHeader({ date, wave }) {
     children: [
       { tag: 'h1', attrs: { 'data-app-title': '' }, text: t('today.title') },
       { tag: 'span', attrs: { class: 'today-date' }, text: _formatTodayDate(date) },
-      { tag: 'span', attrs: { class: 'today-wave' }, text: wave?.name ?? '' },
+      { tag: 'span', attrs: { class: 'today-wave' }, text: wave != null ? t('catalog.wave', { n: wave.number }) : '' },
     ],
   };
 }
@@ -217,6 +217,7 @@ export function buildNumericRow(habit, log) {
   const count = log?.count ?? 0;
   const target = habit.target ?? 1;
   const isComplete = count >= target;
+  const displayName = getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name;
 
   return {
     tag: 'li',
@@ -225,7 +226,7 @@ export function buildNumericRow(habit, log) {
       {
         tag: 'span',
         attrs: { class: isComplete ? 'today-row-name today-row-name--completed' : 'today-row-name' },
-        text: habit.name,
+        text: displayName,
       },
       {
         tag: 'span',
@@ -274,6 +275,7 @@ export function buildSlotRow(habit, log) {
   const habitSlots = habit.slots ?? [];
   const logSlots = log?.slots ?? [];
   const total = habit.target ?? habitSlots.length;
+  const displayName = getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name;
 
   // Build effective slot state: merge habit slot definitions with log state.
   // Use logSlots when available; fall back to unchecked for each habit slot.
@@ -316,12 +318,12 @@ export function buildSlotRow(habit, log) {
       {
         tag: 'span',
         attrs: { class: isComplete ? 'today-row-name today-row-name--completed' : 'today-row-name' },
-        text: habit.name,
+        text: displayName,
       },
       {
         tag: 'span',
         attrs: { class: 'today-row-progress', 'data-progress': '' },
-        text: `${checkedCount} / ${total} slots`,
+        text: `${checkedCount} / ${total} ${t('today.slots')}`,
       },
       {
         tag: 'button',

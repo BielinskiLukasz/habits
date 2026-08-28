@@ -151,4 +151,40 @@ export const PL = {
   'desktop.wavePlanning.promoteToActive': 'Aktywuj',
   'desktop.wavePlanning.scheduled': 'Zaplanowane',
   'desktop.wavePlanning.noHabitsInWave': 'Brak nawyków w tej fali.',
+
+  // Util — relative time
+  'util.justNow': 'przed chwilą',
+  'util.minutesAgo': '{n} min. temu',
+  'util.hoursAgo': '{n} godz. temu',
+  'util.daysAgo': '{n} dni temu',
+
+  // History — extra
+  'history.noHabits': 'Brak nawyków na ten dzień.',
+  'history.slots': 'poz.',
+
+  // Today — extra
+  'today.slots': 'poz.',
+
+  // Catalog — cadence type options
+  'catalog.cadence.daily': 'Codziennie',
+  'catalog.cadence.weekly': 'Tygodniowo',
+  'catalog.cadence.monthly': 'Miesięcznie',
+  'catalog.cadence.everyNDays': 'Co N dni',
+  'catalog.cadence.specificDays': 'Wybrane dni',
+
+  // Catalog — target type options
+  'catalog.targetType.binary': 'Binarne (tak/nie)',
+  'catalog.targetType.numeric': 'Liczba (ilość)',
+  'catalog.targetType.slotChecklist': 'Lista pozycji',
+
+  // Catalog — panel actions
+  'catalog.save': 'Zapisz',
+  'catalog.cancel': 'Anuluj',
+  'catalog.stagePlaceholder': 'Nazwa etapu',
+
+  // Settings — Data card extra strings
+  'settings.data.never': 'Nigdy',
+  'settings.data.backupDaysAgo': '{n} dni temu',
+  'settings.data.nagNoBackup': 'Nie znaleziono kopii. Wyeksportuj dane.',
+  'settings.data.nagDaysAgo': 'Ostatnia kopia: {n} dni temu. Wyeksportuj dane.',
 };

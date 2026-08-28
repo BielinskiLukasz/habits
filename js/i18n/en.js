@@ -153,4 +153,40 @@ export const EN = {
   'desktop.wavePlanning.promoteToActive': 'Promote to active',
   'desktop.wavePlanning.scheduled': 'Scheduled',
   'desktop.wavePlanning.noHabitsInWave': 'No habits in this wave.',
+
+  // Util — relative time
+  'util.justNow': 'just now',
+  'util.minutesAgo': '{n} minutes ago',
+  'util.hoursAgo': '{n} hours ago',
+  'util.daysAgo': '{n} days ago',
+
+  // History — extra
+  'history.noHabits': 'No applicable habits for this day.',
+  'history.slots': 'slots',
+
+  // Today — extra
+  'today.slots': 'slots',
+
+  // Catalog — cadence type options
+  'catalog.cadence.daily': 'Daily',
+  'catalog.cadence.weekly': 'Weekly',
+  'catalog.cadence.monthly': 'Monthly',
+  'catalog.cadence.everyNDays': 'Every N days',
+  'catalog.cadence.specificDays': 'Specific days',
+
+  // Catalog — target type options
+  'catalog.targetType.binary': 'Binary (done/not done)',
+  'catalog.targetType.numeric': 'Numeric (count)',
+  'catalog.targetType.slotChecklist': 'Slot checklist',
+
+  // Catalog — panel actions
+  'catalog.save': 'Save',
+  'catalog.cancel': 'Cancel',
+  'catalog.stagePlaceholder': 'Stage label',
+
+  // Settings — Data card extra strings
+  'settings.data.never': 'Never',
+  'settings.data.backupDaysAgo': '{n} days ago',
+  'settings.data.nagNoBackup': 'No backup found. Export your data now.',
+  'settings.data.nagDaysAgo': 'Last backup: {n} days ago. Export your data now.',
 };

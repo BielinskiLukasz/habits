@@ -35,6 +35,8 @@
  * inside `daysBetween`'s whole-day computation (use Math.round).
  */
 
+import { t } from '../i18n/index.js';
+
 /**
  * Today's date as YYYY-MM-DD in the user's local timezone.
  *
@@ -148,10 +150,10 @@ export function daysBetween(aYMD, bYMD) {
 export function formatRelative(atISO, nowMs = Date.now()) {
   const atMs = typeof atISO === 'number' ? atISO : new Date(atISO).getTime();
   const ms = nowMs - atMs;
-  if (ms < 60_000) return 'just now';
-  if (ms < 3_600_000) return `${Math.floor(ms / 60_000)} minutes ago`;
-  if (ms < 86_400_000) return `${Math.floor(ms / 3_600_000)} hours ago`;
-  return `${Math.floor(ms / 86_400_000)} days ago`;
+  if (ms < 60_000) return t('util.justNow');
+  if (ms < 3_600_000) return t('util.minutesAgo', { n: Math.floor(ms / 60_000) });
+  if (ms < 86_400_000) return t('util.hoursAgo', { n: Math.floor(ms / 3_600_000) });
+  return t('util.daysAgo', { n: Math.floor(ms / 86_400_000) });
 }
 
 /**

@@ -361,8 +361,8 @@ export function buildDataCard({
           tag: 'span',
           text:
             lastBackupDays === null
-              ? 'No backup found. Export your data now.'
-              : `Last backup: ${lastBackupDays} days ago. Export your data now.`,
+              ? t('settings.data.nagNoBackup')
+              : t('settings.data.nagDaysAgo', { n: lastBackupDays }),
         },
         {
           tag: 'button',
@@ -386,7 +386,7 @@ export function buildDataCard({
       {
         tag: 'dd',
         text:
-          lastBackupDays === null ? 'Never' : `${lastBackupDays} days ago`,
+          lastBackupDays === null ? t('settings.data.never') : t('settings.data.backupDaysAgo', { n: lastBackupDays }),
       },
     ],
   });

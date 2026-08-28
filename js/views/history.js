@@ -32,6 +32,7 @@ import { apply } from '../state/apply.js';
 import { mount } from '../util/mount.js';
 import { appliesToday } from '../domain/cadence.js';
 import { todayLocal, daysFrom, formatLocalYMD, parseLocalYMD } from '../util/date.js';
+import { t, getLang } from '../i18n/index.js';
 
 /**
  * Clear every child of `parent` without using `.innerHTML = ''` (D-78).
@@ -52,8 +53,12 @@ function clearChildren(parent) {
 function formatHistoryDate(ymd) {
   const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const PL_WEEKDAY_SHORT = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'];
+  const PL_MONTH_SHORT = ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'];
   const d = parseLocalYMD(ymd);
-  return `${WEEKDAY_SHORT[d.getDay()]} ${d.getDate()} ${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+  const weekdays = getLang() === 'pl' ? PL_WEEKDAY_SHORT : WEEKDAY_SHORT;
+  const months = getLang() === 'pl' ? PL_MONTH_SHORT : MONTH_SHORT;
+  return `${weekdays[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 /**
@@ -162,7 +167,7 @@ export function mountHistory(parent, { repo, store }) {
 
     if (!rows.length) {
       const emptyEl = parent.ownerDocument.createElement('p');
-      emptyEl.textContent = 'No applicable habits for this day.';
+      emptyEl.textContent = t('history.noHabits');
       emptyEl.className = 'history-empty';
       parent.appendChild(emptyEl);
     } else {

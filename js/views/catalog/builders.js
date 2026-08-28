@@ -207,7 +207,7 @@ export function buildUpcomingListItem(habit) {
     tag: 'div',
     attrs: { class: 'catalog-habit-info' },
     children: [
-      { tag: 'span', attrs: { class: 'catalog-habit-name' }, text: habit.name },
+      { tag: 'span', attrs: { class: 'catalog-habit-name' }, text: getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name },
       {
         tag: 'div',
         attrs: { class: 'catalog-habit-badges' },
@@ -535,7 +535,7 @@ export function buildEditPanel(habit) {
               class: 'catalog-btn catalog-btn--save',
               'data-action': 'save-edit',
             },
-            text: 'Save',
+            text: t('catalog.save'),
           },
           {
             tag: 'button',
@@ -543,7 +543,7 @@ export function buildEditPanel(habit) {
               class: 'catalog-btn catalog-btn--cancel',
               'data-action': 'cancel-edit',
             },
-            text: 'Cancel',
+            text: t('catalog.cancel'),
           },
         ],
       },
@@ -766,7 +766,7 @@ export function buildCreatePanel(todayYMD) {
               class: 'catalog-btn catalog-btn--save',
               'data-action': 'save-create',
             },
-            text: 'Save',
+            text: t('catalog.save'),
           },
           {
             tag: 'button',
@@ -774,7 +774,7 @@ export function buildCreatePanel(todayYMD) {
               class: 'catalog-btn catalog-btn--cancel',
               'data-action': 'cancel-create',
             },
-            text: 'Cancel',
+            text: t('catalog.cancel'),
           },
         ],
       },
@@ -794,11 +794,11 @@ export function buildCreatePanel(todayYMD) {
  */
 function _buildCadenceTypeSelect(cadence, id) {
   const options = [
-    { value: 'daily', text: 'Daily' },
-    { value: 'weekly', text: 'Weekly' },
-    { value: 'monthly', text: 'Monthly' },
-    { value: 'every-n-days', text: 'Every N days' },
-    { value: 'day-of-week-subset', text: 'Specific days' },
+    { value: 'daily', text: t('catalog.cadence.daily') },
+    { value: 'weekly', text: t('catalog.cadence.weekly') },
+    { value: 'monthly', text: t('catalog.cadence.monthly') },
+    { value: 'every-n-days', text: t('catalog.cadence.everyNDays') },
+    { value: 'day-of-week-subset', text: t('catalog.cadence.specificDays') },
   ];
   return {
     tag: 'select',
@@ -824,9 +824,9 @@ function _buildCadenceTypeSelect(cadence, id) {
  */
 function _buildTargetTypeSelect(targetType, id) {
   const options = [
-    { value: 'binary', text: 'Binary (done/not done)' },
-    { value: 'numeric', text: 'Numeric (count)' },
-    { value: 'slot-checklist', text: 'Slot checklist' },
+    { value: 'binary', text: t('catalog.targetType.binary') },
+    { value: 'numeric', text: t('catalog.targetType.numeric') },
+    { value: 'slot-checklist', text: t('catalog.targetType.slotChecklist') },
   ];
   return {
     tag: 'select',
@@ -863,7 +863,7 @@ function _buildStageRow(stage, idx) {
           'data-field': 'stage-label',
           'data-stage-index': String(idx),
           value: stage.label ?? '',
-          placeholder: 'Stage label',
+          placeholder: t('catalog.stagePlaceholder'),
         },
       },
       {

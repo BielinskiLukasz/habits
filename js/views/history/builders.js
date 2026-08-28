@@ -16,7 +16,7 @@
  *   - `.innerHTML` family — D-78 grep gate.
  */
 
-import { t } from '../../i18n/index.js';
+import { t, getLang } from '../../i18n/index.js';
 
 /**
  * Build the History view header: date stepper with ← → navigation buttons,
@@ -113,7 +113,9 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
  */
 export function buildHistoryHabitRow(habit, log, version, date = '') {
   const targetType = version.targetType ?? 'binary';
-  const displayName = version.name ?? habit.name;
+  const displayName = getLang() === 'pl'
+    ? (version.name_pl ?? version.name ?? habit.name_pl ?? habit.name)
+    : (version.name ?? habit.name);
 
   // Compute completion display text for the status indicator.
   let statusText;
@@ -127,7 +129,7 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
     const slots = log.slots ?? [];
     const checked = slots.filter((s) => s.checked).length;
     const total = version.target ?? slots.length;
-    statusText = `${checked} / ${total} slots`;
+    statusText = `${checked} / ${total} ${t('history.slots')}`;
   } else {
     // binary
     statusText = log.completed === true ? '✓' : '–';
@@ -177,7 +179,9 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
  */
 export function buildHistoryReadOnly(habit, log, version) {
   const targetType = version.targetType ?? 'binary';
-  const displayName = version.name ?? habit.name;
+  const displayName = getLang() === 'pl'
+    ? (version.name_pl ?? version.name ?? habit.name_pl ?? habit.name)
+    : (version.name ?? habit.name);
 
   // Compute completion display text for the status indicator.
   let statusText;
@@ -191,7 +195,7 @@ export function buildHistoryReadOnly(habit, log, version) {
     const slots = log.slots ?? [];
     const checked = slots.filter((s) => s.checked).length;
     const total = version.target ?? slots.length;
-    statusText = `${checked} / ${total} slots`;
+    statusText = `${checked} / ${total} ${t('history.slots')}`;
   } else {
     // binary
     statusText = log.completed === true ? '✓' : '–';
