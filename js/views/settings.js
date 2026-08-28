@@ -722,7 +722,7 @@ function wireScoringModelCard(cardEl, actions) {
  */
 function wireLangSelect(cardEl, actions) {
   if (!cardEl) return;
-  const select = cardEl.querySelector('[data-action="setLang"]');
+  const select = cardEl.querySelector('#lang-select');
   if (select && typeof actions.setLang === 'function') {
     select.addEventListener('change', actions.setLang);
   }
