@@ -391,7 +391,8 @@ export function buildDataCard({
     ],
   });
 
-  // Export buttons.
+  // Export sub-group.
+  backupChildren.push({ tag: 'h3', text: t('settings.data.exportGroup') });
   backupChildren.push({
     tag: 'button',
     attrs: {
@@ -411,6 +412,8 @@ export function buildDataCard({
     text: t('settings.data.exportCsv'),
   });
 
+  // Import sub-group.
+  backupChildren.push({ tag: 'h3', text: t('settings.data.importGroup') });
   // Hidden file input — visually hidden, triggered by custom button below.
   backupChildren.push({
     tag: 'input',
@@ -456,6 +459,7 @@ export function buildDataCard({
     tag: 'div',
     attrs: { class: 'settings-data-recompute' },
     children: [
+      { tag: 'h3', text: t('settings.data.recomputeGroup') },
       {
         tag: 'button',
         attrs: recomputeAttrs,
@@ -467,7 +471,7 @@ export function buildDataCard({
   // --- Undo section ---
 
   /** @type {object[]} */
-  const undoChildren = [];
+  const undoChildren = [{ tag: 'h3', text: t('settings.data.lastActionGroup') }];
   if (hasUndoToken) {
     undoChildren.push({
       tag: 'p',

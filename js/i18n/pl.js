@@ -96,10 +96,14 @@ export const PL = {
   // Settings — Data card
   'settings.data.title': 'Dane',
   'settings.data.lastBackup': 'Ostatnia kopia',
+  'settings.data.exportGroup': 'Eksport danych',
   'settings.data.exportJson': 'Eksportuj JSON',
   'settings.data.exportCsv': 'Eksportuj CSV',
+  'settings.data.importGroup': 'Import danych',
+  'settings.data.recomputeGroup': 'Rekalkulacja danych',
   'settings.data.recomputing': 'Przeliczanie…',
   'settings.data.recomputeScores': 'Przelicz wyniki',
+  'settings.data.lastActionGroup': 'Ostatnia akcja',
   'settings.data.undoBtn': 'Cofnij ostatnią akcję',
   'settings.data.nothingToUndo': 'Nie ma czego cofać.',
   'settings.data.last': 'Ostatnio: {event} · {relativeTime}',
@@ -256,6 +260,6 @@ export const PL = {
   'settings.data.unknownHabit': '(nawyk)',
 
   // Settings — custom file import button
-  'settings.data.chooseFile': 'Wybierz plik',
+  'settings.data.chooseFile': 'Wybierz importowany plik',
   'settings.data.noFileChosen': 'Nie wybrano pliku',
 };

@@ -98,10 +98,14 @@ export const EN = {
   // Settings — Data card
   'settings.data.title': 'Data',
   'settings.data.lastBackup': 'Last backup',
+  'settings.data.exportGroup': 'Export data',
   'settings.data.exportJson': 'Export JSON',
   'settings.data.exportCsv': 'Export CSV',
+  'settings.data.importGroup': 'Import data',
+  'settings.data.recomputeGroup': 'Data recalculation',
   'settings.data.recomputing': 'Recomputing…',
   'settings.data.recomputeScores': 'Recompute Scores',
+  'settings.data.lastActionGroup': 'Last action',
   'settings.data.undoBtn': 'Undo last action',
   'settings.data.nothingToUndo': 'Nothing to undo.',
   'settings.data.last': 'Last: {event} · {relativeTime}',
@@ -258,6 +262,6 @@ export const EN = {
   'settings.data.unknownHabit': '(habit)',
 
   // Settings — custom file import button
-  'settings.data.chooseFile': 'Choose file',
+  'settings.data.chooseFile': 'Choose file to import',
   'settings.data.noFileChosen': 'No file chosen',
 };
