@@ -81,7 +81,7 @@ export function buildLanguageCard(currentLang = 'en') {
           { tag: 'label', attrs: { for: 'lang-select' }, text: t('settings.language.label') },
           {
             tag: 'select',
-            attrs: { id: 'lang-select', 'data-action': 'setLang' },
+            attrs: { id: 'lang-select' },
             children: [
               opt('en', t('settings.language.en')),
               opt('pl', t('settings.language.pl')),
