@@ -217,4 +217,32 @@ export const PL = {
   'util.minuteAgo': '1 minutę temu',
   'util.hourAgo': '1 godzinę temu',
   'util.dayAgo': '1 dzień temu',
+
+  // Analytics table column headers
+  'desktop.analytics.stageCol': 'Etap',
+  'desktop.analytics.rollingPctCol': 'Krocząco %',
+  'desktop.analytics.masteryCol': 'Opanowanie',
+  'desktop.analytics.modelScore': 'Wynik {model}',
+
+  // Shared desktop S1 status badge names
+  'desktop.status.healthy': 'Zdrowy',
+  'desktop.status.watch': 'Obserwacja',
+  'desktop.status.atRisk': 'Zagrożony',
+  'desktop.status.failing': 'Krytyczny',
+
+  // Show archived toggle
+  'desktop.showArchived': 'Pokaż archiwalne',
+
+  // Waveboard
+  'desktop.waveboard.scoreMatrix': 'Macierz wyników',
+  'desktop.waveboard.notApplicable': 'Nie dotyczy',
+  'desktop.waveboard.cellTitle': '{status} ({completed}/{applicable} dni)',
+  'desktop.waveboard.gracePeriod': 'Okres wdrożenia',
+
+  // Wave Planning
+  'desktop.wavePlanning.countsText': '{active} aktywne · {scheduled} zaplanowane',
+  'desktop.wavePlanning.promoteFailed': 'Błąd — spróbuj ponownie',
+
+  // Cadence summary with actual count
+  'catalog.cadence.everyNDaysCount': 'Co {n} dni',
 };

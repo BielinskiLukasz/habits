@@ -219,4 +219,32 @@ export const EN = {
   'util.minuteAgo': '1 minute ago',
   'util.hourAgo': '1 hour ago',
   'util.dayAgo': '1 day ago',
+
+  // Analytics table column headers
+  'desktop.analytics.stageCol': 'Stage',
+  'desktop.analytics.rollingPctCol': 'Rolling %',
+  'desktop.analytics.masteryCol': 'Mastery',
+  'desktop.analytics.modelScore': '{model} Score',
+
+  // Shared desktop S1 status badge names
+  'desktop.status.healthy': 'Healthy',
+  'desktop.status.watch': 'Watch',
+  'desktop.status.atRisk': 'At Risk',
+  'desktop.status.failing': 'Failing',
+
+  // Show archived toggle (analytics + waveboard)
+  'desktop.showArchived': 'Show archived',
+
+  // Waveboard
+  'desktop.waveboard.scoreMatrix': 'Score Matrix',
+  'desktop.waveboard.notApplicable': 'Not applicable',
+  'desktop.waveboard.cellTitle': '{status} ({completed}/{applicable} days)',
+  'desktop.waveboard.gracePeriod': 'Grace period',
+
+  // Wave Planning
+  'desktop.wavePlanning.countsText': '{active} active · {scheduled} scheduled',
+  'desktop.wavePlanning.promoteFailed': 'Failed — try again',
+
+  // Cadence summary with actual count
+  'catalog.cadence.everyNDaysCount': 'Every {n} days',
 };

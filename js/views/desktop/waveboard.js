@@ -272,18 +272,23 @@ export function buildWaveboardRows({ habitsByWave, cellData, weeks, showArchived
             tag: 'td',
             attrs: {
               class: 'waveboard-cell waveboard-cell--na',
-              title: 'Not applicable',
+              title: t('desktop.waveboard.notApplicable'),
             },
             text: '',
           };
         }
 
+        const CELL_STATUS_I18N = { Healthy: 'desktop.status.healthy', Watch: 'desktop.status.watch', 'At-risk': 'desktop.status.atRisk', Failing: 'desktop.status.failing' };
         const slug = statusSlug(weekCell.status);
         return {
           tag: 'td',
           attrs: {
             class: `waveboard-cell waveboard-cell--${slug}`,
-            title: `${weekCell.status ?? 'Grace period'} (${weekCell.completed}/${weekCell.applicable} days)`,
+            title: t('desktop.waveboard.cellTitle', {
+              status: weekCell.status ? (t(CELL_STATUS_I18N[weekCell.status]) ?? weekCell.status) : t('desktop.waveboard.gracePeriod'),
+              completed: weekCell.completed,
+              applicable: weekCell.applicable,
+            }),
           },
           text: '',
         };
@@ -337,7 +342,7 @@ export function mountWaveboard(parent, { repo, store }) {
   // Score Matrix heading.
   const heatmapHeading = parent.ownerDocument.createElement('h2');
   heatmapHeading.setAttribute('class', 'waveboard-heatmap-heading');
-  heatmapHeading.textContent = 'Score Matrix';
+  heatmapHeading.textContent = t('desktop.waveboard.scoreMatrix');
   parent.appendChild(heatmapHeading);
 
   // "Show archived" toggle above the grid.
@@ -350,7 +355,7 @@ export function mountWaveboard(parent, { repo, store }) {
     renderGrid();
   });
   toggleLabel.appendChild(toggleCheckbox);
-  toggleLabel.appendChild(parent.ownerDocument.createTextNode(' Show archived'));
+  toggleLabel.appendChild(parent.ownerDocument.createTextNode(' ' + t('desktop.showArchived')));
   parent.appendChild(toggleLabel);
 
   // Scrollable container for the grid.

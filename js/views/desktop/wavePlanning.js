@@ -36,10 +36,10 @@ const DOW_LABEL = { sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', 
 function cadenceSummary(cadence) {
   if (!cadence) return '';
   const TYPE_LABEL = {
-    daily: 'Daily',
-    weekly: 'Weekly',
-    monthly: 'Monthly',
-    'every-n-days': `Every ${cadence.n} days`,
+    daily: t('catalog.cadence.daily'),
+    weekly: t('catalog.cadence.weekly'),
+    monthly: t('catalog.cadence.monthly'),
+    'every-n-days': t('catalog.cadence.everyNDaysCount', { n: cadence.n ?? '' }),
     'day-of-week-subset': cadence.days?.map(d => DOW_LABEL[d] ?? d).join('/'),
   };
   const result = TYPE_LABEL[cadence.type];
@@ -52,7 +52,7 @@ function cadenceSummary(cadence) {
 // ---------------------------------------------------------------------------
 
 /** @type {{ [key: string]: string }} */
-const STATUS_LABEL = { Healthy: 'Healthy', Watch: 'Watch', 'At-risk': 'At Risk', Failing: 'Failing' };
+const STATUS_I18N_KEYS = { Healthy: 'desktop.status.healthy', Watch: 'desktop.status.watch', 'At-risk': 'desktop.status.atRisk', Failing: 'desktop.status.failing' };
 
 /**
  * Build a health badge description node for a wave.
@@ -79,7 +79,7 @@ function buildHealthBadge(waveHabits, currentWeekKey, snapshotsByWeek) {
     return { tag: 'span', attrs: { class: 'waveplanning-badge waveplanning-badge--na' }, text: t('desktop.wavePlanning.noData') };
   }
   const slug = statusSlug(worst);
-  const label = STATUS_LABEL[worst] ?? worst;
+  const label = STATUS_I18N_KEYS[worst] ? t(STATUS_I18N_KEYS[worst]) : (worst ?? '');
   return { tag: 'span', attrs: { class: `waveplanning-badge waveplanning-badge--${slug}` }, text: label };
 }
 
@@ -102,7 +102,7 @@ function buildActiveHabitRow(habit) {
     attrs: { class: 'waveplanning-habit-row' },
     children: [
       { tag: 'span', attrs: { class: 'waveplanning-habit-name' }, text: displayName(habit) },
-      { tag: 'span', attrs: { class: 'waveplanning-habit-status' }, text: habit.status },
+      { tag: 'span', attrs: { class: 'waveplanning-habit-status' }, text: t(`catalog.status.${habit.status}`) },
       { tag: 'span', attrs: { class: 'waveplanning-habit-stage' }, text: stageLabel },
       { tag: 'span', attrs: { class: 'waveplanning-habit-cadence' }, text: cadenceSummary(habit.cadence) },
     ],
@@ -184,7 +184,7 @@ function buildWaveItem(wave, habits, currentWeekKey, snapshotsByWeek) {
   const activeHabits = waveHabits.filter(h => h.status === 'active' || h.status === 'mastered');
   const scheduledHabits = waveHabits.filter(h => h.status === 'scheduled');
 
-  const countsText = `${activeHabits.length} active · ${scheduledHabits.length} scheduled`;
+  const countsText = t('desktop.wavePlanning.countsText', { active: activeHabits.length, scheduled: scheduledHabits.length });
   const badgeDesc = buildHealthBadge(waveHabits, currentWeekKey, snapshotsByWeek);
 
   const headerButton = {
@@ -198,7 +198,7 @@ function buildWaveItem(wave, habits, currentWeekKey, snapshotsByWeek) {
     },
     children: [
       { tag: 'span', attrs: { class: 'waveplanning-chevron' }, text: '▶' },
-      { tag: 'span', attrs: { class: 'waveplanning-wave-name' }, text: wave.name },
+      { tag: 'span', attrs: { class: 'waveplanning-wave-name' }, text: t('catalog.wave', { n: wave.number }) },
       {
         tag: 'span',
         attrs: { class: 'waveplanning-wave-meta' },
@@ -303,7 +303,7 @@ export function mountWavePlanning(parent, { repo, store }) {
       btn.disabled = false;
       const errSpan = document.createElement('span');
       errSpan.className = 'waveplanning-promote-error';
-      errSpan.textContent = 'Failed — try again';
+      errSpan.textContent = t('desktop.wavePlanning.promoteFailed');
       btn.parentNode.insertBefore(errSpan, btn.nextSibling);
       setTimeout(() => errSpan.remove(), 3000);
     }

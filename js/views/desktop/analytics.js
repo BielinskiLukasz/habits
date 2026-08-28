@@ -103,20 +103,21 @@ function _waveAggText(waveGroup, snapshots, scoringModel) {
  */
 export function buildAnalyticsHeader({ statusCounts, scoringModel }) {
   const statuses = ['Healthy', 'Watch', 'At-risk', 'Failing'];
+  const STATUS_I18N = { Healthy: 'desktop.status.healthy', Watch: 'desktop.status.watch', 'At-risk': 'desktop.status.atRisk', Failing: 'desktop.status.failing' };
 
   const statusSummaryChildren = statuses.map(status => ({
     tag: 'span',
     attrs: {
       class: `analytics-status-count analytics-status-count--${status.toLowerCase().replace('-', '-')}`,
     },
-    text: `${status}: ${statusCounts[status] ?? 0}`,
+    text: `${t(STATUS_I18N[status])}: ${statusCounts[status] ?? 0}`,
   }));
 
   // Radio labels for S1, S2, S3 scoring model selector
   const modelRadioLabels = [
-    { value: 'S1', label: 'S1 — Rolling Threshold' },
-    { value: 'S2', label: 'S2 — Day-Weighted' },
-    { value: 'S3', label: 'S3 — Load-Adjusted' },
+    { value: 'S1', label: t('settings.scoring.s1') },
+    { value: 'S2', label: t('settings.scoring.s2') },
+    { value: 'S3', label: t('settings.scoring.s3') },
   ].map(({ value, label }) => {
     /** @type {Record<string, string>} */
     const radioAttrs = {
@@ -185,9 +186,9 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
   const colCount = hasModelCol ? 5 : 4;
 
   // Build thead
-  const theadCols = [t('desktop.analytics.habit'), 'Stage', 'Rolling %', 'Mastery'];
+  const theadCols = [t('desktop.analytics.habit'), t('desktop.analytics.stageCol'), t('desktop.analytics.rollingPctCol'), t('desktop.analytics.masteryCol')];
   if (hasModelCol) {
-    theadCols.push(`${scoringModel} Score`);
+    theadCols.push(t('desktop.analytics.modelScore', { model: scoringModel }));
   }
   const thead = {
     tag: 'thead',
@@ -230,6 +231,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
       const s1Score  = snap?.s1Score ?? null;
       const s1Status = snap?.s1Status ?? null;
       const slug = statusSlug(s1Status);
+      const badgeI18N = { Healthy: 'desktop.status.healthy', Watch: 'desktop.status.watch', 'At-risk': 'desktop.status.atRisk', Failing: 'desktop.status.failing' };
 
       /** @type {Record<string, string>} */
       const rowAttrs = { class: 'analytics-row' + (isArchived ? ' analytics-row--archived' : '') };
@@ -249,7 +251,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
             {
               tag: 'span',
               attrs: { class: `score-badge score-badge--${slug}` },
-              text: s1Status ?? '—',
+              text: s1Status ? (t(badgeI18N[s1Status]) ?? s1Status) : '—',
             },
           ],
         },
@@ -333,7 +335,7 @@ export function mountAnalytics(parent, { repo, store }) {
     renderTable();
   });
   toggleLabel.appendChild(toggleCheckbox);
-  toggleLabel.appendChild(parent.ownerDocument.createTextNode(' Show archived'));
+  toggleLabel.appendChild(parent.ownerDocument.createTextNode(' ' + t('desktop.showArchived')));
   parent.appendChild(toggleLabel);
 
   // Container for the table (reactive on model change + archived toggle).
