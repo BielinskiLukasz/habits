@@ -22,7 +22,7 @@ export const PL = {
 
   // Catalog view
   'catalog.title': 'Katalog',
-  'catalog.newHabit': 'Nowy nawók',
+  'catalog.newHabit': 'Nowy nawyk',
   'catalog.wave': 'Fala {n}',
   'catalog.status.active': 'aktywny',
   'catalog.status.mastered': 'opanowany',
@@ -35,7 +35,7 @@ export const PL = {
   'catalog.archive': 'Archiwizuj',
   'catalog.advanceStage': 'Następny etap',
   'catalog.promote': 'Aktywuj',
-  'catalog.edit.title': 'Edytuj nawók',
+  'catalog.edit.title': 'Edytuj nawyk',
   'catalog.edit.name': 'Nazwa',
   'catalog.edit.namePl': 'Polska nazwa (opcjonalnie)',
   'catalog.edit.wave': 'Fala',
@@ -59,14 +59,14 @@ export const PL = {
 
   // Settings — Language card
   'settings.language.title': 'Język',
-  'settings.language.label': 'Język wyświetlania',
+  'settings.language.label': 'Język wyświetlania: ',
   'settings.language.en': 'English',
   'settings.language.pl': 'Polski',
 
   // Settings — Storage card
   'settings.storage.title': 'Pamięć',
   'settings.storage.unsupported': 'Status pamięci niedostępny w tej przeglądarce.',
-  'settings.storage.persistent': 'Trwałe',
+  'settings.storage.persistent': 'Trwała',
   'settings.storage.loading': 'ładowanie…',
   'settings.storage.yes': 'tak',
   'settings.storage.no': 'nie',
@@ -83,11 +83,11 @@ export const PL = {
   // Settings — Install card
   'settings.install.title': 'Instalacja',
   'settings.install.ios': 'iOS Safari',
-  'settings.install.iosTap': 'Dotkną przycisku Udostępnij, a następnie ',
+  'settings.install.iosTap': 'Dotknij przycisku Udostępnij, a następnie ',
   'settings.install.iosAdd': 'Dodaj do ekranu głównego',
   'settings.install.iosEnd': '.',
   'settings.install.android': 'Android Chrome',
-  'settings.install.androidMenu': 'Otwrz menu, a następnie ',
+  'settings.install.androidMenu': 'Otwórz menu, a następnie ',
   'settings.install.androidInstall': 'Zainstaluj aplikację',
   'settings.install.androidEnd': '.',
   'settings.install.desktop': 'Przeglądarki na komputerze',
@@ -114,36 +114,36 @@ export const PL = {
   'settings.about.serviceWorker': 'Service worker',
 
   // Settings — Mastery card
-  'settings.mastery.title': 'Opanowanie',
-  'settings.mastery.threshold': 'Próg ukończenia',
-  'settings.mastery.thresholdAria': 'Próg opanowania %',
+  'settings.mastery.title': 'Poziom opanowania',
+  'settings.mastery.threshold': 'Próg zaliczenia',
+  'settings.mastery.thresholdAria': 'Próg zaliczenia %',
   'settings.mastery.pct': '%',
-  'settings.mastery.window': 'Okno króczne',
-  'settings.mastery.windowAria': 'Okno kroczne opanowania (dni)',
+  'settings.mastery.window': 'Okres kroczący',
+  'settings.mastery.windowAria': 'Okres kroczący opanowania (dni)',
   'settings.mastery.days': 'dni',
 
   // Settings — Scoring Model card
   'settings.scoring.title': 'Model punktacji',
   'settings.scoring.legend': 'Model punktacji',
-  'settings.scoring.s1': 'S1 — Króczny próg',
-  'settings.scoring.s2': 'S2 — Ważony dniami',
-  'settings.scoring.s3': 'S3 — Dostosowany do obciążenia',
+  'settings.scoring.s1': 'S1 — Próg dynamiczny',
+  'settings.scoring.s2': 'S2 — Ważony liczbą dni',
+  'settings.scoring.s3': 'S3 — Skorygowany względem obciążenia',
 
   // Desktop — Analytics
   'desktop.analytics.scoringModel': 'Model punktacji: ',
-  'desktop.analytics.habit': 'Nawók',
+  'desktop.analytics.habit': 'Nawyk',
   'desktop.analytics.mastered': 'Opanowany',
   'desktop.analytics.stage': 'Etap {n}',
 
   // Desktop — Planning
-  'desktop.planning.waveHabit': 'Fala / Nawók',
+  'desktop.planning.waveHabit': 'Fala / Nawyk',
   'desktop.planning.noUpcoming': 'Brak nadchodzących startów',
   'desktop.planning.scheduleHint': 'Nawyki, które planujesz zacząć w przyszłości, pojawią się tutaj. Zaplanuj je w ',
   'desktop.planning.catalogView': 'Katalogu',
   'desktop.planning.scheduleHintEnd': '.',
 
   // Desktop — Waveboard
-  'desktop.waveboard.habit': 'Nawók',
+  'desktop.waveboard.habit': 'Nawyk',
 
   // Desktop — WavePlanning
   'desktop.wavePlanning.upcoming': 'Nadchodzący',

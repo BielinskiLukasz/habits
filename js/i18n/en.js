@@ -61,7 +61,7 @@ export const EN = {
 
   // Settings — Language card
   'settings.language.title': 'Language',
-  'settings.language.label': 'Display language',
+  'settings.language.label': 'Display language: ',
   'settings.language.en': 'English',
   'settings.language.pl': 'Polski',
 
