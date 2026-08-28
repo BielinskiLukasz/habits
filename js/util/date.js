@@ -151,9 +151,9 @@ export function formatRelative(atISO, nowMs = Date.now()) {
   const atMs = typeof atISO === 'number' ? atISO : new Date(atISO).getTime();
   const ms = nowMs - atMs;
   if (ms < 60_000) return t('util.justNow');
-  if (ms < 3_600_000) return t('util.minutesAgo', { n: Math.floor(ms / 60_000) });
-  if (ms < 86_400_000) return t('util.hoursAgo', { n: Math.floor(ms / 3_600_000) });
-  return t('util.daysAgo', { n: Math.floor(ms / 86_400_000) });
+  if (ms < 3_600_000) { const n = Math.floor(ms / 60_000); return t(n === 1 ? 'util.minuteAgo' : 'util.minutesAgo', { n }); }
+  if (ms < 86_400_000) { const n = Math.floor(ms / 3_600_000); return t(n === 1 ? 'util.hourAgo' : 'util.hoursAgo', { n }); }
+  const n = Math.floor(ms / 86_400_000); return t(n === 1 ? 'util.dayAgo' : 'util.daysAgo', { n });
 }
 
 /**

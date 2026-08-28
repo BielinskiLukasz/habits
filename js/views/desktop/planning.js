@@ -27,7 +27,7 @@
 
 import { mount } from '../../util/mount.js';
 import { todayLocal, daysFrom } from '../../util/date.js';
-import { t } from '../../i18n/index.js';
+import { t, displayName } from '../../i18n/index.js';
 
 // ---------------------------------------------------------------------------
 // ISO week helpers (internal, not exported)
@@ -149,7 +149,7 @@ export function buildPlanningRows({ waveGroups, weeks }) {
         {
           tag: 'td',
           attrs: { colspan: String(weeks.length + 1) },
-          text: waveGroup.waveName,
+          text: t('catalog.wave', { n: waveGroup.waveNumber }),
         },
       ],
     });
@@ -159,7 +159,7 @@ export function buildPlanningRows({ waveGroups, weeks }) {
       // Habit name cell (first column — plain label)
       const nameCell = {
         tag: 'td',
-        text: habit.name,
+        text: displayName(habit),
       };
 
       // One cell per week: link if habit starts in that week, else empty
@@ -172,7 +172,7 @@ export function buildPlanningRows({ waveGroups, weeks }) {
               {
                 tag: 'a',
                 attrs: { href: './index.html#catalog' },
-                text: habit.name,
+                text: displayName(habit),
               },
             ],
           };

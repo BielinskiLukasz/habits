@@ -187,4 +187,34 @@ export const PL = {
   'settings.data.backupDaysAgo': '{n} dni temu',
   'settings.data.nagNoBackup': 'Nie znaleziono kopii. Wyeksportuj dane.',
   'settings.data.nagDaysAgo': 'Ostatnia kopia: {n} dni temu. Wyeksportuj dane.',
+
+  // Page headings (static HTML)
+  'page.settings': 'Ustawienia',
+  'page.history': 'Historia',
+
+  // Desktop shell
+  'desktop.title': 'Analityka nawyków',
+  'desktop.nav.analytics': 'Analityka',
+  'desktop.nav.waveboard': 'Tablica fal',
+  'desktop.nav.planning': 'Planowanie',
+  'desktop.nav.settings': 'Ustawienia',
+  'desktop.wavePlanning.title': 'Planowanie fal',
+
+  // Settings — Data card
+  'settings.data.openDesktop': 'Otwórz analitykę →',
+
+  // Settings — Storage card (dynamic text)
+  'settings.storage.unknown': 'nieznany',
+
+  // Settings — About card (dynamic text)
+  'settings.about.na': 'n/d',
+  'settings.about.none': 'brak',
+  'settings.about.unsupported': 'nieobsługiwane',
+  'settings.about.swControlled': 'aktywny',
+  'settings.about.swRegistered': 'zarejestrowany',
+
+  // Util — singular relative time
+  'util.minuteAgo': '1 minutę temu',
+  'util.hourAgo': '1 godzinę temu',
+  'util.dayAgo': '1 dzień temu',
 };

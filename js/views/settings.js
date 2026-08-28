@@ -61,7 +61,7 @@
 
 import { mount } from '../util/mount.js';
 import { apply } from '../state/apply.js';
-import { setLang as applyLang, getLang } from '../i18n/index.js';
+import { setLang as applyLang, getLang, t } from '../i18n/index.js';
 import { undo } from '../state/undo.js';
 import { showErrorToast } from './toast.js';
 import { APP_VERSION } from '../util/version.js';
@@ -185,10 +185,10 @@ function loadStorageStateAsync(cardEl) {
   navigator.storage
     .persisted()
     .then((value) => {
-      if (persistedDd) persistedDd.textContent = value ? 'yes' : 'no';
+      if (persistedDd) persistedDd.textContent = value ? t('settings.storage.yes') : t('settings.storage.no');
     })
     .catch(() => {
-      if (persistedDd) persistedDd.textContent = 'unknown';
+      if (persistedDd) persistedDd.textContent = t('settings.storage.unknown');
     });
 
   // estimate()
@@ -199,11 +199,11 @@ function loadStorageStateAsync(cardEl) {
         if (estimateDd && est && typeof est.usage === 'number' && typeof est.quota === 'number') {
           const usedMB = (est.usage / 1_000_000).toFixed(1);
           const quotaMB = Math.round(est.quota / 1_000_000);
-          estimateDd.textContent = `Using ${usedMB} MB of ~${quotaMB} MB`;
+          estimateDd.textContent = t('settings.storage.using', { usedMB, quotaMB });
         }
       })
       .catch(() => {
-        if (estimateDd) estimateDd.textContent = 'unknown';
+        if (estimateDd) estimateDd.textContent = t('settings.storage.unknown');
       });
   }
 }
@@ -227,13 +227,13 @@ function loadAboutStateAsync(cardEl, repo) {
     repo
       .getSetting('schemaVersion')
       .then((row) => {
-        if (schemaDd) schemaDd.textContent = row?.value != null ? String(row.value) : 'n/a';
+        if (schemaDd) schemaDd.textContent = row?.value != null ? String(row.value) : t('settings.about.na');
       })
       .catch(() => {
-        if (schemaDd) schemaDd.textContent = 'n/a';
+        if (schemaDd) schemaDd.textContent = t('settings.about.na');
       });
   } else if (schemaDd) {
-    schemaDd.textContent = 'n/a';
+    schemaDd.textContent = t('settings.about.na');
   }
 
   // Cache name (filter caches.keys() for /^habits-/).
@@ -242,23 +242,23 @@ function loadAboutStateAsync(cardEl, repo) {
       .keys()
       .then((keys) => {
         const match = keys.find((k) => /^habits-/.test(k));
-        if (cacheDd) cacheDd.textContent = match || 'none';
+        if (cacheDd) cacheDd.textContent = match || t('settings.about.none');
       })
       .catch(() => {
-        if (cacheDd) cacheDd.textContent = 'none';
+        if (cacheDd) cacheDd.textContent = t('settings.about.none');
       });
   } else if (cacheDd) {
-    cacheDd.textContent = 'unsupported';
+    cacheDd.textContent = t('settings.about.unsupported');
   }
 
   // SW state.
   if (swDd) {
     if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
-      swDd.textContent = 'unsupported';
+      swDd.textContent = t('settings.about.unsupported');
     } else if (navigator.serviceWorker.controller) {
-      swDd.textContent = 'controlled';
+      swDd.textContent = t('settings.about.swControlled');
     } else {
-      swDd.textContent = 'registered';
+      swDd.textContent = t('settings.about.swRegistered');
     }
   }
 }
@@ -894,7 +894,7 @@ export function mountSettings(parent, deps) {
   desktopLinkEl.setAttribute('class', 'settings-desktop-link');
   const anchor = _panelEl.ownerDocument.createElement('a');
   anchor.href = './desktop.html';
-  anchor.textContent = 'Open desktop analytics →';
+  anchor.textContent = t('settings.data.openDesktop');
   desktopLinkEl.appendChild(anchor);
   _panelEl.appendChild(desktopLinkEl);
 

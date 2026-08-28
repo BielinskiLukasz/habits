@@ -84,6 +84,32 @@ export function t(key, subs) {
   return result;
 }
 
+/**
+ * Return the display name for a habit, using the Polish name when the current
+ * locale is 'pl' and name_pl is set.
+ *
+ * @param {{ name: string, name_pl?: string|null }} habit
+ * @returns {string}
+ */
+export function displayName(habit) {
+  return getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name;
+}
+
+/**
+ * Apply t() to every element in the document that has a data-i18n attribute,
+ * setting its textContent to the translated string. Call once at boot after
+ * the DOM is ready to translate static HTML headings and nav links.
+ *
+ * @returns {void}
+ */
+export function applyStaticTranslations() {
+  if (typeof document === 'undefined') return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key) el.textContent = t(key);
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Test helpers
 // ---------------------------------------------------------------------------

@@ -28,7 +28,7 @@
 
 import { mount } from '../../util/mount.js';
 import { getWave } from '../../domain/wave.js';
-import { t } from '../../i18n/index.js';
+import { t, displayName } from '../../i18n/index.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -214,7 +214,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
           tag: 'td',
           attrs: { colspan: String(colCount) },
           children: [
-            { tag: 'span', attrs: { class: 'analytics-wave-name' }, text: waveGroup.waveName },
+            { tag: 'span', attrs: { class: 'analytics-wave-name' }, text: t('catalog.wave', { n: waveGroup.waveNumber }) },
             { tag: 'span', attrs: { class: 'analytics-wave-agg' }, text: aggText },
           ],
         },
@@ -236,7 +236,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
 
       const cells = [
         // 1. Habit name
-        { tag: 'td', text: habit.name },
+        { tag: 'td', text: displayName(habit) },
         // 2. Stage — derived from currentStageIndex (0-based) + stages array.
         // habit.stage does not exist in the IDB schema; the seed stores
         // `stages: [{label, target, ...}]` and `currentStageIndex: number`.

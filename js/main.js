@@ -73,8 +73,10 @@ import { mountHistory } from './views/history.js';
 import * as store from './state/store.js';
 import { configureWave, bootWaves } from './domain/wave.js';
 import { configureScheduled, bootScheduled } from './domain/scheduled.js';
+import { applyStaticTranslations } from './i18n/index.js';
 
 registerServiceWorker();
+applyStaticTranslations();
 
 // ?debug=1 trigger (D-02). Bookmark-friendly: `index.html?debug=1` always
 // mounts the diagnostics panel on top of whatever the page would otherwise

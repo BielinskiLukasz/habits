@@ -189,4 +189,34 @@ export const EN = {
   'settings.data.backupDaysAgo': '{n} days ago',
   'settings.data.nagNoBackup': 'No backup found. Export your data now.',
   'settings.data.nagDaysAgo': 'Last backup: {n} days ago. Export your data now.',
+
+  // Page headings (static HTML)
+  'page.settings': 'Settings',
+  'page.history': 'History',
+
+  // Desktop shell
+  'desktop.title': 'Habit Analytics',
+  'desktop.nav.analytics': 'Analytics',
+  'desktop.nav.waveboard': 'Wave Board',
+  'desktop.nav.planning': 'Planning',
+  'desktop.nav.settings': 'Settings',
+  'desktop.wavePlanning.title': 'Wave Planning',
+
+  // Settings — Data card
+  'settings.data.openDesktop': 'Open desktop analytics →',
+
+  // Settings — Storage card (dynamic text)
+  'settings.storage.unknown': 'unknown',
+
+  // Settings — About card (dynamic text)
+  'settings.about.na': 'n/a',
+  'settings.about.none': 'none',
+  'settings.about.unsupported': 'unsupported',
+  'settings.about.swControlled': 'controlled',
+  'settings.about.swRegistered': 'registered',
+
+  // Util — singular relative time
+  'util.minuteAgo': '1 minute ago',
+  'util.hourAgo': '1 hour ago',
+  'util.dayAgo': '1 day ago',
 };

@@ -65,8 +65,10 @@ import { mountAnalytics } from './views/desktop/analytics.js';
 import { mountWaveboard } from './views/desktop/waveboard.js';
 import { mountPlanning } from './views/desktop/planning.js';
 import { mountSettings } from './views/settings.js';
+import { applyStaticTranslations } from './i18n/index.js';
 
 registerServiceWorker();
+applyStaticTranslations();
 
 // ?debug=1 trigger (D-02). Same surface as the mobile shell so the developer
 // workflow is identical regardless of which HTML they have open.

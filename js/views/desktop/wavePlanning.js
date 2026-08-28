@@ -18,7 +18,7 @@ import { getCachedHabits } from '../../state/store.js';
 import { getAllWaves } from '../../domain/wave.js';
 import { todayLocal } from '../../util/date.js';
 import { mount } from '../../util/mount.js';
-import { t } from '../../i18n/index.js';
+import { t, displayName } from '../../i18n/index.js';
 
 // ---------------------------------------------------------------------------
 // Cadence summary — dispatch table, no switch (Anti-Pattern 4)
@@ -101,7 +101,7 @@ function buildActiveHabitRow(habit) {
     tag: 'li',
     attrs: { class: 'waveplanning-habit-row' },
     children: [
-      { tag: 'span', attrs: { class: 'waveplanning-habit-name' }, text: habit.name },
+      { tag: 'span', attrs: { class: 'waveplanning-habit-name' }, text: displayName(habit) },
       { tag: 'span', attrs: { class: 'waveplanning-habit-status' }, text: habit.status },
       { tag: 'span', attrs: { class: 'waveplanning-habit-stage' }, text: stageLabel },
       { tag: 'span', attrs: { class: 'waveplanning-habit-cadence' }, text: cadenceSummary(habit.cadence) },
@@ -120,13 +120,13 @@ function buildScheduledHabitRow(habit) {
     tag: 'li',
     attrs: { class: 'waveplanning-scheduled-row' },
     children: [
-      { tag: 'span', attrs: { class: 'waveplanning-habit-name' }, text: habit.name },
+      { tag: 'span', attrs: { class: 'waveplanning-habit-name' }, text: displayName(habit) },
       { tag: 'span', attrs: { class: 'waveplanning-scheduled-date' }, text: habit.startDate ?? '' },
       {
         tag: 'button',
         attrs: {
           class: 'waveplanning-promote-btn',
-          'aria-label': `Promote ${habit.name} to active`,
+          'aria-label': `Promote ${displayName(habit)} to active`,
           'data-habit-id': habit.id,
         },
         text: t('desktop.wavePlanning.promoteToActive'),
@@ -246,7 +246,7 @@ export function buildWavePlanningSection({ waves, habits, currentWeekKey, snapsh
     tag: 'section',
     attrs: { class: 'waveplanning', 'aria-label': 'Wave Planning' },
     children: [
-      { tag: 'h2', attrs: { class: 'waveplanning-title' }, text: 'Wave Planning' },
+      { tag: 'h2', attrs: { class: 'waveplanning-title' }, text: t('desktop.wavePlanning.title') },
       ...waveItems,
     ],
   };

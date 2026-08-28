@@ -146,6 +146,6 @@ describe('formatRelative — days', () => {
 describe('formatRelative — accepts ISO timestamp string input', () => {
   test('explicit ISO string for `at` argument works (no Date instance required)', () => {
     const now = Date.parse('2026-05-28T10:01:00.000Z');
-    assert.equal(formatRelative('2026-05-28T10:00:00.000Z', now), '1 minutes ago');
+    assert.equal(formatRelative('2026-05-28T10:00:00.000Z', now), '1 minute ago');
   });
 });

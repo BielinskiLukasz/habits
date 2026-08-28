@@ -30,7 +30,7 @@
  */
 
 import { mount } from '../../util/mount.js';
-import { t } from '../../i18n/index.js';
+import { t, displayName } from '../../i18n/index.js';
 import { todayLocal, formatLocalYMD } from '../../util/date.js';
 import { mountWavePlanning } from './wavePlanning.js';
 
@@ -240,7 +240,7 @@ export function buildWaveboardRows({ habitsByWave, cellData, weeks, showArchived
         {
           tag: 'td',
           attrs: { colspan: String(weeks.length + 1) },
-          text: waveGroup.waveName,
+          text: t('catalog.wave', { n: waveGroup.waveNumber }),
         },
       ],
     });
@@ -259,7 +259,7 @@ export function buildWaveboardRows({ habitsByWave, cellData, weeks, showArchived
       const nameCell = {
         tag: 'td',
         attrs: { class: 'waveboard-sticky-column' },
-        text: habit.name,
+        text: displayName(habit),
       };
 
       // One cell per week
