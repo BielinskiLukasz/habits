@@ -121,33 +121,40 @@ export function buildFooterNav({ activeHash }) {
 }
 
 /**
- * Build a single Today row description: `<li class="today-row[ today-row--completed]">`
- * containing a tap `<button class="today-row-tap" aria-pressed=... data-action=...>`
- * plus an optional ⓘ disclosure `<button>` when `habit.name_pl` is truthy.
+ * Build a single Today row description: `<li class="today-row[ today-row--completed|today-row--skipped]">`
+ * containing a `.today-row__slide` wrapper (the swipeable content) and a
+ * `.today-row__actions` panel (Skip + Fail buttons revealed on swipe-left).
  *
- * - Uncompleted: button has `aria-pressed="false"`, `data-action="markComplete"`,
- *   and a `<span class="today-row-name">` with `habit.name`.
- * - Completed: button has `aria-pressed="true"`, `data-action="markUncomplete"`,
- *   a `<span class="today-row-glyph">✓</span>`, and a `<span class="today-row-name today-row-name--completed">`
- *   with `habit.name` (strikethrough class) per D-54.
+ * Swipe UX (o1g — 4-state log model):
+ *   - Swipe right on the slide → commits `markCompleted` (wired in today.js pointer handler).
+ *   - Swipe left on the slide → reveals `.today-row__actions` panel.
+ *   - Skip button: `data-action="swipeSkip"` → dispatches `markSkipped`.
+ *   - Fail button: `data-action="swipeFail"` → dispatches `markUncompleted` (status: 'failed').
+ *
+ * Inside `.today-row__slide`:
+ *   - Uncompleted/failed/skipped: button `aria-pressed="false"`, `data-action="markComplete"`,
+ *     `<span class="today-row-name">` with `habit.name`.
+ *   - Skipped: name span carries `today-row-name--skipped` (muted italic via CSS).
+ *   - Completed: `aria-pressed="true"`, `data-action="markUncomplete"`,
+ *     `<span class="today-row-glyph">✓</span>` + `<span class="today-row-name today-row-name--completed">`.
  *
  * The ⓘ disclosure button (D-55, D-79) — `aria-label="Show original Polish name"`,
  * `aria-expanded="false"`, `data-action="togglePolish"` — is omitted entirely
  * when `name_pl` is null/undefined; the slot is not reserved.
  *
- * Tap wiring (closures bound to `data-action`) lands in Slice 3; this slice
- * emits the attributes but the action map at mount time is empty.
- *
- * @param {{ habit: { id: string, name: string, name_pl?: string | null }, completed: boolean }} args
+ * @param {{ habit: { id: string, name: string, name_pl?: string | null }, status: string | null }} args
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
-export function buildTodayRow({ habit, completed }) {
+export function buildTodayRow({ habit, status = null }) {
   // Display name: show Polish name when PL lang is active and name_pl exists.
   const displayName = getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name;
 
+  const isCompleted = status === 'completed';
+  const isSkipped = status === 'skipped';
+
   /** @type {object[]} */
   const tapChildren = [];
-  if (completed) {
+  if (isCompleted) {
     tapChildren.push({
       tag: 'span',
       attrs: { class: 'today-row-glyph' },
@@ -156,6 +163,12 @@ export function buildTodayRow({ habit, completed }) {
     tapChildren.push({
       tag: 'span',
       attrs: { class: 'today-row-name today-row-name--completed' },
+      text: displayName,
+    });
+  } else if (isSkipped) {
+    tapChildren.push({
+      tag: 'span',
+      attrs: { class: 'today-row-name today-row-name--skipped' },
       text: displayName,
     });
   } else {
@@ -170,18 +183,18 @@ export function buildTodayRow({ habit, completed }) {
     tag: 'button',
     attrs: {
       class: 'today-row-tap',
-      'aria-pressed': completed ? 'true' : 'false',
-      'data-action': completed ? 'markUncomplete' : 'markComplete',
+      'aria-pressed': isCompleted ? 'true' : 'false',
+      'data-action': isCompleted ? 'markUncomplete' : 'markComplete',
       'data-habit-id': habit.id,
     },
     children: tapChildren,
   };
 
   /** @type {object[]} */
-  const rowChildren = [tapBtn];
+  const slideChildren = [tapBtn];
 
   if (habit.name_pl) {
-    rowChildren.push({
+    slideChildren.push({
       tag: 'button',
       attrs: {
         class: 'today-row-info',
@@ -194,10 +207,44 @@ export function buildTodayRow({ habit, completed }) {
     });
   }
 
+  const rowClasses = ['today-row'];
+  if (isCompleted) rowClasses.push('today-row--completed');
+  if (isSkipped) rowClasses.push('today-row--skipped');
+
   return {
     tag: 'li',
-    attrs: { class: completed ? 'today-row today-row--completed' : 'today-row' },
-    children: rowChildren,
+    attrs: { class: rowClasses.join(' ') },
+    children: [
+      {
+        tag: 'div',
+        attrs: { class: 'today-row__slide' },
+        children: slideChildren,
+      },
+      {
+        tag: 'div',
+        attrs: { class: 'today-row__actions' },
+        children: [
+          {
+            tag: 'button',
+            attrs: {
+              class: 'today-row__action today-row__action--skip',
+              'data-action': 'swipeSkip',
+              'data-habit-id': habit.id,
+            },
+            text: t('today.skip'),
+          },
+          {
+            tag: 'button',
+            attrs: {
+              class: 'today-row__action today-row__action--fail',
+              'data-action': 'swipeFail',
+              'data-habit-id': habit.id,
+            },
+            text: t('today.fail'),
+          },
+        ],
+      },
+    ],
   };
 }
 
@@ -354,10 +401,11 @@ export function buildSlotRow(habit, log) {
  *   3. Otherwise → `<ul class="today-list" aria-label="Today's habits">` with one
  *      `buildTodayRow` per habit.
  *
- * `habits` for the list branch is `Array<{habit, completed}>`. The empty /
- * all-done branches use `totalApplicable` for the counter copy.
+ * `habits` for the list branch is `Array<{habit, status}>` where `status` is
+ * `'completed'|'failed'|'skipped'|null`. The empty / all-done branches use
+ * `totalApplicable` for the counter copy.
  *
- * @param {{ habits: Array<{habit: object, completed: boolean}>, allCompleted?: boolean, totalApplicable?: number }} args
+ * @param {{ habits: Array<{habit: object, status: string|null}>, allCompleted?: boolean, totalApplicable?: number }} args
  * @returns {{ tag: string, attrs: object, text?: string, children?: object[] }}
  */
 export function buildTodayList({ habits, allCompleted = false, totalApplicable = 0 }) {
@@ -385,6 +433,6 @@ export function buildTodayList({ habits, allCompleted = false, totalApplicable =
   return {
     tag: 'ul',
     attrs: { class: 'today-list', 'aria-label': "Today's habits" },
-    children: habits.map(({ habit, completed }) => buildTodayRow({ habit, completed })),
+    children: habits.map(({ habit, status }) => buildTodayRow({ habit, status })),
   };
 }

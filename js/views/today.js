@@ -85,6 +85,28 @@ import {
 /** Singleton unsubscribe handle — second mountToday call returns existing unmount. */
 let _unsub = null;
 
+/** @type {Element|null} Currently-open swipe actions panel row (one at a time). */
+let _openSwipeRow = null;
+
+/** @type {Element|null} Row currently being swiped (pointer captured). */
+let _swipeEl = null;
+
+/** @type {number} clientX where the active swipe started. */
+let _swipeStartX = 0;
+
+/**
+ * Collapse any open swipe actions panel and clear the tracking ref.
+ *
+ * @returns {void}
+ */
+function _closeOpenSwipeRow() {
+  if (!_openSwipeRow) return;
+  const slide = _openSwipeRow.querySelector('.today-row__slide');
+  if (slide) slide.style.transform = '';
+  _openSwipeRow.classList.remove('today-row--swipe-open');
+  _openSwipeRow = null;
+}
+
 /**
  * Clear every child of `parent` without using `.innerHTML = ''` (D-78).
  *
@@ -231,6 +253,154 @@ async function handleMarkUncompleteTap(evt) {
 }
 
 /**
+ * Dispatch `markCompleted` directly (no optimistic flip — the store re-render
+ * handles the UI update). Used by the swipe-right gesture, which already
+ * provides visual feedback via the slide animation.
+ *
+ * @param {string} habitId
+ * @returns {Promise<void>}
+ */
+async function _swipeMarkComplete(habitId) {
+  const date = todayLocal();
+  try {
+    await apply({ type: 'markCompleted', payload: { habitId, date } });
+    const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+    showUndoToast({ message: `Marked ${habitName} complete`, undoFn: () => undo() });
+  } catch (_err) {
+    showErrorToast("Couldn't mark — try again");
+  }
+}
+
+/**
+ * Pointer-down on the list: begin swipe gesture tracking. Closes any
+ * previously open actions panel when a different row is tapped.
+ *
+ * @param {PointerEvent} evt
+ * @returns {void}
+ */
+function handleSwipeStart(evt) {
+  if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+  const row = evt.target.closest('.today-row');
+  // Tap outside a row → close open panel.
+  if (!row) { _closeOpenSwipeRow(); return; }
+  // Tap on the actions panel itself → let the action button click fire.
+  if (evt.target.closest('.today-row__actions')) return;
+  // Switch rows → close the previous panel first.
+  if (_openSwipeRow && _openSwipeRow !== row) _closeOpenSwipeRow();
+  _swipeEl = row;
+  _swipeStartX = evt.clientX;
+  // Capture pointer to listEl so move/up events keep firing even outside bounds.
+  evt.currentTarget.setPointerCapture(evt.pointerId);
+}
+
+/**
+ * Pointer-move: translate the slide div in real time.
+ *
+ * @param {PointerEvent} evt
+ * @returns {void}
+ */
+function handleSwipeMove(evt) {
+  if (!_swipeEl) return;
+  const dx = evt.clientX - _swipeStartX;
+  const slide = _swipeEl.querySelector('.today-row__slide');
+  if (!slide) return;
+  // Clamp: left up to -120 px (actions width), right up to +80 px.
+  const clamped = Math.max(-120, Math.min(80, dx));
+  slide.style.transform = `translateX(${clamped}px)`;
+}
+
+/**
+ * Pointer-up: commit swipe action or snap back.
+ *
+ * - dx > 60 → swipe-right: mark complete.
+ * - dx < -60 → swipe-left: reveal actions panel.
+ * - Otherwise → snap back.
+ *
+ * @param {PointerEvent} evt
+ * @returns {void}
+ */
+function handleSwipeEnd(evt) {
+  if (!_swipeEl) return;
+  const dx = evt.clientX - _swipeStartX;
+  const slide = _swipeEl.querySelector('.today-row__slide');
+  const row = _swipeEl;
+  _swipeEl = null;
+
+  if (dx > 60) {
+    // Swipe right → mark complete.
+    if (slide) slide.style.transform = '';
+    const habitId = row.querySelector('[data-habit-id]')?.getAttribute('data-habit-id');
+    if (habitId) _swipeMarkComplete(habitId);
+  } else if (dx < -60) {
+    // Swipe left → reveal actions panel.
+    if (slide) slide.style.transform = 'translateX(-120px)';
+    row.classList.add('today-row--swipe-open');
+    _openSwipeRow = row;
+  } else {
+    // Small movement → snap back.
+    if (slide) slide.style.transform = '';
+    if (_openSwipeRow === row) {
+      row.classList.remove('today-row--swipe-open');
+      _openSwipeRow = null;
+    }
+  }
+}
+
+/**
+ * Pointer-cancel: abort swipe and snap slide back.
+ *
+ * @returns {void}
+ */
+function handleSwipeCancel() {
+  if (!_swipeEl) return;
+  const slide = _swipeEl.querySelector('.today-row__slide');
+  if (slide) slide.style.transform = '';
+  _swipeEl = null;
+}
+
+/**
+ * Skip action tap: dispatches `markSkipped` for the habit and closes the
+ * swipe panel.
+ *
+ * @param {object} evt
+ * @returns {Promise<void>}
+ */
+async function handleMarkSkipTap(evt) {
+  const btn = evt.currentTarget;
+  const habitId = btn.getAttribute('data-habit-id');
+  const date = todayLocal();
+  _closeOpenSwipeRow();
+  try {
+    await apply({ type: 'markSkipped', payload: { habitId, date } });
+    const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+    showUndoToast({ message: `Skipped ${habitName}`, undoFn: () => undo() });
+  } catch (_err) {
+    showErrorToast("Couldn't skip — try again");
+  }
+}
+
+/**
+ * Fail action tap: dispatches `markUncompleted` (status → 'failed') for the
+ * habit and closes the swipe panel.
+ *
+ * @param {object} evt
+ * @returns {Promise<void>}
+ */
+async function handleMarkFailTap(evt) {
+  const btn = evt.currentTarget;
+  const habitId = btn.getAttribute('data-habit-id');
+  const date = todayLocal();
+  _closeOpenSwipeRow();
+  try {
+    await apply({ type: 'markUncompleted', payload: { habitId, date } });
+    const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+    showUndoToast({ message: `Marked ${habitName} not done`, undoFn: () => undo() });
+  } catch (_err) {
+    showErrorToast("Couldn't mark — try again");
+  }
+}
+
+/**
  * RENDERERS dispatch table (Pitfall 5 — no if-else chain).
  * Maps `habit.targetType` to the pure builder for that row variant.
  * Binary row builder has a different signature ({habit, completed}) so it is
@@ -239,7 +409,7 @@ async function handleMarkUncompleteTap(evt) {
  * @type {Record<string, (habit: object, log: object|null) => object>}
  */
 const RENDERERS = {
-  binary: (habit, log) => buildTodayRow({ habit, completed: log?.completed === true }),
+  binary: (habit, log) => buildTodayRow({ habit, status: log?.status ?? null }),
   numeric: buildNumericRow,
   'slot-checklist': buildSlotRow,
 };
@@ -368,10 +538,16 @@ function renderTodayInto(parent) {
   const date = todayLocal();
   const wave = currentWave(date);
 
+  // Reset swipe tracking state — DOM is about to be rebuilt.
+  _openSwipeRow = null;
+  _swipeEl = null;
+
   /** @type {Record<string, (e: object) => void>} */
   const actions = {
     markComplete: handleMarkCompleteTap,
     markUncomplete: handleMarkUncompleteTap,
+    swipeSkip: handleMarkSkipTap,
+    swipeFail: handleMarkFailTap,
     'log-increment': handleLogIncrementTap,
     'log-decrement': handleLogDecrementTap,
     'toggle-slots': handleToggleSlotsTap,
@@ -392,19 +568,19 @@ function renderTodayInto(parent) {
   // Habits completed today remain visible (sorted last per D-54) even when cadence returns false
   // — provides visual confirmation of same-day completions.
   const applicable = allActive.filter(
-    (h) => appliesToday(h, date, ctx) || getCachedLog(h.id, date)?.completed === true
+    (h) => appliesToday(h, date, ctx) || getCachedLog(h.id, date)?.status === 'completed'
   );
 
-  // Pair each applicable habit with its completion state and log, then sort
+  // Pair each applicable habit with its 4-state status and log, then sort
   // completed rows last (D-54 muted treatment).
   const pairs = applicable.map((habit) => ({
     habit,
     log: getCachedLog(habit.id, date) ?? null,
-    completed: getCachedLog(habit.id, date)?.completed === true,
+    status: getCachedLog(habit.id, date)?.status ?? null,
   }));
   // Stable partition: uncompleted first, completed last; preserve order within each group.
-  const uncompleted = pairs.filter((p) => !p.completed);
-  const completed = pairs.filter((p) => p.completed);
+  const uncompleted = pairs.filter((p) => p.status !== 'completed');
+  const completed = pairs.filter((p) => p.status === 'completed');
   const ordered = [...uncompleted, ...completed];
 
   // Decide list shape per D-58.
@@ -436,6 +612,11 @@ function renderTodayInto(parent) {
       const renderer = RENDERERS[habit.targetType] ?? RENDERERS.binary;
       mount(renderer(habit, log), listEl, actions);
     }
+    // Wire swipe gesture (pointer events, event delegation on listEl).
+    listEl.addEventListener('pointerdown', handleSwipeStart);
+    listEl.addEventListener('pointermove', handleSwipeMove);
+    listEl.addEventListener('pointerup', handleSwipeEnd);
+    listEl.addEventListener('pointercancel', handleSwipeCancel);
   }
 }
 

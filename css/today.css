@@ -51,13 +51,11 @@
     min-height: 200px;
   }
 
-  /* Today rows — flex layout with name + optional ⓘ disclosure. The whole
-   * row (the button) is the tap target; the row <li> itself only carries
-   * the muted/strikethrough state class. */
+  /* Today rows — clip the swipeable slide + hidden actions panel.
+   * Flex was moved to .today-row__slide (o1g — 4-state swipe UX). */
   .today-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+    position: relative;
+    overflow: hidden;
     border-bottom: 1px solid var(--color-border);
   }
 
@@ -66,6 +64,60 @@
    * neither is color-only (NFR-07). */
   .today-row--completed {
     opacity: 0.55;
+  }
+
+  /* Skipped rows — muted italic (o1g). The name span carries the
+   * today-row-name--skipped class from the builder. */
+  .today-row--skipped .today-row-name--skipped {
+    opacity: 0.6;
+    font-style: italic;
+  }
+
+  /* Slide layer — the visible row content that translates on swipe.
+   * background matches --color-bg so it fully covers the actions panel
+   * when at rest (no gap artifacts). */
+  .today-row__slide {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    position: relative;
+    z-index: 1;
+    background: var(--color-bg);
+    transition: transform 0.15s ease;
+    will-change: transform;
+    touch-action: pan-y; /* allow vertical scroll; horizontal captured by JS */
+  }
+
+  /* Actions panel — hidden behind the slide; revealed by swipe-left.
+   * Width must match the -120 px translateX clamp in today.js. */
+  .today-row__actions {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 120px;
+    display: flex;
+  }
+
+  /* Skip / Fail action buttons */
+  .today-row__action {
+    flex: 1;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--color-fg);
+    min-height: 44px;
+  }
+
+  .today-row__action--skip {
+    background: var(--color-score-watch);
+  }
+
+  .today-row__action--fail {
+    background: var(--color-score-failing);
   }
 
   /* The whole-row tap target (D-53). Min 44 × 44 px per NFR-06; uses the

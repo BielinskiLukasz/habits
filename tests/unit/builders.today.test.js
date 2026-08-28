@@ -137,15 +137,46 @@ describe('buildFooterNav — 4 anchors + aria attributes (D-79, D-80, D-82)', ()
   });
 });
 
+/**
+ * Find the .today-row__slide div inside a row description tree.
+ * @param {object} rowOut - result of buildTodayRow
+ * @returns {object}
+ */
+function findSlide(rowOut) {
+  return rowOut.children.find((c) => c.attrs?.class === 'today-row__slide');
+}
+
+/**
+ * Find the .today-row__actions div inside a row description tree.
+ * @param {object} rowOut - result of buildTodayRow
+ * @returns {object}
+ */
+function findActions(rowOut) {
+  return rowOut.children.find((c) => c.attrs?.class === 'today-row__actions');
+}
+
 describe('buildTodayRow — uncompleted row (D-53, D-54, D-79)', () => {
-  test('emits <li class="today-row"> with a button carrying aria-pressed="false" + data-action="markComplete"', () => {
+  test('emits <li class="today-row"> with .today-row__slide and .today-row__actions children', () => {
     const habit = { id: 'h1', name: 'Drink water', name_pl: 'Picie wody' };
-    const out = buildTodayRow({ habit, completed: false });
+    const out = buildTodayRow({ habit, status: null });
     assert.equal(out.tag, 'li');
     assert.equal(out.attrs.class, 'today-row');
+    assert.ok(Array.isArray(out.children), 'li has children');
 
-    const btn = out.children.find((c) => c.tag === 'button' && c.attrs?.class === 'today-row-tap');
-    assert.ok(btn, 'tap button present');
+    const slide = findSlide(out);
+    assert.ok(slide, '.today-row__slide present');
+    assert.equal(slide.tag, 'div');
+
+    const actions = findActions(out);
+    assert.ok(actions, '.today-row__actions present');
+  });
+
+  test('slide contains tap button with aria-pressed="false" + data-action="markComplete"', () => {
+    const habit = { id: 'h1', name: 'Drink water', name_pl: 'Picie wody' };
+    const out = buildTodayRow({ habit, status: null });
+    const slide = findSlide(out);
+    const btn = slide.children.find((c) => c.tag === 'button' && c.attrs?.class === 'today-row-tap');
+    assert.ok(btn, 'tap button present in slide');
     assert.equal(btn.attrs['aria-pressed'], 'false');
     assert.equal(btn.attrs['data-action'], 'markComplete');
     assert.equal(btn.attrs['data-habit-id'], 'h1');
@@ -158,10 +189,11 @@ describe('buildTodayRow — uncompleted row (D-53, D-54, D-79)', () => {
     assert.equal(name.text, 'Drink water');
   });
 
-  test('emits ⓘ disclosure button when habit.name_pl is truthy (D-55, D-79)', () => {
+  test('emits ⓘ disclosure button inside slide when habit.name_pl is truthy (D-55, D-79)', () => {
     const habit = { id: 'h1', name: 'Drink water', name_pl: 'Picie wody' };
-    const out = buildTodayRow({ habit, completed: false });
-    const info = out.children.find((c) => c.tag === 'button' && c.attrs?.class === 'today-row-info');
+    const out = buildTodayRow({ habit, status: null });
+    const slide = findSlide(out);
+    const info = slide.children.find((c) => c.tag === 'button' && c.attrs?.class === 'today-row-info');
     assert.ok(info, 'ⓘ button present when name_pl truthy');
     assert.equal(info.attrs['aria-label'], 'Show original Polish name');
     assert.equal(info.attrs['aria-expanded'], 'false');
@@ -172,42 +204,53 @@ describe('buildTodayRow — uncompleted row (D-53, D-54, D-79)', () => {
 
   test('omits ⓘ disclosure button when habit.name_pl is null/undefined', () => {
     const habit = { id: 'h1', name: 'English-only', name_pl: null };
-    const out = buildTodayRow({ habit, completed: false });
-    const info = out.children.find((c) => c.attrs?.class === 'today-row-info');
+    const out = buildTodayRow({ habit, status: null });
+    const slide = findSlide(out);
+    const info = slide.children.find((c) => c.attrs?.class === 'today-row-info');
     assert.equal(info, undefined, 'no ⓘ when name_pl null');
 
     const habit2 = { id: 'h2', name: 'No PL field' };
-    const out2 = buildTodayRow({ habit: habit2, completed: false });
-    const info2 = out2.children.find((c) => c.attrs?.class === 'today-row-info');
+    const out2 = buildTodayRow({ habit: habit2, status: null });
+    const slide2 = findSlide(out2);
+    const info2 = slide2.children.find((c) => c.attrs?.class === 'today-row-info');
     assert.equal(info2, undefined, 'no ⓘ when name_pl missing entirely');
+  });
+
+  test('actions panel emits Skip + Fail buttons with correct data-action values', () => {
+    const habit = { id: 'h1', name: 'Drink water' };
+    const out = buildTodayRow({ habit, status: null });
+    const actions = findActions(out);
+    const skip = actions.children.find((c) => c.attrs?.['data-action'] === 'swipeSkip');
+    const fail = actions.children.find((c) => c.attrs?.['data-action'] === 'swipeFail');
+    assert.ok(skip, 'swipeSkip button present');
+    assert.equal(skip.attrs['data-habit-id'], 'h1');
+    assert.ok(fail, 'swipeFail button present');
+    assert.equal(fail.attrs['data-habit-id'], 'h1');
   });
 });
 
 describe('buildTodayRow — completed row (D-54, D-79)', () => {
   test('row carries today-row + today-row--completed classes', () => {
     const habit = { id: 'h1', name: 'Drink water', name_pl: 'Picie wody' };
-    const out = buildTodayRow({ habit, completed: true });
+    const out = buildTodayRow({ habit, status: 'completed' });
     assert.equal(out.attrs.class, 'today-row today-row--completed');
   });
 
-  test('button carries aria-pressed="true" + data-action="markUncomplete" + data-habit-id', () => {
-    // Phase 03 plan 03 Task 3: the closure-lookup contract — Today view
-    // reads `data-habit-id` off the tap button on completed rows too so the
-    // markUncomplete handler can dispatch the right `apply({type, payload:
-    // {habitId, date}})`. The uncompleted variant of this test (above) already
-    // pinned `data-habit-id`; this is the symmetric guard for completed rows.
+  test('slide tap button carries aria-pressed="true" + data-action="markUncomplete" + data-habit-id', () => {
     const habit = { id: 'h1', name: 'Drink water' };
-    const out = buildTodayRow({ habit, completed: true });
-    const btn = out.children.find((c) => c.attrs?.class === 'today-row-tap');
+    const out = buildTodayRow({ habit, status: 'completed' });
+    const slide = findSlide(out);
+    const btn = slide.children.find((c) => c.attrs?.class === 'today-row-tap');
     assert.equal(btn.attrs['aria-pressed'], 'true');
     assert.equal(btn.attrs['data-action'], 'markUncomplete');
     assert.equal(btn.attrs['data-habit-id'], 'h1');
   });
 
-  test('completed row emits the ✓ glyph span + strikethrough name class', () => {
+  test('completed row emits the ✓ glyph span + strikethrough name class inside slide', () => {
     const habit = { id: 'h1', name: 'Drink water' };
-    const out = buildTodayRow({ habit, completed: true });
-    const btn = out.children.find((c) => c.attrs?.class === 'today-row-tap');
+    const out = buildTodayRow({ habit, status: 'completed' });
+    const slide = findSlide(out);
+    const btn = slide.children.find((c) => c.attrs?.class === 'today-row-tap');
     const glyph = btn.children.find((c) => c.attrs?.class === 'today-row-glyph');
     assert.ok(glyph, '✓ glyph present in completed row');
     assert.equal(glyph.text, '✓');
@@ -241,8 +284,8 @@ describe('buildTodayList — three branches (D-58)', () => {
 
   test('list branch: returns <ul class="today-list"> with one row per habit', () => {
     const habits = [
-      { habit: { id: 'h1', name: 'A' }, completed: false },
-      { habit: { id: 'h2', name: 'B' }, completed: true },
+      { habit: { id: 'h1', name: 'A' }, status: null },
+      { habit: { id: 'h2', name: 'B' }, status: 'completed' },
     ];
     const out = buildTodayList({ habits });
     assert.equal(out.tag, 'ul');
@@ -250,11 +293,13 @@ describe('buildTodayList — three branches (D-58)', () => {
     assert.equal(out.attrs['aria-label'], "Today's habits");
     assert.equal(out.children.length, 2);
     assert.equal(out.children[0].tag, 'li');
-    // First row uncompleted → markComplete action.
-    const btn1 = out.children[0].children.find((c) => c.attrs?.class === 'today-row-tap');
+    // First row uncompleted → markComplete action (found inside .today-row__slide).
+    const slide1 = out.children[0].children.find((c) => c.attrs?.class === 'today-row__slide');
+    const btn1 = slide1.children.find((c) => c.attrs?.class === 'today-row-tap');
     assert.equal(btn1.attrs['data-action'], 'markComplete');
     // Second row completed → markUncomplete action.
-    const btn2 = out.children[1].children.find((c) => c.attrs?.class === 'today-row-tap');
+    const slide2 = out.children[1].children.find((c) => c.attrs?.class === 'today-row__slide');
+    const btn2 = slide2.children.find((c) => c.attrs?.class === 'today-row-tap');
     assert.equal(btn2.attrs['data-action'], 'markUncomplete');
   });
 });
