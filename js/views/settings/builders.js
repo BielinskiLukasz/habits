@@ -411,8 +411,7 @@ export function buildDataCard({
     text: t('settings.data.exportCsv'),
   });
 
-  // Import file input — carries data-action so the mounter can locate it
-  // via `[data-action="importJSON"]` and attach a `change` listener.
+  // Hidden file input — visually hidden, triggered by custom button below.
   backupChildren.push({
     tag: 'input',
     attrs: {
@@ -420,8 +419,22 @@ export function buildDataCard({
       accept: 'application/json',
       'data-action': 'importJSON',
       id: 'import-file-input',
-      'aria-label': 'Import JSON backup file',
+      style: 'position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden',
+      tabindex: '-1',
+      'aria-hidden': 'true',
     },
+  });
+  // Custom button triggers click on the hidden input.
+  backupChildren.push({
+    tag: 'button',
+    attrs: { type: 'button', id: 'import-file-btn', class: 'settings-import-btn' },
+    text: t('settings.data.chooseFile'),
+  });
+  // Filename display span — updated via change event in wireImportInput.
+  backupChildren.push({
+    tag: 'span',
+    attrs: { id: 'import-file-name', class: 'settings-import-filename', 'aria-live': 'polite' },
+    text: t('settings.data.noFileChosen'),
   });
 
   cardChildren.push({

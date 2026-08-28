@@ -163,6 +163,14 @@
     opacity: 0.4;
   }
 
+  /* Analytics status summary row (header dashboard) */
+  .analytics-status-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+  }
+
   /* Planning grid */
   .planning-grid {
     overflow-x: auto;

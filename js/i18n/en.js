@@ -247,4 +247,17 @@ export const EN = {
 
   // Cadence summary with actual count
   'catalog.cadence.everyNDaysCount': 'Every {n} days',
+
+  // Analytics — avg abbreviation
+  'desktop.analytics.avg': 'avg',
+
+  // Settings — last event descriptions
+  'settings.data.markedComplete': 'marked {name} complete',
+  'settings.data.markedUncomplete': 'marked {name} uncomplete',
+  'settings.data.changedSetting': 'changed {key} to {value}',
+  'settings.data.unknownHabit': '(habit)',
+
+  // Settings — custom file import button
+  'settings.data.chooseFile': 'Choose file',
+  'settings.data.noFileChosen': 'No file chosen',
 };

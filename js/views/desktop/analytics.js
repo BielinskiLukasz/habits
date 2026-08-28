@@ -64,7 +64,7 @@ function _waveAggText(waveGroup, snapshots, scoringModel) {
       .filter(v => v != null);
     if (scores.length === 0) return '';
     const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-    return `avg S1: ${avg}%`;
+    return `${t('desktop.analytics.avg')} S1: ${avg}%`;
   }
 
   if (scoringModel === 'S2') {
@@ -73,7 +73,7 @@ function _waveAggText(waveGroup, snapshots, scoringModel) {
       .filter(v => v != null);
     if (scores.length === 0) return '';
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    return `avg S2: ${avg.toFixed(2)}`;
+    return `${t('desktop.analytics.avg')} S2: ${avg.toFixed(2)}`;
   }
 
   // S3
@@ -82,7 +82,7 @@ function _waveAggText(waveGroup, snapshots, scoringModel) {
     .filter(v => v != null);
   if (scores.length === 0) return '';
   const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-  return `avg S3: ${avg.toFixed(2)}`;
+  return `${t('desktop.analytics.avg')} S3: ${avg.toFixed(2)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -216,7 +216,7 @@ export function buildAnalyticsTable({ habitsByWave, snapshots, scoringModel, sho
           attrs: { colspan: String(colCount) },
           children: [
             { tag: 'span', attrs: { class: 'analytics-wave-name' }, text: t('catalog.wave', { n: waveGroup.waveNumber }) },
-            { tag: 'span', attrs: { class: 'analytics-wave-agg' }, text: aggText },
+            { tag: 'span', attrs: { class: 'analytics-wave-agg' }, text: aggText ? ' — ' + aggText : '' },
           ],
         },
       ],

@@ -61,7 +61,7 @@
 
 import { mount } from '../util/mount.js';
 import { apply } from '../state/apply.js';
-import { setLang as applyLang, getLang, t } from '../i18n/index.js';
+import { setLang as applyLang, getLang, t, displayName } from '../i18n/index.js';
 import { undo } from '../state/undo.js';
 import { showErrorToast } from './toast.js';
 import { APP_VERSION } from '../util/version.js';
@@ -292,11 +292,11 @@ function buildDataCardFromState(eventRow, habitName, lastBackupDays, nagVisible)
   const relativeTime = formatRelative(eventRow.at);
   let lastEvent;
   if (eventRow.type === 'markCompleted') {
-    lastEvent = 'marked ' + (habitName ?? '(habit)') + ' complete';
+    lastEvent = t('settings.data.markedComplete', { name: habitName ?? t('settings.data.unknownHabit') });
   } else if (eventRow.type === 'markUncompleted') {
-    lastEvent = 'marked ' + (habitName ?? '(habit)') + ' uncomplete';
+    lastEvent = t('settings.data.markedUncomplete', { name: habitName ?? t('settings.data.unknownHabit') });
   } else if (eventRow.type === 'setSetting') {
-    lastEvent = 'changed ' + eventRow.payload.key + ' to ' + eventRow.payload.value;
+    lastEvent = t('settings.data.changedSetting', { key: eventRow.payload.key, value: String(eventRow.payload.value) });
   } else {
     lastEvent = eventRow.type;
   }
@@ -327,9 +327,9 @@ async function readDataCardInputs(repo, store) {
   const cached = store.getCachedHabits
     ? store.getCachedHabits().find((h) => h.id === habitId)
     : undefined;
-  if (cached) return { eventRow, habitName: cached.name };
+  if (cached) return { eventRow, habitName: displayName(cached) };
   const habit = await repo.getHabit(habitId);
-  return { eventRow, habitName: habit?.name };
+  return { eventRow, habitName: habit ? displayName(habit) : undefined };
 }
 
 /**
@@ -691,6 +691,16 @@ function wireImportInput(cardEl, actions) {
   const fileInput = cardEl.querySelector('[data-action="importJSON"]');
   if (fileInput && typeof actions.importJSON === 'function') {
     fileInput.addEventListener('change', actions.importJSON);
+  }
+  const importBtn = cardEl.querySelector('#import-file-btn');
+  if (importBtn && fileInput) {
+    importBtn.addEventListener('click', () => fileInput.click());
+  }
+  const importName = cardEl.querySelector('#import-file-name');
+  if (fileInput && importName) {
+    fileInput.addEventListener('change', () => {
+      importName.textContent = fileInput.files?.[0]?.name ?? t('settings.data.noFileChosen');
+    });
   }
 }
 

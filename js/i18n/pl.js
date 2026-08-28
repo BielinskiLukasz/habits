@@ -245,4 +245,17 @@ export const PL = {
 
   // Cadence summary with actual count
   'catalog.cadence.everyNDaysCount': 'Co {n} dni',
+
+  // Analytics — avg abbreviation
+  'desktop.analytics.avg': 'śr.',
+
+  // Settings — last event descriptions
+  'settings.data.markedComplete': 'oznaczono {name} jako wykonane',
+  'settings.data.markedUncomplete': 'oznaczono {name} jako niewykonane',
+  'settings.data.changedSetting': 'zmieniono {key} na {value}',
+  'settings.data.unknownHabit': '(nawyk)',
+
+  // Settings — custom file import button
+  'settings.data.chooseFile': 'Wybierz plik',
+  'settings.data.noFileChosen': 'Nie wybrano pliku',
 };
