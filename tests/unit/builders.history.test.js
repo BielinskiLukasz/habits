@@ -122,7 +122,7 @@ describe('buildHistoryHabitRow — completion states (HISTORY-02, HISTORY-06)', 
   test('completed binary log shows ✓ text', () => {
     const out = buildHistoryHabitRow(
       { id: 'h1', name: 'Walk', wave: 1 },
-      { completed: true },
+      { status: 'completed' },
       { name: 'Walk', targetType: 'binary' },
     );
     // Find a text node or span with ✓
@@ -154,7 +154,7 @@ describe('buildHistoryHabitRow — completion states (HISTORY-02, HISTORY-06)', 
   test('uses version.name for historical accuracy (HISTORY-06)', () => {
     const out = buildHistoryHabitRow(
       { id: 'h1', name: 'Current Name', wave: 1 },
-      { completed: false },
+      { status: 'failed' },
       { name: 'Historical Name', targetType: 'binary' },
     );
     const nameEl = collectDeep(out, (d) => String(d.text ?? '').includes('Historical Name'));
@@ -164,7 +164,7 @@ describe('buildHistoryHabitRow — completion states (HISTORY-02, HISTORY-06)', 
   test('toggle-log button has data-habit-id and data-action', () => {
     const out = buildHistoryHabitRow(
       { id: 'h1', name: 'Walk', wave: 1 },
-      { completed: true },
+      { status: 'completed' },
       { name: 'Walk', targetType: 'binary' },
     );
     const btn = findDeep(out, (d) => d.attrs?.['data-action'] === 'toggle-log');
@@ -185,7 +185,7 @@ describe('buildHistoryHabitRow — completion states (HISTORY-02, HISTORY-06)', 
   test('data-date attribute is set on toggle-log button', () => {
     const out = buildHistoryHabitRow(
       { id: 'h1', name: 'Walk', wave: 1 },
-      { completed: true },
+      { status: 'completed' },
       { name: 'Walk', targetType: 'binary' },
       '2026-06-04',
     );

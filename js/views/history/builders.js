@@ -132,7 +132,7 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
     statusText = `${checked} / ${total} ${t('history.slots')}`;
   } else {
     // binary
-    statusText = log.completed === true ? '✓' : '–';
+    statusText = log.status === 'completed' ? '✓' : '–';
   }
 
   /** @type {Record<string, string>} */
@@ -198,7 +198,7 @@ export function buildHistoryReadOnly(habit, log, version) {
     statusText = `${checked} / ${total} ${t('history.slots')}`;
   } else {
     // binary
-    statusText = log.completed === true ? '✓' : '–';
+    statusText = log.status === 'completed' ? '✓' : '–';
   }
 
   return {
