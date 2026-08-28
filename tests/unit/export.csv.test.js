@@ -82,12 +82,12 @@ function makeCtx(logs = [], weekStart = 'mon') {
     weekStart,
     weekCompletions: (habitId, start, end) => {
       return logs.filter(
-        l => l.habitId === habitId && l.date >= start && l.date <= end && l.completed
+        l => l.habitId === habitId && l.date >= start && l.date <= end && l.status === 'completed'
       ).length;
     },
     monthCompletions: (habitId, start, end) => {
       return logs.filter(
-        l => l.habitId === habitId && l.date >= start && l.date <= end && l.completed
+        l => l.habitId === habitId && l.date >= start && l.date <= end && l.status === 'completed'
       ).length;
     },
   };
@@ -110,18 +110,18 @@ describe('csvCellValue — binary habit, applicable, no log', () => {
 // Test 2: Binary habit, applicable today, completed log → cell value is '1'
 // ---------------------------------------------------------------------------
 describe('csvCellValue — binary habit, applicable, completed', () => {
-  test('returns "1" when binary habit has completed:true log', () => {
+  test('returns "1" when binary habit has status:completed log', () => {
     const habit = binaryHabit();
     const date = '2026-06-06';
-    const logs = [{ habitId: 'h1', date: '2026-06-06', completed: true }];
+    const logs = [{ habitId: 'h1', date: '2026-06-06', status: 'completed' }];
     const ctx = makeCtx(logs);
     assert.equal(csvCellValue(habit, date, logs, ctx), '1');
   });
 
-  test('returns "0" when binary habit has completed:false log', () => {
+  test('returns "0" when binary habit has status:failed log', () => {
     const habit = binaryHabit();
     const date = '2026-06-06';
-    const logs = [{ habitId: 'h1', date: '2026-06-06', completed: false }];
+    const logs = [{ habitId: 'h1', date: '2026-06-06', status: 'failed' }];
     const ctx = makeCtx(logs);
     assert.equal(csvCellValue(habit, date, logs, ctx), '0');
   });
@@ -149,7 +149,7 @@ describe('csvCellValue — cadence exclusion', () => {
     });
     const date = '2026-06-04'; // Thursday — same week as Mon 2026-06-01
     // Prior completion on Monday of the same week
-    const logs = [{ habitId: 'h-weekly', date: '2026-06-01', completed: true }];
+    const logs = [{ habitId: 'h-weekly', date: '2026-06-01', status: 'completed' }];
     const ctx = makeCtx(logs);
     assert.equal(csvCellValue(habit, date, logs, ctx), 'x');
   });
@@ -272,8 +272,8 @@ describe('csvCellValue — applicable with no log', () => {
     const date = '2026-06-06';
     // Logs exist on OTHER dates but not this one
     const logs = [
-      { habitId: 'h1', date: '2026-06-05', completed: true },
-      { habitId: 'h1', date: '2026-06-04', completed: true },
+      { habitId: 'h1', date: '2026-06-05', status: 'completed' },
+      { habitId: 'h1', date: '2026-06-04', status: 'completed' },
     ];
     const ctx = makeCtx(logs);
     assert.equal(csvCellValue(habit, date, logs, ctx), '0');

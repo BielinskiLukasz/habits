@@ -43,6 +43,7 @@ import {
   handleRestoreLogRow,
 } from './apply/markCompleted.js';
 import { handleMarkUncompleted } from './apply/markUncompleted.js';
+import { handleMarkSkipped } from './apply/markSkipped.js';
 import { handleSetSetting } from './apply/setSetting.js';
 import { handleCreateHabit } from './apply/createHabit.js';
 import { handleEditHabit } from './apply/editHabit.js';
@@ -66,6 +67,7 @@ const HANDLERS = {
   markCompleted: handleMarkCompleted,
   restoreLogRow: handleRestoreLogRow,
   markUncompleted: handleMarkUncompleted,
+  markSkipped: handleMarkSkipped,
   setSetting: handleSetSetting,
   createHabit: handleCreateHabit,
   editHabit: handleEditHabit,

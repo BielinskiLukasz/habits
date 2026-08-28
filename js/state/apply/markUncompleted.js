@@ -52,8 +52,8 @@
 export async function handleMarkUncompleted(event, repo) {
   const { habitId, date } = event.payload;
   const prior = await repo.getLog(habitId, date);
-  /** @type {{ habitId: string, date: string, completed: false, definitionVersion: null }} */
-  const next = { habitId, date, completed: false, definitionVersion: null };
+  /** @type {{ habitId: string, date: string, status: 'failed', definitionVersion: null }} */
+  const next = { habitId, date, status: 'failed', definitionVersion: null };
   const habitRow = await _recomputeLastCompletedDate({
     habitId,
     currentLogRow: next,
@@ -112,7 +112,7 @@ export async function _recomputeLastCompletedDate({ habitId, currentLogRow, repo
     .filter((l) => l.date !== currentLogRow.date)
     .concat([currentLogRow]);
   const completedDates = merged
-    .filter((l) => l.completed === true)
+    .filter((l) => l.status === 'completed')
     .map((l) => l.date)
     .sort();
   const lastCompletedDate =

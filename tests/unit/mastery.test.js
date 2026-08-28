@@ -68,13 +68,13 @@ function makeCtx({
 
 /**
  * Build a set of daily binary logs: for each date in the range [start, end]
- * (inclusive), emit a log with `completed: true` (or false).
+ * (inclusive), emit a log with `status: 'completed'` (or 'failed').
  *
  * @param {string} habitId
  * @param {string} startYMD YYYY-MM-DD
  * @param {string} endYMD YYYY-MM-DD
- * @param {boolean} completed
- * @returns {Array<{habitId: string, date: string, completed: boolean}>}
+ * @param {boolean} completed — true → status:'completed', false → status:'failed'
+ * @returns {Array<{habitId: string, date: string, status: string}>}
  */
 function buildDailyLogs(habitId, startYMD, endYMD, completed = true) {
   const logs = [];
@@ -87,7 +87,7 @@ function buildDailyLogs(habitId, startYMD, endYMD, completed = true) {
     const y = cur.getFullYear();
     const mo = String(cur.getMonth() + 1).padStart(2, '0');
     const day = String(cur.getDate()).padStart(2, '0');
-    logs.push({ habitId, date: `${y}-${mo}-${day}`, completed });
+    logs.push({ habitId, date: `${y}-${mo}-${day}`, status: completed ? 'completed' : 'failed' });
     cur.setDate(cur.getDate() + 1);
   }
   return logs;
@@ -176,8 +176,8 @@ describe('evaluateMastery — cadence-aware denominator (MASTERY-01, MASTERY-05)
     };
     // Build 63 completed + 7 not-completed
     const logs = buildDailyLogs('h1', windowStart, evalDate, true);
-    // Replace last 7 with not-completed
-    logs.slice(-7).forEach(l => { l.completed = false; });
+    // Replace last 7 with not-completed (status:'failed')
+    logs.slice(-7).forEach(l => { l.status = 'failed'; });
     const result = evaluateMastery(habit, logs, evalDate, ctx);
     assert.equal(result.applicableDayCount, 70);
     assert.equal(result.completedCount, 63);
@@ -222,7 +222,7 @@ describe('evaluateMastery — cadence-aware denominator (MASTERY-01, MASTERY-05)
         const y = cur.getFullYear();
         const mo = String(cur.getMonth() + 1).padStart(2, '0');
         const day = String(cur.getDate()).padStart(2, '0');
-        allLogs.push({ habitId: 'h2', date: `${y}-${mo}-${day}`, completed: true });
+        allLogs.push({ habitId: 'h2', date: `${y}-${mo}-${day}`, status: 'completed' });
       }
       cur.setDate(cur.getDate() + 1);
     }
@@ -260,7 +260,7 @@ describe('evaluateMastery — cadence-aware denominator (MASTERY-01, MASTERY-05)
         const y = cur.getFullYear();
         const mo = String(cur.getMonth() + 1).padStart(2, '0');
         const day = String(cur.getDate()).padStart(2, '0');
-        allLogs.push({ habitId: 'h2', date: `${y}-${mo}-${day}`, completed: true });
+        allLogs.push({ habitId: 'h2', date: `${y}-${mo}-${day}`, status: 'completed' });
       }
       cur.setDate(cur.getDate() + 1);
     }
@@ -355,16 +355,16 @@ describe('evaluateMastery — binary log type dispatch', () => {
   const createdAt = '2026-01-01';
   const evalDate = '2026-06-01';
 
-  test('binary: log.completed === true → counts as completed', () => {
+  test('binary: log.status === "completed" → counts as completed', () => {
     const habit = { id: 'h1', cadence: { type: 'daily' }, createdAt, targetType: 'binary' };
-    const logs = [{ habitId: 'h1', date: evalDate, completed: true }];
+    const logs = [{ habitId: 'h1', date: evalDate, status: 'completed' }];
     const result = evaluateMastery(habit, logs, evalDate, ctx);
     assert.ok(result.completedCount >= 1);
   });
 
-  test('binary: log.completed === false → does NOT count as completed', () => {
+  test('binary: log.status === "failed" → does NOT count as completed', () => {
     const habit = { id: 'h1', cadence: { type: 'daily' }, createdAt, targetType: 'binary' };
-    const logs = [{ habitId: 'h1', date: evalDate, completed: false }];
+    const logs = [{ habitId: 'h1', date: evalDate, status: 'failed' }];
     const result = evaluateMastery(habit, logs, evalDate, ctx);
     assert.equal(result.completedCount, 0);
   });
@@ -599,7 +599,7 @@ describe('evaluateMastery — unknown targetType fallback (T-04-02)', () => {
       id: 'h99', cadence: { type: 'daily' }, createdAt,
       targetType: 'future-unknown-type',
     };
-    const logs = [{ habitId: 'h99', date: evalDate, completed: true, count: 99 }];
+    const logs = [{ habitId: 'h99', date: evalDate, status: 'completed', count: 99 }];
     // Should not throw; unknown type just does not count as completed.
     const result = evaluateMastery(habit, logs, evalDate, ctx);
     assert.equal(result.completedCount, 0);
@@ -649,21 +649,21 @@ describe('evaluateMastery — log date range filtering', () => {
   test('logs before the 70-day window are NOT counted', () => {
     const habit = { id: 'h1', cadence: { type: 'daily' }, createdAt, targetType: 'binary' };
     // A log 100 days before evalDate (outside 70-day window)
-    const oldLog = { habitId: 'h1', date: '2026-02-21', completed: true };
+    const oldLog = { habitId: 'h1', date: '2026-02-21', status: 'completed' };
     const result = evaluateMastery(habit, [oldLog], evalDate, ctx);
     assert.equal(result.completedCount, 0);
   });
 
   test('logs in the future (after evalDate) are NOT counted', () => {
     const habit = { id: 'h1', cadence: { type: 'daily' }, createdAt, targetType: 'binary' };
-    const futureLog = { habitId: 'h1', date: '2026-07-01', completed: true };
+    const futureLog = { habitId: 'h1', date: '2026-07-01', status: 'completed' };
     const result = evaluateMastery(habit, [futureLog], evalDate, ctx);
     assert.equal(result.completedCount, 0);
   });
 
   test('log on evalDate itself is included in window', () => {
     const habit = { id: 'h1', cadence: { type: 'daily' }, createdAt, targetType: 'binary' };
-    const todayLog = { habitId: 'h1', date: evalDate, completed: true };
+    const todayLog = { habitId: 'h1', date: evalDate, status: 'completed' };
     const result = evaluateMastery(habit, [todayLog], evalDate, ctx);
     assert.ok(result.completedCount >= 1);
   });
@@ -671,7 +671,7 @@ describe('evaluateMastery — log date range filtering', () => {
   test('log on window start date (70 days back inclusive) is included', () => {
     const habit = { id: 'h1', cadence: { type: 'daily' }, createdAt, targetType: 'binary' };
     // windowStart = daysFrom('2026-06-01', -69) = '2026-03-24'
-    const windowStartLog = { habitId: 'h1', date: '2026-03-24', completed: true };
+    const windowStartLog = { habitId: 'h1', date: '2026-03-24', status: 'completed' };
     const result = evaluateMastery(habit, [windowStartLog], evalDate, ctx);
     assert.ok(result.completedCount >= 1);
   });

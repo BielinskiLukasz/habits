@@ -41,7 +41,7 @@ import {
  * @type {Record<string, (log: object, habit: object) => boolean>}
  */
 const LOG_COMPLETED = {
-  binary: (log, _habit) => log.completed === true,
+  binary: (log, _habit) => log.status === 'completed',
 
   numeric: (log, habit) => (log.count ?? 0) >= (habit.target ?? 1),
 
@@ -204,13 +204,21 @@ export function computeS1(habit, logsForHabit, ctx) {
   // daysFrom(evaluationDate, -(windowDays-1)) gives a span of exactly windowDays.
   const windowStart = daysFrom(ctx.evaluationDate, -(ctx.windowDays - 1));
 
+  // Build a log lookup for skipped-day exclusion.
+  const s1LogByDate = new Map();
+  for (const log of logsForHabit) {
+    s1LogByDate.set(log.date, log);
+  }
+
   // Count applicable days (cadence-aware denominator).
+  // Skipped days are excluded: the user consciously opted out, so they should
+  // not penalise the score or dilute the denominator (4-state model, o1g).
   let applicableDayCount = 0;
   for (let i = 0; i < ctx.windowDays; i++) {
     const dayYMD = daysFrom(windowStart, i);
-    if (ctx.appliesToday(habit, dayYMD, ctx)) {
-      applicableDayCount++;
-    }
+    if (!ctx.appliesToday(habit, dayYMD, ctx)) continue;
+    if (s1LogByDate.get(dayYMD)?.status === 'skipped') continue;
+    applicableDayCount++;
   }
 
   // Zero applicable days: score 0, status Failing (habit never applies in window).
@@ -299,6 +307,8 @@ export function computeS2(habit, logsForHabit, ctx) {
   for (let i = 0; i < ctx.windowDays; i++) {
     const dayYMD = daysFrom(ctx.evaluationDate, -i);
     if (!ctx.appliesToday(habit, dayYMD, ctx)) continue;
+    // Skipped days are excluded from both numerator and denominator (o1g).
+    if (logByDate.get(dayYMD)?.status === 'skipped') continue;
 
     // Exponential weight decaying with 21-day half-life.
     const w = Math.pow(2, -i / 21) * baseWeightMultiplier;
@@ -375,6 +385,8 @@ export function computeS3(habit, logsForHabit, ctx, allHabits) {
 
     // Skip if the target habit does not apply on this day.
     if (!ctx.appliesToday(habit, dayYMD, ctx)) continue;
+    // Skipped days excluded from the target habit's denominator (o1g).
+    if (logByDate.get(dayYMD)?.status === 'skipped') continue;
 
     // Compute load: count of ALL habits applicable on this day.
     const loadCount = allHabits.filter(h => ctx.appliesToday(h, dayYMD, ctx)).length;

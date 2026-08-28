@@ -33,7 +33,7 @@
  */
 
 /** @type {number} */
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 /**
  * IDB migrations dispatch table — one entry per version bump.
@@ -71,5 +71,41 @@ export const MIGRATIONS = {
     const snapshots = db.createObjectStore('score_snapshots', { keyPath: ['habitId', 'date'] });
     snapshots.createIndex('date', 'date');
     snapshots.createIndex('habitId', 'habitId');
+  },
+
+  /**
+   * v2 — Migrate `logs` rows from `completed: boolean` to `status:
+   * 'completed'|'failed'` (4-state log model, o1g).
+   *
+   * Uses raw cursor callbacks — no async/await — because the IDB upgrade
+   * transaction auto-commits when all pending requests drain. Keeping
+   * `cursor.update().onsuccess → cursor.continue()` as an onsuccess chain
+   * ensures the transaction always has an outstanding request until the
+   * last row is processed.
+   *
+   * Idempotent: rows that already carry a `status` field are skipped.
+   *
+   * @param {IDBDatabase} _db
+   * @param {IDBTransaction} tx
+   */
+  2: (_db, tx) => {
+    const store = tx.objectStore('logs');
+    const req = store.openCursor();
+    req.onsuccess = function onCursor(e) {
+      const cursor = e.target.result;
+      if (!cursor) return; // all rows processed
+      const value = cursor.value;
+      if (value.status !== undefined) {
+        // Already migrated — skip (idempotent guard).
+        cursor.continue();
+        return;
+      }
+      const migrated = {
+        ...value,
+        status: value.completed === true ? 'completed' : 'failed',
+      };
+      const upd = cursor.update(migrated);
+      upd.onsuccess = () => cursor.continue();
+    };
   },
 };

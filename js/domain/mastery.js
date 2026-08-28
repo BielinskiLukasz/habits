@@ -41,7 +41,7 @@ import {
  * @type {Record<string, (log: object, habit: object) => boolean>}
  */
 const LOG_COMPLETED = {
-  binary: (log, _habit) => log.completed === true,
+  binary: (log, _habit) => log.status === 'completed',
 
   numeric: (log, habit) => (log.count ?? 0) >= (habit.target ?? 1),
 

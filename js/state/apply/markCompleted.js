@@ -53,8 +53,8 @@ import { _recomputeLastCompletedDate } from './markUncompleted.js';
 export async function handleMarkCompleted(event, repo) {
   const { habitId, date } = event.payload;
   const prior = await repo.getLog(habitId, date); // undefined when no prior row exists
-  /** @type {{ habitId: string, date: string, completed: true, definitionVersion: null }} */
-  const next = { habitId, date, completed: true, definitionVersion: null };
+  /** @type {{ habitId: string, date: string, status: 'completed', definitionVersion: null }} */
+  const next = { habitId, date, status: 'completed', definitionVersion: null };
   const habitRow = await _recomputeLastCompletedDate({
     habitId,
     currentLogRow: next,
@@ -113,7 +113,7 @@ export async function handleRestoreLogRow(event, repo) {
     // existing log row at this date AND the synthetic row won't contribute
     // to the max because completed===false. This is equivalent to removing
     // the date entirely from the completed-dates pool.
-    currentLogRow = { habitId, date, completed: false };
+    currentLogRow = { habitId, date, status: 'failed' };
   } else {
     writes = [{ store: 'logs', value: prior }];
     currentLogRow = prior;

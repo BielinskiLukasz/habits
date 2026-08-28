@@ -58,7 +58,7 @@ function makeCtx({
 function buildCompletedLogs(habitId, evalDate, count) {
   const logs = [];
   for (let i = count - 1; i >= 0; i--) {
-    logs.push({ habitId, date: daysFrom(evalDate, -i), completed: true });
+    logs.push({ habitId, date: daysFrom(evalDate, -i), status: 'completed' });
   }
   return logs;
 }

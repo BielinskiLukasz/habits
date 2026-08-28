@@ -52,21 +52,86 @@ function mockDb() {
 }
 
 describe('DB_VERSION', () => {
-  test('is the number 1 (v1 schema is locked)', () => {
-    assert.equal(DB_VERSION, 1);
+  test('is the number 2 (v2 adds 4-state log status migration, o1g)', () => {
+    assert.equal(DB_VERSION, 2);
     assert.equal(typeof DB_VERSION, 'number');
   });
 });
 
 describe('MIGRATIONS', () => {
-  test('is an object with key "1" mapping to a function', () => {
+  test('is an object with keys "1" and "2" mapping to functions', () => {
     assert.equal(typeof MIGRATIONS, 'object');
     assert.notEqual(MIGRATIONS, null);
     assert.equal(typeof MIGRATIONS[1], 'function');
+    assert.equal(typeof MIGRATIONS[2], 'function');
   });
 
-  test('contains exactly key "1" at this point in time', () => {
-    assert.deepEqual(Object.keys(MIGRATIONS), ['1']);
+  test('contains exactly keys "1" and "2" at this point in time', () => {
+    assert.deepEqual(Object.keys(MIGRATIONS), ['1', '2']);
+  });
+
+  test('MIGRATIONS[2] runs cursor-based migration on logs store (mock tx)', () => {
+    // Build a minimal IDB tx mock that captures cursor walk requests.
+    const rows = [
+      { habitId: 'h1', date: '2026-01-01', completed: true },
+      { habitId: 'h1', date: '2026-01-02', completed: false },
+      { habitId: 'h1', date: '2026-01-03', status: 'completed' }, // already migrated
+    ];
+    const updated = [];
+    let cursorIdx = 0;
+
+    function makeCursorRequest() {
+      const req = {};
+      req.onsuccess = null;
+      // Simulate async dispatch via synchronous draining loop below.
+      return req;
+    }
+
+    function drainCursor(req) {
+      // Fire onsuccess for each row, then null (end of cursor).
+      for (; cursorIdx <= rows.length; cursorIdx++) {
+        if (cursorIdx === rows.length) {
+          // End of cursor — fire with null result.
+          if (req.onsuccess) req.onsuccess({ target: { result: null } });
+          break;
+        }
+        const rowIdx = cursorIdx;
+        const value = rows[rowIdx];
+        cursorIdx++;
+        const updateReq = {};
+        const cursor = {
+          value,
+          update(newValue) {
+            updated.push(newValue);
+            updateReq.onsuccess = null;
+            return updateReq;
+          },
+          continue() {
+            drainCursor(req);
+          },
+        };
+        if (req.onsuccess) req.onsuccess({ target: { result: cursor } });
+        // If update was called, fire its onsuccess to trigger cursor.continue().
+        if (updateReq.onsuccess) updateReq.onsuccess();
+        break;
+      }
+    }
+
+    const openCursorReq = makeCursorRequest();
+    const mockStore = { openCursor: () => openCursorReq };
+    const mockTx = { objectStore: () => mockStore };
+
+    MIGRATIONS[2](null, mockTx);
+    // Fire the cursor walk starting from the onsuccess handler.
+    drainCursor(openCursorReq);
+
+    // Row 0: completed:true → status:'completed'
+    assert.equal(updated[0].status, 'completed');
+    assert.equal(updated[0].habitId, 'h1');
+    // Row 1: completed:false → status:'failed'
+    assert.equal(updated[1].status, 'failed');
+    // Row 2: already has status — should be skipped (not updated).
+    assert.equal(updated.length, 2, 'only 2 rows should be migrated (1 already had status)');
   });
 
   test('MIGRATIONS[1] creates exactly 7 stores with the locked (name, options) shapes', () => {

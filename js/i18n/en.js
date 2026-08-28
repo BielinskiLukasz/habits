@@ -21,6 +21,10 @@ export const EN = {
   'today.count': '{done} of {total}',
   'today.showPolish': 'Show original Polish name',
   'today.phaseTooltip': 'Coming in Phase 4',
+  'today.skip': 'Skip',
+  'today.fail': 'Fail',
+  'today.skipped': 'Skipped',
+  'today.failed': 'Failed',
 
   // Catalog view
   'catalog.title': 'Catalog',

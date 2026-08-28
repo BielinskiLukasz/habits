@@ -210,7 +210,7 @@ function buildCadenceCtx(allLogs, weekStart) {
   function isCompleted(log) {
     if (Array.isArray(log.slots)) return log.slots.some((s) => s.checked);
     if (typeof log.count === 'number') return log.count > 0;
-    return log.completed === true;
+    return log.status === 'completed';
   }
 
   return {
@@ -378,8 +378,10 @@ export function csvCellValue(habit, date, logs, ctx) {
     return String(log.count);
   }
 
-  // Binary habit: log.completed is boolean.
-  return log.completed === true ? '1' : '0';
+  // Binary habit: 4-state model (o1g) — skipped → 'x', completed → '1', failed → '0'.
+  if (log.status === 'skipped') return 'x';
+  if (log.status === 'completed') return '1';
+  return '0';
 }
 
 /**
