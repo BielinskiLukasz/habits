@@ -7,6 +7,7 @@ data/
 # GSD
 gsd-*
 .gsd-*
+.gsd/
 .claude/get-shit-done/
 .claude/commands/gsd/
 .claude/hooks/lib/git-cmd.js
