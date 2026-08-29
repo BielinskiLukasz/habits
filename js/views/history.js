@@ -29,10 +29,13 @@
 
 import { buildHistoryHeader, buildHistoryHabitRow, buildHistoryReadOnly, buildBulkActionBar } from './history/builders.js';
 import { apply } from '../state/apply.js';
+import { undo } from '../state/undo.js';
 import { mount } from '../util/mount.js';
 import { appliesToday } from '../domain/cadence.js';
 import { todayLocal, daysFrom, formatLocalYMD, parseLocalYMD } from '../util/date.js';
 import { t, getLang } from '../i18n/index.js';
+import { showUndoToast, showErrorToast } from './toast.js';
+import { getCachedHabits } from '../state/store.js';
 
 /**
  * Clear every child of `parent` without using `.innerHTML = ''` (D-78).
@@ -42,6 +45,28 @@ import { t, getLang } from '../i18n/index.js';
  */
 function clearChildren(parent) {
   while (parent.firstChild) parent.removeChild(parent.firstChild);
+}
+
+/** @type {Element|null} Currently-open swipe actions panel row (one at a time). */
+let _openSwipeRow = null;
+
+/** @type {Element|null} Row currently being swiped (pointer captured). */
+let _swipeEl = null;
+
+/** @type {number} clientX where the active swipe started. */
+let _swipeStartX = 0;
+
+/**
+ * Collapse any open swipe actions panel and clear the tracking ref.
+ *
+ * @returns {void}
+ */
+function _closeOpenHistorySwipeRow() {
+  if (!_openSwipeRow) return;
+  const slide = _openSwipeRow.querySelector('.history-row__slide');
+  if (slide) slide.style.transform = '';
+  _openSwipeRow.classList.remove('history-habit-row--swipe-open');
+  _openSwipeRow = null;
 }
 
 /**
@@ -78,6 +103,92 @@ export function mountHistory(parent, { repo, store }) {
   let selectedDate = todayLocal();
 
   /**
+   * Pointer-down on the history list: begin swipe gesture tracking.
+   *
+   * @param {PointerEvent} evt
+   * @returns {void}
+   */
+  function handleSwipeStart(evt) {
+    if (evt.pointerType === 'mouse' && evt.button !== 0) return;
+    const row = evt.target.closest('.history-habit-row');
+    if (!row) { _closeOpenHistorySwipeRow(); return; }
+    if (evt.target.closest('.today-row__actions')) return;
+    if (_openSwipeRow && _openSwipeRow !== row) _closeOpenHistorySwipeRow();
+    _swipeEl = row;
+    _swipeStartX = evt.clientX;
+    evt.currentTarget.setPointerCapture(evt.pointerId);
+  }
+
+  /**
+   * Pointer-move: translate the slide div in real time.
+   *
+   * @param {PointerEvent} evt
+   * @returns {void}
+   */
+  function handleSwipeMove(evt) {
+    if (!_swipeEl) return;
+    const dx = evt.clientX - _swipeStartX;
+    const slide = _swipeEl.querySelector('.history-row__slide');
+    if (!slide) return;
+    const clamped = Math.max(-120, Math.min(80, dx));
+    slide.style.transform = `translateX(${clamped}px)`;
+  }
+
+  /**
+   * Pointer-up: commit swipe action or snap back.
+   *
+   * - dx > 60 → swipe-right: mark completed for selectedDate.
+   * - dx < -60 → swipe-left: reveal actions panel.
+   * - Otherwise → snap back.
+   *
+   * @param {PointerEvent} evt
+   * @returns {void}
+   */
+  function handleSwipeEnd(evt) {
+    if (!_swipeEl) return;
+    const dx = evt.clientX - _swipeStartX;
+    const slide = _swipeEl.querySelector('.history-row__slide');
+    const row = _swipeEl;
+    _swipeEl = null;
+
+    if (dx > 60) {
+      if (slide) slide.style.transform = '';
+      const habitId = row.querySelector('[data-habit-id]')?.getAttribute('data-habit-id');
+      if (habitId) {
+        apply({ type: 'markCompleted', payload: { habitId, date: selectedDate } })
+          .then(() => {
+            const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+            showUndoToast({ message: `Marked ${habitName} complete`, undoFn: () => undo() });
+            render(selectedDate);
+          })
+          .catch(() => showErrorToast("Couldn't mark — try again"));
+      }
+    } else if (dx < -60) {
+      if (slide) slide.style.transform = 'translateX(-120px)';
+      row.classList.add('history-habit-row--swipe-open');
+      _openSwipeRow = row;
+    } else {
+      if (slide) slide.style.transform = '';
+      if (_openSwipeRow === row) {
+        row.classList.remove('history-habit-row--swipe-open');
+        _openSwipeRow = null;
+      }
+    }
+  }
+
+  /**
+   * Pointer-cancel: abort swipe and snap slide back.
+   *
+   * @returns {void}
+   */
+  function handleSwipeCancel() {
+    if (!_swipeEl) return;
+    const slide = _swipeEl.querySelector('.history-row__slide');
+    if (slide) slide.style.transform = '';
+    _swipeEl = null;
+  }
+
+  /**
    * Async render pass: reads IDB, builds description tree, mounts into parent.
    *
    * @param {string} date YYYY-MM-DD
@@ -85,6 +196,10 @@ export function mountHistory(parent, { repo, store }) {
    */
   async function render(date) {
     clearChildren(parent);
+
+    // Reset swipe tracking state — DOM is about to be rebuilt.
+    _openSwipeRow = null;
+    _swipeEl = null;
 
     const today = todayLocal();
     const canGoForward = date < today;
@@ -220,7 +335,9 @@ export function mountHistory(parent, { repo, store }) {
             const freshLogs = await repo.getLogsForDate(logDate);
             const currentLog = freshLogs.find((l) => l.habitId === habitId) ?? null;
             try {
-              if (currentLog?.completed === true) {
+              // Check status field (4-state model); fall back to completed boolean for legacy logs.
+              const isCompleted = currentLog?.status === 'completed' || currentLog?.completed === true;
+              if (isCompleted) {
                 await apply({ type: 'markUncompleted', payload: { habitId, date: logDate } });
               } else {
                 await apply({ type: 'markCompleted', payload: { habitId, date: logDate } });
@@ -230,8 +347,42 @@ export function mountHistory(parent, { repo, store }) {
             }
             render(selectedDate);
           },
+          'history-swipe-skip': async (evt) => {
+            const btn = evt.currentTarget;
+            const habitId = btn.getAttribute('data-habit-id');
+            const logDate = btn.getAttribute('data-date') || selectedDate;
+            _closeOpenHistorySwipeRow();
+            try {
+              await apply({ type: 'markSkipped', payload: { habitId, date: logDate } });
+              const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+              showUndoToast({ message: `Skipped ${habitName}`, undoFn: () => undo() });
+            } catch (_e) {
+              showErrorToast("Couldn't skip — try again");
+            }
+            render(selectedDate);
+          },
+          'history-swipe-fail': async (evt) => {
+            const btn = evt.currentTarget;
+            const habitId = btn.getAttribute('data-habit-id');
+            const logDate = btn.getAttribute('data-date') || selectedDate;
+            _closeOpenHistorySwipeRow();
+            try {
+              await apply({ type: 'markUncompleted', payload: { habitId, date: logDate } });
+              const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
+              showUndoToast({ message: `Marked ${habitName} not done`, undoFn: () => undo() });
+            } catch (_e) {
+              showErrorToast("Couldn't mark — try again");
+            }
+            render(selectedDate);
+          },
         });
       }
+
+      // Wire swipe gesture (pointer events, event delegation on listEl).
+      listEl.addEventListener('pointerdown', handleSwipeStart);
+      listEl.addEventListener('pointermove', handleSwipeMove);
+      listEl.addEventListener('pointerup', handleSwipeEnd);
+      listEl.addEventListener('pointercancel', handleSwipeCancel);
     }
   }
 

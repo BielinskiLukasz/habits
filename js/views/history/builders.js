@@ -105,8 +105,18 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
  * T-04-09c: slot names and habit names are rendered via `text:` (textContent),
  * never innerHTML, so user-supplied strings cannot inject markup.
  *
+ * Swipe UX (mirrors Today view — same 4-state model):
+ *   - Swipe right → `markCompleted` for the selected date.
+ *   - Swipe left → reveals `.today-row__actions` panel (Skip + Fail).
+ *   - Toggle button inside the slide → tap to cycle completed ↔ not-done.
+ *
+ * Row state classes:
+ *   - `history-habit-row--completed` when status === 'completed' (muted opacity).
+ *   - `history-habit-row--skipped` when status === 'skipped' (italic name).
+ *   - `history-habit-row--failed` when status === 'failed'.
+ *
  * @param {{ id: string, name: string, wave?: number }} habit — current habit row
- * @param {{ completed?: boolean, count?: number, slots?: Array<{name: string, checked: boolean}> } | null} log — log row for this date, or null
+ * @param {{ status?: string, count?: number, slots?: Array<{name: string, checked: boolean}> } | null} log — log row for this date, or null
  * @param {{ name: string, targetType?: 'binary'|'numeric'|'slot-checklist', target?: number }} version — habit_versions entry effective on the selected date
  * @param {string} [date] — selected date YYYY-MM-DD (for data-date attribute)
  * @returns {{ tag: string, attrs: object, children: object[] }}
@@ -116,6 +126,8 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
   const displayName = getLang() === 'pl'
     ? (version.name_pl ?? version.name ?? habit.name_pl ?? habit.name)
     : (version.name ?? habit.name);
+
+  const logStatus = log?.status ?? null;
 
   // Compute completion display text for the status indicator.
   let statusText;
@@ -131,9 +143,17 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
     const total = version.target ?? slots.length;
     statusText = `${checked} / ${total} ${t('history.slots')}`;
   } else {
-    // binary
-    statusText = log.status === 'completed' ? '✓' : '–';
+    // binary — reflect all 4 states
+    if (logStatus === 'completed') statusText = '✓';
+    else if (logStatus === 'skipped') statusText = '↷';
+    else if (logStatus === 'failed') statusText = '✕';
+    else statusText = '–';
   }
+
+  const rowClasses = ['history-habit-row'];
+  if (logStatus === 'completed') rowClasses.push('history-habit-row--completed');
+  else if (logStatus === 'skipped') rowClasses.push('history-habit-row--skipped');
+  else if (logStatus === 'failed') rowClasses.push('history-habit-row--failed');
 
   /** @type {Record<string, string>} */
   const toggleAttrs = {
@@ -145,24 +165,62 @@ export function buildHistoryHabitRow(habit, log, version, date = '') {
     toggleAttrs['data-date'] = date;
   }
 
+  /** @type {Record<string, string>} */
+  const skipAttrs = {
+    class: 'today-row__action today-row__action--skip',
+    'data-action': 'history-swipe-skip',
+    'data-habit-id': habit.id,
+  };
+  if (date) skipAttrs['data-date'] = date;
+
+  /** @type {Record<string, string>} */
+  const failAttrs = {
+    class: 'today-row__action today-row__action--fail',
+    'data-action': 'history-swipe-fail',
+    'data-habit-id': habit.id,
+  };
+  if (date) failAttrs['data-date'] = date;
+
   return {
     tag: 'li',
-    attrs: { class: 'history-habit-row' },
+    attrs: { class: rowClasses.join(' ') },
     children: [
       {
-        tag: 'span',
-        attrs: { class: 'history-habit-name' },
-        text: displayName,
+        tag: 'div',
+        attrs: { class: 'history-row__slide' },
+        children: [
+          {
+            tag: 'span',
+            attrs: { class: 'history-habit-name' },
+            text: displayName,
+          },
+          {
+            tag: 'span',
+            attrs: { class: 'history-habit-status' },
+            text: statusText,
+          },
+          {
+            tag: 'button',
+            attrs: toggleAttrs,
+            text: t('history.toggle'),
+          },
+        ],
       },
       {
-        tag: 'span',
-        attrs: { class: 'history-habit-status' },
-        text: statusText,
-      },
-      {
-        tag: 'button',
-        attrs: toggleAttrs,
-        text: t('history.toggle'),
+        tag: 'div',
+        attrs: { class: 'today-row__actions' },
+        children: [
+          {
+            tag: 'button',
+            attrs: skipAttrs,
+            text: t('today.skip'),
+          },
+          {
+            tag: 'button',
+            attrs: failAttrs,
+            text: t('today.fail'),
+          },
+        ],
       },
     ],
   };

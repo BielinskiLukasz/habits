@@ -109,11 +109,39 @@
 }
 
 .history-habit-row {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+/* Completed rows muted (mirrors today-row--completed). */
+.history-habit-row--completed {
+  opacity: 0.55;
+}
+
+/* Skipped rows — muted italic name. */
+.history-habit-row--skipped .history-habit-name {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Failed rows — slightly muted. */
+.history-habit-row--failed .history-habit-name {
+  opacity: 0.7;
+}
+
+/* Swipeable slide layer — mirrors .today-row__slide. */
+.history-row__slide {
   display: flex;
   align-items: center;
   gap: var(--space-3, 0.75rem);
   padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  position: relative;
+  z-index: 1;
+  background: var(--color-bg, #fff);
+  transition: transform 0.15s ease;
+  will-change: transform;
+  touch-action: pan-y;
 }
 
 .history-habit-name {
