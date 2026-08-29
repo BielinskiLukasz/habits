@@ -183,19 +183,6 @@
     border-radius: 3px;
   }
 
-  /* Settings desktop link */
-  .settings-desktop-link {
-    text-align: center;
-    padding: var(--space-3);
-  }
-  .settings-desktop-link a {
-    color: var(--color-accent);
-    text-decoration: none;
-  }
-  .settings-desktop-link a:hover {
-    text-decoration: underline;
-  }
-
   /* Wave Planning accordion — Phase 9 (WAVE-01, WAVE-02, WAVE-03, WAVE-04) */
 
   .waveplanning {

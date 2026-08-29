@@ -898,16 +898,6 @@ export function mountSettings(parent, deps) {
   const scoringModelDesc = buildScoringModelCard({ scoringModel });
   const scoringModelCardEl = mount(scoringModelDesc, _panelEl, actions);
 
-  // Desktop link (D-115, DESKTOP-01) — provides navigation to the desktop
-  // analytics shell. Appended after all cards, before closing tag.
-  const desktopLinkEl = _panelEl.ownerDocument.createElement('p');
-  desktopLinkEl.setAttribute('class', 'settings-desktop-link');
-  const anchor = _panelEl.ownerDocument.createElement('a');
-  anchor.href = './desktop.html';
-  anchor.textContent = t('settings.data.openDesktop');
-  desktopLinkEl.appendChild(anchor);
-  _panelEl.appendChild(desktopLinkEl);
-
   parent.appendChild(_panelEl);
 
   // Wire change listeners on mastery inputs (mount.js wires only click;
