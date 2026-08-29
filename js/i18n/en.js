@@ -13,6 +13,7 @@ export const EN = {
   'nav.history': 'history',
   'nav.catalog': 'catalog',
   'nav.settings': 'settings',
+  'nav.analytics': 'analytics',
 
   // Today view
   'today.title': 'Habits',

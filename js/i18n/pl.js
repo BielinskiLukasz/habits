@@ -11,6 +11,7 @@ export const PL = {
   'nav.history': 'historia',
   'nav.catalog': 'katalog',
   'nav.settings': 'ustawienia',
+  'nav.analytics': 'analityka',
 
   // Today view
   'today.title': 'Nawyki',

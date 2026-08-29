@@ -101,6 +101,7 @@ export function buildFooterNav({ activeHash }) {
     { href: '#history', text: t('nav.history') },
     { href: '#catalog', text: t('nav.catalog') },
     { href: '#settings', text: t('nav.settings') },
+    { href: './desktop.html', text: t('nav.analytics') },
   ];
 
   return {

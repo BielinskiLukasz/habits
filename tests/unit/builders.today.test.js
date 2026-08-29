@@ -11,8 +11,8 @@
  *   - `_formatTodayDate(ymd)`: 'Wed 27 May' format on canonical + leap-day +
  *     no-zero-padding dates
  *   - `buildTodayHeader`: tag + class + h1 + date + wave slots
- *   - `buildFooterNav`: 3 anchors, aria-current on active, aria-disabled +
- *     tabindex + title on history (D-80)
+ *   - `buildFooterNav`: 5 anchors (today/history/catalog/settings/analytics),
+ *     aria-current on active, aria-disabled + tabindex + title on history (D-80)
  *   - `buildTodayRow`: button + aria-pressed + data-action + ⓘ disclosure
  *     (D-54, D-55, D-79)
  *   - `buildTodayList`: 3 branches — empty / all-done / normal list (D-58)
@@ -92,13 +92,13 @@ describe('buildTodayHeader — date + wave slots', () => {
   });
 });
 
-describe('buildFooterNav — 4 anchors + aria attributes (D-79, D-80, D-82)', () => {
-  test('emits <nav> with aria-label and 4 <a> children in today/history/catalog/settings order', () => {
+describe('buildFooterNav — 5 anchors + aria attributes (D-79, D-80, D-82)', () => {
+  test('emits <nav> with aria-label and 5 <a> children in today/history/catalog/settings/analytics order', () => {
     const out = buildFooterNav({ activeHash: '#today' });
     assert.equal(out.tag, 'nav');
     assert.equal(out.attrs.class, 'today-footer-nav');
     assert.equal(out.attrs['aria-label'], 'Primary navigation');
-    assert.equal(out.children.length, 4);
+    assert.equal(out.children.length, 5);
     assert.equal(out.children[0].tag, 'a');
     assert.equal(out.children[0].attrs.href, '#today');
     assert.equal(out.children[1].tag, 'a');
@@ -107,6 +107,8 @@ describe('buildFooterNav — 4 anchors + aria attributes (D-79, D-80, D-82)', ()
     assert.equal(out.children[2].attrs.href, '#catalog');
     assert.equal(out.children[3].tag, 'a');
     assert.equal(out.children[3].attrs.href, '#settings');
+    assert.equal(out.children[4].tag, 'a');
+    assert.equal(out.children[4].attrs.href, './desktop.html');
   });
 
   test('active link carries aria-current="page"', () => {
@@ -128,12 +130,13 @@ describe('buildFooterNav — 4 anchors + aria attributes (D-79, D-80, D-82)', ()
     assert.equal(catalogLink.attrs['aria-current'], 'page');
   });
 
-  test('link text labels are lowercase: today / history / catalog / settings', () => {
+  test('link text labels are lowercase: today / history / catalog / settings / analytics', () => {
     const out = buildFooterNav({ activeHash: '#today' });
     assert.equal(out.children[0].text, 'today');
     assert.equal(out.children[1].text, 'history');
     assert.equal(out.children[2].text, 'catalog');
     assert.equal(out.children[3].text, 'settings');
+    assert.equal(out.children[4].text, 'analytics');
   });
 });
 
