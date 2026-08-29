@@ -92,15 +92,15 @@ export function buildTodayHeader({ date, wave }) {
  * `aria-disabled="true"`, `tabindex="-1"`, and a `title="Coming in Phase 4"`
  * tooltip.
  *
- * @param {{ activeHash: string }} args
+ * @param {{ activeHash: string, linkBase?: string }} args
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
-export function buildFooterNav({ activeHash }) {
+export function buildFooterNav({ activeHash, linkBase = '' }) {
   const linkDefs = [
-    { href: '#today', text: t('nav.today') },
-    { href: '#history', text: t('nav.history') },
-    { href: '#catalog', text: t('nav.catalog') },
-    { href: '#settings', text: t('nav.settings') },
+    { href: `${linkBase}#today`, text: t('nav.today') },
+    { href: `${linkBase}#history`, text: t('nav.history') },
+    { href: `${linkBase}#catalog`, text: t('nav.catalog') },
+    { href: `${linkBase}#settings`, text: t('nav.settings') },
     { href: './desktop.html', text: t('nav.analytics') },
   ];
 

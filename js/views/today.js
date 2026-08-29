@@ -667,13 +667,14 @@ export function mountToday(parent) {
  *
  * @param {object} navEl
  * @param {string} activeHash
+ * @param {string} [linkBase] - prefix for hash-based links (e.g. './index.html' on desktop.html)
  * @returns {void}
  */
-export function mountFooterNav(navEl, activeHash) {
+export function mountFooterNav(navEl, activeHash, linkBase = '') {
   clearChildren(navEl);
   // buildFooterNav returns a <nav> element description; we want its children
   // inside the existing <nav> element instead of nesting nav inside nav.
-  const desc = buildFooterNav({ activeHash });
+  const desc = buildFooterNav({ activeHash, linkBase });
   // Propagate the aria-label onto the existing nav element so screen readers
   // see the same label the builder emits.
   if (desc.attrs && desc.attrs['aria-label']) {

@@ -65,6 +65,7 @@ import { mountAnalytics } from './views/desktop/analytics.js';
 import { mountWaveboard } from './views/desktop/waveboard.js';
 import { mountPlanning } from './views/desktop/planning.js';
 import { mountSettings } from './views/settings.js';
+import { mountFooterNav } from './views/today.js';
 import { applyStaticTranslations } from './i18n/index.js';
 
 registerServiceWorker();
@@ -133,6 +134,11 @@ const waveboardPanel = document.querySelector('section[data-route="waveboard"]')
 const planningPanel  = document.querySelector('section[data-route="planning"]');
 const settingsPanel  = document.querySelector('section[data-route="settings"]');
 const sidebarLinks   = document.querySelectorAll('.desktop-sidebar-link[data-route-link]');
+const footerNavEl    = document.querySelector('nav.today-footer-nav');
+
+// Footer nav: static on desktop — analytics is always the active entry; hash
+// links get the ./index.html prefix so they navigate back to the mobile shell.
+if (footerNavEl) mountFooterNav(footerNavEl, './desktop.html', './index.html');
 
 /**
  * Show one panel and hide the rest. Toggles the HTML `hidden` attribute

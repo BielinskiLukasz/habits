@@ -15,5 +15,6 @@
     color: var(--color-fg);
     min-height: 100vh;
     line-height: 1.5;
+    padding-bottom: var(--nav-h);
   }
 }

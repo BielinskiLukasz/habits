@@ -50,8 +50,12 @@
     --radius-lg: 14px;
 
     /* Z-index layers */
+    --z-nav: 50;
     --z-toast: 1000;
     --z-overlay: 2000;
+
+    /* Footer nav height — used for padding-bottom so fixed nav doesn't cover content */
+    --nav-h: 52px;
 
     /* Score status colors (D-119) */
     --color-score-healthy: #10b981;

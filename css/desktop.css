@@ -61,6 +61,7 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--space-5);
+    padding-bottom: calc(var(--space-5) + var(--nav-h));
   }
 
   /* Route panels: full width, visible when not hidden */

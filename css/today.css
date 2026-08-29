@@ -20,8 +20,7 @@
 
   .route-panel {
     /* Baseline route panel — actual layout lives on the inner content
-     * (the Today h1 + list, the Settings cards, etc.). Setting min-height
-     * here would interfere with the sticky footer-nav on short content. */
+     * (the Today h1 + list, the Settings cards, etc.). */
   }
 
   .today-header {
@@ -175,8 +174,11 @@
   }
 
   .today-footer-nav {
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-nav);
     display: flex;
     justify-content: space-around;
     align-items: center;
