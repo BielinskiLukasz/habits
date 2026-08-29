@@ -48,7 +48,7 @@ Archives: `.planning/milestones/`
 Phase: Milestone v1.1 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-08-28 - Completed quick task 260828-o1g: Add 4-state log status model
+Last activity: 2026-08-29 - Completed quick task 260829-ka4: History screen swipe UX
 
 ## Performance Metrics
 
@@ -106,6 +106,7 @@ None
 | 260827-otr | Fix import.js broadcast call: treat broadcast as a function matching apply.js pattern | 2026-08-27 | 83590a2 | [260827-otr-fix-import-js-broadcast-call-treat-broad](.planning/quick/260827-otr-fix-import-js-broadcast-call-treat-broad/) |
 | 260828-00l | Add full EN/PL i18n to the habits app | 2026-08-28 | 1c53d4e | [260828-00l-add-full-en-pl-i18n-to-the-habits-app](.planning/quick/260828-00l-add-full-en-pl-i18n-to-the-habits-app/) |
 | 260828-o1g | Add 4-state log status model (completed/failed/skipped/undefined) | 2026-08-28 | beb23e7 | [260828-o1g-add-4-state-log-status-model-completed-f](.planning/quick/260828-o1g-add-4-state-log-status-model-completed-f/) |
+| 260829-ka4 | Implement swipe action handling for history screen (4-state UX) | 2026-08-29 | — | [260829-ka4-implement-swipe-action-handling-for-hist](.planning/quick/260829-ka4-implement-swipe-action-handling-for-hist/) |
 
 ## Session Continuity
 
