@@ -60,11 +60,9 @@ function makePayload(overrides = {}) {
  */
 function makeBroadcastSpy() {
   const messages = [];
-  return {
-    messages,
-    postMessage(msg) { messages.push(msg); },
-    close() {},
-  };
+  const spy = (msg) => messages.push(msg);
+  spy.messages = messages;
+  return spy;
 }
 
 // ---------------------------------------------------------------------------
