@@ -346,7 +346,7 @@ describe('Today tap — optimistic flip happens BEFORE apply() resolves (NFR-02,
     // Canonical IDB state: the log row is {completed: true, definitionVersion: null}.
     const log = repo._stores.logs.get(JSON.stringify(['h1', today]));
     assert.ok(log, 'log row written by apply()');
-    assert.equal(log.completed, true);
+    assert.equal(log.status, 'completed');
     assert.equal(log.definitionVersion, null);
   });
 });
@@ -373,7 +373,7 @@ describe('Today tap — tap a completed row → flip back + write {completed: fa
       cadence: { type: 'daily' },
     });
     // Pre-seed a completed log on h1 so its row renders as completed.
-    await repo.putLog({ habitId: 'h1', date: today, completed: true, definitionVersion: null });
+    await repo.putLog({ habitId: 'h1', date: today, status: 'completed', definitionVersion: null });
     await store.hydrate();
 
     const fakeDoc = createFakeDocument();
@@ -402,7 +402,7 @@ describe('Today tap — tap a completed row → flip back + write {completed: fa
     // Log row exists with {completed: false} (D-74 — NOT delete).
     const log = repo._stores.logs.get(JSON.stringify(['h1', today]));
     assert.ok(log, 'log row still exists after markUncompleted (D-74)');
-    assert.equal(log.completed, false);
+    assert.equal(log.status, 'failed');
     assert.equal(log.definitionVersion, null);
   });
 });
