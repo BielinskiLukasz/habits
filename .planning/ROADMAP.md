@@ -35,7 +35,7 @@
 
 ### v1.2 UX & i18n Quality Gate (Phases 10–13)
 
-- [ ] **Phase 10: i18n Tests & Verification** - Test i18n module coverage and confirm all views use t()
+- [x] **Phase 10: i18n Tests & Verification** — completed 2026-08-31
 - [ ] **Phase 11: 4-State Log Model Tests** - Unit tests for log status domain logic and export round-trip verification
 - [ ] **Phase 12: Swipe UX & Navigation Verification** - Verify swipe interactions, footer nav, and sidebar persistence
 - [ ] **Phase 13: Code Review & Documentation** - Confirm pattern compliance and document new architecture decisions
@@ -122,7 +122,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 10. i18n Tests & Verification | 4/4 | In Progress|  |
+| 10. i18n Tests & Verification | 4/4 | Complete | 2026-08-31 |
 | 11. 4-State Log Model Tests | 0/? | Not started | - |
 | 12. Swipe UX & Navigation Verification | 0/? | Not started | - |
 | 13. Code Review & Documentation | 0/? | Not started | - |
