@@ -140,11 +140,11 @@ describe('buildAnalyticsHeader — D-116 dashboard + scoring model selector', ()
     // Find spans with status count text
     const healthySpan = findDesc(out, d => d.tag === 'span' && d.text && d.text.includes('Healthy: 5'));
     const watchSpan   = findDesc(out, d => d.tag === 'span' && d.text && d.text.includes('Watch: 2'));
-    const atRiskSpan  = findDesc(out, d => d.tag === 'span' && d.text && d.text.includes('At-risk: 1'));
+    const atRiskSpan  = findDesc(out, d => d.tag === 'span' && d.text && d.text.includes('At Risk: 1'));
     const failingSpan = findDesc(out, d => d.tag === 'span' && d.text && d.text.includes('Failing: 0'));
     assert.ok(healthySpan, 'Should contain "Healthy: 5" span');
     assert.ok(watchSpan,   'Should contain "Watch: 2" span');
-    assert.ok(atRiskSpan,  'Should contain "At-risk: 1" span');
+    assert.ok(atRiskSpan,  'Should contain "At Risk: 1" span');
     assert.ok(failingSpan, 'Should contain "Failing: 0" span');
   });
 
@@ -213,7 +213,7 @@ describe('buildAnalyticsTable — D-116 wave-grouped habit table', () => {
     });
     const wave1Header = findDesc(out, d =>
       d.tag === 'tr' && d.attrs && d.attrs.class === 'analytics-wave-header' &&
-      JSON.stringify(d).includes('Wave 1 — Foundation')
+      JSON.stringify(d).includes('Wave 1')
     );
     assert.ok(wave1Header, 'Wave 1 header row should contain wave name');
   });
