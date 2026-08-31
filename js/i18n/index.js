@@ -7,6 +7,27 @@
  * bugs. No dynamic imports; en.js and pl.js are static imports at module
  * load time (T-i18n-01: validate against VALID Set; T-i18n-02: guard setLang
  * against out-of-range values).
+ *
+ * Cross-shell consistency (I18N-03): both index.html (via main.js) and
+ * desktop.html (via desktop.js) import this module. Because both shells are
+ * served from the same origin, they share the same localStorage domain.
+ * Writing the preference in one shell makes it immediately available to the
+ * other on the next page load. The 'habits-lang' key is the single source of
+ * truth for the user's language choice across both entry points.
+ *
+ * Node / service-worker null-safe pattern: the _storage constant is captured
+ * at module init time using a typeof localStorage guard. In Node (tests) and
+ * in service workers _storage is null, making all _storage?.* calls no-ops.
+ * Locale state is managed purely in-memory in those contexts, which is why
+ * setLang/getLang round-trips work correctly in unit tests without mocking
+ * localStorage (I18N-03 verification relies on this property).
+ *
+ * Fallback chain: _resolveInitialLang reads localStorage → falls back to 'en'
+ * if the key is absent or the stored value is not in the VALID set. This
+ * ensures English is always the safe default (D-35: English primary).
+ *
+ * Decision references: D-35 (English as primary locale), I18N-03 (language
+ * preference persists across page reload and between mobile and desktop shells).
  */
 
 import { EN } from './en.js';
