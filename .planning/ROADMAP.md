@@ -55,12 +55,12 @@
   2. A code scan finds zero hardcoded UI strings — every view builder and event handler calls t()
   3. Changing the language preference, reloading the page, and switching shells all display the correct language
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 Plans:
 **Wave 1**
 
 - [x] 10-01-PLAN.md — i18n unit test expansion (I18N-01)
-- [ ] 10-02-PLAN.md — locale key expansion + catalog.js fix (I18N-02)
+- [x] 10-02-PLAN.md — locale key expansion + catalog.js fix (I18N-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -122,7 +122,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 10. i18n Tests & Verification | 1/4 | In Progress|  |
+| 10. i18n Tests & Verification | 2/4 | In Progress|  |
 | 11. 4-State Log Model Tests | 0/? | Not started | - |
 | 12. Swipe UX & Navigation Verification | 0/? | Not started | - |
 | 13. Code Review & Documentation | 0/? | Not started | - |

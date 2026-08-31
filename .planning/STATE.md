@@ -5,16 +5,16 @@ milestone_name: UX & i18n Quality Gate (Phases 10–13)
 current_phase: 10
 current_phase_name: i18n Tests & Verification
 status: executing
-stopped_at: Completed 10-01-PLAN.md (i18n test coverage expansion)
-last_updated: "2026-08-31T13:01:29.220Z"
+stopped_at: Completed 10-02-PLAN.md (locale keys + catalog.js i18n)
+last_updated: "2026-08-31T13:57:08.456Z"
 last_activity: 2026-08-31
 last_activity_desc: Phase 10 execution started
-state_head: 4b24911f110fcbcfeba0a22d4ecb16b1f378c1ab
+state_head: 43dce49cb1536dc140b3b5f3bee71faaedd49edf
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -53,7 +53,7 @@ Archives: `.planning/milestones/`
 ## Current Position
 
 Phase: 10 (i18n Tests & Verification) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-08-31 — Phase 10 execution started
 
@@ -93,6 +93,7 @@ Last activity: 2026-08-31 — Phase 10 execution started
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 10 P01 | 463 | 2 tasks | 1 files |
+| Phase 10 P02 | 2433 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -141,9 +142,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-31T13:01:29.141Z
-**Stopped at:** Completed 10-01-PLAN.md (i18n test coverage expansion)
-**Resume file:** .planning/phases/10-i18n-tests-verification/10-02-PLAN.md
+**Last session:** 2026-08-31T13:57:08.372Z
+**Stopped at:** Completed 10-02-PLAN.md (locale keys + catalog.js i18n)
+**Resume file:** .planning/phases/10-i18n-tests-verification/10-03-PLAN.md
 
 Next command: `/gsd-plan-phase 10`
 
@@ -161,3 +162,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 ## Decisions
 
 - [Phase 10]: Retroactive TDD for i18n tests: RED commit references un-imported functions, GREEN adds imports to pass all 17 tests
+- [Phase 10]: Plan 10-02: all 37 locale keys added to en.js/pl.js in single authoring pass to avoid conflicts for 10-03
+- [Phase 10]: Plan 10-02: catalog.js fully adopts t() for all 12 hardcoded string sites
