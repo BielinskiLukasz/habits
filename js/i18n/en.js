@@ -3,7 +3,9 @@
  * strings for every view builder and the Settings language card. Keys use
  * dot-notation namespaced by view (nav, today, catalog, history, settings,
  * desktop). Values are plain strings; {placeholder} syntax marks interpolation
- * points substituted by t() at call time.
+ * points substituted by t() at call time. Namespaces: catalog (UI + error
+ * strings), history (error + nav), settings (error strings), toast (dismiss +
+ * undo error), today (error + undo toast strings).
  */
 
 /** @type {Record<string, string>} */
@@ -173,8 +175,23 @@ export const EN = {
   'history.noHabits': 'No applicable habits for this day.',
   'history.slots': 'slots',
 
+  // History — new keys (I18N-02)
+  'history.errorMark': "Couldn't mark — try again",
+  'history.errorSkip': "Couldn't skip — try again",
+  'history.nextDay': 'Next day',
+  'history.prevDay': 'Previous day',
+
   // Today — extra
   'today.slots': 'slots',
+
+  // Today — new keys (I18N-02)
+  'today.errorMark': "Couldn't mark — try again",
+  'today.errorSkip': "Couldn't skip — try again",
+  'today.errorUpdateCount': "Couldn't update count — try again",
+  'today.errorUpdateSlot': "Couldn't update slot — try again",
+  'today.listAriaLabel': "Today's habits",
+  'today.markedComplete': 'Marked {name} complete',
+  'today.markedUncomplete': 'Marked {name} uncomplete',
 
   // Catalog — cadence type options
   'catalog.cadence.daily': 'Daily',
@@ -192,6 +209,19 @@ export const EN = {
   'catalog.save': 'Save',
   'catalog.cancel': 'Cancel',
   'catalog.stagePlaceholder': 'Stage label',
+
+  // Catalog — new keys (I18N-02)
+  'catalog.empty': 'No habits yet. Tap "New habit" to create one.',
+  'catalog.errorAdvanceStage': "Couldn't advance stage — try again",
+  'catalog.errorArchive': "Couldn't archive habit — try again",
+  'catalog.errorCreate': "Couldn't create habit — try again",
+  'catalog.errorPromote': "Couldn't promote habit — try again",
+  'catalog.errorRestore': "Couldn't restore habit — try again",
+  'catalog.errorSave': "Couldn't save habit — try again",
+  'catalog.listAriaLabel': 'Habit catalog',
+  'catalog.stageTargetPlaceholder': 'Target (optional)',
+  'catalog.upcomingAriaLabel': 'Upcoming habits',
+  'catalog.upcomingHeading': 'Upcoming',
 
   // Settings — Data card extra strings
   'settings.data.never': 'Never',
@@ -269,4 +299,22 @@ export const EN = {
   // Settings — custom file import button
   'settings.data.chooseFile': 'Choose file to import',
   'settings.data.noFileChosen': 'No file chosen',
+
+  // Settings — new error keys (I18N-02)
+  'settings.errorDismissNag': "Couldn't dismiss reminder: {msg}",
+  'settings.errorExportCsv': 'CSV export failed: {msg}',
+  'settings.errorExportJson': 'JSON export failed: {msg}',
+  'settings.errorImport': 'Import failed: {msg}',
+  'settings.errorMasteryThreshold': "Couldn't change mastery threshold — try again",
+  'settings.errorMasteryWindow': "Couldn't change mastery window — try again",
+  'settings.errorPersistenceRequest': "Couldn't request persistence",
+  'settings.errorPersistenceUnsupported': 'Storage persistence not supported in this browser',
+  'settings.errorRecompute': 'Recompute failed: {msg}',
+  'settings.errorScoringModel': "Couldn't change scoring model — try again",
+  'settings.errorUndo': "Couldn't undo — try again",
+  'settings.errorWeekStart': "Couldn't change week start — try again",
+
+  // Toast — new keys (I18N-02)
+  'toast.dismiss': 'Dismiss',
+  'toast.errorUndo': "Couldn't undo — try again",
 };

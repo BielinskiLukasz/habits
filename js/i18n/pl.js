@@ -1,7 +1,9 @@
 /**
  * @file Polish locale dictionary for the Nawyki i18n module. Mirrors every key
  * in en.js with Polish equivalents. Any untranslated key falls back to English
- * in t(). Keys use the same dot-notation namespace as en.js.
+ * in t(). Keys use the same dot-notation namespace as en.js. Namespaces:
+ * catalog (UI + error strings), history (error + nav), settings (error
+ * strings), toast (dismiss + undo error), today (error + undo toast strings).
  */
 
 /** @type {Record<string, string>} */
@@ -171,8 +173,23 @@ export const PL = {
   'history.noHabits': 'Brak nawyków na ten dzień.',
   'history.slots': 'poz.',
 
+  // History — new keys (I18N-02)
+  'history.errorMark': 'Nie można zaznaczyć — spróbuj ponownie',
+  'history.errorSkip': 'Nie można pominąć — spróbuj ponownie',
+  'history.nextDay': 'Następny dzień',
+  'history.prevDay': 'Poprzedni dzień',
+
   // Today — extra
   'today.slots': 'poz.',
+
+  // Today — new keys (I18N-02)
+  'today.errorMark': 'Nie można zaznaczyć — spróbuj ponownie',
+  'today.errorSkip': 'Nie można pominąć — spróbuj ponownie',
+  'today.errorUpdateCount': 'Nie można zaktualizować liczby — spróbuj ponownie',
+  'today.errorUpdateSlot': 'Nie można zaktualizować pola — spróbuj ponownie',
+  'today.listAriaLabel': 'Nawyki na dziś',
+  'today.markedComplete': 'Oznaczono {name} jako wykonane',
+  'today.markedUncomplete': 'Oznaczono {name} jako niewykonane',
 
   // Catalog — cadence type options
   'catalog.cadence.daily': 'Codziennie',
@@ -190,6 +207,19 @@ export const PL = {
   'catalog.save': 'Zapisz',
   'catalog.cancel': 'Anuluj',
   'catalog.stagePlaceholder': 'Nazwa etapu',
+
+  // Catalog — new keys (I18N-02)
+  'catalog.empty': 'Brak nawyków. Dotknij ‚Nowy nawyk“, aby dodać.',
+  'catalog.errorAdvanceStage': 'Nie można przejść do kolejnego etapu — spróbuj ponownie',
+  'catalog.errorArchive': 'Nie można zarchiwizować nawyku — spróbuj ponownie',
+  'catalog.errorCreate': 'Nie można utworzyć nawyku — spróbuj ponownie',
+  'catalog.errorPromote': 'Nie można aktywować nawyku — spróbuj ponownie',
+  'catalog.errorRestore': 'Nie można przywrócić nawyku — spróbuj ponownie',
+  'catalog.errorSave': 'Nie można zapisać nawyku — spróbuj ponownie',
+  'catalog.listAriaLabel': 'Katalog nawyków',
+  'catalog.stageTargetPlaceholder': 'Cel (opcjonalny)',
+  'catalog.upcomingAriaLabel': 'Nadchodzące nawyki',
+  'catalog.upcomingHeading': 'Nadchodzące',
 
   // Settings — Data card extra strings
   'settings.data.never': 'Nigdy',
@@ -267,4 +297,22 @@ export const PL = {
   // Settings — custom file import button
   'settings.data.chooseFile': 'Wybierz importowany plik',
   'settings.data.noFileChosen': 'Nie wybrano pliku',
+
+  // Settings — new error keys (I18N-02)
+  'settings.errorDismissNag': 'Nie można odrzucić przypomnienia: {msg}',
+  'settings.errorExportCsv': 'Eksport CSV nie powiódł się: {msg}',
+  'settings.errorExportJson': 'Eksport JSON nie powiódł się: {msg}',
+  'settings.errorImport': 'Import nie powiódł się: {msg}',
+  'settings.errorMasteryThreshold': 'Nie można zmienić progu biegłości — spróbuj ponownie',
+  'settings.errorMasteryWindow': 'Nie można zmienić okna biegłości — spróbuj ponownie',
+  'settings.errorPersistenceRequest': 'Nie można zażądać trwałości magazynu',
+  'settings.errorPersistenceUnsupported': 'Trwałość magazynu nie jest obsługiwana w tej przeglądarce',
+  'settings.errorRecompute': 'Przeliczenie nie powiodło się: {msg}',
+  'settings.errorScoringModel': 'Nie można zmienić modelu punktacji — spróbuj ponownie',
+  'settings.errorUndo': 'Nie można cofnąć — spróbuj ponownie',
+  'settings.errorWeekStart': 'Nie można zmienić początku tygodnia — spróbuj ponownie',
+
+  // Toast — new keys (I18N-02)
+  'toast.dismiss': 'Zamknij',
+  'toast.errorUndo': 'Nie można cofnąć — spróbuj ponownie',
 };
