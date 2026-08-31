@@ -151,6 +151,7 @@ export function buildTodayRow({ habit, status = null }) {
   const displayName = getLang() === 'pl' ? (habit.name_pl ?? habit.name) : habit.name;
 
   const isCompleted = status === 'completed';
+  const isFailed = status === 'failed';
   const isSkipped = status === 'skipped';
 
   /** @type {object[]} */
@@ -166,7 +167,23 @@ export function buildTodayRow({ habit, status = null }) {
       attrs: { class: 'today-row-name today-row-name--completed' },
       text: displayName,
     });
+  } else if (isFailed) {
+    tapChildren.push({
+      tag: 'span',
+      attrs: { class: 'today-row-glyph' },
+      text: '✕',
+    });
+    tapChildren.push({
+      tag: 'span',
+      attrs: { class: 'today-row-name today-row-name--failed' },
+      text: displayName,
+    });
   } else if (isSkipped) {
+    tapChildren.push({
+      tag: 'span',
+      attrs: { class: 'today-row-glyph' },
+      text: '↷',
+    });
     tapChildren.push({
       tag: 'span',
       attrs: { class: 'today-row-name today-row-name--skipped' },
@@ -210,6 +227,7 @@ export function buildTodayRow({ habit, status = null }) {
 
   const rowClasses = ['today-row'];
   if (isCompleted) rowClasses.push('today-row--completed');
+  if (isFailed) rowClasses.push('today-row--failed');
   if (isSkipped) rowClasses.push('today-row--skipped');
 
   return {

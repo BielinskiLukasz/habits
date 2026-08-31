@@ -62,6 +62,7 @@
     --color-score-watch: #f59e0b;
     --color-score-atrisk: #f97316;
     --color-score-failing: #ef4444;
+    --color-failed-bg: rgba(239, 68, 68, 0.12);
     --color-score-na: #6b7280;
   }
 }

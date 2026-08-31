@@ -65,6 +65,14 @@
     opacity: 0.55;
   }
 
+  /* Failed rows — red tint (D-03). Background tint + glyph, not color-only (NFR-07). */
+  .today-row--failed {
+    background: var(--color-failed-bg);
+  }
+  .today-row--failed .today-row-name {
+    opacity: 0.75;
+  }
+
   /* Skipped rows — muted italic (o1g). The name span carries the
    * today-row-name--skipped class from the builder. */
   .today-row--skipped .today-row-name--skipped {
