@@ -24,8 +24,6 @@ Fix and verify four interaction surfaces: (1) swipe-right cycling through all 4 
 ### Unit tests for nextLogState (artifact)
 
 - **D-06:** Create `tests/unit/logStatus.test.js` to cover `nextLogState`. Tests must cover: each of the 4 known input states advancing to the correct next state, plus `null` and `undefined` inputs both returning `'completed'`. 6 test cases minimum. Follows `node:test` + `node:assert/strict` — no test framework.
-- **D-07:** [informational] Swipe gesture mechanics (pointer events, dx threshold) are NOT tested in Node runner — no DOM available. Tests cover the pure domain logic only.
-
 ### UX-01 — Footer nav analytics link
 
 - **D-08:** Footer nav analytics link keeps its current cross-shell behavior: clicking "Analytics" from mobile (`index.html`) opens `./desktop.html` in the same tab. No change to `buildFooterNav` behavior.
@@ -39,6 +37,7 @@ Fix and verify four interaction surfaces: (1) swipe-right cycling through all 4 
 
 - Exact CSS token names for the `failed` state tint (e.g., `--color-failed-bg`, `--row-failed-bg`) — follow existing token naming in `css/tokens.css`.
 - Whether the new `logStatus.js` file gets an exported `LOG_STATES` constant array (ordered cycle) or keeps the logic purely in `nextLogState` — either is fine as long as the function is the single truth.
+- **D-07:** [informational] Swipe gesture mechanics (pointer events, dx threshold) are NOT tested in Node runner — no DOM available. Tests cover the pure domain logic only.
 
 </decisions>
 
