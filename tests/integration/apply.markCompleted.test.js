@@ -62,7 +62,7 @@ describe('apply(markCompleted) — happy path single-tx (D-43, Pitfall 7)', () =
     assert.ok(log, 'logs row should exist');
     assert.equal(log.habitId, 'h1');
     assert.equal(log.date, '2026-05-26');
-    assert.equal(log.completed, true);
+    assert.equal(log.status, 'completed');
     assert.equal(log.definitionVersion, null, 'definitionVersion must be null (DATA-05 "current")');
 
     // events row written under the eventId.
