@@ -45,50 +45,75 @@
 ## Phase Details
 
 ### Phase 10: i18n Tests & Verification
+
 **Goal**: i18n module is fully tested and all views consistently use the translation system
 **Depends on**: Nothing (retroactive quality gate over existing code)
 **Requirements**: I18N-01, I18N-02, I18N-03
 **Success Criteria** (what must be TRUE):
+
   1. Unit tests pass for locale lookup, missing-key fallback, and t() with variable interpolation
   2. A code scan finds zero hardcoded UI strings — every view builder and event handler calls t()
   3. Changing the language preference, reloading the page, and switching shells all display the correct language
+
 **Plans**: 4 plans
 Plans:
+**Wave 1**
+
 - [ ] 10-01-PLAN.md — i18n unit test expansion (I18N-01)
 - [ ] 10-02-PLAN.md — locale key expansion + catalog.js fix (I18N-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 10-03-PLAN.md — fix remaining view hardcoded strings (I18N-02)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 10-04-PLAN.md — integration verification + @file documentation (I18N-03)
+
+**Cross-cutting constraints:**
+
+- node --test tests/ exits 0 after all modifications
+
 **UI hint**: yes
 
 ### Phase 11: 4-State Log Model Tests
+
 **Goal**: 4-state log status domain logic is test-covered and data round-trips are verified correct
 **Depends on**: Phase 10
 **Requirements**: LOG4-01, LOG4-04
 **Success Criteria** (what must be TRUE):
+
   1. Unit tests cover all state transitions (completed/failed/skipped/undefined), persistence paths, and invalid-input handling
   2. A JSON export-then-import cycle preserves all 4 log states without data loss or state coercion
   3. CSV export cells show correct values: numeric/1/0 for applicable days and `x` for non-applicable days across all 4 states
+
 **Plans**: TBD
 
 ### Phase 12: Swipe UX & Navigation Verification
+
 **Goal**: All interaction surfaces (swipe cycling, footer nav, sidebar) work correctly and consistently
 **Depends on**: Phase 11
 **Requirements**: LOG4-02, LOG4-03, UX-01, UX-02
 **Success Criteria** (what must be TRUE):
+
   1. Swiping on Today view cycles states in the correct order (completed → failed → skipped → undefined → completed) with a distinct visual indicator for each state
   2. Swiping on History screen uses the same gestures and produces the same state progression as Today view
   3. Analytics footer nav is visible and functional on mobile; settings panel no longer contains a duplicate desktop analytics link
   4. Desktop sidebar collapse state persists across hash-route navigation within the same session
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 13: Code Review & Documentation
+
 **Goal**: New code meets all project quality patterns and architectural decisions are recorded
 **Depends on**: Phase 12
 **Requirements**: QA-01, QA-02
 **Success Criteria** (what must be TRUE):
+
   1. Code review confirms no switch on log status or cadence types, no .innerHTML, JSDoc @file headers present on new modules, no indexedDB.* calls outside js/db/idb.js
   2. PROJECT.md documents the rationale and design of the 4-state log status model and i18n architecture (locale dict shape, no Intl framework, t() signature)
+
 **Plans**: TBD
 
 ---
