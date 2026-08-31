@@ -33,9 +33,9 @@ describe('History flow — version-aware log reading (NFR-10, HISTORY-06)', () =
     // Seed two habits + logs on the same date
     await repo.putHabit({ id: 'h1', name: 'Walk', status: 'active', cadence: { type: 'daily' } });
     await repo.putHabit({ id: 'h2', name: 'Water', status: 'active', cadence: { type: 'daily' } });
-    await repo.putLog({ habitId: 'h1', date: '2026-06-01', completed: true });
-    await repo.putLog({ habitId: 'h2', date: '2026-06-01', completed: false });
-    await repo.putLog({ habitId: 'h1', date: '2026-06-02', completed: true });
+    await repo.putLog({ habitId: 'h1', date: '2026-06-01', status: 'completed' });
+    await repo.putLog({ habitId: 'h2', date: '2026-06-01', status: 'failed' });
+    await repo.putLog({ habitId: 'h1', date: '2026-06-02', status: 'completed' });
 
     const logs = await repo.getLogsForDate('2026-06-01');
     assert.equal(logs.length, 2, '2 logs on 2026-06-01');
@@ -48,7 +48,7 @@ describe('History flow — version-aware log reading (NFR-10, HISTORY-06)', () =
   it('getHabitVersionAtDate returns the version effective on the selected date', async () => {
     await repo.putHabit({ id: 'h1', name: 'Walk v2', status: 'active' });
     // Seed two versions: v1 effective 2026-01-01, v2 effective 2026-05-01
-    await repo.putLog({ habitId: 'h1', date: '2026-06-01', completed: true });
+    await repo.putLog({ habitId: 'h1', date: '2026-06-01', status: 'completed' });
     // Manually put habit_versions using runTx pattern
     await repo.runTx(['habit_versions'], 'readwrite', (tx) => {
       tx.objectStore('habit_versions').put({
@@ -105,31 +105,31 @@ describe('History flow — past-day log toggle (HISTORY-02, HISTORY-03)', () => 
 
     const log = await repo.getLog('h1', '2026-05-15');
     assert.ok(log, 'log row created');
-    assert.equal(log.completed, true, 'completed:true on past date');
+    assert.equal(log.status, 'completed', 'status:completed on past date');
   });
 
   it('markUncompleted on a past completed log sets completed:false', async () => {
     await repo.putHabit({ id: 'h1', name: 'Walk', status: 'active', cadence: { type: 'daily' } });
-    await repo.putLog({ habitId: 'h1', date: '2026-05-15', completed: true });
+    await repo.putLog({ habitId: 'h1', date: '2026-05-15', status: 'completed' });
 
     await apply({ type: 'markUncompleted', payload: { habitId: 'h1', date: '2026-05-15' } });
 
     const log = await repo.getLog('h1', '2026-05-15');
     assert.ok(log, 'log row still exists');
-    assert.equal(log.completed, false, 'completed:false after markUncompleted');
+    assert.equal(log.status, 'failed', 'status:failed after markUncompleted');
   });
 
   it('toggle on past date does not affect a different date log', async () => {
     await repo.putHabit({ id: 'h1', name: 'Walk', status: 'active', cadence: { type: 'daily' } });
-    await repo.putLog({ habitId: 'h1', date: '2026-05-14', completed: true });
-    await repo.putLog({ habitId: 'h1', date: '2026-05-15', completed: false });
+    await repo.putLog({ habitId: 'h1', date: '2026-05-14', status: 'completed' });
+    await repo.putLog({ habitId: 'h1', date: '2026-05-15', status: 'failed' });
 
     await apply({ type: 'markCompleted', payload: { habitId: 'h1', date: '2026-05-15' } });
 
     const log14 = await repo.getLog('h1', '2026-05-14');
     const log15 = await repo.getLog('h1', '2026-05-15');
-    assert.equal(log14.completed, true, '2026-05-14 log unaffected');
-    assert.equal(log15.completed, true, '2026-05-15 log updated');
+    assert.equal(log14.status, 'completed', '2026-05-14 log unaffected');
+    assert.equal(log15.status, 'completed', '2026-05-15 log updated');
   });
 });
 
@@ -146,20 +146,20 @@ describe('History flow — bulk uncomplete (HISTORY-04)', () => {
     const log1 = await repo.getLog('h1', '2026-05-20');
     const log2 = await repo.getLog('h2', '2026-05-20');
     assert.ok(log1, 'h1 log created');
-    assert.equal(log1.completed, false, 'h1 completed:false');
+    assert.equal(log1.status, 'failed', 'h1 status:failed');
     assert.ok(log2, 'h2 log created');
-    assert.equal(log2.completed, false, 'h2 completed:false');
+    assert.equal(log2.status, 'failed', 'h2 status:failed');
   });
 
   it('bulk-mark-uncompleted skips habits already marked uncompleted (idempotent-ish)', async () => {
     await repo.putHabit({ id: 'h1', name: 'Walk', status: 'active', cadence: { type: 'daily' } });
-    await repo.putLog({ habitId: 'h1', date: '2026-05-20', completed: false });
+    await repo.putLog({ habitId: 'h1', date: '2026-05-20', status: 'failed' });
 
     // Re-applying markUncompleted should not throw
     await apply({ type: 'markUncompleted', payload: { habitId: 'h1', date: '2026-05-20' } });
 
     const log = await repo.getLog('h1', '2026-05-20');
-    assert.equal(log.completed, false, 'still completed:false after idempotent markUncompleted');
+    assert.equal(log.status, 'failed', 'still status:failed after idempotent markUncompleted');
   });
 });
 
