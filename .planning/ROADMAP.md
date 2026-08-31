@@ -52,7 +52,12 @@
   1. Unit tests pass for locale lookup, missing-key fallback, and t() with variable interpolation
   2. A code scan finds zero hardcoded UI strings — every view builder and event handler calls t()
   3. Changing the language preference, reloading the page, and switching shells all display the correct language
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 10-01-PLAN.md — i18n unit test expansion (I18N-01)
+- [ ] 10-02-PLAN.md — locale key expansion + catalog.js fix (I18N-02)
+- [ ] 10-03-PLAN.md — fix remaining view hardcoded strings (I18N-02)
+- [ ] 10-04-PLAN.md — integration verification + @file documentation (I18N-03)
 **UI hint**: yes
 
 ### Phase 11: 4-State Log Model Tests
@@ -92,7 +97,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 10. i18n Tests & Verification | 0/? | Not started | - |
+| 10. i18n Tests & Verification | 0/4 | Not started | - |
 | 11. 4-State Log Model Tests | 0/? | Not started | - |
 | 12. Swipe UX & Navigation Verification | 0/? | Not started | - |
 | 13. Code Review & Documentation | 0/? | Not started | - |
