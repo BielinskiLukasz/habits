@@ -29,6 +29,7 @@
 
 import { buildHistoryHeader, buildHistoryHabitRow, buildHistoryReadOnly, buildBulkActionBar } from './history/builders.js';
 import { apply } from '../state/apply.js';
+import { nextLogState } from '../domain/logStatus.js';
 import { undo } from '../state/undo.js';
 import { mount } from '../util/mount.js';
 import { appliesToday } from '../domain/cadence.js';
@@ -155,7 +156,17 @@ export function mountHistory(parent, { repo, store }) {
       if (slide) slide.style.transform = '';
       const habitId = row.querySelector('[data-habit-id]')?.getAttribute('data-habit-id');
       if (habitId) {
-        apply({ type: 'markCompleted', payload: { habitId, date: selectedDate } })
+        // History reads from repo.getLog since cache only holds the current ISO week.
+        repo.getLog(habitId, selectedDate)
+          .then((log) => {
+            const currentStatus = log?.status ?? null;
+            const next = nextLogState(currentStatus);
+            const type = next === 'completed' ? 'markCompleted'
+                       : next === 'failed'    ? 'markFailed'
+                       : next === 'skipped'   ? 'markSkipped'
+                       : 'markUncompleted';
+            return apply({ type, payload: { habitId, date: selectedDate } });
+          })
           .then(() => {
             const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
             showUndoToast({ message: t('today.markedComplete', { name: habitName }), undoFn: () => undo() });
