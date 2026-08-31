@@ -5,17 +5,17 @@ milestone_name: UX & i18n Quality Gate (Phases 10–13)
 current_phase: 11
 current_phase_name: 4-State Log Model Tests
 status: executing
-stopped_at: "Phase 11 Plan 01 complete — fix 4-state status model"
-last_updated: "2026-08-31T16:52:43Z"
+stopped_at: Phase 11 Plan 02 complete — markSkipped + CSV tests
+last_updated: "2026-08-31T17:33:31.877Z"
 last_activity: 2026-08-31
-last_activity_desc: Plan 11-01 executed — 29 failing tests fixed, 910/910 passing
-state_head: 8b8dcd9
+last_activity_desc: Plan 11-02 complete — markSkipped integration tests + CSV skipped state, 918/918 passing
+state_head: ea0a44a016636b6820013f4488399564bff2dfc8
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
-  percent: 27
+  total_plans: 4
+  completed_plans: 4
+  percent: 25
 ---
 
 # Project State
@@ -52,9 +52,9 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: 11 (4-State Log Model Tests) — EXECUTING (Plan 01 complete)
+Phase: 11 (4-State Log Model Tests) — EXECUTING (Plan 02 complete)
 Status: Executing Phase 11
-Last activity: 2026-08-31 — Plan 11-01 complete, 910/910 tests passing
+Last activity: 2026-08-31 — Plan 11-02 complete, 918/918 tests passing
 
 █████░░░░░░░░░░░░░░░ 27% (1/4 phases, 5/5 plans so far)
 
@@ -84,7 +84,7 @@ Last activity: 2026-08-31 — Plan 11-01 complete, 910/910 tests passing
 | Phase | Plans | Completed |
 |-------|-------|-----------|
 | 10. i18n Tests & Verification | 4/4 | 2026-08-31 |
-| 11. 4-State Log Model Tests | 1/? | 2026-08-31 (in progress) |
+| 11. 4-State Log Model Tests | 2/? | 2026-08-31 (in progress) |
 | 12. Swipe UX & Navigation Verification | 0/? | — |
 | 13. Code Review & Documentation | 0/? | — |
 **Per-Plan Metrics:**
@@ -96,6 +96,7 @@ Last activity: 2026-08-31 — Plan 11-01 complete, 910/910 tests passing
 | Phase 10 P03 | 1200 | 2 tasks | 7 files |
 | Phase 10 P04 | 543 | 2 tasks | 2 files |
 | Phase 11 P01 | 1363 | 15 tasks | 14 files |
+| Phase 11 P02 | 300 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -144,9 +145,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-31T16:52:43Z
-**Stopped at:** Phase 11 Plan 01 complete — 910/910 tests passing
-**Resume file:** .planning/phase-11/11-01-SUMMARY.md
+**Last session:** 2026-08-31T17:32:06.317Z
+**Stopped at:** Phase 11 Plan 02 complete — markSkipped + CSV tests
+**Resume file:** None
 
 Next command: `/gsd-plan-phase 11` (remaining plans in phase 11)
 
@@ -172,3 +173,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Phase 11]: Plan 11-01: getCachedWeekCompletions checks status === 'completed' instead of completed === true
 - [Phase 11]: Plan 11-01: broadcastSpy in import.integration.test.js fixed to callable function
 - [Phase 11]: Plan 11-01: analytics.builders.test.js At Risk label aligned to i18n output (capital R)
+- [Phase 11]: Plan 11-02: markSkipped has storeNames:['logs'] only — D-52 not triggered, confirmed by integration test
+- [Phase 11]: Plan 11-02: status:skipped on applicable day returns 'x' in CSV export (csvCellValue branch verified by unit test)
