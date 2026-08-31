@@ -58,7 +58,7 @@ export async function handleLogNumeric(event, repo) {
   const isCompleted = count >= (habit?.target ?? 1);
   const habitRow = await _recomputeLastCompletedDate({
     habitId,
-    currentLogRow: { ...newLog, completed: isCompleted },
+    currentLogRow: { ...newLog, status: isCompleted ? 'completed' : 'failed' },
     repo,
   });
 
