@@ -76,6 +76,7 @@ import { apply } from '../state/apply.js';
 import { undo } from '../state/undo.js';
 import { showUndoToast, showErrorToast } from './toast.js';
 import { t } from '../i18n/index.js';
+import { nextLogState } from '../domain/logStatus.js';
 import {
   subscribe,
   getCachedHabits,
@@ -255,17 +256,25 @@ async function handleMarkUncompleteTap(evt) {
 }
 
 /**
- * Dispatch `markCompleted` directly (no optimistic flip — the store re-render
- * handles the UI update). Used by the swipe-right gesture, which already
- * provides visual feedback via the slide animation.
+ * Cycle the log status forward by one step and dispatch the matching apply
+ * event. Used by the swipe-right gesture (D-01, D-04, D-05). The store
+ * re-render handles the UI update after the write.
+ *
+ * Cycle: null/undefined → markCompleted → markFailed → markSkipped → markUncompleted → …
  *
  * @param {string} habitId
  * @returns {Promise<void>}
  */
-async function _swipeMarkComplete(habitId) {
+async function _swipeCycleLog(habitId) {
   const date = todayLocal();
+  const currentStatus = getCachedLog(habitId, date)?.status ?? null;
+  const next = nextLogState(currentStatus);
+  const type = next === 'completed' ? 'markCompleted'
+             : next === 'failed'    ? 'markFailed'
+             : next === 'skipped'   ? 'markSkipped'
+             : 'markUncompleted';
   try {
-    await apply({ type: 'markCompleted', payload: { habitId, date } });
+    await apply({ type, payload: { habitId, date } });
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
     showUndoToast({ message: t('today.markedComplete', { name: habitName }), undoFn: () => undo() });
   } catch (_err) {
@@ -332,7 +341,7 @@ function handleSwipeEnd(evt) {
     // Swipe right → mark complete.
     if (slide) slide.style.transform = '';
     const habitId = row.querySelector('[data-habit-id]')?.getAttribute('data-habit-id');
-    if (habitId) _swipeMarkComplete(habitId);
+    if (habitId) _swipeCycleLog(habitId);
   } else if (dx < -60) {
     // Swipe left → reveal actions panel.
     if (slide) slide.style.transform = 'translateX(-120px)';
