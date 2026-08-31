@@ -52,23 +52,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| I18N-01 | TBD | Pending |
-| I18N-02 | TBD | Pending |
-| I18N-03 | TBD | Pending |
-| LOG4-01 | TBD | Pending |
-| LOG4-02 | TBD | Pending |
-| LOG4-03 | TBD | Pending |
-| LOG4-04 | TBD | Pending |
-| UX-01 | TBD | Pending |
-| UX-02 | TBD | Pending |
-| QA-01 | TBD | Pending |
-| QA-02 | TBD | Pending |
+| I18N-01 | Phase 10 | Pending |
+| I18N-02 | Phase 10 | Pending |
+| I18N-03 | Phase 10 | Pending |
+| LOG4-01 | Phase 11 | Pending |
+| LOG4-02 | Phase 12 | Pending |
+| LOG4-03 | Phase 12 | Pending |
+| LOG4-04 | Phase 11 | Pending |
+| UX-01 | Phase 12 | Pending |
+| UX-02 | Phase 12 | Pending |
+| QA-01 | Phase 13 | Pending |
+| QA-02 | Phase 13 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 11 total
-- Mapped to phases: 0 (TBD — roadmap pending)
-- Unmapped: 11 ⚠️
+- Mapped to phases: 11 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-31*
-*Last updated: 2026-08-31 after initial definition*
+*Last updated: 2026-08-31 after roadmap creation*

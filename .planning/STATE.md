@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: UX & i18n Quality Gate
 status: planning
-last_updated: "2026-08-31T11:05:14.526Z"
+last_updated: "2026-08-31"
 last_activity: 2026-08-31
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,10 +17,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-27)
+See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Planning next milestone — run `/gsd-new-milestone` to define v1.2
+**Current focus:** v1.2 UX & i18n Quality Gate — retroactive validation of 6 quick-task features
 
 ## Milestone Status
 
@@ -33,18 +33,26 @@ See: .planning/PROJECT.md (updated 2026-08-27)
 
 Archives: `.planning/milestones/`
 
-**v1.1 Scheduled Habits — IN PROGRESS**
+**v1.1 Scheduled Habits — COMPLETE (2026-08-27)**
 
-- 3 phases defined: Phase 7 (status foundation) → Phase 8 (Today/Catalog UI) → Phase 9 (Waveboard)
-- 15 requirements, all mapped
-- Phase 7 planned 2026-07-01 — 3 plans created
+- 3 phases shipped: Phase 7 (status foundation) → Phase 8 (Today/Catalog UI) → Phase 9 (Waveboard)
+- 169 commits · 9 plans · 7 requirements
+- Archives: `.planning/milestones/`
+
+**v1.2 UX & i18n Quality Gate — IN PROGRESS**
+
+- 4 phases defined: Phase 10 (i18n) → Phase 11 (4-state tests) → Phase 12 (swipe UX/nav) → Phase 13 (code review/docs)
+- 11 requirements, all mapped
+- Roadmap created 2026-08-31
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 10 (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-08-31 — Milestone v1.2 started
+Status: Roadmap created — ready to plan Phase 10
+Last activity: 2026-08-31 — Roadmap created for v1.2
+
+████░░░░░░░░░░░░░░░░ 0% (0/4 phases)
 
 ## Performance Metrics
 
@@ -59,13 +67,22 @@ Last activity: 2026-08-31 — Milestone v1.2 started
 | 5. Backup & Restore | 6/6 | 2026-06-06 |
 | 6. Desktop Analytics & Scoring Trio | 8/8 | 2026-06-30 |
 
-### v1.1 (in progress)
+### v1.1 (archived)
 
 | Phase | Plans | Completed |
 |-------|-------|-----------|
 | 7. Scheduled Status Foundation | 3/3 | 2026-07-28 |
 | 8. Today & Catalog — Upcoming Section | 4/4 | 2026-07-29 (08-04) |
 | 9. Desktop Waveboard | 2/2 | 2026-08-25 |
+
+### v1.2 (in progress)
+
+| Phase | Plans | Completed |
+|-------|-------|-----------|
+| 10. i18n Tests & Verification | 0/? | — |
+| 11. 4-State Log Model Tests | 0/? | — |
+| 12. Swipe UX & Navigation Verification | 0/? | — |
+| 13. Code Review & Documentation | 0/? | — |
 
 ## Accumulated Context
 
@@ -86,6 +103,12 @@ Last activity: 2026-08-31 — Milestone v1.2 started
 - Existing habits with `status: 'active'` and `startDate > today` are migrated on first boot (one-time pass)
 - Catalog Upcoming section: sorted by startDate ascending
 - Waveboard is informational only in v1.1 (no edit actions on wave definitions)
+
+### v1.2 Decisions
+
+- Phases 10–13 are a retroactive quality gate over features already in the codebase
+- TDD mode applies: retroactive tests follow RED → GREEN cycle (write failing test first, then confirm it passes against existing implementation)
+- All 6 quick-task features being validated: i18n, 4-state log model, swipe UX (Today + History), footer nav, sidebar collapse, waveboard fix
 
 ### Open Todos
 
@@ -108,13 +131,11 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-25
-**Stopped at:** Phase 9 complete — all phases complete
-**Resume file:** .planning/phases/09-desktop-waveboard/
+**Last session:** 2026-08-31
+**Stopped at:** Roadmap created for v1.2 — 4 phases (10–13), 11 requirements mapped
+**Resume file:** .planning/ROADMAP.md
 
-Next command: `/gsd-verify-work 9` (re-run UAT for G-09-2/4/5) or `/gsd-ship`
-
-*Updated: 2026-08-25 — Gap closure: wave field backfill migration added to seed.js; refresh IDB (clear storage or use fresh profile) before re-testing*
+Next command: `/gsd-plan-phase 10`
 
 ## Deferred Items
 
@@ -126,7 +147,3 @@ Items acknowledged and deferred at milestone close, most recent first:
 | uat_gaps | 03/03-UAT.md | verified (0 pending scenarios, archived v1.0) | 2026-08-27 | v1.1 |
 | quick_tasks | 260705-fix-sw-waves-version-bump | missing (empty dir, task completed in-line) | 2026-08-27 | v1.1 |
 | debug_sessions | knowledge-base | unknown (knowledge-base docs file, not an open session) | 2026-08-27 | v1.1 |
-
-## Operator Next Steps
-
-- Start the next milestone with /gsd-new-milestone
