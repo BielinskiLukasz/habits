@@ -10,7 +10,10 @@
 
 import { describe, it, beforeEach, after, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { t, getLang, setLang, _resetLangForTest } from '../../js/i18n/index.js';
+import {
+  t, getLang, setLang, _resetLangForTest,
+  displayName, applyStaticTranslations,
+} from '../../js/i18n/index.js';
 
 // Reset to English before every test so tests are order-independent.
 beforeEach(() => _resetLangForTest('en'));
