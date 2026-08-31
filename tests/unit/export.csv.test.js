@@ -128,6 +128,19 @@ describe('csvCellValue — binary habit, applicable, completed', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Test 2b: Binary habit, applicable, status:skipped → cell value is 'x'
+// ---------------------------------------------------------------------------
+describe('csvCellValue — binary habit, applicable, skipped', () => {
+  test('returns "x" when binary habit has status:skipped log', () => {
+    const habit = binaryHabit();
+    const date = '2026-06-06';
+    const logs = [{ habitId: 'h1', date: '2026-06-06', status: 'skipped' }];
+    const ctx = makeCtx(logs);
+    assert.equal(csvCellValue(habit, date, logs, ctx), 'x');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Test 3: Binary habit, not applicable (cadence exclusion) → cell value is 'x'
 // ---------------------------------------------------------------------------
 describe('csvCellValue — cadence exclusion', () => {
