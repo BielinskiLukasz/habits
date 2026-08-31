@@ -55,7 +55,7 @@
   2. A code scan finds zero hardcoded UI strings — every view builder and event handler calls t()
   3. Changing the language preference, reloading the page, and switching shells all display the correct language
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 Plans:
 **Wave 1**
 
@@ -68,7 +68,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 10-04-PLAN.md — integration verification + @file documentation (I18N-03)
+- [x] 10-04-PLAN.md — integration verification + @file documentation (I18N-03)
 
 **Cross-cutting constraints:**
 
@@ -122,7 +122,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 10. i18n Tests & Verification | 3/4 | In Progress|  |
+| 10. i18n Tests & Verification | 4/4 | In Progress|  |
 | 11. 4-State Log Model Tests | 0/? | Not started | - |
 | 12. Swipe UX & Navigation Verification | 0/? | Not started | - |
 | 13. Code Review & Documentation | 0/? | Not started | - |

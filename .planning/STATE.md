@@ -4,17 +4,17 @@ milestone: v1.2
 milestone_name: UX & i18n Quality Gate (Phases 10–13)
 current_phase: 10
 current_phase_name: i18n Tests & Verification
-status: executing
-stopped_at: Completed 10-03-PLAN.md (today.js, toast.js, history.js, settings.js, history/builders.js i18n)
-last_updated: "2026-08-31T14:39:47.947Z"
+status: verifying
+stopped_at: Completed 10-04-PLAN.md (i18n persistence tests and @file header update)
+last_updated: "2026-08-31T14:58:29.910Z"
 last_activity: 2026-08-31
 last_activity_desc: Phase 10 execution started
-state_head: 10c38dd6c7b58551ecad3e6733284a146cac010c
+state_head: 8784a1030f4c48e6191ed66bd9f71e7533913f9f
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -54,7 +54,7 @@ Archives: `.planning/milestones/`
 
 Phase: 10 (i18n Tests & Verification) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-31 — Phase 10 execution started
 
 ████░░░░░░░░░░░░░░░░ 0% (0/4 phases)
@@ -95,6 +95,7 @@ Last activity: 2026-08-31 — Phase 10 execution started
 | Phase 10 P01 | 463 | 2 tasks | 1 files |
 | Phase 10 P02 | 2433 | 2 tasks | 3 files |
 | Phase 10 P03 | 1200 | 2 tasks | 7 files |
+| Phase 10 P04 | 543 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -143,8 +144,8 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-31T14:39:47.892Z
-**Stopped at:** Completed 10-03-PLAN.md (today.js, toast.js, history.js, settings.js, history/builders.js i18n)
+**Last session:** 2026-08-31T14:58:29.883Z
+**Stopped at:** Completed 10-04-PLAN.md (i18n persistence tests and @file header update)
 **Resume file:** None
 
 Next command: `/gsd-plan-phase 10`
@@ -166,3 +167,4 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Phase 10]: Plan 10-02: all 37 locale keys added to en.js/pl.js in single authoring pass to avoid conflicts for 10-03
 - [Phase 10]: Plan 10-02: catalog.js fully adopts t() for all 12 hardcoded string sites
 - [Phase 10]: Plan 10-03: today.skippedToast and today.markedNotDone keys added; history.js undo toasts use shared today.* keys
+- [Phase 10]: Plan 10-04: Structural assertions via fs.readFileSync verify habits-lang key and setItem in index.js without requiring localStorage in Node

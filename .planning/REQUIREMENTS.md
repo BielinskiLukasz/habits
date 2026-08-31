@@ -11,7 +11,7 @@ Retroactive quality validation of 6 quick-task features shipped outside the mile
 
 - [x] **I18N-01**: i18n module has unit tests covering locale lookup, missing-key fallback, and t() with interpolation
 - [x] **I18N-02**: All view builders and event handlers use t() — zero hardcoded UI strings remain across both shells
-- [ ] **I18N-03**: Language preference (setting stored in IDB `settings` store) persists correctly across page reload and between the mobile and desktop shells
+- [x] **I18N-03**: Language preference (setting stored in IDB `settings` store) persists correctly across page reload and between the mobile and desktop shells
 
 ### 4-State Log Status
 
@@ -54,7 +54,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | I18N-01 | Phase 10 | Complete |
 | I18N-02 | Phase 10 | Complete |
-| I18N-03 | Phase 10 | Pending |
+| I18N-03 | Phase 10 | Complete |
 | LOG4-01 | Phase 11 | Pending |
 | LOG4-02 | Phase 12 | Pending |
 | LOG4-03 | Phase 12 | Pending |
