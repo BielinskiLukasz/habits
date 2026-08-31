@@ -52,16 +52,17 @@
 export async function handleMarkUncompleted(event, repo) {
   const { habitId, date } = event.payload;
   const prior = await repo.getLog(habitId, date);
-  /** @type {{ habitId: string, date: string, status: 'failed', definitionVersion: null }} */
-  const next = { habitId, date, status: 'failed', definitionVersion: null };
+  // Deletes the row so (habitId, date) returns to the "not logged" (null) state.
+  // D-52 recompute uses a non-completed placeholder — the delete op removes the
+  // row from the completed-dates pool without requiring a put.
   const habitRow = await _recomputeLastCompletedDate({
     habitId,
-    currentLogRow: next,
+    currentLogRow: { habitId, date, status: 'failed' },
     repo,
   });
 
-  /** @type {Array<{store: string, value: object}>} */
-  const writes = [{ store: 'logs', value: next }];
+  /** @type {Array<{op: string, store: string, key: unknown}>} */
+  const writes = [{ op: 'delete', store: 'logs', key: [habitId, date] }];
   /** @type {string[]} */
   const storeNames = ['logs'];
   if (habitRow !== null) {

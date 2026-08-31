@@ -351,8 +351,8 @@ describe('Today tap — optimistic flip happens BEFORE apply() resolves (NFR-02,
   });
 });
 
-describe('Today tap — tap a completed row → flip back + write {completed: false}', () => {
-  test('completed row → tap → aria-pressed="false" + log row {completed:false} (NOT delete)', async () => {
+describe('Today tap — tap a completed row → flip back to null state', () => {
+  test('completed row → tap → aria-pressed="false" + log row deleted (4-state null)', async () => {
     const { store, applyMod, undoMod, todayMod } = await freshAll();
     const repo = createFakeRepo();
     wire({ store, applyMod, undoMod, repo });
@@ -399,11 +399,9 @@ describe('Today tap — tap a completed row → flip back + write {completed: fa
     // Settle the tx.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Log row exists with {completed: false} (D-74 — NOT delete).
+    // Log row is deleted — markUncompleted returns to null state in 4-state model.
     const log = repo._stores.logs.get(JSON.stringify(['h1', today]));
-    assert.ok(log, 'log row still exists after markUncompleted (D-74)');
-    assert.equal(log.status, 'failed');
-    assert.equal(log.definitionVersion, null);
+    assert.equal(log, undefined, 'log row deleted after markUncompleted (4-state null)');
   });
 });
 

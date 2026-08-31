@@ -108,15 +108,14 @@ describe('History flow — past-day log toggle (HISTORY-02, HISTORY-03)', () => 
     assert.equal(log.status, 'completed', 'status:completed on past date');
   });
 
-  it('markUncompleted on a past completed log sets completed:false', async () => {
+  it('markUncompleted on a past completed log deletes the row (returns to null)', async () => {
     await repo.putHabit({ id: 'h1', name: 'Walk', status: 'active', cadence: { type: 'daily' } });
     await repo.putLog({ habitId: 'h1', date: '2026-05-15', status: 'completed' });
 
     await apply({ type: 'markUncompleted', payload: { habitId: 'h1', date: '2026-05-15' } });
 
     const log = await repo.getLog('h1', '2026-05-15');
-    assert.ok(log, 'log row still exists');
-    assert.equal(log.status, 'failed', 'status:failed after markUncompleted');
+    assert.equal(log, undefined, 'log row deleted after markUncompleted (4-state null)');
   });
 
   it('toggle on past date does not affect a different date log', async () => {
@@ -134,14 +133,14 @@ describe('History flow — past-day log toggle (HISTORY-02, HISTORY-03)', () => 
 });
 
 describe('History flow — bulk uncomplete (HISTORY-04)', () => {
-  it('bulk-mark-uncompleted via sequential markUncompleted calls sets completed:false for all targeted habits', async () => {
+  it('bulk-mark-uncompleted via sequential markFailed calls sets status:failed for all targeted habits', async () => {
     await repo.putHabit({ id: 'h1', name: 'Walk', status: 'active', cadence: { type: 'daily' } });
     await repo.putHabit({ id: 'h2', name: 'Water', status: 'active', cadence: { type: 'daily' } });
     // h1 has no log (not completed), h2 has no log (not completed)
 
-    // Simulate bulk-mark-uncompleted: call markUncompleted for all applicable habits
-    await apply({ type: 'markUncompleted', payload: { habitId: 'h1', date: '2026-05-20' } });
-    await apply({ type: 'markUncompleted', payload: { habitId: 'h2', date: '2026-05-20' } });
+    // Simulate bulk-mark-uncompleted: dispatch markFailed for all applicable habits
+    await apply({ type: 'markFailed', payload: { habitId: 'h1', date: '2026-05-20' } });
+    await apply({ type: 'markFailed', payload: { habitId: 'h2', date: '2026-05-20' } });
 
     const log1 = await repo.getLog('h1', '2026-05-20');
     const log2 = await repo.getLog('h2', '2026-05-20');
@@ -151,15 +150,15 @@ describe('History flow — bulk uncomplete (HISTORY-04)', () => {
     assert.equal(log2.status, 'failed', 'h2 status:failed');
   });
 
-  it('bulk-mark-uncompleted skips habits already marked uncompleted (idempotent-ish)', async () => {
+  it('bulk-mark-uncompleted is idempotent for already-failed habits', async () => {
     await repo.putHabit({ id: 'h1', name: 'Walk', status: 'active', cadence: { type: 'daily' } });
     await repo.putLog({ habitId: 'h1', date: '2026-05-20', status: 'failed' });
 
-    // Re-applying markUncompleted should not throw
-    await apply({ type: 'markUncompleted', payload: { habitId: 'h1', date: '2026-05-20' } });
+    // Re-applying markFailed should not throw and keeps status:failed
+    await apply({ type: 'markFailed', payload: { habitId: 'h1', date: '2026-05-20' } });
 
     const log = await repo.getLog('h1', '2026-05-20');
-    assert.equal(log.status, 'failed', 'still status:failed after idempotent markUncompleted');
+    assert.equal(log.status, 'failed', 'still status:failed after idempotent markFailed');
   });
 });
 

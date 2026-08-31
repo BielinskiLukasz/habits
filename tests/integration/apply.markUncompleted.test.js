@@ -41,8 +41,8 @@ async function freshApplyAndUndo() {
   return { applyMod, undoMod };
 }
 
-describe('apply(markUncompleted) — writes {completed: false} (NOT delete) (D-74)', () => {
-  test('after markCompleted → markUncompleted, the log row is {completed: false, definitionVersion: null}', async () => {
+describe('apply(markUncompleted) — deletes log row (4-state null)', () => {
+  test('after markCompleted → markUncompleted, the log row is deleted (returns to null state)', async () => {
     const repo = createFakeRepo();
     const { applyMod } = await freshApplyAndUndo();
     applyMod.configure({ repo, broadcast: () => {}, trackTx: () => {} });
@@ -59,11 +59,7 @@ describe('apply(markUncompleted) — writes {completed: false} (NOT delete) (D-7
     });
 
     const log = repo._stores.logs.get(JSON.stringify(['h1', '2026-05-26']));
-    assert.ok(log, 'log row must EXIST after markUncompleted — NOT delete (D-74)');
-    assert.equal(log.habitId, 'h1');
-    assert.equal(log.date, '2026-05-26');
-    assert.equal(log.status, 'failed');
-    assert.equal(log.definitionVersion, null, 'definitionVersion must be null (DATA-05 "current")');
+    assert.equal(log, undefined, 'log row deleted after markUncompleted (4-state null)');
   });
 });
 

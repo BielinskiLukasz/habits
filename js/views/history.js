@@ -165,11 +165,15 @@ export function mountHistory(parent, { repo, store }) {
                        : next === 'failed'    ? 'markFailed'
                        : next === 'skipped'   ? 'markSkipped'
                        : 'markUncompleted';
-            return apply({ type, payload: { habitId, date: selectedDate } });
+            return apply({ type, payload: { habitId, date: selectedDate } }).then(() => type);
           })
-          .then(() => {
+          .then((eventType) => {
             const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-            showUndoToast({ message: t('today.markedComplete', { name: habitName }), undoFn: () => undo() });
+            const msg = eventType === 'markCompleted' ? t('today.markedComplete', { name: habitName })
+                      : eventType === 'markFailed'    ? t('today.markedNotDone', { name: habitName })
+                      : eventType === 'markSkipped'   ? t('today.skippedToast', { name: habitName })
+                      : t('today.markedUncomplete', { name: habitName });
+            showUndoToast({ message: msg, undoFn: () => undo() });
             render(selectedDate);
           })
           .catch(() => showErrorToast(t('history.errorMark')));
@@ -308,11 +312,11 @@ export function mountHistory(parent, { repo, store }) {
           const freshLogsForBulk = await repo.getLogsForDate(selectedDate);
           const notYetCompleted = rows.filter((r) => {
             const freshLog = freshLogsForBulk.find((l) => l.habitId === r.habit.id) ?? null;
-            return freshLog === null || freshLog.completed !== true;
+            return freshLog?.status !== 'completed';
           });
           for (const { habit } of notYetCompleted) {
             try {
-              await apply({ type: 'markUncompleted', payload: { habitId: habit.id, date: selectedDate } });
+              await apply({ type: 'markFailed', payload: { habitId: habit.id, date: selectedDate } });
             } catch (_e) {
               // Swallow — re-render will show current state
             }

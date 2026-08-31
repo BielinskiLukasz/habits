@@ -276,7 +276,11 @@ async function _swipeCycleLog(habitId) {
   try {
     await apply({ type, payload: { habitId, date } });
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-    showUndoToast({ message: t('today.markedComplete', { name: habitName }), undoFn: () => undo() });
+    const msg = type === 'markCompleted' ? t('today.markedComplete', { name: habitName })
+              : type === 'markFailed'    ? t('today.markedNotDone', { name: habitName })
+              : type === 'markSkipped'   ? t('today.skippedToast', { name: habitName })
+              : t('today.markedUncomplete', { name: habitName });
+    showUndoToast({ message: msg, undoFn: () => undo() });
   } catch (_err) {
     showErrorToast(t('today.errorMark'));
   }

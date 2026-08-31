@@ -256,7 +256,7 @@ describe('notify refreshes cache for affected keys (D-52, D-72, Pitfall 2)', () 
     );
   });
 
-  test('notify refreshes after markUncompleted writes completed:false (NOT delete)', async () => {
+  test('notify refreshes after markUncompleted deletes row (4-state null)', async () => {
     const { store, applyMod } = await freshStoreAndApply();
     const repo = createFakeRepo();
     store.configureStore({ repo });
@@ -274,8 +274,7 @@ describe('notify refreshes cache for affected keys (D-52, D-72, Pitfall 2)', () 
     });
 
     const log = store.getCachedLog('h1', '2026-05-26');
-    assert.ok(log, 'log row still cached (D-74 — NOT delete)');
-    assert.equal(log.status, 'failed');
+    assert.ok(!log, 'log row removed from cache after markUncompleted (4-state null)');
   });
 
   test('notify refreshes after restoreLogRow deletes (undo of markCompleted)', async () => {
