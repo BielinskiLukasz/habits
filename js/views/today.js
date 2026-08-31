@@ -1,6 +1,7 @@
 /**
  * @file Today view mounter — subscribe + render + return unmount
- * (CORE-01..06, D-52, D-53, D-71, D-73, D-79).
+ * (CORE-01..06, D-52, D-53, D-71, D-73, D-79). Adopts i18n via t()
+ * import for all user-visible strings (I18N-02).
  *
  * Wires the pure description builders (`js/views/today/builders.js`) into
  * real DOM via `mount()` (D-77). `mountToday(parent)` performs the initial
@@ -74,6 +75,7 @@ import { todayLocal } from '../util/date.js';
 import { apply } from '../state/apply.js';
 import { undo } from '../state/undo.js';
 import { showUndoToast, showErrorToast } from './toast.js';
+import { t } from '../i18n/index.js';
 import {
   subscribe,
   getCachedHabits,
@@ -213,13 +215,13 @@ async function handleMarkCompleteTap(evt) {
     // fallback to '(habit)' when the row was archived cross-tab mid-tap.
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
     showUndoToast({
-      message: `Marked ${habitName} complete`,
+      message: t('today.markedComplete', { name: habitName }),
       undoFn: () => undo(),
     });
   } catch (_err) {
     // D-53 + D-73: user-visible error feedback on apply() reject.
     revertRow(rowEl, priorState);
-    showErrorToast("Couldn't mark — try again");
+    showErrorToast(t('today.errorMark'));
   }
 }
 
@@ -242,13 +244,13 @@ async function handleMarkUncompleteTap(evt) {
     // D-71: verb+habit Undo toast (mirrors markComplete branch).
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
     showUndoToast({
-      message: `Marked ${habitName} uncomplete`,
+      message: t('today.markedUncomplete', { name: habitName }),
       undoFn: () => undo(),
     });
   } catch (_err) {
     // D-53 + D-73: user-visible error feedback on apply() reject.
     revertRow(rowEl, priorState);
-    showErrorToast("Couldn't mark — try again");
+    showErrorToast(t('today.errorMark'));
   }
 }
 
@@ -265,9 +267,9 @@ async function _swipeMarkComplete(habitId) {
   try {
     await apply({ type: 'markCompleted', payload: { habitId, date } });
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-    showUndoToast({ message: `Marked ${habitName} complete`, undoFn: () => undo() });
+    showUndoToast({ message: t('today.markedComplete', { name: habitName }), undoFn: () => undo() });
   } catch (_err) {
-    showErrorToast("Couldn't mark — try again");
+    showErrorToast(t('today.errorMark'));
   }
 }
 
@@ -373,9 +375,9 @@ async function handleMarkSkipTap(evt) {
   try {
     await apply({ type: 'markSkipped', payload: { habitId, date } });
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-    showUndoToast({ message: `Skipped ${habitName}`, undoFn: () => undo() });
+    showUndoToast({ message: t('today.skippedToast', { name: habitName }), undoFn: () => undo() });
   } catch (_err) {
-    showErrorToast("Couldn't skip — try again");
+    showErrorToast(t('today.errorSkip'));
   }
 }
 
@@ -394,9 +396,9 @@ async function handleMarkFailTap(evt) {
   try {
     await apply({ type: 'markUncompleted', payload: { habitId, date } });
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-    showUndoToast({ message: `Marked ${habitName} not done`, undoFn: () => undo() });
+    showUndoToast({ message: t('today.markedNotDone', { name: habitName }), undoFn: () => undo() });
   } catch (_err) {
-    showErrorToast("Couldn't mark — try again");
+    showErrorToast(t('today.errorMark'));
   }
 }
 
@@ -432,7 +434,7 @@ async function handleLogIncrementTap(evt) {
   try {
     await apply({ type: 'logNumeric', payload: { habitId, date, count: currentCount + 1 } });
   } catch (_err) {
-    showErrorToast("Couldn't update count — try again");
+    showErrorToast(t('today.errorUpdateCount'));
   }
 }
 
@@ -453,7 +455,7 @@ async function handleLogDecrementTap(evt) {
   try {
     await apply({ type: 'logNumeric', payload: { habitId, date, count: newCount } });
   } catch (_err) {
-    showErrorToast("Couldn't update count — try again");
+    showErrorToast(t('today.errorUpdateCount'));
   }
 }
 
@@ -517,7 +519,7 @@ async function handleToggleSlotTap(evt) {
       if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
     }
   } catch (_err) {
-    showErrorToast("Couldn't update slot — try again");
+    showErrorToast(t('today.errorUpdateSlot'));
   }
 }
 
@@ -606,7 +608,7 @@ function renderTodayInto(parent) {
     // All habits (binary, numeric, slot-checklist) are rendered via RENDERERS.
     const listEl = parent.ownerDocument.createElement('ul');
     listEl.className = 'today-list';
-    listEl.setAttribute('aria-label', "Today's habits");
+    listEl.setAttribute('aria-label', t('today.listAriaLabel'));
     parent.appendChild(listEl);
     for (const { habit, log } of ordered) {
       const renderer = RENDERERS[habit.targetType] ?? RENDERERS.binary;

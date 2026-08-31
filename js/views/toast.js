@@ -1,6 +1,7 @@
 /**
  * @file Toast primitive (D-08, D-69, D-70, D-71, D-73). Shared by Plan 03's
  * SW-update notification and Plan 03-04's Undo / Error notifications.
+ * Adopts i18n via t() for aria-label and undo error strings (I18N-02).
  *
  * Three public surfaces:
  *
@@ -33,6 +34,8 @@
  *     — D-78 grep gate.
  *   - Auto-dismiss on the update-toast path — D-08 LOCKED.
  */
+
+import { t } from '../i18n/index.js';
 
 // Single-toast invariant guard (D-70) — every new _showToast call replaces
 // the current toast, clearing its timer. `toastEl === null` means "no toast
@@ -100,11 +103,11 @@ function _showToast({ message, action, autoDismissMs, variant }) {
         const result = fn();
         if (result && typeof result.then === 'function') {
           result.catch(() => {
-            showErrorToast("Couldn't undo — try again");
+            showErrorToast(t('toast.errorUndo'));
           });
         }
       } catch (_err) {
-        showErrorToast("Couldn't undo — try again");
+        showErrorToast(t('toast.errorUndo'));
       }
     });
     toastEl.appendChild(actionBtn);
@@ -113,7 +116,7 @@ function _showToast({ message, action, autoDismissMs, variant }) {
   // Always append a dismiss button (× glyph + aria-label).
   const closeBtn = document.createElement('button');
   closeBtn.className = 'toast-close';
-  closeBtn.setAttribute('aria-label', 'Dismiss');
+  closeBtn.setAttribute('aria-label', t('toast.dismiss'));
   closeBtn.textContent = '×';
   closeBtn.addEventListener('click', () => {
     _dismissToast();

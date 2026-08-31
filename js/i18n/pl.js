@@ -190,6 +190,8 @@ export const PL = {
   'today.listAriaLabel': 'Nawyki na dziś',
   'today.markedComplete': 'Oznaczono {name} jako wykonane',
   'today.markedUncomplete': 'Oznaczono {name} jako niewykonane',
+  'today.skippedToast': 'Pominięto: {name}',
+  'today.markedNotDone': 'Nie wykonano: {name}',
 
   // Catalog — cadence type options
   'catalog.cadence.daily': 'Codziennie',

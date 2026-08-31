@@ -192,6 +192,8 @@ export const EN = {
   'today.listAriaLabel': "Today's habits",
   'today.markedComplete': 'Marked {name} complete',
   'today.markedUncomplete': 'Marked {name} uncomplete',
+  'today.skippedToast': 'Skipped {name}',
+  'today.markedNotDone': 'Marked {name} not done',
 
   // Catalog — cadence type options
   'catalog.cadence.daily': 'Daily',
