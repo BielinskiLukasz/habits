@@ -16,6 +16,15 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Validated
 
+<!-- v1.2 UX & i18n Quality Gate — Phases 10–11 validated so far -->
+
+- ✓ I18N-01 — Retroactive tests for i18n module (locale lookup, fallback, t() coverage) — Phase 10 — v1.2
+- ✓ I18N-02 — All views use t() with no hardcoded UI strings remaining — Phase 10 — v1.2
+- ✓ I18N-03 — Language preference persists across reload and shell switch — Phase 10 — v1.2
+- ✓ LOG4-01 — Unit tests for 4-state log status model (completed/failed/skipped/undefined) — Phase 11 — v1.2
+- ✓ LOG4-04 — JSON export/import round-trips all 4 log states without data loss; CSV export emits correct cell values for all 4 states — Phase 11 — v1.2
+- ✓ LOG4-05 — CSV export emits correct cell values for all 4 states (`x` for skipped, `1` for completed, `0` for failed/undefined-applicable) — Phase 11 — v1.2
+
 <!-- v1.1 Scheduled Habits — Phases 7–9 (shipped 2026-08-27) -->
 
 - ✓ SCHED-01 — New `scheduled` status (4th, alongside active/mastered/archived) for future-start habits — Phase 7 — v1.1
@@ -47,14 +56,8 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 <!-- v1.2 UX & i18n Quality Gate — retroactive validation of quick-task features -->
 
-- [ ] I18N-01 — Retroactive tests for i18n module (locale lookup, fallback, t() coverage) — v1.2
-- [ ] I18N-02 — All views use t() with no hardcoded UI strings remaining — v1.2
-- [ ] I18N-03 — Language preference persists across reload and shell switch — v1.2
-- [ ] LOG4-01 — Unit tests for 4-state log status model (completed/failed/skipped/undefined) — v1.2
 - [ ] LOG4-02 — Swipe UX on Today view correctly cycles all 4 states — v1.2
 - [ ] LOG4-03 — History screen swipe UX matches Today's 4-state interaction model — v1.2
-- [ ] LOG4-04 — JSON export/import round-trips all 4 log states without data loss — v1.2
-- [ ] LOG4-05 — CSV export emits correct cell values for all 4 states — v1.2
 - [ ] UX-01 — Analytics footer nav visible and functional on mobile and desktop — v1.2
 - [ ] UX-02 — Desktop sidebar collapse/expand persists across navigation — v1.2
 - [ ] QA-01 — Code review: no switch on log status/cadence types; no innerHTML; JSDoc headers present — v1.2
@@ -150,6 +153,7 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 | D-39: IndexedDB schema v1 carries **seven** stores, not six — the original ARCHITECTURE list of 6 stores is superseded. v1 stores are `habits`, `habit_versions`, `logs`, `events`, `settings`, `meta`, `score_snapshots`. `score_snapshots` (keyPath `[habitId, date]`, indexes on `date` and `habitId`) is declared empty in v1 and starts being written in Phase 6 when scoring lands | Declaring the snapshots store at v1 means no v2 migration is needed when Phase 6 starts writing rows — the schema is forward-compatible without DB upgrade; matches D-19 "scoring is a snapshotted projection, not a recompute" | Locked 2026-05-26 (Phase 2); shipped in `js/db/schema.js` plan 02-02 |
 | D-40: The `habits` store carries an optional `name_pl` string field alongside the primary English `name`. Source-derived habits (from the original 47-week xlsx seed) populate both. User-created habits default `name_pl: null`. No separate `i18n` layer | Minimum-viable bilingual storage that preserves the user's existing Polish identifiers without adding a translation framework or `Intl.LocaleMatcher` dependency; honors the no-npm constraint | Locked 2026-05-26 (Phase 2); shipped in `seed/habits.json` + the schema's habit row shape (plan 02-04) |
 | D-42: The `events` store uses a string UUID keyPath (`crypto.randomUUID()`-generated) instead of `autoIncrement: true`. Events still have chronological order via the `at` index on the timestamp column. Cross-device imports merge by UUID without primary-key collision risk | Autoincrement keys collide when merging two export files from different devices (both would start at 1); UUIDs make the JSON-import "merge by id" semantic (D-5) safe for events too, not just habits and logs | Locked 2026-05-26 (Phase 2); shipped in `js/db/schema.js` plan 02-02 |
+| D-43: 4-state log model — `logs` store rows carry `status: 'completed'|'failed'|'skipped'`. The fourth state (undefined/not-logged) is represented by the **absence** of a row, not a null status field. `markCompleted` writes `status: 'completed'`; `markUncompleted` writes `status: 'failed'`; `markSkipped` writes `status: 'skipped'` (does not trigger D-52 lastCompletedDate). The legacy `completed: boolean` field is retired. CSV export maps all 4 states to cell values: `'1'` (completed), `'0'` (failed or absent on applicable day), `'x'` (skipped or non-applicable cadence day) | Single field `status` is unambiguous at every call-site; absence-as-undefined keeps IDB free of phantom rows; the skipped state allows a distinct "I consciously skipped" signal that maps to `'x'` in CSV without inflating the 0-failure count | Shipped 2026-08-28 (quick-task 260828-o1g); validated Phase 11 (tests + round-trip) |
 
 ## Evolution
 
@@ -197,4 +201,4 @@ This document evolves at phase transitions and milestone boundaries.
 - JSON import preserves `status:'scheduled'` through mergeImportedStores
 
 ---
-*Last updated: 2026-08-31 after v1.2 UX & i18n Quality Gate milestone started*
+*Last updated: 2026-08-31 after Phase 11 (4-State Log Model Tests)*

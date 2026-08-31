@@ -25,7 +25,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 11 — 4-State Log Model Tests
+**Current focus:** Phase 12 — Swipe UX & Navigation Verification
 
 ## Milestone Status
 
@@ -56,7 +56,7 @@ Phase: 12 — Swipe UX & Navigation Verification
 Status: Ready to plan
 Last activity: 2026-08-31 — Phase 11 complete, transitioned to Phase 12
 
-█████░░░░░░░░░░░░░░░ 27% (1/4 phases, 5/5 plans so far)
+██████████░░░░░░░░░░ 50% (2/4 phases complete)
 
 ## Performance Metrics
 
@@ -84,7 +84,7 @@ Last activity: 2026-08-31 — Phase 11 complete, transitioned to Phase 12
 | Phase | Plans | Completed |
 |-------|-------|-----------|
 | 10. i18n Tests & Verification | 4/4 | 2026-08-31 |
-| 11. 4-State Log Model Tests | 2/? | 2026-08-31 (in progress) |
+| 11. 4-State Log Model Tests | 3/3 | 2026-08-31 |
 | 12. Swipe UX & Navigation Verification | 0/? | — |
 | 13. Code Review & Documentation | 0/? | — |
 **Per-Plan Metrics:**
@@ -129,6 +129,16 @@ Last activity: 2026-08-31 — Phase 11 complete, transitioned to Phase 12
 
 None
 
+### Concerns (Phase 13 targets)
+
+- ⚠️ `js/io/scoreSnapshots.js:305` — `_logCompleted` still checks `log.completed === true` (stale boolean model; scoring pipeline affected)
+- ⚠️ `js/domain/waveAggregates.js:44,198` — `_countForHabit` and streak walk-back check `log.completed === true` (wave analytics show 0 completions for any new log)
+- ⚠️ `js/views/history.js:300` — bulk "mark all uncompleted" filter checks `freshLog.completed !== true` (history bulk action broken for new-model logs)
+- ⚠️ `js/io/import.js:130` — v1 backup import does not normalize `completed: boolean` rows to `status: string` (old exports will be silently dropped)
+- ⚠️ `js/state/apply/markSkipped.js:35` — does not call `_recomputeLastCompletedDate` when overwriting a completed log (lastCompletedDate stranded if user skips after completing)
+
+All deferred to Phase 13 (Code Review & Documentation). These do not affect the Phase 11 test coverage success criteria.
+
 ### Blockers
 
 None
@@ -146,11 +156,11 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-31T17:54:18.411Z
-**Stopped at:** Phase 11 complete, ready to plan Phase 12
+**Last session:** 2026-08-31T20:00:00Z
+**Stopped at:** Phase 11 complete, transitioned to Phase 12
 **Resume file:** None
 
-Next command: `/gsd-plan-phase 11` (remaining plans in phase 11)
+Next command: `/gsd-plan-phase 12`
 
 ## Deferred Items
 
