@@ -84,14 +84,14 @@ const DATE = '2026-06-05';
 const LOG_COMPLETED = {
   habitId: 'h-binary',
   date: DATE,
-  completed: true,
+  status: 'completed',
   definitionVersion: null,
 };
 
 const LOG_NOT_COMPLETED = {
   habitId: 'h-binary',
   date: '2026-06-04',
-  completed: false,
+  status: 'failed',
   definitionVersion: null,
 };
 
@@ -176,7 +176,7 @@ describe('exportJSON — round-trip integrity (all 7 stores preserved)', () => {
     const { logs } = JSON.parse(json);
     const l = logs.find((x) => x.habitId === 'h-binary' && x.date === DATE);
     assert.ok(l, 'log [h-binary, 2026-06-05] in export');
-    assert.equal(l.completed, true);
+    assert.equal(l.status, 'completed');
   });
 
   test('exportJSON does NOT prepend UTF-8 BOM (Pitfall 6)', async () => {
