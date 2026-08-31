@@ -116,7 +116,7 @@ Plans:
   3. Analytics footer nav is visible and functional on mobile; settings panel no longer contains a duplicate desktop analytics link
   4. Desktop sidebar collapse state persists across hash-route navigation within the same session
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 Plans:
 **Wave 1** *(parallel)*
 
@@ -125,7 +125,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 Plan 01 completion)*
 
-- [ ] 12-02-PLAN.md — today/builders.js visual indicators + history.js swipe-right wire
+- [x] 12-02-PLAN.md — today/builders.js visual indicators + history.js swipe-right wire
 
 **Cross-cutting constraints:**
 
@@ -153,7 +153,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 10. i18n Tests & Verification | 4/4 | Complete | 2026-08-31 |
 | 11. 4-State Log Model Tests | 0/0 | Complete    | 2026-08-31 |
-| 12. Swipe UX & Navigation Verification | 2/3 | In Progress|  |
+| 12. Swipe UX & Navigation Verification | 3/3 | In Progress|  |
 | 13. Code Review & Documentation | 0/? | Not started | - |
 
 ---
