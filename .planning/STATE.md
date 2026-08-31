@@ -48,7 +48,7 @@ Archives: `.planning/milestones/`
 Phase: Milestone v1.1 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-08-29 - Completed quick task 260829-ucr: Move analytics link to footer nav
+Last activity: 2026-08-31 - Completed quick task 260829-ws9: Add collapse/expand toggle button to desktop analytics sidebar
 
 ## Performance Metrics
 
@@ -108,6 +108,7 @@ None
 | 260828-o1g | Add 4-state log status model (completed/failed/skipped/undefined) | 2026-08-28 | beb23e7 | [260828-o1g-add-4-state-log-status-model-completed-f](.planning/quick/260828-o1g-add-4-state-log-status-model-completed-f/) |
 | 260829-ka4 | Implement swipe action handling for history screen (4-state UX) | 2026-08-29 | afc9703 | [260829-ka4-implement-swipe-action-handling-for-hist](.planning/quick/260829-ka4-implement-swipe-action-handling-for-hist/) |
 | 260829-ucr | Move the analytics link from bottom of settings panel to footer nav | 2026-08-29 | c8e51e8 | [260829-ucr-move-the-analytics-link-from-bottom-of-s](.planning/quick/260829-ucr-move-the-analytics-link-from-bottom-of-s/) |
+| 260829-ws9 | Add collapse/expand toggle button to desktop analytics sidebar | 2026-08-31 | c60e2fc | [260829-ws9-add-a-collapse-expand-toggle-button-to-t](.planning/quick/260829-ws9-add-a-collapse-expand-toggle-button-to-t/) |
 
 ## Session Continuity
 
