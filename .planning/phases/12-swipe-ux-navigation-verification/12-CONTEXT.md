@@ -24,7 +24,7 @@ Fix and verify four interaction surfaces: (1) swipe-right cycling through all 4 
 ### Unit tests for nextLogState (artifact)
 
 - **D-06:** Create `tests/unit/logStatus.test.js` to cover `nextLogState`. Tests must cover: each of the 4 known input states advancing to the correct next state, plus `null` and `undefined` inputs both returning `'completed'`. 6 test cases minimum. Follows `node:test` + `node:assert/strict` — no test framework.
-- **D-07:** Swipe gesture mechanics (pointer events, dx threshold) are NOT tested in Node runner — no DOM available. Tests cover the pure domain logic only.
+- **D-07:** [informational] Swipe gesture mechanics (pointer events, dx threshold) are NOT tested in Node runner — no DOM available. Tests cover the pure domain logic only.
 
 ### UX-01 — Footer nav analytics link
 
