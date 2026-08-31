@@ -170,7 +170,7 @@ describe('D-52 — defensive: missing habit row does not throw', () => {
     // Log row written.
     const log = repo._stores.logs.get(JSON.stringify(['ghost', '2026-05-26']));
     assert.ok(log, 'log row written even when habit is missing');
-    assert.equal(log.completed, true);
+    assert.equal(log.status, 'completed');
     // No habit row created.
     assert.equal(repo._stores.habits.get('ghost'), undefined, 'no habit row synthesized');
   });
