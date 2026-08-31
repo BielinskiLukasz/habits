@@ -4,17 +4,17 @@ milestone: v1.2
 milestone_name: UX & i18n Quality Gate (Phases 10–13)
 current_phase: 10
 current_phase_name: i18n Tests & Verification
-status: planning
-stopped_at: Roadmap created for v1.2 — 4 phases (10–13), 11 requirements mapped
-last_updated: "2026-08-31T12:04:22.698Z"
+status: executing
+stopped_at: Completed 10-01-PLAN.md (i18n test coverage expansion)
+last_updated: "2026-08-31T13:01:29.220Z"
 last_activity: 2026-08-31
-last_activity_desc: Roadmap created for v1.2
-state_head: 1c197a11329053127ae985a3c0fa294c4e065417
+last_activity_desc: Phase 10 execution started
+state_head: 4b24911f110fcbcfeba0a22d4ecb16b1f378c1ab
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -25,7 +25,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** v1.2 UX & i18n Quality Gate — retroactive validation of 6 quick-task features
+**Current focus:** Phase 10 — i18n Tests & Verification
 
 ## Milestone Status
 
@@ -52,10 +52,10 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: 10 (i18n Tests & Verification) — READY TO EXECUTE
-Plan: —
-Status: Roadmap created — ready to plan Phase 10
-Last activity: 2026-08-31 — Roadmap created for v1.2
+Phase: 10 (i18n Tests & Verification) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-08-31 — Phase 10 execution started
 
 ████░░░░░░░░░░░░░░░░ 0% (0/4 phases)
 
@@ -88,6 +88,11 @@ Last activity: 2026-08-31 — Roadmap created for v1.2
 | 11. 4-State Log Model Tests | 0/? | — |
 | 12. Swipe UX & Navigation Verification | 0/? | — |
 | 13. Code Review & Documentation | 0/? | — |
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 10 P01 | 463 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -136,9 +141,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-31
-**Stopped at:** Roadmap created for v1.2 — 4 phases (10–13), 11 requirements mapped
-**Resume file:** .planning/ROADMAP.md
+**Last session:** 2026-08-31T13:01:29.141Z
+**Stopped at:** Completed 10-01-PLAN.md (i18n test coverage expansion)
+**Resume file:** .planning/phases/10-i18n-tests-verification/10-02-PLAN.md
 
 Next command: `/gsd-plan-phase 10`
 
@@ -152,3 +157,7 @@ Items acknowledged and deferred at milestone close, most recent first:
 | uat_gaps | 03/03-UAT.md | verified (0 pending scenarios, archived v1.0) | 2026-08-27 | v1.1 |
 | quick_tasks | 260705-fix-sw-waves-version-bump | missing (empty dir, task completed in-line) | 2026-08-27 | v1.1 |
 | debug_sessions | knowledge-base | unknown (knowledge-base docs file, not an open session) | 2026-08-27 | v1.1 |
+
+## Decisions
+
+- [Phase 10]: Retroactive TDD for i18n tests: RED commit references un-imported functions, GREEN adds imports to pass all 17 tests
