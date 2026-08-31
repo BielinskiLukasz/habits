@@ -29,14 +29,13 @@ import assert from 'node:assert/strict';
 import { createFakeRepo } from '../helpers/fake-idb.js';
 import { DB_VERSION } from '../../js/db/schema.js';
 
-// RED: imports commented out — test contract established before wiring
-// GREEN: uncomment these two lines to wire the real implementations
-// const { exportJSON, configureExport } = await import(
-//   `../../js/io/export.js?t=${Date.now()}`
-// );
-// const { mergeImportedStores, configureImport } = await import(
-//   `../../js/io/import.js?t=${Date.now()}`
-// );
+// GREEN: imports wired to verify against existing implementation
+const { exportJSON, configureExport } = await import(
+  `../../js/io/export.js?t=${Date.now()}`
+);
+const { mergeImportedStores, configureImport } = await import(
+  `../../js/io/import.js?t=${Date.now()}`
+);
 
 // ---------------------------------------------------------------------------
 // Fixtures
