@@ -45,7 +45,20 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 ### Active
 
-<!-- Next milestone TBD — run /gsd-new-milestone to define v1.2 requirements -->
+<!-- v1.2 UX & i18n Quality Gate — retroactive validation of quick-task features -->
+
+- [ ] I18N-01 — Retroactive tests for i18n module (locale lookup, fallback, t() coverage) — v1.2
+- [ ] I18N-02 — All views use t() with no hardcoded UI strings remaining — v1.2
+- [ ] I18N-03 — Language preference persists across reload and shell switch — v1.2
+- [ ] LOG4-01 — Unit tests for 4-state log status model (completed/failed/skipped/undefined) — v1.2
+- [ ] LOG4-02 — Swipe UX on Today view correctly cycles all 4 states — v1.2
+- [ ] LOG4-03 — History screen swipe UX matches Today's 4-state interaction model — v1.2
+- [ ] LOG4-04 — JSON export/import round-trips all 4 log states without data loss — v1.2
+- [ ] LOG4-05 — CSV export emits correct cell values for all 4 states — v1.2
+- [ ] UX-01 — Analytics footer nav visible and functional on mobile and desktop — v1.2
+- [ ] UX-02 — Desktop sidebar collapse/expand persists across navigation — v1.2
+- [ ] QA-01 — Code review: no switch on log status/cadence types; no innerHTML; JSDoc headers present — v1.2
+- [ ] QA-02 — New architectural decisions (4-state model, i18n architecture) documented in PROJECT.md — v1.2
 
 ### Out of Scope
 
@@ -155,6 +168,20 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+## Current Milestone: v1.2 UX & i18n Quality Gate
+
+**Goal:** Retroactively validate and harden the 6 quick-task features (i18n, 4-state log model, swipe UX, nav/sidebar) so they meet project quality standards — tests, code review, UX completeness, and decision documentation.
+
+**Target features:**
+- EN/PL i18n — language toggle, locale dictionaries, t() wired across all views
+- 4-state log status (completed/failed/skipped/undefined) — domain model + swipe UX on Today
+- History screen swipe UX — 4-state interaction model
+- Analytics footer nav — moved from settings panel
+- Desktop sidebar collapse toggle
+- Waveboard scores fix + daily snapshot rebuild
+
+---
+
 ## Last Shipped: v1.1 Scheduled Habits
 
 **Shipped:** 2026-08-27 · Phases 7–9 · 9 plans · 169 commits · 57 days
@@ -170,4 +197,4 @@ This document evolves at phase transitions and milestone boundaries.
 - JSON import preserves `status:'scheduled'` through mergeImportedStores
 
 ---
-*Last updated: 2026-08-27 after v1.1 Scheduled Habits milestone*
+*Last updated: 2026-08-31 after v1.2 UX & i18n Quality Gate milestone started*

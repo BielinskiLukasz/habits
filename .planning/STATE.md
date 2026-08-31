@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Scheduled Habits — Phases 7–9 (in progress)
-status: Awaiting next milestone
-stopped_at: Phase 9 complete — all phases complete
-last_updated: "2026-08-27T10:22:02.550Z"
-last_activity: 2026-08-27
-last_activity_desc: Milestone v1.1 completed and archived
-state_head: 001e524eada38168ebc3b8ebeeb3df1f14f20ea5
+milestone: v1.2
+milestone_name: UX & i18n Quality Gate
+status: planning
+last_updated: "2026-08-31T11:05:14.526Z"
+last_activity: 2026-08-31
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
-current_phase: 9
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -45,10 +41,10 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: Milestone v1.1 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-31 - Completed quick task 260829-ws9: Add collapse/expand toggle button to desktop analytics sidebar
+Status: Defining requirements
+Last activity: 2026-08-31 — Milestone v1.2 started
 
 ## Performance Metrics
 
