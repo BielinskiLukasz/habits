@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: UX & i18n Quality Gate (Phases 10–13)
-current_phase: 12
-current_phase_name: Swipe UX & Navigation Verification
-status: executing
-stopped_at: Phase 12 context gathered
-last_updated: "2026-08-31T21:40:36.677Z"
-last_activity: 2026-08-31
-last_activity_desc: Phase 12 execution started
-state_head: b15c1f5e43c638be1d8c661bbde167a822a753dd
+current_phase: 13
+current_phase_name: Code Review & Documentation
+status: idle
+stopped_at: Phase 12 complete; Phase 13 next
+last_updated: "2026-09-01T00:00:00.000Z"
+last_activity: 2026-09-01
+last_activity_desc: Phase 12 complete — 3/3 plans, VERIFICATION.md written
+state_head: c578faf
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 4
-  percent: 50
+  completed_plans: 7
+  percent: 75
 ---
 
 # Project State
@@ -25,7 +25,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 12 — Swipe UX & Navigation Verification
+**Current focus:** Phase 13 — Code Review & Documentation
 
 ## Milestone Status
 
@@ -52,11 +52,11 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: 12 (Swipe UX & Navigation Verification) — EXECUTING
-Status: Executing Phase 12
-Last activity: 2026-08-31 — Phase 12 execution started
+Phase: 13 (Code Review & Documentation) — NOT STARTED
+Status: Phase 12 complete; ready for Phase 13
+Last activity: 2026-09-01 — Phase 12 complete
 
-██████████░░░░░░░░░░ 50% (2/4 phases complete)
+███████████████░░░░░ 75% (3/4 phases complete)
 
 ## Performance Metrics
 
@@ -85,7 +85,7 @@ Last activity: 2026-08-31 — Phase 12 execution started
 |-------|-------|-----------|
 | 10. i18n Tests & Verification | 4/4 | 2026-08-31 |
 | 11. 4-State Log Model Tests | 3/3 | 2026-08-31 |
-| 12. Swipe UX & Navigation Verification | 0/? | — |
+| 12. Swipe UX & Navigation Verification | 3/3 | 2026-09-01 |
 | 13. Code Review & Documentation | 0/? | — |
 **Per-Plan Metrics:**
 
@@ -133,7 +133,6 @@ None
 
 - ⚠️ `js/io/scoreSnapshots.js:305` — `_logCompleted` still checks `log.completed === true` (stale boolean model; scoring pipeline affected)
 - ⚠️ `js/domain/waveAggregates.js:44,198` — `_countForHabit` and streak walk-back check `log.completed === true` (wave analytics show 0 completions for any new log)
-- ⚠️ `js/views/history.js:300` — bulk "mark all uncompleted" filter checks `freshLog.completed !== true` (history bulk action broken for new-model logs)
 - ⚠️ `js/io/import.js:130` — v1 backup import does not normalize `completed: boolean` rows to `status: string` (old exports will be silently dropped)
 - ⚠️ `js/state/apply/markSkipped.js:35` — does not call `_recomputeLastCompletedDate` when overwriting a completed log (lastCompletedDate stranded if user skips after completing)
 
@@ -156,11 +155,11 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-31T19:37:53.217Z
-**Stopped at:** Phase 12 context gathered
-**Resume file:** .planning/phases/12-swipe-ux-navigation-verification/12-CONTEXT.md
+**Last session:** 2026-09-01T00:00:00.000Z
+**Stopped at:** Phase 12 complete
+**Resume file:** .planning/phases/12-swipe-ux-navigation-verification/12-VERIFICATION.md
 
-Next command: `/gsd-plan-phase 12`
+Next command: `/gsd-plan-phase 13`
 
 ## Deferred Items
 
