@@ -158,10 +158,10 @@ export function mountHistory(parent, { repo, store }) {
         apply({ type: 'markCompleted', payload: { habitId, date: selectedDate } })
           .then(() => {
             const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-            showUndoToast({ message: `Marked ${habitName} complete`, undoFn: () => undo() });
+            showUndoToast({ message: t('today.markedComplete', { name: habitName }), undoFn: () => undo() });
             render(selectedDate);
           })
-          .catch(() => showErrorToast("Couldn't mark — try again"));
+          .catch(() => showErrorToast(t('history.errorMark')));
       }
     } else if (dx < -60) {
       if (slide) slide.style.transform = 'translateX(-120px)';
@@ -355,9 +355,9 @@ export function mountHistory(parent, { repo, store }) {
             try {
               await apply({ type: 'markSkipped', payload: { habitId, date: logDate } });
               const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-              showUndoToast({ message: `Skipped ${habitName}`, undoFn: () => undo() });
+              showUndoToast({ message: t('today.skippedToast', { name: habitName }), undoFn: () => undo() });
             } catch (_e) {
-              showErrorToast("Couldn't skip — try again");
+              showErrorToast(t('history.errorSkip'));
             }
             render(selectedDate);
           },
@@ -369,9 +369,9 @@ export function mountHistory(parent, { repo, store }) {
             try {
               await apply({ type: 'markUncompleted', payload: { habitId, date: logDate } });
               const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
-              showUndoToast({ message: `Marked ${habitName} not done`, undoFn: () => undo() });
+              showUndoToast({ message: t('today.markedNotDone', { name: habitName }), undoFn: () => undo() });
             } catch (_e) {
-              showErrorToast("Couldn't mark — try again");
+              showErrorToast(t('history.errorMark'));
             }
             render(selectedDate);
           },

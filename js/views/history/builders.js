@@ -37,7 +37,7 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
   const nextAttrs = {
     class: 'stepper-btn stepper-btn--next',
     'data-action': 'next-day',
-    'aria-label': 'Next day',
+    'aria-label': t('history.nextDay'),
   };
   if (!canGoForward) {
     // T-04-09b: disabled prevents navigating to future dates
@@ -53,7 +53,7 @@ export function buildHistoryHeader(selectedDate, canGoForward) {
         attrs: {
           class: 'stepper-btn stepper-btn--prev',
           'data-action': 'prev-day',
-          'aria-label': 'Previous day',
+          'aria-label': t('history.prevDay'),
         },
         text: t('history.prev'),
       },

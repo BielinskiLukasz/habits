@@ -362,15 +362,13 @@ function buildActions() {
         !navigator.storage ||
         typeof navigator.storage.persist !== 'function'
       ) {
-        showErrorToast('Storage persistence not supported');
+        showErrorToast(t('settings.errorPersistenceUnsupported'));
         return;
       }
       try {
         const ok = await navigator.storage.persist();
         if (!ok) {
-          showErrorToast(
-            'Browser declined persistence — try clearing site data or installing',
-          );
+          showErrorToast(t('settings.errorPersistenceRequest'));
         }
         // Refresh the Storage card status.
         if (_panelEl) {
@@ -378,7 +376,7 @@ function buildActions() {
           if (storageCard) loadStorageStateAsync(storageCard);
         }
       } catch (_e) {
-        showErrorToast("Couldn't request persistence");
+        showErrorToast(t('settings.errorPersistenceRequest'));
       }
     },
 
@@ -391,7 +389,7 @@ function buildActions() {
       if (value !== 'mon' && value !== 'sun') return;
       apply({ type: 'setSetting', payload: { key: 'weekStart', value } }).catch(
         () => {
-          showErrorToast("Couldn't change week start — try again");
+          showErrorToast(t('settings.errorWeekStart'));
         },
       );
     },
@@ -406,7 +404,7 @@ function buildActions() {
         const r = await undo();
         if (r === null) return;
       } catch (_e) {
-        showErrorToast("Couldn't undo — try again");
+        showErrorToast(t('settings.errorUndo'));
       }
     },
 
@@ -454,7 +452,7 @@ function buildActions() {
       const value = parseInt(raw, 10);
       if (isNaN(value)) return;
       apply({ type: 'setMasteryThreshold', payload: { value } }).catch(() => {
-        showErrorToast("Couldn't change mastery threshold — try again");
+        showErrorToast(t('settings.errorMasteryThreshold'));
       });
     },
 
@@ -468,7 +466,7 @@ function buildActions() {
       const value = parseInt(raw, 10);
       if (isNaN(value)) return;
       apply({ type: 'setMasteryWindow', payload: { value } }).catch(() => {
-        showErrorToast("Couldn't change mastery window — try again");
+        showErrorToast(t('settings.errorMasteryWindow'));
       });
     },
 
@@ -494,7 +492,7 @@ function buildActions() {
           payload: { key: 'lastBackupDate', value: new Date().toLocaleDateString('sv-SE') },
         });
       } catch (err) {
-        showErrorToast('JSON export failed: ' + (err?.message ?? String(err)));
+        showErrorToast(t('settings.errorExportJson', { msg: err?.message ?? String(err) }));
       }
     },
 
@@ -520,7 +518,7 @@ function buildActions() {
           payload: { key: 'lastBackupDate', value: new Date().toLocaleDateString('sv-SE') },
         });
       } catch (err) {
-        showErrorToast('CSV export failed: ' + (err?.message ?? String(err)));
+        showErrorToast(t('settings.errorExportCsv', { msg: err?.message ?? String(err) }));
       }
     },
 
@@ -572,7 +570,7 @@ function buildActions() {
         else if (evt?.target) evt.target.value = '';
       } catch (err) {
         console.error('[settings] importJSON failed:', err);
-        showErrorToast('Import failed: ' + (err?.message ?? String(err)));
+        showErrorToast(t('settings.errorImport', { msg: err?.message ?? String(err) }));
       }
     },
 
@@ -589,7 +587,7 @@ function buildActions() {
         // nag is a pure UI preference (localStorage), not an IDB mutation.
         await refreshLiveCards();
       } catch (err) {
-        showErrorToast("Couldn't dismiss nag: " + (err?.message ?? String(err)));
+        showErrorToast(t('settings.errorDismissNag', { msg: err?.message ?? String(err) }));
       }
     },
 
@@ -604,7 +602,7 @@ function buildActions() {
       const value = evt?.currentTarget?.value ?? evt?.target?.value;
       if (value !== 'S1' && value !== 'S2' && value !== 'S3') return;
       apply({ type: 'setSetting', payload: { key: 'scoringModel', value } }).catch(() => {
-        showErrorToast("Couldn't change scoring model — try again");
+        showErrorToast(t('settings.errorScoringModel'));
       });
     },
 
@@ -646,7 +644,7 @@ function buildActions() {
           await store.notify({ event: 'snapshot:rebuild' });
         }
       } catch (err) {
-        showErrorToast('Recompute failed: ' + (err?.message ?? String(err)));
+        showErrorToast(t('settings.errorRecompute', { msg: err?.message ?? String(err) }));
       }
 
       // Restore Data card with isRecomputing: false.
