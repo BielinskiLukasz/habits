@@ -57,7 +57,7 @@ export async function handleLogSlot(event, repo) {
   const allChecked = slots.every((s) => s.checked);
   const habitRow = await _recomputeLastCompletedDate({
     habitId,
-    currentLogRow: { ...newLog, completed: allChecked },
+    currentLogRow: { ...newLog, status: allChecked ? 'completed' : 'failed' },
     repo,
   });
 
