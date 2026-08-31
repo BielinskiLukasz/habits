@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-08-25 (added B-026 — UI density; enriched B-024 with little-words reference)
-Last assigned ID: **B-026** — next new item must be **B-027**
+Last updated: 2026-08-31 (added B-027 — app version display)
+Last assigned ID: **B-027** — next new item must be **B-028**
 
 ---
 
@@ -635,3 +635,30 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 - Settings: reduce section header margins and form element spacing.
 - Test on a real phone at 375 px viewport width before shipping — desktop DevTools emulation misses tap-target ergonomics.
 - Effort: Low–Medium (mostly CSS token tuning + visual QA on device).
+
+---
+
+## Captured 2026-08-31
+
+### B-027 · App Version Number Display
+
+**Source:** product idea — reported 2026-08-31; mirrors B-013 from med-stock sibling app
+**Status:** captured · not scheduled
+**Earliest sensible slot:** next available patch or alongside any Settings view work
+
+**What:** Show the current app version somewhere visible in the UI — most naturally in the Settings → Data section footer or a dedicated "About" card. The version string should match the `VERSION` constant in `js/util/version.js` exactly (e.g., `v1.0.0`).
+
+**Why:** Without a visible version, the user cannot report "which version broke X" and there is no way to correlate bug reports to releases. A one-line version badge costs almost nothing to add and eliminates ambiguity — especially useful as the app evolves across milestones and the user runs it on multiple devices.
+
+**Open questions when this gets planned:**
+
+- Where exactly: Settings → Data section footer, a small badge in the bottom-nav area, or a dedicated "About" card in Settings?
+- Should the build date be shown alongside the version for debugging purposes?
+- Tap-to-copy behaviour — useful for filing bug reports?
+
+**Implementation notes:**
+
+- `js/util/version.js` already exports a `VERSION` constant (referenced in B-022 alignment pass and Phase 2 docs). Import that export — no new constant needed.
+- Render as a small `<p class="settings-version">v{VERSION}</p>` (or equivalent) in the Settings view builder (`js/views/settings.js` or `settings/builders.js`). No new module or component needed.
+- Style with a muted, small-text token from `css/tokens.css` — `--font-size-xs` + `--color-text-muted` or equivalent.
+- Effort: Very low.
