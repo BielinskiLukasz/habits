@@ -36,7 +36,7 @@
 ### v1.2 UX & i18n Quality Gate (Phases 10–13)
 
 - [x] **Phase 10: i18n Tests & Verification** — completed 2026-08-31
-- [ ] **Phase 11: 4-State Log Model Tests** - Unit tests for log status domain logic and export round-trip verification
+- [x] **Phase 11: 4-State Log Model Tests** - Unit tests for log status domain logic and export round-trip verification
 - [ ] **Phase 12: Swipe UX & Navigation Verification** - Verify swipe interactions, footer nav, and sidebar persistence
 - [ ] **Phase 13: Code Review & Documentation** - Confirm pattern compliance and document new architecture decisions
 
@@ -87,16 +87,16 @@ Plans:
   2. A JSON export-then-import cycle preserves all 4 log states without data loss or state coercion
   3. CSV export cells show correct values: numeric/1/0 for applicable days and `x` for non-applicable days across all 4 states
 
-**Plans**: 1/3 plans executed
+**Plans**: 3/3 plans executed
 Plans:
 **Wave 1**
 
 - [x] 11-01-PLAN.md — fix 4-state status model inconsistency (clears 29 failing tests)
-- [ ] 11-02-PLAN.md — add markSkipped integration tests + CSV skipped→x coverage
+- [x] 11-02-PLAN.md — add markSkipped integration tests + CSV skipped→x coverage
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 11-03-PLAN.md — JSON round-trip for all 4 log states
+- [x] 11-03-PLAN.md — JSON round-trip for all 4 log states
 
 **Cross-cutting constraints:**
 
@@ -138,7 +138,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 10. i18n Tests & Verification | 4/4 | Complete | 2026-08-31 |
-| 11. 4-State Log Model Tests | 1/3 | In progress | - |
+| 11. 4-State Log Model Tests | 3/3 | Complete | 2026-08-31 |
 | 12. Swipe UX & Navigation Verification | 0/? | Not started | - |
 | 13. Code Review & Documentation | 0/? | Not started | - |
 
