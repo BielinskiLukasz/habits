@@ -299,7 +299,7 @@ export function getCachedSettings() {
 }
 
 /**
- * Count cached logs for `habitId` with `completed === true` whose `date`
+ * Count cached logs for `habitId` with `status: 'completed'` whose `date`
  * falls inside the inclusive `[startYMD, endYMD]` range.
  *
  * This is the function the cadence resolver's `ctx.weekCompletions` is
@@ -316,7 +316,7 @@ export function getCachedWeekCompletions(habitId, startYMD, endYMD) {
   for (const log of cache.logs.values()) {
     if (
       log.habitId === habitId &&
-      log.completed === true &&
+      log.status === 'completed' &&
       log.date >= startYMD &&
       log.date <= endYMD
     ) {
