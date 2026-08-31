@@ -5,16 +5,16 @@ milestone_name: UX & i18n Quality Gate (Phases 10–13)
 current_phase: 10
 current_phase_name: i18n Tests & Verification
 status: executing
-stopped_at: Completed 10-02-PLAN.md (locale keys + catalog.js i18n)
-last_updated: "2026-08-31T13:57:08.456Z"
+stopped_at: Completed 10-03-PLAN.md (today.js, toast.js, history.js, settings.js, history/builders.js i18n)
+last_updated: "2026-08-31T14:39:47.947Z"
 last_activity: 2026-08-31
 last_activity_desc: Phase 10 execution started
-state_head: 43dce49cb1536dc140b3b5f3bee71faaedd49edf
+state_head: 10c38dd6c7b58551ecad3e6733284a146cac010c
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -53,7 +53,7 @@ Archives: `.planning/milestones/`
 ## Current Position
 
 Phase: 10 (i18n Tests & Verification) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-08-31 — Phase 10 execution started
 
@@ -94,6 +94,7 @@ Last activity: 2026-08-31 — Phase 10 execution started
 |------|----------|-------|-------|
 | Phase 10 P01 | 463 | 2 tasks | 1 files |
 | Phase 10 P02 | 2433 | 2 tasks | 3 files |
+| Phase 10 P03 | 1200 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -142,9 +143,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-08-31T13:57:08.372Z
-**Stopped at:** Completed 10-02-PLAN.md (locale keys + catalog.js i18n)
-**Resume file:** .planning/phases/10-i18n-tests-verification/10-03-PLAN.md
+**Last session:** 2026-08-31T14:39:47.892Z
+**Stopped at:** Completed 10-03-PLAN.md (today.js, toast.js, history.js, settings.js, history/builders.js i18n)
+**Resume file:** None
 
 Next command: `/gsd-plan-phase 10`
 
@@ -164,3 +165,4 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Phase 10]: Retroactive TDD for i18n tests: RED commit references un-imported functions, GREEN adds imports to pass all 17 tests
 - [Phase 10]: Plan 10-02: all 37 locale keys added to en.js/pl.js in single authoring pass to avoid conflicts for 10-03
 - [Phase 10]: Plan 10-02: catalog.js fully adopts t() for all 12 hardcoded string sites
+- [Phase 10]: Plan 10-03: today.skippedToast and today.markedNotDone keys added; history.js undo toasts use shared today.* keys
