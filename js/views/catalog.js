@@ -7,6 +7,8 @@
  * (same-tab or cross-tab) mutation, and returns an `unmount()` closure that
  * drops the subscription + clears the parent.
  *
+ * All user-visible strings route through t() from js/i18n/index.js (I18N-02).
+ *
  * Architecture:
  *   - Reads all habits from repo (or store cache when warm).
  *   - Evaluates mastery for each habit by reading `isMastered` from the latest
@@ -44,6 +46,7 @@ import {
   buildEditPanel,
   buildCreatePanel,
 } from './catalog/builders.js';
+import { t } from '../i18n/index.js';
 import { mount } from '../util/mount.js';
 import { apply } from '../state/apply.js';
 import { todayLocal } from '../util/date.js';
@@ -193,7 +196,7 @@ function addStageRowToDom(panelEl) {
   labelInput.name = `stage-label-${currentCount}`;
   labelInput.setAttribute('data-field', 'stage-label');
   labelInput.setAttribute('data-stage-index', String(currentCount));
-  labelInput.placeholder = 'Stage label';
+  labelInput.placeholder = t('catalog.stagePlaceholder');
   li.appendChild(labelInput);
 
   const targetInput = doc.createElement('input');
@@ -202,7 +205,7 @@ function addStageRowToDom(panelEl) {
   targetInput.name = `stage-target-${currentCount}`;
   targetInput.setAttribute('data-field', 'stage-target');
   targetInput.setAttribute('data-stage-index', String(currentCount));
-  targetInput.placeholder = 'Target (optional)';
+  targetInput.placeholder = t('catalog.stageTargetPlaceholder');
   li.appendChild(targetInput);
 
   stagesList.appendChild(li);
@@ -247,7 +250,7 @@ async function renderCatalogInto(parent, deps) {
   const doc = parent.ownerDocument;
   const listEl = doc.createElement('ul');
   listEl.setAttribute('class', 'catalog-habit-list');
-  listEl.setAttribute('aria-label', 'Habit catalog');
+  listEl.setAttribute('aria-label', t('catalog.listAriaLabel'));
   parent.appendChild(listEl);
 
   for (const habit of activeHabits) {
@@ -258,7 +261,7 @@ async function renderCatalogInto(parent, deps) {
   if (activeHabits.length === 0 && scheduledHabits.length === 0) {
     const empty = doc.createElement('li');
     empty.setAttribute('class', 'catalog-empty');
-    empty.textContent = 'No habits yet. Tap "New habit" to create one.';
+    empty.textContent = t('catalog.empty');
     listEl.appendChild(empty);
   }
 
@@ -270,12 +273,12 @@ async function renderCatalogInto(parent, deps) {
 
     const upcomingHeading = doc.createElement('h2');
     upcomingHeading.setAttribute('class', 'catalog-upcoming-heading');
-    upcomingHeading.textContent = 'Upcoming';
+    upcomingHeading.textContent = t('catalog.upcomingHeading');
     upcomingSection.appendChild(upcomingHeading);
 
     const upcomingList = doc.createElement('ul');
     upcomingList.setAttribute('class', 'catalog-upcoming-list');
-    upcomingList.setAttribute('aria-label', 'Upcoming habits');
+    upcomingList.setAttribute('aria-label', t('catalog.upcomingAriaLabel'));
     upcomingSection.appendChild(upcomingList);
 
     for (const habit of scheduledHabits) {
@@ -364,7 +367,7 @@ function buildActions(parent, deps) {
         await apply({ type: 'archiveHabit', payload: { habitId } });
         // store.subscribe will trigger re-render.
       } catch (_e) {
-        showErrorToast("Couldn't archive habit — try again");
+        showErrorToast(t('catalog.errorArchive'));
       }
     },
 
@@ -378,7 +381,7 @@ function buildActions(parent, deps) {
       try {
         await apply({ type: 'restoreHabit', payload: { habitId } });
       } catch (_e) {
-        showErrorToast("Couldn't restore habit — try again");
+        showErrorToast(t('catalog.errorRestore'));
       }
     },
 
@@ -393,7 +396,7 @@ function buildActions(parent, deps) {
         await apply({ type: 'promoteHabit', payload: { habitId } });
         // store.subscribe will trigger re-render.
       } catch (_e) {
-        showErrorToast("Couldn't promote habit — try again");
+        showErrorToast(t('catalog.errorPromote'));
       }
     },
 
@@ -410,7 +413,7 @@ function buildActions(parent, deps) {
           payload: { habitId, triggerType: 'manual' },
         });
       } catch (_e) {
-        showErrorToast("Couldn't advance stage — try again");
+        showErrorToast(t('catalog.errorAdvanceStage'));
       }
     },
 
@@ -443,7 +446,7 @@ function buildActions(parent, deps) {
         });
         _closeOpenPanel(parent);
       } catch (_e) {
-        showErrorToast("Couldn't save habit — try again");
+        showErrorToast(t('catalog.errorSave'));
       }
     },
 
@@ -473,7 +476,7 @@ function buildActions(parent, deps) {
         });
         _closeOpenPanel(parent);
       } catch (_e) {
-        showErrorToast("Couldn't create habit — try again");
+        showErrorToast(t('catalog.errorCreate'));
       }
     },
 
