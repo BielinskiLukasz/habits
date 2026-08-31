@@ -62,7 +62,7 @@ describe('apply(markUncompleted) — writes {completed: false} (NOT delete) (D-7
     assert.ok(log, 'log row must EXIST after markUncompleted — NOT delete (D-74)');
     assert.equal(log.habitId, 'h1');
     assert.equal(log.date, '2026-05-26');
-    assert.equal(log.completed, false);
+    assert.equal(log.status, 'failed');
     assert.equal(log.definitionVersion, null, 'definitionVersion must be null (DATA-05 "current")');
   });
 });
@@ -91,7 +91,7 @@ describe('apply(markUncompleted) — captures prior log row in inverse (D-43)', 
     assert.equal(evt.inverse.payload.date, '2026-05-26');
     assert.deepEqual(
       evt.inverse.payload.prior,
-      { habitId: 'h1', date: '2026-05-26', completed: true, definitionVersion: null },
+      { habitId: 'h1', date: '2026-05-26', status: 'completed', definitionVersion: null },
       'prior should equal the log row written by the preceding markCompleted',
     );
   });
@@ -164,7 +164,7 @@ describe('apply(markUncompleted) — undo round-trip via restoreLogRow', () => {
     const log = repo._stores.logs.get(JSON.stringify(['h1', '2026-05-26']));
     assert.deepEqual(
       log,
-      { habitId: 'h1', date: '2026-05-26', completed: true, definitionVersion: null },
+      { habitId: 'h1', date: '2026-05-26', status: 'completed', definitionVersion: null },
       'undo of markUncompleted restores the prior completed:true row',
     );
   });
