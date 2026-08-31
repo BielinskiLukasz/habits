@@ -37,8 +37,8 @@ function makeCtx(overrides = {}) {
  * @param {boolean} [completed]
  * @returns {object[]}
  */
-function makeLogs(habitId, dates, completed = true) {
-  return dates.map(date => ({ habitId, date, completed }));
+function makeLogs(habitId, dates, isCompleted = true) {
+  return dates.map(date => ({ habitId, date, status: isCompleted ? 'completed' : 'failed' }));
 }
 
 describe('mastery + cadence integration', () => {
