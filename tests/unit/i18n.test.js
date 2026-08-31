@@ -1,11 +1,14 @@
 /**
- * @file Unit tests for js/i18n/index.js — getLang, setLang, t, and fallback
- * behavior. Uses _resetLangForTest (exported from index.js) to wipe module
- * state between tests. No DOM or localStorage required — Node environment
- * gracefully skips both.
+ * @file Unit tests for js/i18n/index.js — getLang, setLang (valid and invalid
+ * cases), t (locale lookup, missing-key fallback, variable interpolation),
+ * displayName (en/pl locale branches and null name_pl fallback), and
+ * applyStaticTranslations (DOM-present and DOM-absent paths).
+ * Uses _resetLangForTest (exported from index.js) to wipe module state between
+ * tests. No DOM or localStorage required — Node environment gracefully skips
+ * both; applyStaticTranslations tests inline a minimal globalThis.document fake.
  */
 
-import { describe, it, before, beforeEach, after } from 'node:test';
+import { describe, it, beforeEach, after, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { t, getLang, setLang, _resetLangForTest } from '../../js/i18n/index.js';
 
@@ -67,5 +70,56 @@ describe('i18n — setLang()', () => {
     const before = getLang();
     setLang('de');
     assert.equal(getLang(), before);
+  });
+});
+
+describe('i18n — setLang() — valid locale cases', () => {
+  afterEach(() => _resetLangForTest('en'));
+
+  it('setLang("pl") updates getLang() to "pl"', () => {
+    setLang('pl');
+    assert.equal(getLang(), 'pl');
+  });
+
+  it('setLang("en") keeps getLang() as "en"', () => {
+    setLang('en');
+    assert.equal(getLang(), 'en');
+  });
+});
+
+describe('i18n — displayName()', () => {
+  afterEach(() => _resetLangForTest('en'));
+
+  it('at lang=en returns the English name', () => {
+    assert.equal(displayName({ name: 'Walk', name_pl: 'Spacer' }), 'Walk');
+  });
+
+  it('at lang=pl returns name_pl when set', () => {
+    _resetLangForTest('pl');
+    assert.equal(displayName({ name: 'Walk', name_pl: 'Spacer' }), 'Spacer');
+  });
+
+  it('at lang=pl falls back to name when name_pl is null', () => {
+    _resetLangForTest('pl');
+    assert.equal(displayName({ name: 'Walk', name_pl: null }), 'Walk');
+  });
+
+  it('at lang=pl falls back to name when name_pl is absent', () => {
+    _resetLangForTest('pl');
+    assert.equal(displayName({ name: 'Walk' }), 'Walk');
+  });
+});
+
+describe('i18n — applyStaticTranslations()', () => {
+  it('does not throw when globalThis.document is not defined', () => {
+    assert.doesNotThrow(() => applyStaticTranslations());
+  });
+
+  it('sets textContent via t() when document is defined with matching element', () => {
+    const el = { getAttribute: () => 'nav.today', textContent: '' };
+    globalThis.document = { querySelectorAll: () => [el] };
+    applyStaticTranslations();
+    assert.equal(el.textContent, t('nav.today'));
+    delete globalThis.document;
   });
 });
