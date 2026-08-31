@@ -67,6 +67,7 @@ import { mountPlanning } from './views/desktop/planning.js';
 import { mountSettings } from './views/settings.js';
 import { mountFooterNav } from './views/today.js';
 import { applyStaticTranslations } from './i18n/index.js';
+import { mountSidebarToggle } from './views/desktop/sidebar.js';
 
 registerServiceWorker();
 applyStaticTranslations();
@@ -134,6 +135,8 @@ const waveboardPanel = document.querySelector('section[data-route="waveboard"]')
 const planningPanel  = document.querySelector('section[data-route="planning"]');
 const settingsPanel  = document.querySelector('section[data-route="settings"]');
 const sidebarLinks   = document.querySelectorAll('.desktop-sidebar-link[data-route-link]');
+const sidebarEl      = document.querySelector('.desktop-sidebar');
+if (sidebarEl) mountSidebarToggle(sidebarEl);
 const footerNavEl    = document.querySelector('nav.today-footer-nav');
 
 // Footer nav: static on desktop — analytics is always the active entry; hash
