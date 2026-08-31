@@ -7,7 +7,7 @@
  *   - Empty repo → hydrate() resolves with empty cache + default weekStart
  *   - Seeded repo → hydrate() populates habits, logs, weekStart
  *   - Idempotency — second hydrate() does NOT re-read from repo
- *   - getCachedWeekCompletions counts only completed:true logs inside the
+ *   - getCachedWeekCompletions counts only status:'completed' logs inside the
  *     inclusive date range
  *   - notify({event, keys}) refreshes affected `cache.logs` / `cache.habits`
  *     BEFORE fanning out to subscribers (Pitfall 2 — no stale reads)
@@ -68,7 +68,7 @@ describe('hydrate populates cache', () => {
       cadence: { type: 'daily' },
       status: 'active',
     });
-    await repo.putLog({ habitId: 'a', date: today, completed: true });
+    await repo.putLog({ habitId: 'a', date: today, status: 'completed' });
     await repo.putSetting({ key: 'weekStart', value: 'sun' });
 
     store.configureStore({ repo });
@@ -78,7 +78,7 @@ describe('hydrate populates cache', () => {
     assert.equal(store.getCachedHabits()[0].id, 'a');
     const log = store.getCachedLog('a', today);
     assert.ok(log, 'log cached');
-    assert.equal(log.completed, true);
+    assert.equal(log.status, 'completed');
     assert.equal(store.getCachedWeekStart(), 'sun');
   });
 
@@ -124,8 +124,8 @@ describe('getCachedWeekCompletions counts completed-true logs in range', () => {
     // the past so it is NOT loaded by hydrate — confirming that the cached
     // weekCompletions function only sees what hydrate cached.
     const today = todayLocal();
-    await repo.putLog({ habitId: 'a', date: today, completed: true });
-    await repo.putLog({ habitId: 'a', date: today, completed: true }); // overwrites — same key
+    await repo.putLog({ habitId: 'a', date: today, status: 'completed' });
+    await repo.putLog({ habitId: 'a', date: today, status: 'completed' }); // overwrites — same key
 
     store.configureStore({ repo });
     await store.hydrate();
@@ -145,7 +145,7 @@ describe('getCachedWeekCompletions counts completed-true logs in range', () => {
       cadence: { type: 'weekly' },
       status: 'active',
     });
-    await repo.putLog({ habitId: 'a', date: today, completed: false });
+    await repo.putLog({ habitId: 'a', date: today, status: 'failed' });
 
     store.configureStore({ repo });
     await store.hydrate();
@@ -164,7 +164,7 @@ describe('getCachedWeekCompletions counts completed-true logs in range', () => {
       cadence: { type: 'weekly' },
       status: 'active',
     });
-    await repo.putLog({ habitId: 'a', date: today, completed: true });
+    await repo.putLog({ habitId: 'a', date: today, status: 'completed' });
 
     store.configureStore({ repo });
     await store.hydrate();
@@ -190,8 +190,8 @@ describe('getCachedWeekCompletions counts completed-true logs in range', () => {
       cadence: { type: 'weekly' },
       status: 'active',
     });
-    await repo.putLog({ habitId: 'a', date: today, completed: true });
-    await repo.putLog({ habitId: 'b', date: today, completed: true });
+    await repo.putLog({ habitId: 'a', date: today, status: 'completed' });
+    await repo.putLog({ habitId: 'b', date: today, status: 'completed' });
 
     store.configureStore({ repo });
     await store.hydrate();
@@ -226,7 +226,7 @@ describe('notify refreshes cache for affected keys (D-52, D-72, Pitfall 2)', () 
     // After tap (NO manual re-hydrate): the cache reflects the new log row.
     const log = store.getCachedLog('h1', '2026-05-26');
     assert.ok(log, 'cache.logs should contain the newly-written row after notify');
-    assert.equal(log.completed, true);
+    assert.equal(log.status, 'completed');
     assert.equal(log.definitionVersion, null);
   });
 
@@ -275,7 +275,7 @@ describe('notify refreshes cache for affected keys (D-52, D-72, Pitfall 2)', () 
 
     const log = store.getCachedLog('h1', '2026-05-26');
     assert.ok(log, 'log row still cached (D-74 — NOT delete)');
-    assert.equal(log.completed, false);
+    assert.equal(log.status, 'failed');
   });
 
   test('notify refreshes after restoreLogRow deletes (undo of markCompleted)', async () => {
@@ -328,7 +328,7 @@ describe('notify refreshes cache for affected keys (D-52, D-72, Pitfall 2)', () 
 
     assert.equal(observed.length, 1, 'subscriber fired exactly once');
     assert.ok(observed[0], 'subscriber saw a defined log row, not undefined');
-    assert.equal(observed[0].completed, true);
+    assert.equal(observed[0].status, 'completed');
   });
 
   test('notify without payload.keys does NOT trigger a refresh (no regression for sync callers)', async () => {
