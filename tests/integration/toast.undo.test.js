@@ -248,7 +248,7 @@ describe('Toast Undo click → undo() → log row reverted (UNDO-02)', () => {
     // Verify the log row was written.
     const logBefore = repo._stores.logs.get(JSON.stringify(['h1', today]));
     assert.ok(logBefore, 'log row written by markCompleted');
-    assert.equal(logBefore.completed, true);
+    assert.equal(logBefore.status, 'completed');
 
     // Show the Undo toast wired to undo().
     toastMod._resetToastForTest();
