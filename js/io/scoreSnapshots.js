@@ -302,7 +302,7 @@ export async function rebuildAllSnapshots(repo, onProgress = () => {}) {
 function _logCompleted(log, habit) {
   if (!log) return false;
   const t = habit.targetType ?? 'binary';
-  if (t === 'binary') return log.completed === true;
+  if (t === 'binary') return log.status === 'completed';
   if (t === 'numeric') return (log.count ?? 0) >= (habit.target ?? 1);
   if (t === 'slot-checklist') {
     return Array.isArray(log.slots) && log.slots.length > 0 && log.slots.every(s => s.checked);
