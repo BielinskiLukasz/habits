@@ -52,11 +52,16 @@ blocked: 0
 
 - gap_id: G-12-4
   truth: "Footer nav analytics link opens desktop.html correctly"
-  status: failed
+  status: resolved
+  resolved_by: "direct fix — commit 0dbd185"
+  resolved_at: 2026-09-03
   reason: "User reported: all statuses are critical in analytics view (analytic and waves) — regression introduced by phase 12 changes"
   severity: major
   test: 4
-  artifacts: []
+  root_cause: "_logCompleted in scoreSnapshots.js checked log.completed===true (old boolean model) but markCompleted now writes {status:'completed'}. All habits scored 0 completions → Failing."
+  artifacts:
+    - path: "js/io/scoreSnapshots.js"
+      issue: "_logCompleted line 305: log.completed===true → log.status==='completed'"
   missing: []
 
 ## Deferred Follow-Ups
