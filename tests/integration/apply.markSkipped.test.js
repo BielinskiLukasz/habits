@@ -258,3 +258,48 @@ describe('apply(markSkipped) — defensive: no habit row required', () => {
     assert.equal(habit, undefined, 'handler must not create a habit row');
   });
 });
+
+// ---------------------------------------------------------------------------
+// g) D-52 recompute — markSkipped on a previously-completed log must clear
+//    lastCompletedDate (stale-boolean bug fix, QA-01)
+// ---------------------------------------------------------------------------
+describe('apply(markSkipped) — D-52 recompute when overwriting a completed log', () => {
+  test('habit.lastCompletedDate is null after skipping the only completed log (fails before fix)', async () => {
+    const repo = createFakeRepo();
+
+    // Seed habit with lastCompletedDate pointing to the date we will skip
+    await repo.putHabit({
+      id: 'h1',
+      wave: 1,
+      status: 'active',
+      name: 'Morning walk',
+      lastCompletedDate: '2026-09-01',
+    });
+
+    // Seed the completed log for that date — this is what markSkipped overwrites
+    await repo.putLog({
+      habitId: 'h1',
+      date: '2026-09-01',
+      status: 'completed',
+      definitionVersion: null,
+    });
+
+    const apply = await freshApply();
+    apply.configure({ repo, broadcast: () => {}, trackTx: () => {} });
+
+    // Skipping the only completed log must recompute lastCompletedDate → null
+    await apply.apply({
+      type: 'markSkipped',
+      payload: { habitId: 'h1', date: '2026-09-01' },
+    });
+
+    const habit = await repo.getHabit('h1');
+    assert.ok(habit, 'habit row must still exist after markSkipped');
+    assert.equal(
+      habit.lastCompletedDate,
+      null,
+      `lastCompletedDate should be null after skipping the only completed log but got ` +
+        `'${habit.lastCompletedDate}' — handleMarkSkipped does not call _recomputeLastCompletedDate (D-52)`,
+    );
+  });
+});
