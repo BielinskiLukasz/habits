@@ -130,7 +130,21 @@ export async function mergeImportedStores(imported) {
       for (const row of importedRows) {
         // IDB put() overwrites on key collision; inserts if absent.
         // No delete() calls — local-only records are preserved (D-98).
-        tx.objectStore(storeName).put(row);
+
+        // Backwards-compatibility: pre-4-state-model backup files (D-43) store
+        // log completion as a `completed: boolean` field. Normalize to the
+        // current `status: string` shape before writing to IDB so old exports
+        // import correctly into the new schema.
+        let rowToWrite = row;
+        if (storeName === 'logs' && !Object.prototype.hasOwnProperty.call(row, 'status') &&
+            Object.prototype.hasOwnProperty.call(row, 'completed')) {
+          // Legacy format: no status field; derive status from completed boolean.
+          // Do not mutate the original row object — create a normalized copy.
+          const { completed, ...rest } = row;
+          rowToWrite = { ...rest, status: completed === true ? 'completed' : 'failed' };
+        }
+
+        tx.objectStore(storeName).put(rowToWrite);
       }
     }
   });

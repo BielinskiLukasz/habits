@@ -41,7 +41,7 @@ function _countForHabit(habit, habitLogs, ctx) {
   for (const log of habitLogs) {
     if (ctx.appliesToday(habit, log.date, ctx)) {
       applicable += 1;
-      if (log.completed === true) {
+      if (log.status === 'completed') {
         completed += 1;
       }
     }
@@ -195,7 +195,7 @@ export function computeWaveAggregates(waveNumber, habits, logs, today, ctx) {
         dayApplicable += 1;
         const habitLogs = logsByHabit.get(h.id) ?? [];
         const log = habitLogs.find((l) => l.date === date);
-        if (log && log.completed === true) {
+        if (log && log.status === 'completed') {
           dayCompleted += 1;
         }
       }

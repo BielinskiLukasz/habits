@@ -62,15 +62,15 @@ function makeHabit(fields) {
 }
 
 /**
- * Create a completed log row for a habit on a date.
+ * Create a log row for a habit on a date using the 4-state status model (D-02).
  *
  * @param {string} habitId
  * @param {string} date  YYYY-MM-DD
- * @param {boolean} [completed]
+ * @param {boolean} [completed]  true → status:'completed', false → status:'failed'
  * @returns {object}
  */
 function makeLog(habitId, date, completed = true) {
-  return { habitId, date, completed };
+  return { habitId, date, status: completed ? 'completed' : 'failed' };
 }
 
 // ---------------------------------------------------------------------------

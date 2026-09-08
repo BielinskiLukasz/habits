@@ -41,7 +41,7 @@ function makeCtx(overrides = {}) {
  * @returns {object[]}
  */
 function makeLogs(habitId, dates, completed = true) {
-  return dates.map(date => ({ habitId, date, completed }));
+  return dates.map(date => ({ habitId, date, status: completed ? 'completed' : 'failed' }));
 }
 
 describe('wave aggregates + cadence integration', () => {

@@ -150,7 +150,8 @@ describe('mergeImportedStores — all 7 stores merged (IMPORT-02)', () => {
   test('imported log appears in logs store', async () => {
     const log = await repo.getLog('h-imported', '2026-06-05');
     assert.ok(log, 'imported log found in store');
-    assert.equal(log.completed, true);
+    // Legacy row had completed:true; normalization (D-43) converts to status:'completed'
+    assert.equal(log.status, 'completed');
   });
 
   test('imported setting appears in settings store', async () => {

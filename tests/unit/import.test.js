@@ -233,7 +233,8 @@ describe('mergeImportedStores — merge-by-id semantics', () => {
 
     const log = await repo.getLog('h1', '2026-01-01');
     assert.ok(log, 'Log should exist after import');
-    assert.equal(log.completed, true, 'Imported log should overwrite local');
+    // After normalization (D-43): legacy completed:boolean → status:string
+    assert.equal(log.status, 'completed', 'Imported log should overwrite local (status field from normalized row)');
     assert.equal(log.notes, 'imported', 'Imported log fields should overwrite local');
   });
 
