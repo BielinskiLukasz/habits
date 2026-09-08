@@ -4,17 +4,17 @@ milestone: v1.2
 milestone_name: UX & i18n Quality Gate (Phases 10–13)
 current_phase: 13
 current_phase_name: Code Review & Documentation
-status: planned
-stopped_at: Phase 13 planned — 3/3 plans created, ready to execute
-last_updated: "2026-09-08T20:18:00.000Z"
+status: executing
+stopped_at: Completed 13-01-PLAN.md — stale-boolean TDD fixes (waveAggregates, import, markSkipped)
+last_updated: "2026-09-08T19:15:50.052Z"
 last_activity: 2026-09-08
-last_activity_desc: Phase 13 planning complete — 3 plans (TDD bug fix, code review, docs)
-state_head: f775e4a
+last_activity_desc: Phase 13 execution started
+state_head: 8e73a80ddb0b50d5441f036a212ec6bcdd2c5004
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
   percent: 25
 ---
 
@@ -52,9 +52,9 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: 13 (Code Review & Documentation) — NOT STARTED
-Status: Phase 12 complete; ready for Phase 13
-Last activity: 2026-09-01 — Phase 12 complete
+Phase: 13 (Code Review & Documentation) — EXECUTING
+Status: Executing Phase 13
+Last activity: 2026-09-08 — Phase 13 execution started
 
 ███████████████░░░░░ 75% (3/4 phases complete)
 
@@ -98,6 +98,7 @@ Last activity: 2026-09-01 — Phase 12 complete
 | Phase 11 P01 | 1363 | 15 tasks | 14 files |
 | Phase 11 P02 | 300 | 3 tasks | 2 files |
 | Phase 11 P03 | 321 | 2 tasks | 1 files |
+| Phase 13 P01 | 5400 | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -155,9 +156,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-09-08T20:18:00.000Z
-**Stopped at:** Phase 13 planned — 3/3 plans created (13-01 TDD bug fixes, 13-02 code review, 13-03 QA-02 docs)
-**Resume file:** .planning/phases/13-code-review-documentation/
+**Last session:** 2026-09-08T19:15:47.797Z
+**Stopped at:** Completed 13-01-PLAN.md — stale-boolean TDD fixes (waveAggregates, import, markSkipped)
+**Resume file:** None
 
 Next command: `/gsd-execute-phase 13`
 
@@ -188,3 +189,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Phase 11]: Plan 11-02: markSkipped has storeNames:['logs'] only — D-52 not triggered, confirmed by integration test
 - [Phase 11]: Plan 11-02: status:skipped on applicable day returns 'x' in CSV export (csvCellValue branch verified by unit test)
 - [Phase 11]: [Phase 11]: Plan 11-03: exportJSON returns a JSON string (not Blob) — plan description corrected; tests use configureExport+exportJSON() API correctly
+- [Phase 13]: Phase 13 Plan 01: D-43 applied — legacy completed boolean rows normalized to status string on import
+- [Phase 13]: Phase 13 Plan 01: D-52 extended — markSkipped calls _recomputeLastCompletedDate when overwriting a completed log

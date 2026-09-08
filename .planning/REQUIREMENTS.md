@@ -27,7 +27,7 @@ Retroactive quality validation of 6 quick-task features shipped outside the mile
 
 ### Quality Assurance
 
-- [ ] **QA-01**: Code review confirms all new modules follow project patterns — no `switch` on log status or cadence types; no `.innerHTML`; JSDoc `@file` headers present; no `indexedDB.*` calls outside `js/db/idb.js`
+- [x] **QA-01**: Code review confirms all new modules follow project patterns — no `switch` on log status or cadence types; no `.innerHTML`; JSDoc `@file` headers present; no `indexedDB.*` calls outside `js/db/idb.js`
 - [ ] **QA-02**: PROJECT.md documents new architectural decisions: 4-state log status model rationale and i18n architecture (locale dictionary shape, no Intl framework, t() signature)
 
 ## Future Requirements
@@ -61,7 +61,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LOG4-04 | Phase 11 | Complete |
 | UX-01 | Phase 12 | Pending |
 | UX-02 | Phase 12 | Pending |
-| QA-01 | Phase 13 | Pending |
+| QA-01 | Phase 13 | Complete |
 | QA-02 | Phase 13 | Pending |
 
 **Coverage:**

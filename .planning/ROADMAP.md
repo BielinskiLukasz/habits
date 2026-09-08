@@ -145,6 +145,10 @@ Plans:
 
 **Plans**: TBD
 
+- [x] 13-01-PLAN.md
+- [ ] 13-02-PLAN.md
+- [ ] 13-03-PLAN.md
+
 ---
 
 ## Progress
@@ -154,7 +158,7 @@ Plans:
 | 10. i18n Tests & Verification | 4/4 | Complete | 2026-08-31 |
 | 11. 4-State Log Model Tests | 0/0 | Complete    | 2026-08-31 |
 | 12. Swipe UX & Navigation Verification | 3/3 | Complete | 2026-09-01 |
-| 13. Code Review & Documentation | 0/? | Not started | - |
+| 13. Code Review & Documentation | 1/3 | In Progress|  |
 
 ---
 
