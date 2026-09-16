@@ -19,7 +19,7 @@
  * second configure() call.
  */
 
-import { todayLocal, daysFrom } from '../util/date.js';
+import { todayLocal, daysFrom, isoWeekStart, isoWeekEnd, getMonthStart, getMonthEnd } from '../util/date.js';
 import { appliesToday } from '../domain/cadence.js';
 import { computeS1, computeS2, computeS3 } from '../domain/scoring.js';
 import { evaluateMastery } from '../domain/mastery.js';
@@ -221,9 +221,22 @@ export async function writeHabitSnapshots(habitId, repo) {
     // Per-day completion and applicability for the waveboard tooltip.
     // loggedToday: was the habit actually completed on this specific date?
     // applicableToday: does the habit's cadence say it should happen on this date?
+    //
+    // wave-completion-weekly-cadence fix: for weekly/monthly cadence, delegate
+    // to _snapshotApplicability instead of calling appliesToday() directly.
+    // appliesToday()'s "still due this period?" semantics stay true on EVERY
+    // day from the period's start through the day of completion (D-49/
+    // CADENCE-03), so a raw per-day call inflates the waveboard's week-summed
+    // denominator to as many as 7 "applicable days" for what is really ONE
+    // expected occurrence per period — see debug session
+    // .planning/debug/resolved/wave-completion-weekly-cadence.md. Mirrors the
+    // period-based collapsing already applied to computeS1 via
+    // _computeS1Periodic (scoring.js "Bug 3 fix"), which this snapshot field
+    // had not yet adopted.
     const logForDate = logsForHabit.find(l => l.date === dateYMD);
-    const loggedToday = _logCompleted(logForDate, habitForScoring);
-    const applicableToday = appliesToday(habitForScoring, dateYMD, ctx);
+    const { applicableToday, loggedToday } = _snapshotApplicability(
+      habitForScoring, dateYMD, weekStart, startDate, todayYMD, logsForHabit, ctx, logForDate
+    );
 
     snapshotRows.push({
       habitId,
@@ -308,6 +321,71 @@ function _logCompleted(log, habit) {
     return Array.isArray(log.slots) && log.slots.length > 0 && log.slots.every(s => s.checked);
   }
   return false;
+}
+
+/**
+ * Compute the waveboard tooltip's per-day `applicableToday` / `loggedToday`
+ * flags for a single snapshot row (wave-completion-weekly-cadence fix).
+ *
+ * Day-granular cadences (daily, day-of-week-subset, every-n-days): delegate
+ * straight to `appliesToday` — its per-day answer already IS a distinct
+ * expected occurrence, so summing it across a week/month (as
+ * js/views/desktop/waveboard.js does) is correct.
+ *
+ * Period-granular cadences (weekly, monthly): `appliesToday` answers "still
+ * due this period?" and stays true on EVERY day from the period's start
+ * through the day of completion (D-49 / CADENCE-03 log-aware resolvers), so
+ * calling it once per day and summing the results inflates the waveboard's
+ * denominator (e.g. 7 "applicable days" for a weekly habit that only needs
+ * ONE completion per week). Instead, exactly one day per period is marked
+ * applicable — the first day of that period actually covered by this
+ * snapshot run (`periodStart` clamped forward to `rangeStartYMD`, so a habit
+ * created mid-period still gets exactly one applicable day for that partial
+ * period) — carrying `loggedToday = true` iff any completed log falls
+ * anywhere in [periodStart, min(periodEnd, todayYMD)]. This mirrors the
+ * period-based collapsing already applied to S1 via `_computeS1Periodic`
+ * (scoring.js), which these two fields had not yet adopted.
+ *
+ * Scope note: every-n-days cadence has an analogous "stays applicable until
+ * completed" persistence (anchor-based rather than calendar-period-based)
+ * that is NOT addressed here — left day-granular to match computeS1's own
+ * scoping decision (`type === 'weekly' || type === 'monthly'` only).
+ *
+ * @param {object} habit - habitForScoring (createdAt-normalized)
+ * @param {string} dateYMD - the day this snapshot row is for
+ * @param {'mon'|'sun'} weekStart
+ * @param {string} rangeStartYMD - first date being snapshotted this run (habit.createdAt fallback chain)
+ * @param {string} todayYMD
+ * @param {object[]} logsForHabit
+ * @param {object} ctx - ctx.appliesToday for the non-periodic path
+ * @param {object|undefined} logForDate - the log row (if any) dated dateYMD
+ * @returns {{ applicableToday: boolean, loggedToday: boolean }}
+ */
+function _snapshotApplicability(habit, dateYMD, weekStart, rangeStartYMD, todayYMD, logsForHabit, ctx, logForDate) {
+  const cadenceType = habit.cadence?.type;
+  const isPeriodic = cadenceType === 'weekly' || cadenceType === 'monthly';
+
+  if (!isPeriodic) {
+    return {
+      applicableToday: appliesToday(habit, dateYMD, ctx),
+      loggedToday: _logCompleted(logForDate, habit),
+    };
+  }
+
+  const isWeekly = cadenceType === 'weekly';
+  const periodStart = isWeekly ? isoWeekStart(dateYMD, weekStart) : getMonthStart(dateYMD);
+  const periodEnd = isWeekly ? isoWeekEnd(dateYMD, weekStart) : getMonthEnd(dateYMD);
+  const periodAnchor = periodStart < rangeStartYMD ? rangeStartYMD : periodStart;
+
+  if (dateYMD !== periodAnchor) {
+    return { applicableToday: false, loggedToday: false };
+  }
+
+  const clampedEnd = periodEnd > todayYMD ? todayYMD : periodEnd;
+  const loggedToday = logsForHabit.some(
+    (log) => log.date >= periodStart && log.date <= clampedEnd && _logCompleted(log, habit)
+  );
+  return { applicableToday: true, loggedToday };
 }
 
 /**

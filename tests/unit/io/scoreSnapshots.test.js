@@ -30,6 +30,7 @@ import {
   writeHabitSnapshots,
   rebuildAllSnapshots,
 } from '../../../js/io/scoreSnapshots.js';
+import { isoWeekStart, isoWeekEnd, getMonthStart, getMonthEnd } from '../../../js/util/date.js';
 
 // ---------------------------------------------------------------------------
 // Fake scoring functions — mocked S1/S2/S3 that return deterministic values.
@@ -281,6 +282,173 @@ describe('writeHabitSnapshots', () => {
     assert.strictEqual(row.s1Status, FIXED_S1.s1Status);
     assert.strictEqual(row.s2Score, FIXED_S2.s2Score);
     assert.strictEqual(row.s3Score, FIXED_S3.s3Score);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: weekly/monthly cadence tooltip flags (wave-completion-weekly-cadence)
+// ---------------------------------------------------------------------------
+//
+// Regression coverage for the bug where js/views/desktop/waveboard.js's
+// {completed}/{applicable} tooltip ratio was built by summing raw per-day
+// appliesToday()/loggedToday results across a calendar week. For weekly
+// cadence, appliesToday stays true from the week's start through the day of
+// completion (D-49 log-aware resolver), so the summed "applicable" count
+// varied from 1 to 7 depending on which weekday carried the completion
+// (reported as "0/7 or 1/7" for a habit that should always read 1/1 per
+// elapsed week). These tests assert the fix: exactly ONE row per cadence
+// period carries applicableToday=true, and its loggedToday reflects whether
+// ANY day in that period was completed — independent of which weekday.
+describe('weekly/monthly cadence tooltip flags (wave-completion-weekly-cadence)', () => {
+  beforeEach(() => {
+    configure({
+      computeS1: mockComputeS1,
+      computeS2: mockComputeS2,
+      computeS3: mockComputeS3,
+    });
+  });
+
+  /** Sum applicable/completed exactly like js/views/desktop/waveboard.js does for one ISO week. */
+  function sumWeek(snapshots, weekStartYMD, weekEndYMD) {
+    let applicable = 0;
+    let completed = 0;
+    for (const row of snapshots) {
+      if (row.date < weekStartYMD || row.date > weekEndYMD) continue;
+      if (row.applicableToday) applicable++;
+      if (row.loggedToday) completed++;
+    }
+    return { applicable, completed };
+  }
+
+  test('weekly habit completed on the FIRST day of an elapsed week → exactly one applicable row, tooltip reads 1/1', async () => {
+    const today = todayYMD();
+    // A week solidly in the past (2+ weeks back) so it is fully elapsed.
+    const targetWeekMonday = isoWeekStart(addDays(today, -14), 'mon');
+    const targetWeekSunday = isoWeekEnd(targetWeekMonday, 'mon');
+    const createdAt = addDays(targetWeekMonday, -14); // well before the target week
+    const habit = { id: 'w1', createdAt, cadence: { type: 'weekly' } };
+    const logs = [{ habitId: 'w1', date: targetWeekMonday, status: 'completed' }];
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit], logsByHabit: logs });
+
+    await writeHabitSnapshots('w1', fakeRepo);
+
+    const weekRows = captured.snapshots.filter(
+      (r) => r.date >= targetWeekMonday && r.date <= targetWeekSunday
+    );
+    const applicableRows = weekRows.filter((r) => r.applicableToday);
+    assert.strictEqual(applicableRows.length, 1, 'exactly one applicable row per elapsed week');
+    assert.strictEqual(applicableRows[0].date, targetWeekMonday, 'applicable row is the period anchor (week start)');
+
+    const { applicable, completed } = sumWeek(captured.snapshots, targetWeekMonday, targetWeekSunday);
+    assert.strictEqual(applicable, 1);
+    assert.strictEqual(completed, 1);
+  });
+
+  test('weekly habit completed on the LAST day of an elapsed week → tooltip STILL reads 1/1 (not 1/7)', async () => {
+    const today = todayYMD();
+    const targetWeekMonday = isoWeekStart(addDays(today, -14), 'mon');
+    const targetWeekSunday = isoWeekEnd(targetWeekMonday, 'mon');
+    const createdAt = addDays(targetWeekMonday, -14);
+    const habit = { id: 'w2', createdAt, cadence: { type: 'weekly' } };
+    // Completed on the LAST day of the week — this is the case that used to
+    // inflate the denominator to 7 before the fix.
+    const logs = [{ habitId: 'w2', date: targetWeekSunday, status: 'completed' }];
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit], logsByHabit: logs });
+
+    await writeHabitSnapshots('w2', fakeRepo);
+
+    const { applicable, completed } = sumWeek(captured.snapshots, targetWeekMonday, targetWeekSunday);
+    assert.strictEqual(applicable, 1, 'applicable must stay 1 regardless of which weekday was completed');
+    assert.strictEqual(completed, 1);
+  });
+
+  test('weekly habit never completed in an elapsed week → tooltip reads 0/1 (not 0/7)', async () => {
+    const today = todayYMD();
+    const targetWeekMonday = isoWeekStart(addDays(today, -14), 'mon');
+    const targetWeekSunday = isoWeekEnd(targetWeekMonday, 'mon');
+    const createdAt = addDays(targetWeekMonday, -14);
+    const habit = { id: 'w3', createdAt, cadence: { type: 'weekly' } };
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit], logsByHabit: [] });
+
+    await writeHabitSnapshots('w3', fakeRepo);
+
+    const { applicable, completed } = sumWeek(captured.snapshots, targetWeekMonday, targetWeekSunday);
+    assert.strictEqual(applicable, 1);
+    assert.strictEqual(completed, 0);
+  });
+
+  test('completion in the FOLLOWING week does not leak into the previous week\'s loggedToday (period boundary)', async () => {
+    const today = todayYMD();
+    const targetWeekMonday = isoWeekStart(addDays(today, -21), 'mon');
+    const targetWeekSunday = isoWeekEnd(targetWeekMonday, 'mon');
+    const nextWeekMonday = addDays(targetWeekSunday, 1);
+    const createdAt = addDays(targetWeekMonday, -14);
+    const habit = { id: 'w4', createdAt, cadence: { type: 'weekly' } };
+    // Completed the day immediately AFTER the target week ends.
+    const logs = [{ habitId: 'w4', date: nextWeekMonday, status: 'completed' }];
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit], logsByHabit: logs });
+
+    await writeHabitSnapshots('w4', fakeRepo);
+
+    const targetWeek = sumWeek(captured.snapshots, targetWeekMonday, targetWeekSunday);
+    assert.strictEqual(targetWeek.applicable, 1);
+    assert.strictEqual(targetWeek.completed, 0, 'the next week\'s completion must not count toward this week');
+
+    const nextWeekSunday = isoWeekEnd(nextWeekMonday, 'mon');
+    const nextWeek = sumWeek(captured.snapshots, nextWeekMonday, nextWeekSunday);
+    assert.strictEqual(nextWeek.applicable, 1);
+    assert.strictEqual(nextWeek.completed, 1);
+  });
+
+  test('habit created mid-week: the partial first week\'s applicable row is createdAt, not the preceding Monday', async () => {
+    const today = todayYMD();
+    const targetWeekMonday = isoWeekStart(addDays(today, -14), 'mon');
+    // Habit created on the Wednesday of its first (partial) week.
+    const createdAt = addDays(targetWeekMonday, 2);
+    const habit = { id: 'w5', createdAt, cadence: { type: 'weekly' } };
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit], logsByHabit: [] });
+
+    await writeHabitSnapshots('w5', fakeRepo);
+
+    const weekSunday = isoWeekEnd(targetWeekMonday, 'mon');
+    const weekRows = captured.snapshots.filter((r) => r.date >= createdAt && r.date <= weekSunday);
+    const applicableRows = weekRows.filter((r) => r.applicableToday);
+    assert.strictEqual(applicableRows.length, 1, 'partial first week still gets exactly one applicable row');
+    assert.strictEqual(applicableRows[0].date, createdAt, 'anchor is createdAt, not the calendar week start');
+  });
+
+  test('daily-cadence habit is unaffected — applicableToday remains true every day (fix is periodic-only)', async () => {
+    const today = todayYMD();
+    const createdAt = addDays(today, -6);
+    const habit = { id: 'd1', createdAt, cadence: { type: 'daily' } };
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit], logsByHabit: [] });
+
+    await writeHabitSnapshots('d1', fakeRepo);
+
+    assert.ok(captured.snapshots.length > 0);
+    assert.ok(captured.snapshots.every((r) => r.applicableToday === true),
+      'daily cadence must keep one applicable row per calendar day (unchanged by this fix)');
+  });
+
+  test('monthly habit completed mid-month → exactly one applicable row for the month, tooltip reads 1/1', async () => {
+    const today = todayYMD();
+    // A month solidly in the past.
+    const referenceDate = addDays(today, -45);
+    const monthStart = getMonthStart(referenceDate);
+    const monthEnd = getMonthEnd(referenceDate);
+    const createdAt = addDays(monthStart, -30);
+    const habit = { id: 'm1', createdAt, cadence: { type: 'monthly' } };
+    const midMonth = addDays(monthStart, 10);
+    const logs = [{ habitId: 'm1', date: midMonth, status: 'completed' }];
+    const { fakeRepo, captured } = buildFakeRepo({ habits: [habit], logsByHabit: logs });
+
+    await writeHabitSnapshots('m1', fakeRepo);
+
+    const monthRows = captured.snapshots.filter((r) => r.date >= monthStart && r.date <= monthEnd);
+    const applicableRows = monthRows.filter((r) => r.applicableToday);
+    assert.strictEqual(applicableRows.length, 1, 'exactly one applicable row per elapsed month');
+    assert.strictEqual(applicableRows[0].date, monthStart);
+    assert.strictEqual(applicableRows[0].loggedToday, true);
   });
 });
 
