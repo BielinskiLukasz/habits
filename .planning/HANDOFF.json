@@ -1,16 +1,18 @@
 {
   "version": "1.0",
-  "timestamp": "2026-09-08T21:16:47.928Z",
+  "timestamp": "2026-09-16T19:03:58.031Z",
   "phase": "13",
   "phase_name": "code-review-documentation",
   "phase_dir": ".planning/phases/13-code-review-documentation",
   "plan": null,
   "task": null,
-  "total_tasks": null,
+  "total_tasks": 4,
   "status": "paused",
-  "completed_tasks": [],
+  "completed_tasks": [
+    {"id": "uat-1", "name": "Wave Completion Rate", "status": "in_progress", "progress": "User reported weekly-cadence habits showing 0/7 or 1/7 instead of 1/week. Diagnosed and fixed by gsd-debugger (goal: find_and_fix): js/io/scoreSnapshots.js's applicableToday/loggedToday calc for weekly/monthly cadence summed a raw per-day appliesToday() flag instead of counting one occurrence per elapsed period. Fixed, 7 new regression tests added, full suite 953/953 passing. Committed: 400a90c, a81cac3, 452ce67. NOT YET re-verified live by user in the browser."}
+  ],
   "remaining_tasks": [
-    {"id": "uat-1", "name": "Wave Completion Rate — verify non-zero completionPct in wave analytics", "status": "not_started"},
+    {"id": "uat-1-reverify", "name": "User re-checks Wave Board weekly-habit completion % after the fix", "status": "not_started"},
     {"id": "uat-2", "name": "Streak Calculations — verify currentStreak and longestStreak show correct counts", "status": "not_started"},
     {"id": "uat-3", "name": "Legacy Backup Import Normalization — verify pre-v1.2 backup logs appear in analytics", "status": "not_started"},
     {"id": "uat-4", "name": "Mark Completed Habit as Skipped — verify lastCompletedDate recalculates correctly", "status": "not_started"}
@@ -18,12 +20,17 @@
   "blockers": [],
   "async_jobs": [],
   "human_actions_pending": [
-    {"action": "Run UAT tests 1–4 for phase 13", "context": "UAT session was started but paused before Test 1 was answered. User must open the app and verify each test scenario.", "blocking": true}
+    {"action": "Reload desktop.html Wave Board and re-check a weekly-cadence habit's completion % / tooltip", "context": "Confirms the scoreSnapshots.js fix (commit 400a90c) actually resolves the reported 0/7-or-1/7 display in the live UI — the fix was only verified via automated tests (953/953 passing), no browser tool was available to the debug agent.", "blocking": true},
+    {"action": "Continue UAT tests 2-4 via /gsd-verify-work 13", "context": "Session was paused mid-UAT after fixing the Test 1 gap; 3 tests remain unanswered.", "blocking": true}
   ],
-  "decisions": [],
+  "decisions": [
+    {"decision": "Fixed the Test 1 gap immediately via a single gsd-debugger agent (goal: find_and_fix) instead of finishing all 4 UAT tests first and batching gap-closure through plan-phase --gaps", "rationale": "User explicitly asked to 'try to fix it now' mid-UAT rather than wait for the standard diagnose-then-plan-then-execute pipeline", "phase": "13"}
+  ],
   "uncommitted_files": [
-    ".planning/phases/13-code-review-documentation/13-UAT.md"
+    ".planning/milestone.lock",
+    ".planning/phases/13-code-review-documentation/13-UAT.md",
+    ".planning/state.json"
   ],
-  "next_action": "Resume UAT with /gsd-verify-work 13 — the 13-UAT.md file is ready; session will pick up at Test 1 (Wave Completion Rate).",
-  "context_notes": "Phase 13 fixed four stale-boolean bugs after the Phase 11 4-state log migration: waveAggregates completionPct + streak walk-back, import.js legacy normalization, markSkipped D-52 lastCompletedDate. All code changes are committed. The UAT file (13-UAT.md) was just created with 4 tests and 0 answered so far. Test 1 was presented to the user but not answered before /gsd-pause-work was called."
+  "next_action": "Resume with /gsd-verify-work 13 — first ask the user to re-verify Test 1 (Wave Board weekly completion %) now that the fix is committed, then continue to Test 2 (Streak Calculations) if confirmed.",
+  "context_notes": "Phase 13 execution was already complete (3 plans, all committed) before this UAT session started. UAT Test 1 found a real gap (gap_id G-13-1 in 13-UAT.md) that was diagnosed and fixed in-session rather than deferred. Important side-finding from the debug agent: js/domain/waveAggregates.js (computeWaveAggregates/_countForHabit) is DEAD CODE with zero live callers — the actual Wave Board UI reads from js/io/scoreSnapshots.js's score_snapshots store via js/views/desktop/waveboard.js. Don't waste time investigating waveAggregates.js for Wave Board display bugs; it carries the same latent per-day-summing flaw but isn't wired up. Also: js/domain/scoring.js's computeS1 already had a prior fix for this exact bug shape ('Bug 3') that never got extended to the sibling loggedToday/applicableToday fields in scoreSnapshots.js — worth checking computeS2/computeS3 for the same gap if touched later. Non-blocking housekeeping note: git printed a 'failed to write commit-graph' warning during commit 400a90c; history/commits verified healthy, it's a stale performance cache — `git commit-graph write --reachable --changed-paths` can clear it, not urgent."
 }

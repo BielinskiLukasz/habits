@@ -2,32 +2,31 @@
 status: testing
 phase: 13-code-review-documentation
 source: [13-01-SUMMARY.md, 13-02-SUMMARY.md, 13-03-SUMMARY.md]
-started: 2026-09-08T00:00:00Z
-updated: 2026-09-08T00:00:00Z
+started: 2026-09-17T00:00:00Z
+updated: 2026-09-17T00:00:00Z
 ---
 
 ## Current Test
-
 <!-- OVERWRITE each test - shows where we are -->
 
 number: 1
 name: Wave Completion Rate
 expected: |
-  Open the desktop analytics view (desktop.html → Wave Board or Analytics).
-  Look at any wave that has habits you've logged recently.
-  The completion percentage should show a non-zero value for habits you've
-  been checking off. Before this fix, all completion rates showed 0% due to
-  a stale log.completed boolean check — now they read log.status correctly.
+  Open desktop analytics / wave board. Any wave with recently-logged habits
+  should show a non-zero completion percentage. If you've been checking
+  habits regularly, expect values like 70-100%, not 0%. Weekly-cadence
+  habits should count one completed occurrence per elapsed week (not a
+  raw per-day count).
 awaiting: user response
 
 ## Tests
 
 ### 1. Wave Completion Rate
-expected: Open desktop analytics / wave board. Any wave with recently-logged habits should show a non-zero completion percentage. If you've been checking habits regularly, expect values like 70–100%, not 0%.
+expected: Open desktop analytics / wave board. Any wave with recently-logged habits should show a non-zero completion percentage. If you've been checking habits regularly, expect values like 70-100%, not 0%. Weekly-cadence habits should count one completed occurrence per elapsed week (not a raw per-day count).
 result: [pending]
 
 ### 2. Streak Calculations
-expected: In the wave analytics view, current streak and longest streak for regularly-logged habits should display correct non-zero counts. Before this fix, both showed 0 because the streak walk-back used the stale boolean check.
+expected: In the wave analytics view, current streak and longest streak for regularly-logged habits should display correct non-zero counts.
 result: [pending]
 
 ### 3. Legacy Backup Import Normalization

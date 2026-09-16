@@ -1,0 +1,33 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "v1.2 — UX & i18n Quality Gate (Phases 10–13)",
+  "phases": [
+    {
+      "number": "10",
+      "name": "i18n Tests & Verification",
+      "status": "complete"
+    },
+    {
+      "number": "11",
+      "name": "4-State Log Model Tests",
+      "status": "complete"
+    },
+    {
+      "number": "12",
+      "name": "Swipe UX & Navigation Verification",
+      "status": "complete"
+    },
+    {
+      "number": "13",
+      "name": "Code Review & Documentation",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 13 of 4 · 25% · executing"
+  },
+  "updated_at": "2026-09-08T18:26:54.674Z"
+}
