@@ -54,7 +54,7 @@ Archives: `.planning/milestones/`
 
 Phase: 13 (Code Review & Documentation) — EXECUTING
 Status: Executing Phase 13
-Last activity: 2026-09-17 — Completed quick task 260917-lst: Make catalog-habit-actions buttons (edit, archive, activate) lay out in one row instead of a column
+Last activity: 2026-09-17 — Completed quick task 260917-n8p: Extend desktop waveboard heat-map beyond 12 weeks to full history with horizontal scroll
 
 ███████████████░░░░░ 75% (3/4 phases complete)
 
@@ -155,6 +155,7 @@ None
 | 260829-ws9 | Add collapse/expand toggle button to desktop analytics sidebar | 2026-08-31 | c60e2fc | [260829-ws9-add-a-collapse-expand-toggle-button-to-t](.planning/quick/260829-ws9-add-a-collapse-expand-toggle-button-to-t/) |
 | 260917-g2a | Regenerate habits import JSON for 2026-09-17 from prior import + updated Nawyki v1.csv | 2026-09-17 | — (data/ gitignored, no code commit) | [260917-g2a-regenerate-habits-import-json-for-2026-0](.planning/quick/260917-g2a-regenerate-habits-import-json-for-2026-0/) |
 | 260917-lst | Make catalog-habit-actions buttons (edit, archive, activate) lay out in one row instead of a column | 2026-09-17 | aeeaf01 | [260917-lst-make-catalog-habit-actions-buttons-edit-](.planning/quick/260917-lst-make-catalog-habit-actions-buttons-edit-/) |
+| 260917-n8p | Extend desktop waveboard heat-map beyond 12 weeks to full history with horizontal scroll | 2026-09-17 | 6c7d78c | [260917-n8p-extend-the-desktop-waveboard-heat-map-be](.planning/quick/260917-n8p-extend-the-desktop-waveboard-heat-map-be/) |
 
 ## Session Continuity
 
