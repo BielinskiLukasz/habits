@@ -18,7 +18,8 @@
  *
  * Grid structure:
  *   - Leftmost column: habit names (sticky: position sticky; left: 0)
- *   - Week columns: one per ISO week (12 default), with "W26" style labels
+ *   - Week columns: one per ISO week from the earliest week with any
+ *     score_snapshots data through the current week, with "W26" style labels
  *   - Wave header rows: full-width spanning all columns
  *   - Cell classes: waveboard-cell waveboard-cell--{healthy|watch|atrisk|failing|na}
  *   - Cell title: "{status} ({completed}/{applicable} days)" or "Not applicable"
@@ -33,6 +34,16 @@ import { mount } from '../../util/mount.js';
 import { t, displayName } from '../../i18n/index.js';
 import { todayLocal, formatLocalYMD } from '../../util/date.js';
 import { mountWavePlanning } from './wavePlanning.js';
+
+/**
+ * Earliest-possible-date sentinel for full-history score_snapshots range
+ * queries. Matches the "earliest possible date" convention already used by
+ * `js/db/repo.js`'s `getLatestSnapshot` and `js/io/seed.js`'s `effectiveFrom`
+ * fallback.
+ *
+ * @type {string}
+ */
+const SNAPSHOT_EPOCH = '0000-01-01';
 
 // ---------------------------------------------------------------------------
 // ISO week helpers (internal, not exported)
@@ -79,25 +90,31 @@ function isoWeekLabel(key) {
 }
 
 /**
- * Build an array of 12 ISO week keys ending at (and including) the current
- * week, in chronological order.
+ * Build an array of ISO week keys spanning from the week containing
+ * `startYMD` through the week containing `endYMD`, inclusive, in
+ * chronological order.
  *
- * @param {string} todayYMD - Today's date in YYYY-MM-DD format.
- * @returns {string[]} Array of 12 isoWeekKey strings.
+ * Steps one calendar week at a time from the Monday of the start week to
+ * the Monday of the end week, so the result is always chronological with
+ * no possible duplicate entries.
+ *
+ * @param {string} startYMD - Range start date in YYYY-MM-DD format.
+ * @param {string} endYMD - Range end date in YYYY-MM-DD format.
+ * @returns {string[]} Array of isoWeekKey strings, chronological, no dupes.
  */
-function last12Weeks(todayYMD) {
+export function weeksInRange(startYMD, endYMD) {
   const keys = [];
-  const [y, m, d] = todayYMD.split('-').map(Number);
-  // Start from today and step back 7 days at a time to collect 12 weeks.
-  const cursor = new Date(y, m - 1, d);
-  for (let i = 11; i >= 0; i--) {
-    const target = new Date(cursor);
-    target.setDate(cursor.getDate() - i * 7);
-    const ymd = formatLocalYMD(target);
-    keys.push(isoWeekKey(ymd));
+  let cursor = weekMonday(isoWeekKey(startYMD));
+  const endMonday = weekMonday(isoWeekKey(endYMD));
+
+  while (cursor <= endMonday) {
+    keys.push(isoWeekKey(cursor));
+    const [y, m, d] = cursor.split('-').map(Number);
+    const next = new Date(y, m - 1, d + 7);
+    cursor = formatLocalYMD(next);
   }
-  // Remove duplicate keys (can happen near year boundaries due to ISO week math)
-  return [...new Set(keys)];
+
+  return keys;
 }
 
 /**
@@ -318,9 +335,11 @@ export function buildWaveboardRows({ habitsByWave, cellData, weeks, showArchived
  *
  * Data fetch sequence (D-118):
  *   1. `repo.getAllHabits()`  → habit list + wave grouping
- *   2. Score snapshots range query over last 12 weeks from score_snapshots
- *   3. Build cellData Map from snapshot rows (worst S1 status per week per habit)
- *   4. Build weeks array: 12 ISO week keys ending at today
+ *   2. Score snapshots range query over the full existing range (from a
+ *      fixed epoch sentinel through today) from score_snapshots
+ *   3. Build weeks array: ISO week keys derived from the earliest date
+ *      actually returned by the query, through today
+ *   4. Build cellData Map from snapshot rows (worst S1 status per week per habit)
  *   5. Render via `buildWaveboardHeader` + `buildWaveboardRows` + `mount()`
  *
  * Wave-board ALWAYS uses S1 status — active scoringModel has no effect (D-118).
@@ -447,20 +466,24 @@ export function mountWaveboard(parent, { repo, store }) {
       // 1. Habit catalog.
       cachedHabits = await repo.getAllHabits();
 
-      // 2. Compute 12-week date range.
+      // 2. Fetch all snapshot rows over the full possible history range.
       const today = todayLocal();
-      cachedWeeks = last12Weeks(today);
-      const startDate = weekMonday(cachedWeeks[0]);
-      const endDate = today;
-
-      // 3. Fetch all snapshot rows in the date range.
       /** @type {object[]} */
       let snapshotRows = [];
       try {
-        snapshotRows = await repo.getSnapshotsInRange(startDate, endDate);
+        snapshotRows = await repo.getSnapshotsInRange(SNAPSHOT_EPOCH, today);
       } catch (_e) {
         // Non-fatal — no snapshots yet.
       }
+
+      // 3. Derive the displayed week range from the earliest snapshot date
+      // actually returned (fallback: today, so a zero-snapshot install still
+      // renders exactly the current week).
+      let earliestDate = today;
+      for (const row of snapshotRows) {
+        if (row.date && row.date < earliestDate) earliestDate = row.date;
+      }
+      cachedWeeks = weeksInRange(earliestDate, today);
 
       // 4. Build cellData from snapshot rows.
       // Each row: { habitId, date, s1Status, ... }
