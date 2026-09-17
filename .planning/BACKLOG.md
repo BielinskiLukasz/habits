@@ -2,7 +2,7 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-08-31 (added B-027 — app version display)
+Last updated: 2026-09-17 (resolved B-004 — catalog action buttons row layout via quick task 260917-lst)
 Last assigned ID: **B-027** — next new item must be **B-028**
 
 ---
@@ -86,27 +86,6 @@ Last assigned ID: **B-027** — next new item must be **B-028**
 
 - `data-panel="create"` / `data-panel="edit"` currently render at the top-level panel level; need to move rendering anchor closer to the triggering row.
 - Effort: Medium.
-
----
-
-### B-004 · Edit and Archive buttons should be in the same row
-
-**Status:** captured · not scheduled
-**Earliest sensible slot:** next UI polish pass
-
-**What:** Edit and Archive buttons in the Catalog habit card stack vertically on mobile, consuming more vertical space than necessary.
-
-**Why:** Vertical stacking wastes screen real-estate on the primary mobile surface. Side-by-side buttons are the conventional pattern for paired primary/destructive actions and save a full button-height of scroll.
-
-**Open questions when this gets planned:**
-
-- Wrap on very narrow viewports (< 320 px) or always force one row?
-
-**Implementation notes:**
-
-- Change `.catalog-habit-actions` from `flex-direction: column` to `flex-direction: row`.
-- Add an optional `flex-wrap: wrap` media query for very narrow viewports.
-- Effort: Low.
 
 ---
 
