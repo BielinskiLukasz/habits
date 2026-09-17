@@ -168,6 +168,9 @@
   }
 
   /* Wave-board grid — renders as a proper HTML table (not a CSS grid) */
+  .waveboard-container {
+    overflow-x: auto;
+  }
   .waveboard-grid {
     border-collapse: collapse;
   }

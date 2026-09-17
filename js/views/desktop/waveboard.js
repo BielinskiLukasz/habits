@@ -380,7 +380,6 @@ export function mountWaveboard(parent, { repo, store }) {
   // Scrollable container for the grid.
   const waveboardContainer = parent.ownerDocument.createElement('div');
   waveboardContainer.setAttribute('class', 'waveboard-container');
-  waveboardContainer.setAttribute('style', 'overflow-x: auto');
   parent.appendChild(waveboardContainer);
 
   // Data state — populated on first render and refreshed on notify.
