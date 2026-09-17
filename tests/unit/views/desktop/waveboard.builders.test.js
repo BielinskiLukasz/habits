@@ -18,6 +18,8 @@ import assert from 'node:assert/strict';
 import {
   buildWaveboardHeader,
   buildWaveboardRows,
+  weeksInRange,
+  isoWeekKey,
 } from '../../../../js/views/desktop/waveboard.js';
 
 /**
@@ -240,5 +242,24 @@ describe('buildWaveboardRows — DESKTOP-04 heat-map body rows', () => {
       d.tag === 'td' && d.text === 'Old habit'
     );
     assert.equal(oldHabitFound, undefined, '"Old habit" should not appear in output when showArchived=false');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// weeksInRange
+// ---------------------------------------------------------------------------
+
+describe('weeksInRange — DESKTOP-04 full-history week-range builder', () => {
+  test('single-day range (start === end) returns exactly one week key', () => {
+    const out = weeksInRange('2026-06-24', '2026-06-24');
+    assert.deepEqual(out, [isoWeekKey('2026-06-24')]);
+  });
+
+  test('year-boundary multi-week range returns chronological keys with no duplicates', () => {
+    const out = weeksInRange('2025-12-01', '2026-01-20');
+    assert.equal(out[0], isoWeekKey('2025-12-01'));
+    assert.equal(out[out.length - 1], isoWeekKey('2026-01-20'));
+    assert.ok(out.length >= 6, `Expected at least 6 weeks, got ${out.length}`);
+    assert.equal(new Set(out).size, out.length, 'Should contain no duplicate week keys');
   });
 });
