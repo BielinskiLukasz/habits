@@ -1,36 +1,39 @@
 {
   "version": "1.0",
-  "timestamp": "2026-09-16T19:03:58.031Z",
-  "phase": "13",
-  "phase_name": "code-review-documentation",
-  "phase_dir": ".planning/phases/13-code-review-documentation",
+  "timestamp": "2026-09-17T15:46:23.431Z",
+  "phase": null,
+  "phase_name": null,
+  "phase_dir": null,
   "plan": null,
   "task": null,
-  "total_tasks": 4,
+  "total_tasks": null,
   "status": "paused",
   "completed_tasks": [
-    {"id": "uat-1", "name": "Wave Completion Rate", "status": "in_progress", "progress": "User reported weekly-cadence habits showing 0/7 or 1/7 instead of 1/week. Diagnosed and fixed by gsd-debugger (goal: find_and_fix): js/io/scoreSnapshots.js's applicableToday/loggedToday calc for weekly/monthly cadence summed a raw per-day appliesToday() flag instead of counting one occurrence per elapsed period. Fixed, 7 new regression tests added, full suite 953/953 passing. Committed: 400a90c, a81cac3, 452ce67. NOT YET re-verified live by user in the browser."}
+    {"id": "quick-260917-lst", "name": "Catalog action buttons: row layout instead of column", "status": "done", "commit": "6d3ab1f"},
+    {"id": "quick-260917-n8p", "name": "Waveboard heat-map: full history + horizontal scroll", "status": "done", "commit": "dd29965"},
+    {"id": "quick-260917-o9h", "name": "Waveboard heat-map: pin wave-header row on scroll", "status": "done", "commit": "38c2393"},
+    {"id": "debug-s1-weekly-period-premature", "name": "S1 scoring: weekly/monthly current-period premature-fail fix", "status": "in_progress", "progress": "Root cause confirmed, fix implemented in js/domain/scoring.js (_computeS1Periodic), 4 new regression tests added to tests/unit/scoring.test.js, all green (22/22 in that file, 968/968 full suite at last run). Fix is UNCOMMITTED — awaiting user's live-app confirmation (via Settings > Recompute Scores) before commit + session close."}
   ],
   "remaining_tasks": [
-    {"id": "uat-1-reverify", "name": "User re-checks Wave Board weekly-habit completion % after the fix", "status": "not_started"},
-    {"id": "uat-2", "name": "Streak Calculations — verify currentStreak and longestStreak show correct counts", "status": "not_started"},
-    {"id": "uat-3", "name": "Legacy Backup Import Normalization — verify pre-v1.2 backup logs appear in analytics", "status": "not_started"},
-    {"id": "uat-4", "name": "Mark Completed Habit as Skipped — verify lastCompletedDate recalculates correctly", "status": "not_started"}
+    {"id": "debug-s1-weekly-period-premature-confirm", "name": "User confirms S1 fix live in app (after Recompute Scores), then commit js/domain/scoring.js + tests/unit/scoring.test.js and close/archive the debug session", "status": "not_started"},
+    {"id": "woda-habit-followup", "name": "No code action needed — confirmed as intended 7-day grace-period behavior, not a bug", "status": "not_started"}
   ],
-  "blockers": [],
+  "blockers": [
+    {"description": "S1 weekly/monthly fix (js/domain/scoring.js, tests/unit/scoring.test.js) is verified by unit tests but user reported it still showed <100% live in the app after the fix landed in the working tree. Most likely cause: score_snapshots rows are precomputed/cached (views never recompute live) and were written by the OLD buggy formula, so a 'Recompute Scores' run in Settings is needed before the corrected values show up. User said 'I'll check the live app first' and has not yet reported back the result.", "type": "human_action", "workaround": "User needs to: (1) hard-refresh / ensure latest JS is loaded (service worker uses stale-while-revalidate for /js/, so a first reload after a source change can still serve stale cached JS), (2) go to Settings > Recompute Scores to rebuild score_snapshots with the corrected formula, (3) re-check the weekly habit's S1 score, (4) report back confirmed/still-wrong so the debug session can be committed and closed, or reopened if still broken."}
+  ],
   "async_jobs": [],
   "human_actions_pending": [
-    {"action": "Reload desktop.html Wave Board and re-check a weekly-cadence habit's completion % / tooltip", "context": "Confirms the scoreSnapshots.js fix (commit 400a90c) actually resolves the reported 0/7-or-1/7 display in the live UI — the fix was only verified via automated tests (953/953 passing), no browser tool was available to the debug agent.", "blocking": true},
-    {"action": "Continue UAT tests 2-4 via /gsd-verify-work 13", "context": "Session was paused mid-UAT after fixing the Test 1 gap; 3 tests remain unanswered.", "blocking": true}
+    {"action": "Try Settings > Recompute Scores (after a hard refresh) on a weekly habit completed every past week but not yet logged this still-open week, then confirm whether S1 now shows correctly (should be ~100, not deflated).", "context": "Debug session .planning/debug/s1-weekly-period-premature.md is at an awaiting-human-verify checkpoint. The code fix and its regression tests are done and passing; only live confirmation is outstanding before commit.", "blocking": true}
   ],
   "decisions": [
-    {"decision": "Fixed the Test 1 gap immediately via a single gsd-debugger agent (goal: find_and_fix) instead of finishing all 4 UAT tests first and batching gap-closure through plan-phase --gaps", "rationale": "User explicitly asked to 'try to fix it now' mid-UAT rather than wait for the standard diagnose-then-plan-then-execute pipeline", "phase": "13"}
+    {"decision": "S1 grace period explains the 'Woda: wypicie 2 litrów' habit not showing a score — not a bug.", "rationale": "data/habits-import-2026-09-17.json shows this habit has startDate 2026-09-14 and only 3 log rows (09-14/15/16); scoring.js's documented 7-day grace period (habits < 7 days old return null scores) is working as designed. It's a Wave 6 habit that only recently went active as part of the phased wave rollout. It will start scoring around 2026-09-21.", "phase": null},
+    {"decision": "Waveboard heat-map week range changed from hardcoded last-12-weeks to full history from the earliest score_snapshots row, with horizontal scroll and a sticky habit-name column.", "rationale": "score_snapshots are written from habit.createdAt to today (not capped at 70 days) except when createdAt is missing, so full-history display is architecturally supported; the 12-week cap was purely a UI limitation.", "phase": null},
+    {"decision": "Wave-header row in the waveboard now uses a scoped selector (.waveboard-grid .analytics-wave-header td) for sticky positioning, rather than styling the shared bare .analytics-wave-header td class.", "rationale": "That class is also used by the plain, non-scrolling desktop analytics table (js/views/desktop/analytics.js); a bare rule would have leaked sticky positioning into a table that never scrolls.", "phase": null}
   ],
   "uncommitted_files": [
-    ".planning/milestone.lock",
-    ".planning/phases/13-code-review-documentation/13-UAT.md",
-    ".planning/state.json"
+    "js/domain/scoring.js",
+    "tests/unit/scoring.test.js"
   ],
-  "next_action": "Resume with /gsd-verify-work 13 — first ask the user to re-verify Test 1 (Wave Board weekly completion %) now that the fix is committed, then continue to Test 2 (Streak Calculations) if confirmed.",
-  "context_notes": "Phase 13 execution was already complete (3 plans, all committed) before this UAT session started. UAT Test 1 found a real gap (gap_id G-13-1 in 13-UAT.md) that was diagnosed and fixed in-session rather than deferred. Important side-finding from the debug agent: js/domain/waveAggregates.js (computeWaveAggregates/_countForHabit) is DEAD CODE with zero live callers — the actual Wave Board UI reads from js/io/scoreSnapshots.js's score_snapshots store via js/views/desktop/waveboard.js. Don't waste time investigating waveAggregates.js for Wave Board display bugs; it carries the same latent per-day-summing flaw but isn't wired up. Also: js/domain/scoring.js's computeS1 already had a prior fix for this exact bug shape ('Bug 3') that never got extended to the sibling loggedToday/applicableToday fields in scoreSnapshots.js — worth checking computeS2/computeS3 for the same gap if touched later. Non-blocking housekeeping note: git printed a 'failed to write commit-graph' warning during commit 400a90c; history/commits verified healthy, it's a stale performance cache — `git commit-graph write --reachable --changed-paths` can clear it, not urgent."
+  "next_action": "Ask the user whether they tried Settings > Recompute Scores and what the weekly habit's S1 score shows now. If confirmed fixed: commit js/domain/scoring.js + tests/unit/scoring.test.js (docs(quick.../fix commit per debug workflow), then archive .planning/debug/s1-weekly-period-premature.md to .planning/debug/resolved/ and append a knowledge-base.md entry. If still wrong: resume the gsd-debug-session-manager for slug s1-weekly-period-premature with the new evidence to re-open investigation.",
+  "context_notes": "This session was pure quick-task + one debug-session work, no active phase/spike/sketch/deliberation. Three quick tasks fully shipped and committed (see completed_tasks). The ONLY open thread is the S1 weekly/monthly debug session, which is fix-complete and test-green but not yet committed pending the user's live confirmation after Recompute Scores. No other work is in flight."
 }
