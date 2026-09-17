@@ -54,7 +54,7 @@ Archives: `.planning/milestones/`
 
 Phase: 13 (Code Review & Documentation) — EXECUTING
 Status: Executing Phase 13
-Last activity: 2026-09-08 — Phase 13 execution started
+Last activity: 2026-09-17 — Completed quick task 260917-g2a: Regenerate habits import JSON for 2026-09-17 from prior import + updated Nawyki v1.csv
 
 ███████████████░░░░░ 75% (3/4 phases complete)
 
@@ -153,6 +153,7 @@ None
 | 260829-ka4 | Implement swipe action handling for history screen (4-state UX) | 2026-08-29 | afc9703 | [260829-ka4-implement-swipe-action-handling-for-hist](.planning/quick/260829-ka4-implement-swipe-action-handling-for-hist/) |
 | 260829-ucr | Move the analytics link from bottom of settings panel to footer nav | 2026-08-29 | c8e51e8 | [260829-ucr-move-the-analytics-link-from-bottom-of-s](.planning/quick/260829-ucr-move-the-analytics-link-from-bottom-of-s/) |
 | 260829-ws9 | Add collapse/expand toggle button to desktop analytics sidebar | 2026-08-31 | c60e2fc | [260829-ws9-add-a-collapse-expand-toggle-button-to-t](.planning/quick/260829-ws9-add-a-collapse-expand-toggle-button-to-t/) |
+| 260917-g2a | Regenerate habits import JSON for 2026-09-17 from prior import + updated Nawyki v1.csv | 2026-09-17 | — (data/ gitignored, no code commit) | [260917-g2a-regenerate-habits-import-json-for-2026-0](.planning/quick/260917-g2a-regenerate-habits-import-json-for-2026-0/) |
 
 ## Session Continuity
 
