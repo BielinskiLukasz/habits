@@ -206,6 +206,15 @@
     font-weight: 600;
     font-size: var(--text-md);
   }
+  /* Scoped to the waveboard only (mirrors .waveboard-sticky-column's
+     position: sticky; left: 0) — pins the wave-header label at the left
+     edge during horizontal scroll. Leaves the plain analytics table's
+     bare .analytics-wave-header td rule above untouched/non-sticky. */
+  .waveboard-grid .analytics-wave-header td {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
   .analytics-row--archived {
     opacity: 0.4;
   }
