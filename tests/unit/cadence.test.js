@@ -353,6 +353,86 @@ describe('appliesToday — startDate guard (CATALOG-07 future-scheduled habits)'
   });
 });
 
+describe('appliesToday — createdAt existence-fallback guard (history-seed-null-startdate)', () => {
+  // Seed-catalog habits ship with `startDate: null` (they aren't
+  // future-scheduled), so the CATALOG-07 guard alone is a no-op for them.
+  // Without a createdAt fallback, a seeded habit is treated as applicable on
+  // literally any date, including ones that predate the app's existence.
+  test('returns false for startDate:null + createdAt in the future relative to date', () => {
+    const habit = {
+      id: 'seed-h',
+      cadence: { type: 'daily' },
+      startDate: null,
+      createdAt: '2026-09-17',
+    };
+    assert.equal(appliesToday(habit, '2025-12-10', zeroCtx()), false);
+  });
+
+  test('boundary: returns true on the createdAt date itself (habit exists that day)', () => {
+    const habit = {
+      id: 'seed-h',
+      cadence: { type: 'daily' },
+      startDate: null,
+      createdAt: '2026-09-17',
+    };
+    assert.equal(appliesToday(habit, '2026-09-17', zeroCtx()), true);
+  });
+
+  test('boundary N+1: returns true the day after createdAt', () => {
+    const habit = {
+      id: 'seed-h',
+      cadence: { type: 'daily' },
+      startDate: null,
+      createdAt: '2026-09-17',
+    };
+    assert.equal(appliesToday(habit, '2026-09-18', zeroCtx()), true);
+  });
+
+  test('boundary N-1: returns false the day before createdAt', () => {
+    const habit = {
+      id: 'seed-h',
+      cadence: { type: 'daily' },
+      startDate: null,
+      createdAt: '2026-09-17',
+    };
+    assert.equal(appliesToday(habit, '2026-09-16', zeroCtx()), false);
+  });
+
+  test('startDate still takes precedence over createdAt when both are present and differ', () => {
+    // startDate is future relative to date; createdAt is in the past. The
+    // future-scheduling guard (CATALOG-07) must still win.
+    const habit = {
+      id: 'h',
+      cadence: { type: 'daily' },
+      startDate: '2026-07-01',
+      createdAt: '2026-01-01',
+    };
+    assert.equal(appliesToday(habit, '2026-06-15', zeroCtx()), false);
+  });
+
+  test('resolver is NOT consulted when the createdAt-fallback guard blocks (short-circuit)', () => {
+    let resolverCalls = 0;
+    const ctx = {
+      weekStart: 'mon',
+      weekCompletions: () => { resolverCalls++; return 0; },
+      monthCompletions: () => 0,
+    };
+    const habit = {
+      id: 'seed-h',
+      cadence: { type: 'weekly' },
+      startDate: null,
+      createdAt: '2026-09-17',
+    };
+    appliesToday(habit, '2025-12-10', ctx);
+    assert.equal(resolverCalls, 0);
+  });
+
+  test('safe default preserved: still true when both startDate and createdAt are absent', () => {
+    const habit = { id: 'h', cadence: { type: 'daily' } };
+    assert.equal(appliesToday(habit, '2025-12-10', zeroCtx()), true);
+  });
+});
+
 describe('appliesToday — unknown cadence type', () => {
   test('throws Error "cadence: unknown type X"', () => {
     const habit = { id: 'h', cadence: { type: 'unknown' } };

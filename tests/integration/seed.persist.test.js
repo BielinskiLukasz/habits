@@ -113,7 +113,8 @@ describe('bootSeed: persist() returning false is non-fatal (Pitfall 3)', () => {
     assert.ok(persistRow, 'meta.persistResult must be written even when persist() returns false');
     assert.equal(persistRow.value, false, 'persistResult.value must record the false outcome');
 
-    // Sanity: the seed itself still completed (8 habits inserted).
-    assert.equal(repo._stores.habits.size, 8, 'seed insertion is independent of persist() outcome');
+    // Sanity: the seed itself still completed (0 habits — empty seed fixture,
+    // history-seed-null-startdate scope expansion, 2026-09-17).
+    assert.equal(repo._stores.habits.size, 0, 'seed insertion is independent of persist() outcome');
   });
 });

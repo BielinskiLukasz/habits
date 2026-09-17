@@ -19,11 +19,18 @@
  *      User edits to seeded rows are preserved (D-33 / T-02-03 — the
  *      data-trust invariant of this phase).
  *
- *   4. Single tx writes: each new habit + one `seed:createHabit` event per
- *      habit (SEED-04, inverse:null so seed events are non-undoable) +
+ *   4. Single tx writes: each new habit (stamped with `createdAt` at insert
+ *      time — history-seed-null-startdate, 2026-09-17) + one `seed:createHabit`
+ *      event per habit (SEED-04, inverse:null so seed events are non-undoable) +
  *      `meta.seededIds` (full set, not just newly inserted) + D-45 settings
  *      defaults (`defaultThreshold = 0.9`, `defaultWindowDays = 70`,
  *      `schemaVersion = 1`).
+ *
+ *      `seed/habits.json`'s `habits` array is now empty (history-seed-null-startdate
+ *      scope expansion, 2026-09-17 — the 8 placeholder demo habits were never
+ *      part of the real Nawyki catalog). Fresh installs seed 0 habits; the
+ *      `DEMO_HABIT_IDS` migration below removes the demo habits from any
+ *      install that auto-seeded them before this change shipped.
  *
  *   5. After the tx commits, if `meta.persistResult` is still undefined,
  *      call `navigator.storage.persist()` once and record the outcome in
@@ -60,6 +67,29 @@
 
 import { newId } from '../util/id.js';
 import { normalizeSlotsToArray } from '../util/slots.js';
+import { todayLocal } from '../util/date.js';
+
+/**
+ * The 8 hardcoded UUIDs of the placeholder demo habits that used to ship in
+ * `seed/habits.json` (history-seed-null-startdate scope expansion, 2026-09-17).
+ * None of these appear in the real Nawyki v1.csv or in `data/habits-import-*.json`
+ * — they were onboarding placeholder content. Hardcoded here (NOT derived from
+ * the seed fixture, which is now empty) so the `demoHabitsRemoved` migration
+ * below can still find and remove them from any install that auto-seeded them
+ * before this change shipped.
+ *
+ * @type {string[]}
+ */
+export const DEMO_HABIT_IDS = [
+  '015105be-fc0b-45b6-b939-4e8d395fcf13', // Morning walk
+  '44403331-dbdf-4992-ac84-944dba8df6f1', // Drink water (1.5L)
+  '83c8b7c5-6c2b-4121-9395-2d7c1e0f99a5', // Weekly grocery run
+  'b80c7b07-8a37-471b-b9d1-110b6b90011c', // Shower (every 2 days)
+  'c1eecb31-3b91-4a80-92e8-68435b5931f4', // Strength training (M/W/F)
+  'eeef9945-6c8c-4440-9d93-baf6fd4ee312', // 5 things grateful for
+  '45e0f64f-b9c2-46ca-8b21-3ddbc4e9bf07', // 7 meatless meals/week
+  '2694072b-dfe0-4cb3-9ba2-b3aad89f85aa', // Daily learning (3 sources)
+];
 
 /** @type {object|null} */
 let _repo = null;
@@ -104,16 +134,24 @@ export async function bootSeed() {
   const fetchFn = _fetch ?? globalThis.fetch ?? null;
 
   // Fast-path no-op (steady-state on every boot after the first).
-  // All five flags must be present to short-circuit: habitVersionsSeeded guards
+  // All seven flags must be present to short-circuit: habitVersionsSeeded guards
   // the habit_versions backfill (2026-07-03); waveFieldSeeded guards the v1
   // wave backfill (seededIds-only, 2026-08-25); waveFieldV2 guards the v2
-  // wave backfill (all habits, 2026-08-26 — fixes imported habits missed by v1).
+  // wave backfill (all habits, 2026-08-26 — fixes imported habits missed by v1);
+  // createdAtBackfilled guards the createdAt backfill (2026-09-17 —
+  // history-seed-null-startdate: seed habits had no createdAt, defeating the
+  // cadence.js existence guard's createdAt fallback for already-seeded installs);
+  // demoHabitsRemoved guards the demo-habit removal migration (2026-09-17 —
+  // history-seed-null-startdate scope expansion: removes the 8 hardcoded
+  // DEMO_HABIT_IDS from already-seeded installs).
   const seededIds = await repo.getMeta('seededIds');
   const persistResult = await repo.getMeta('persistResult');
   const habitVersionsSeeded = await repo.getMeta('habitVersionsSeeded');
   const waveFieldSeeded = await repo.getMeta('waveFieldSeeded');
   const waveFieldV2 = await repo.getMeta('waveFieldV2');
-  if (seededIds !== undefined && persistResult !== undefined && habitVersionsSeeded && waveFieldSeeded && waveFieldV2) {
+  const createdAtBackfilled = await repo.getMeta('createdAtBackfilled');
+  const demoHabitsRemoved = await repo.getMeta('demoHabitsRemoved');
+  if (seededIds !== undefined && persistResult !== undefined && habitVersionsSeeded && waveFieldSeeded && waveFieldV2 && createdAtBackfilled && demoHabitsRemoved) {
     return;
   }
 
@@ -168,7 +206,14 @@ export async function bootSeed() {
       'readwrite',
       async (tx) => {
         for (const h of toInsert) {
-          tx.objectStore('habits').put({ ...h, slots: normalizeSlotsToArray(h.slots) });
+          // Forward-fix (history-seed-null-startdate): stamp createdAt at
+          // insert time. seed/habits.json never carries createdAt (a static
+          // on-disk fixture can't know its future per-install seed date), and
+          // without it js/domain/cadence.js's existence guard is a permanent
+          // no-op for these habits (startDate is also null). Mirrors
+          // js/state/apply/createHabit.js's contract: every habit row gets a
+          // real createdAt.
+          tx.objectStore('habits').put({ ...h, slots: normalizeSlotsToArray(h.slots), createdAt: h.createdAt ?? todayLocal() });
 
           // Write initial habit_versions row so getHabitVersionAtDate can
           // resolve the original name for any date >= effectiveFrom (NFR-10,
@@ -330,6 +375,85 @@ export async function bootSeed() {
         tx.objectStore('habits').put(h);
       }
       tx.objectStore('meta').put({ key: 'waveFieldV2', value: true });
+    });
+  }
+
+  // One-time backfill: createdAt missing on already-seeded habits (2026-09-17
+  // — history-seed-null-startdate). Pre-fix installs have seed-catalog habits
+  // with no createdAt field at all, defeating js/domain/cadence.js's
+  // existence-guard createdAt fallback (they also have startDate: null, so
+  // the guard was a permanent no-op for them). Source of truth is the
+  // per-habit seed:createHabit event's `at` timestamp (the historically
+  // accurate seed moment) converted to a YMD via UTC slice(0,10), matching
+  // the precedent in js/views/desktop/wavePlanning.js. Falls back to
+  // habit.startDate ?? todayLocal() when no matching event is found
+  // (Pitfall 5 defensive-insert edge case, or a habit that predates the
+  // seed:createHabit event write itself).
+  if (!createdAtBackfilled) {
+    const seededIdsForBackfill = await repo.getMeta('seededIds') ?? [];
+    const allEvents = await repo.getAllEvents();
+    /** @type {Map<string, string>} */
+    const seedEventAtByHabitId = new Map();
+    for (const evt of allEvents) {
+      if (evt.type === 'seed:createHabit' && evt.payload && evt.payload.habitId) {
+        if (!seedEventAtByHabitId.has(evt.payload.habitId)) {
+          seedEventAtByHabitId.set(evt.payload.habitId, evt.at);
+        }
+      }
+    }
+
+    /** @type {object[]} */
+    const toBackfillCreatedAt = [];
+    for (const id of seededIdsForBackfill) {
+      const habit = await repo.getHabit(id);
+      if (!habit || habit.createdAt) continue;
+      const eventAt = seedEventAtByHabitId.get(id);
+      const createdAt = eventAt ? eventAt.slice(0, 10) : (habit.startDate ?? todayLocal());
+      toBackfillCreatedAt.push({ ...habit, createdAt });
+    }
+
+    await repo.runTx(['habits', 'meta'], 'readwrite', async (tx) => {
+      for (const h of toBackfillCreatedAt) {
+        tx.objectStore('habits').put(h);
+      }
+      tx.objectStore('meta').put({ key: 'createdAtBackfilled', value: true });
+    });
+  }
+
+  // One-time migration: remove the 8 hardcoded DEMO_HABIT_IDS placeholder
+  // habits from any install that auto-seeded them before this change shipped
+  // (2026-09-17 — history-seed-null-startdate scope expansion). Per id:
+  // hard-delete when zero real logs exist against it (nothing to preserve);
+  // archive (reusing the same transform as
+  // js/state/apply/archiveHabit.js#handleArchiveHabit) when real logs exist,
+  // so the "habit identity preserved across edits" / history-integrity
+  // invariant holds for a user who toggled a demo habit during testing.
+  // Non-demo habits (any id not in DEMO_HABIT_IDS) are never inspected or
+  // touched by this loop.
+  if (!demoHabitsRemoved) {
+    /** @type {string[]} */
+    const toHardDelete = [];
+    /** @type {object[]} */
+    const toArchive = [];
+    for (const id of DEMO_HABIT_IDS) {
+      const habit = await repo.getHabit(id);
+      if (!habit) continue;
+      const logs = await repo.getLogsByHabit(id);
+      if (logs.length === 0) {
+        toHardDelete.push(id);
+      } else {
+        toArchive.push({ ...habit, status: 'archived' });
+      }
+    }
+
+    await repo.runTx(['habits', 'meta'], 'readwrite', async (tx) => {
+      for (const id of toHardDelete) {
+        tx.objectStore('habits').delete(id);
+      }
+      for (const h of toArchive) {
+        tx.objectStore('habits').put(h);
+      }
+      tx.objectStore('meta').put({ key: 'demoHabitsRemoved', value: true });
     });
   }
 

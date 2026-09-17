@@ -28,9 +28,18 @@
  *     for the rest of the month as soon as ANY completed log lands within the
  *     current month. Resolver queries `ctx.monthCompletions(habitId, monthStart, monthEnd) === 0`.
  *
- * Future-scheduled habits (CATALOG-07 startDate guard):
- *   - If `habit.startDate` is defined AND `habit.startDate > date`, `appliesToday`
- *     returns false immediately without consulting the resolver (habit is not yet active).
+ * Existence guard (CATALOG-07 startDate guard + createdAt fallback,
+ * history-seed-null-startdate):
+ *   - The guard anchors on `habit.startDate ?? habit.createdAt` — startDate
+ *     takes precedence when both are present (future-scheduling still wins).
+ *   - If that anchor is defined AND the anchor is greater than `date`,
+ *     `appliesToday` returns false immediately without consulting the
+ *     resolver (habit is not yet active / did not exist yet on that date).
+ *   - The createdAt fallback matters for seed-catalog habits: they ship with
+ *     `startDate: null` (not future-scheduled) but DO have a real
+ *     `createdAt` once seeded, so without the fallback they were treated as
+ *     applicable on literally any date, including ones before the app
+ *     existed.
  *   - The guard runs BEFORE resolver dispatch, short-circuiting the resolver call.
  *
  * Unknown cadence type → throws `Error('cadence: unknown type <X>')` so a
@@ -97,8 +106,12 @@ const RESOLVERS = {
  * @returns {boolean}
  */
 export function appliesToday(habit, date, ctx) {
-  // startDate guard: if habit is future-scheduled, return false immediately (CATALOG-07).
-  if (habit.startDate && habit.startDate > date) {
+  // Existence guard: startDate wins when present (CATALOG-07 future-scheduling);
+  // otherwise fall back to createdAt so seed-catalog habits (startDate: null)
+  // don't show as applicable on dates before they were ever seeded/created
+  // (history-seed-null-startdate).
+  const existenceAnchor = habit.startDate ?? habit.createdAt;
+  if (existenceAnchor && existenceAnchor > date) {
     return false;
   }
 
