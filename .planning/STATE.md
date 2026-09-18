@@ -2,19 +2,20 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: UX & i18n Quality Gate (Phases 10–13)
-current_phase: 13.1
-status: completed
-stopped_at: Phase 13.2 context gathered
-last_updated: "2026-09-18T19:21:40.839Z"
+current_phase: 13.2
+current_phase_name: "Close gap: I18N-02 - hardcoded 'Undo last action' strings in settings/builders.js"
+status: complete
+stopped_at: Completed 13.2-01-PLAN.md — Phase 13.2 complete
+last_updated: "2026-09-18T21:42:05.000Z"
 last_activity: 2026-09-18
-last_activity_desc: Phase 13.1 complete
-state_head: 8dcf7e6345d16418e6280e56cbc96a36352428af
+last_activity_desc: Phase 13.2 execution complete
+state_head: fcfe2d3d5c857b094f6799534db59686ee0a0aa8
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 14
-  completed_plans: 14
-  percent: 33
+  total_plans: 15
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -24,7 +25,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-18)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** v1.2 milestone complete (Phases 10–13 + inserted gap-close 13.1) — ready to close out
+**Current focus:** Phase 13.2 — Close gap: I18N-02 - hardcoded 'Undo last action' strings in settings/builders.js (COMPLETE)
 
 ## Milestone Status
 
@@ -51,11 +52,11 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: 13.1
-Status: All phases complete
-Last activity: 2026-09-18 — Phase 13.1 complete
+Phase: 13.2 (Close gap: I18N-02 - hardcoded 'Undo last action' strings in settings/builders.js) — COMPLETE
+Status: Phase 13.2 complete (1/1 plans) — I18N-02 genuinely closed, regression-tested
+Last activity: 2026-09-18 — Phase 13.2 execution complete
 
-███████████████████░ 100% (4/4 v1.2 phases + 1 inserted gap-close phase complete)
+█████████████████████ 100% (4/4 v1.2 phases + 2 inserted gap-close phases complete)
 
 ## Performance Metrics
 
@@ -99,6 +100,7 @@ Last activity: 2026-09-18 — Phase 13.1 complete
 | Phase 11 P03 | 321 | 2 tasks | 1 files |
 | Phase 13 P01 | 5400 | 3 tasks | 9 files |
 | Phase 13.1 P01 | 25min | 3 tasks | 6 files |
+| Phase 13.2 P01 | 5min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -168,9 +170,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-09-18T19:21:37.744Z
-**Stopped at:** Phase 13.2 context gathered
-**Resume file:** .planning/phases/13.2-close-gap-i18n-02-hardcoded-undo-last-action-strings-in-sett/13.2-CONTEXT.md
+**Last session:** 2026-09-18T21:42:05.000Z
+**Stopped at:** Completed 13.2-01-PLAN.md — Phase 13.2 complete
+**Resume file:** None
 
 Next command: /gsd-complete-milestone v1.2
 
@@ -205,3 +207,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Debug 2026-09-18]: waveboard-wave-row-not-pinned resolved — `position: sticky` on a colspan-spanning `<td>` is a no-op (cell already full-width, no room to move); sticky moved to an inner `span.wave-header-label` instead. Also bumped APP_VERSION 0.5.0→0.5.1 (CSS-touching commits must bump per README/VERSIONING.md policy, or the SW's cache-first CSS strategy never picks up the fix). Two "still broken" live-verify failures during this session both turned out to be environment mismatches (checking the deployed site before the fix was pushed), not code defects — worth checking "which environment, and was it actually pushed?" before trusting a negative live-check going forward. See `.planning/debug/resolved/waveboard-wave-row-not-pinned.md` and knowledge-base entry.
 - [Phase 13.1]: Plan 13.1-01: swipe-fail tests live in one dedicated tests/integration/swipe-fail.test.js covering both Today and History (D-05 discretion)
 - [Phase 13.1]: Plan 13.1-01: LOG4-02/LOG4-03 moved Active to Validated in PROJECT.md; Phase 12 had marked them complete prematurely
+- [Phase 13.2]: Plan 13.2-01: regression test asserts under 'pl' locale (not 'en') so a hardcoded English literal cannot coincidentally satisfy the assertion (D-04)
+- [Phase 13.2]: Plan 13.2-01: no new locale keys added — settings.data.undoBtn already existed in en.js/pl.js since Phase 10 (D-03)
