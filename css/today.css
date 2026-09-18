@@ -154,19 +154,6 @@
     text-decoration: line-through;
   }
 
-  /* ⓘ disclosure button — sits at the row end (D-55). Min 44 × 44 px
-   * (NFR-06) so it's tappable without competing with the row-tap. */
-  .today-row-info {
-    background: transparent;
-    border: 0;
-    padding: var(--space-2);
-    min-width: 44px;
-    min-height: 44px;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-  }
-
   /* Empty states (D-58). Centered + muted; the all-done variant adds a
    * counter below the main message. */
   .today-empty {

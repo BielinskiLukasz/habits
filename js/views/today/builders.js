@@ -1,6 +1,6 @@
 /**
  * @file Pure description-tree builders for the Today view (D-26 Tier 1,
- * D-54, D-55, D-56, D-58, D-76, D-79, D-80).
+ * D-54, D-56, D-58, D-76, D-79, D-80).
  *
  * Every builder returns `{tag, attrs?, text?, children?}` — the same shape
  * the `mount()` helper (D-77) consumes. NO DOM access here; that lives in
@@ -139,10 +139,6 @@ export function buildFooterNav({ activeHash, linkBase = '' }) {
  *   - Completed: `aria-pressed="true"`, `data-action="markUncomplete"`,
  *     `<span class="today-row-glyph">✓</span>` + `<span class="today-row-name today-row-name--completed">`.
  *
- * The ⓘ disclosure button (D-55, D-79) — `aria-label="Show original Polish name"`,
- * `aria-expanded="false"`, `data-action="togglePolish"` — is omitted entirely
- * when `name_pl` is null/undefined; the slot is not reserved.
- *
  * @param {{ habit: { id: string, name: string, name_pl?: string | null }, status: string | null }} args
  * @returns {{ tag: string, attrs: object, children: object[] }}
  */
@@ -210,20 +206,6 @@ export function buildTodayRow({ habit, status = null }) {
 
   /** @type {object[]} */
   const slideChildren = [tapBtn];
-
-  if (habit.name_pl) {
-    slideChildren.push({
-      tag: 'button',
-      attrs: {
-        class: 'today-row-info',
-        'aria-label': t('today.showPolish'),
-        'aria-expanded': 'false',
-        'data-action': 'togglePolish',
-        'data-habit-id': habit.id,
-      },
-      text: 'ⓘ',
-    });
-  }
 
   const rowClasses = ['today-row'];
   if (isCompleted) rowClasses.push('today-row--completed');
