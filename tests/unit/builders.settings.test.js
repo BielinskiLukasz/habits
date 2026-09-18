@@ -33,6 +33,7 @@ import {
   buildMasteryCard,
   buildScoringModelCard,
 } from '../../js/views/settings/builders.js';
+import { t, _resetLangForTest } from '../../js/i18n/index.js';
 
 /**
  * Helper — find a descendant in a description tree matching `predicate`
@@ -276,6 +277,27 @@ describe('buildDataCard — D-65 (Undo + Reset)', () => {
     assert.ok(preview, 'preview line present');
     assert.match(String(preview.text), /marked Drink water complete/);
     assert.match(String(preview.text), /2 minutes ago/);
+  });
+
+  test('hasUndoToken=false -> disabled button aria-label AND text resolve through t(), not the hardcoded English literal (I18N-02 regression, D-04)', () => {
+    try {
+      _resetLangForTest('pl');
+      const out = buildDataCard({
+        lastEvent: '',
+        hasUndoToken: false,
+        relativeTime: '',
+      });
+      const undoBtn = findDesc(
+        out,
+        (d) => d.tag === 'button' && d.attrs?.['data-action'] === 'undoLastAction',
+      );
+      assert.ok(undoBtn, 'Undo button present');
+      const expected = t('settings.data.undoBtn');
+      assert.equal(undoBtn.attrs['aria-label'], expected, 'disabled button aria-label uses t()');
+      assert.equal(undoBtn.text, expected, 'disabled button text uses t()');
+    } finally {
+      _resetLangForTest('en');
+    }
   });
 
   test('Reset block carries .settings-card--destructive wrapper + Reset button + aria-label', () => {
