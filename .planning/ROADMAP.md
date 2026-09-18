@@ -166,6 +166,17 @@ Plans:
 
 See [BACKLOG.md](BACKLOG.md) for captured ideas and issues.
 
+### Phase 13.2: Close gap: I18N-02 - hardcoded 'Undo last action' strings in settings/builders.js (INSERTED)
+
+**Goal:** Fix the I18N-02 residual so it's genuinely closed — `js/views/settings/builders.js` lines 484, 494, and 497 hardcode "Undo last action" (aria-label + text on the disabled undo-button state) instead of calling `t('settings.data.undoBtn')` like the enabled sibling button does
+**Requirements**: I18N-02
+**Depends on:** Phase 13
+**Plans:** 0/1 plans complete
+
+Plans:
+
+- [ ] 13.2-01-PLAN.md — Route disabled/enabled undo-button aria-label+text through t('settings.data.undoBtn') (I18N-02)
+
 ### Phase 13.1: Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed (INSERTED)
 
 **Goal:** Fix the swipe-Fail dispatch bug on Today and History views so LOG4-02/LOG4-03 are genuinely closed — both handlers currently dispatch `markUncompleted` (which deletes the log row) instead of `markFailed` (which correctly writes `status:'failed'`)
