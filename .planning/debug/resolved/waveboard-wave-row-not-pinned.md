@@ -1,8 +1,8 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "Waveboard heat-map: wave-number/wave-name header row still scrolls horizontally with the grid instead of staying pinned to the left edge, unlike the habit-name column which is correctly sticky."
 created: 2026-09-18
-updated: 2026-09-18T01:30:00Z
+updated: 2026-09-18T03:00:00Z
 ---
 
 ## Symptoms
@@ -133,7 +133,8 @@ verification:
     finding: "Neither commit 55780e2 nor this session's fix (before this correction) bumped APP_VERSION despite touching css/desktop.css, violating README.md/VERSIONING.md's own documented PATCH-bump policy for CSS changes. sw.js caches non-/js/ assets cache-first, so a returning user's browser would never pick up the corrected CSS without a cache-name change."
     action: "Bumped APP_VERSION '0.5.0' -> '0.5.1' in js/util/version.js (PATCH, per policy)."
     verification: "Full suite re-run after the bump: node --test \"tests/**/*.test.js\" -> 973/973 pass, 0 fail (no regressions; tests/unit/_smoke.test.js's SemVer-shape regex still matches '0.5.1')."
-  outstanding_human_factor: "The user's literal live-DOM report (bare `<td>`, no span) is best explained by the checked browser tab never having been actually reloaded since this session's JS edit landed — js/** is network-first in sw.js, so a genuine full reload against the running dev server should pick up the fix regardless of APP_VERSION. This cannot be verified from the codebase alone; the next human-verify checkpoint uses an explicit hard-reload protocol to rule this out cleanly."
+  outstanding_human_factor: "RESOLVED (2026-09-18T02:00:00Z): the checked browser tab wasn't stale JS — the user was checking the DEPLOYED GitHub Pages site (built from a branch that had not yet received any of this session's commits, local-only until pushed). Not a caching bug; the fix simply hadn't reached the environment being checked. After the fix was committed and pushed to origin/develop, the user re-checked the deployed site and confirmed the wave-header row now stays pinned during horizontal scroll."
+  human_verification: "CONFIRMED (2026-09-18) — user verified live on the deployed site after push: wave-number/wave-name header row now stays pinned to the left edge during horizontal scroll, matching the habit-name column."
   guardrail_verdict: accepted
 files_changed:
   - js/views/desktop/waveboard.js

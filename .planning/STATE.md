@@ -160,8 +160,8 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-09-18T02:00:00.000Z
-**Stopped at:** Debug session `s1-weekly-period-premature` resolved and archived — S1 scoring fix + desktop notify-wiring fix both confirmed live by user after deploy
+**Last session:** 2026-09-18T03:00:00.000Z
+**Stopped at:** Debug session `waveboard-wave-row-not-pinned` resolved and archived — wave-header sticky fix + APP_VERSION bump confirmed live by user after push/deploy
 **Resume file:** None
 
 Next command: `/gsd-complete-milestone` to archive v1.2 and open v1.3
@@ -194,3 +194,4 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Phase 13]: Phase 13 Plan 01: D-43 applied — legacy completed boolean rows normalized to status string on import
 - [Phase 13]: Phase 13 Plan 01: D-52 extended — markSkipped calls _recomputeLastCompletedDate when overwriting a completed log
 - [Debug 2026-09-18]: s1-weekly-period-premature resolved — _computeS1Periodic no longer counts a still-open current week/month as a miss; js/views/settings.js recomputeScores now calls the canonical `notify` directly instead of an optional caller-injected `store.notify` (js/desktop.js's #settings route omitted it, so recompute silently never refreshed the desktop Waveboard/Analytics view). Two independent root causes, both fixed and live-confirmed. See `.planning/debug/resolved/s1-weekly-period-premature.md` and knowledge-base entry.
+- [Debug 2026-09-18]: waveboard-wave-row-not-pinned resolved — `position: sticky` on a colspan-spanning `<td>` is a no-op (cell already full-width, no room to move); sticky moved to an inner `span.wave-header-label` instead. Also bumped APP_VERSION 0.5.0→0.5.1 (CSS-touching commits must bump per README/VERSIONING.md policy, or the SW's cache-first CSS strategy never picks up the fix). Two "still broken" live-verify failures during this session both turned out to be environment mismatches (checking the deployed site before the fix was pushed), not code defects — worth checking "which environment, and was it actually pushed?" before trusting a negative live-check going forward. See `.planning/debug/resolved/waveboard-wave-row-not-pinned.md` and knowledge-base entry.
