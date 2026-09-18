@@ -68,6 +68,7 @@ import { APP_VERSION } from '../util/version.js';
 import { formatRelative } from '../util/date.js';
 import {
   subscribe,
+  notify,
   getCachedWeekStart,
   getCachedSettings,
 } from '../state/store.js';
@@ -614,7 +615,7 @@ function buildActions() {
      */
     recomputeScores: async () => {
       if (!_currentDeps) return;
-      const { repo, store } = _currentDeps;
+      const { repo } = _currentDeps;
 
       // Set loading state — re-render Data card with isRecomputing: true.
       if (_panelEl) {
@@ -639,10 +640,15 @@ function buildActions() {
       try {
         await rebuildAllSnapshots(repo);
         showSuccessToast('Snapshots recomputed. All scores updated.');
-        // Notify store subscribers so desktop view refreshes.
-        if (store && typeof store.notify === 'function') {
-          await store.notify({ event: 'snapshot:rebuild' });
-        }
+        // Notify store subscribers so desktop view refreshes. Uses the
+        // statically-imported canonical `notify` (same singleton pub/sub as
+        // `subscribe` above) instead of an injected `store.notify` — a
+        // caller-supplied `store` object missing `notify` (as js/desktop.js's
+        // '#settings' route used to construct) would otherwise silently skip
+        // this fan-out entirely, leaving already-mounted Analytics/Waveboard
+        // views (idempotent-mount, D-115) stuck showing stale scores
+        // (s1-weekly-period-premature delivery-path defect).
+        await notify({ event: 'snapshot:rebuild' });
       } catch (err) {
         showErrorToast(t('settings.errorRecompute', { msg: err?.message ?? String(err) }));
       }
