@@ -53,7 +53,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | I18N-01 | Phase 10 | Complete |
-| I18N-02 | Phase 10 | Complete |
+| I18N-02 | Phase 10 (fixed Phase 13.2) | Complete |
 | I18N-03 | Phase 10 | Complete |
 | LOG4-01 | Phase 11 | Complete |
 | LOG4-02 | Phase 12 (fixed Phase 13.1) | Complete |
