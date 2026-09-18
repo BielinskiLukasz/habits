@@ -481,7 +481,7 @@ export function buildDataCard({
       tag: 'button',
       attrs: {
         'data-action': 'undoLastAction',
-        'aria-label': 'Undo last action',
+        'aria-label': t('settings.data.undoBtn'),
       },
       text: t('settings.data.undoBtn'),
     });
@@ -491,10 +491,10 @@ export function buildDataCard({
       tag: 'button',
       attrs: {
         'data-action': 'undoLastAction',
-        'aria-label': 'Undo last action',
+        'aria-label': t('settings.data.undoBtn'),
         disabled: '',
       },
-      text: 'Undo last action',
+      text: t('settings.data.undoBtn'),
     });
   }
 
