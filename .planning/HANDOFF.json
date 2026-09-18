@@ -1,39 +1,40 @@
 {
   "version": "1.0",
-  "timestamp": "2026-09-17T15:46:23.431Z",
+  "timestamp": "2026-09-18T22:01:02.130Z",
   "phase": null,
-  "phase_name": null,
-  "phase_dir": null,
+  "phase_name": "debug-session: catalog-start-date-not-saving",
+  "phase_dir": ".planning/debug/catalog-start-date-not-saving.md",
   "plan": null,
   "task": null,
   "total_tasks": null,
   "status": "paused",
   "completed_tasks": [
-    {"id": "quick-260917-lst", "name": "Catalog action buttons: row layout instead of column", "status": "done", "commit": "6d3ab1f"},
-    {"id": "quick-260917-n8p", "name": "Waveboard heat-map: full history + horizontal scroll", "status": "done", "commit": "dd29965"},
-    {"id": "quick-260917-o9h", "name": "Waveboard heat-map: pin wave-header row on scroll", "status": "done", "commit": "38c2393"},
-    {"id": "debug-s1-weekly-period-premature", "name": "S1 scoring: weekly/monthly current-period premature-fail fix", "status": "in_progress", "progress": "Root cause confirmed, fix implemented in js/domain/scoring.js (_computeS1Periodic), 4 new regression tests added to tests/unit/scoring.test.js, all green (22/22 in that file, 968/968 full suite at last run). Fix is UNCOMMITTED — awaiting user's live-app confirmation (via Settings > Recompute Scores) before commit + session close."}
+    {"id": 1, "name": "Reproduce + isolate: confirmed Catalog edit form correctly sends startDate; apply-layer handler was the defect", "status": "done", "commit": null},
+    {"id": 2, "name": "TDD red phase: wrote failing regression test proving editHabit silently drops startDate", "status": "done", "commit": null},
+    {"id": 3, "name": "TDD green phase: fixed js/state/apply/editHabit.js (destructure + apply startDate like other optional fields)", "status": "done", "commit": null},
+    {"id": 4, "name": "Guardrail: full suite run (node --test tests/) — 985 tests, 0 failures", "status": "done", "commit": null}
   ],
   "remaining_tasks": [
-    {"id": "debug-s1-weekly-period-premature-confirm", "name": "User confirms S1 fix live in app (after Recompute Scores), then commit js/domain/scoring.js + tests/unit/scoring.test.js and close/archive the debug session", "status": "not_started"},
-    {"id": "woda-habit-followup", "name": "No code action needed — confirmed as intended 7-day grace-period behavior, not a bug", "status": "not_started"}
+    {"id": 5, "name": "Human browser verification: edit a scheduled habit's start date in Catalog, save, confirm it persists across a page reload", "status": "not_started"},
+    {"id": 6, "name": "Resume gsd-debug-session-manager with resume_status=awaiting_human_verify and the user's verification result", "status": "not_started"},
+    {"id": 7, "name": "On confirmation: session manager commits the fix + test + debug doc, archives .planning/debug/catalog-start-date-not-saving.md to .planning/debug/resolved/, appends a knowledge-base.md entry", "status": "not_started"}
   ],
   "blockers": [
-    {"description": "S1 weekly/monthly fix (js/domain/scoring.js, tests/unit/scoring.test.js) is verified by unit tests but user reported it still showed <100% live in the app after the fix landed in the working tree. Most likely cause: score_snapshots rows are precomputed/cached (views never recompute live) and were written by the OLD buggy formula, so a 'Recompute Scores' run in Settings is needed before the corrected values show up. User said 'I'll check the live app first' and has not yet reported back the result.", "type": "human_action", "workaround": "User needs to: (1) hard-refresh / ensure latest JS is loaded (service worker uses stale-while-revalidate for /js/, so a first reload after a source change can still serve stale cached JS), (2) go to Settings > Recompute Scores to rebuild score_snapshots with the corrected formula, (3) re-check the weekly habit's S1 score, (4) report back confirmed/still-wrong so the debug session can be committed and closed, or reopened if still broken."}
+    {"description": "Debug fix is implemented and test-verified but NOT yet human-verified in the live app or committed — awaiting user's browser confirmation per this project's CLAUDE.md rule that UI-affecting changes must be exercised in a browser before being reported complete.", "type": "human_action", "workaround": "none — must wait for user"}
   ],
   "async_jobs": [],
   "human_actions_pending": [
-    {"action": "Try Settings > Recompute Scores (after a hard refresh) on a weekly habit completed every past week but not yet logged this still-open week, then confirm whether S1 now shows correctly (should be ~100, not deflated).", "context": "Debug session .planning/debug/s1-weekly-period-premature.md is at an awaiting-human-verify checkpoint. The code fix and its regression tests are done and passing; only live confirmation is outstanding before commit.", "blocking": true}
+    {"action": "Run `node scripts/serve.js`, open http://localhost:8080/, edit a habit with a future startDate (status scheduled) in Catalog, change the start date, save, and confirm the new date sticks after a full page reload (proves IndexedDB persistence, not just in-memory cache). Also confirm editing a habit's name/wave WITHOUT touching startDate leaves startDate unaffected.", "context": "Verifies the fix for the reported bug: editing a scheduled habit's start date in Catalog wasn't saving.", "blocking": true}
   ],
   "decisions": [
-    {"decision": "S1 grace period explains the 'Woda: wypicie 2 litrów' habit not showing a score — not a bug.", "rationale": "data/habits-import-2026-09-17.json shows this habit has startDate 2026-09-14 and only 3 log rows (09-14/15/16); scoring.js's documented 7-day grace period (habits < 7 days old return null scores) is working as designed. It's a Wave 6 habit that only recently went active as part of the phased wave rollout. It will start scoring around 2026-09-21.", "phase": null},
-    {"decision": "Waveboard heat-map week range changed from hardcoded last-12-weeks to full history from the earliest score_snapshots row, with horizontal scroll and a sticky habit-name column.", "rationale": "score_snapshots are written from habit.createdAt to today (not capped at 70 days) except when createdAt is missing, so full-history display is architecturally supported; the 12-week cap was purely a UI limitation.", "phase": null},
-    {"decision": "Wave-header row in the waveboard now uses a scoped selector (.waveboard-grid .analytics-wave-header td) for sticky positioning, rather than styling the shared bare .analytics-wave-header td class.", "rationale": "That class is also used by the plain, non-scrolling desktop analytics table (js/views/desktop/analytics.js); a bare rule would have leaked sticky positioning into a table that never scrolls.", "phase": null}
+    {"decision": "Fix scope limited to 'the field persists what the user typed' — did not add auto-flip of status back to scheduled when editing startDate on an already-active habit to a future date.", "rationale": "Not part of the reported symptom; existing boot-time scheduled-habit promotion logic (js/domain/scheduled.js) self-heals status/startDate consistency on next app load regardless.", "phase": null},
+    {"decision": "habit_versions rows intentionally still exclude startDate.", "rationale": "Matches the existing convention already used in js/state/apply/createHabit.js — no change needed for consistency.", "phase": null}
   ],
   "uncommitted_files": [
-    "js/domain/scoring.js",
-    "tests/unit/scoring.test.js"
+    "js/state/apply/editHabit.js",
+    "tests/integration/apply.editHabit.test.js",
+    ".planning/debug/catalog-start-date-not-saving.md"
   ],
-  "next_action": "Ask the user whether they tried Settings > Recompute Scores and what the weekly habit's S1 score shows now. If confirmed fixed: commit js/domain/scoring.js + tests/unit/scoring.test.js (docs(quick.../fix commit per debug workflow), then archive .planning/debug/s1-weekly-period-premature.md to .planning/debug/resolved/ and append a knowledge-base.md entry. If still wrong: resume the gsd-debug-session-manager for slug s1-weekly-period-premature with the new evidence to re-open investigation.",
-  "context_notes": "This session was pure quick-task + one debug-session work, no active phase/spike/sketch/deliberation. Three quick tasks fully shipped and committed (see completed_tasks). The ONLY open thread is the S1 weekly/monthly debug session, which is fix-complete and test-green but not yet committed pending the user's live confirmation after Recompute Scores. No other work is in flight."
+  "next_action": "Ask the user to run the browser verification steps for the startDate fix (see human_actions_pending). Once confirmed, re-spawn gsd-debug-session-manager with slug=catalog-start-date-not-saving, debug_file_path=.planning/debug/catalog-start-date-not-saving.md, resume=true, resume_status=awaiting_human_verify, resume_next_action=<user's verification result>, so it can commit the fix and archive the session.",
+  "context_notes": "This pause happened mid-debug-session (not mid-phase). The debug session manager already reached a 'human-verify' checkpoint and cannot use AskUserQuestion itself (nested subagent limitation) — the orchestrator (this session) must relay checkpoints to the user and resume the session manager with the user's answer. Separately: an unrelated quick task (260918-vtr, removing the dead today-row-info Polish-name-disclosure icon) was completed and fully committed earlier this session — that work is done and not part of this handoff."
 }
