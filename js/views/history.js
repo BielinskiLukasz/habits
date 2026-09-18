@@ -382,7 +382,7 @@ export function mountHistory(parent, { repo, store }) {
             const logDate = btn.getAttribute('data-date') || selectedDate;
             _closeOpenHistorySwipeRow();
             try {
-              await apply({ type: 'markUncompleted', payload: { habitId, date: logDate } });
+              await apply({ type: 'markFailed', payload: { habitId, date: logDate } });
               const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
               showUndoToast({ message: t('today.markedNotDone', { name: habitName }), undoFn: () => undo() });
             } catch (_e) {
