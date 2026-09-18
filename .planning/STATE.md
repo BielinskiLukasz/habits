@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: UX & i18n Quality Gate (Phases 10–13)
 current_phase: 13.1
-current_phase_name: "Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed"
-status: executing
-stopped_at: Phase 13.1 context gathered
-last_updated: "2026-09-18T18:04:19.078Z"
+current_phase_name: "Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed (INSERTED)"
+status: complete
+stopped_at: Completed 13.1-01-PLAN.md — Phase 13.1 complete
+last_updated: "2026-09-18T18:34:17.975Z"
 last_activity: 2026-09-18
-last_activity_desc: Phase 13 complete — v1.2 milestone done
-state_head: 14862b5ef811e455884cf02ea616dd81ff411a3a
+last_activity_desc: Phase 13.1 execution started
+state_head: 9d2769aafc38d4cab97d02d7799e26aa2fb8e601
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
   percent: 20
 ---
 
@@ -25,7 +25,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 13.1 — Close gap: LOG4-02/LOG4-03
+**Current focus:** Phase 13.1 — Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed (INSERTED)
 
 ## Milestone Status
 
@@ -52,11 +52,11 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: 13.1 (Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed) — READY TO EXECUTE
-Status: Ready to execute
-Last activity: 2026-09-18 — Completed quick task 260918-kzo: Fix CSV import: add skipped-day status code and rebuild today's import from cleaned Nawyki v2.csv
+Phase: 13.1 (Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed (INSERTED)) — COMPLETE
+Status: Phase 13.1 complete (1/1 plans) — LOG4-02/LOG4-03 genuinely closed, regression-tested
+Last activity: 2026-09-18 — Phase 13.1 execution complete
 
-███████████████░░░░░ 75% (3/4 phases complete)
+███████████████████░ 100% (4/4 v1.2 phases + 1 inserted gap-close phase complete)
 
 ## Performance Metrics
 
@@ -99,6 +99,7 @@ Last activity: 2026-09-18 — Completed quick task 260918-kzo: Fix CSV import: a
 | Phase 11 P02 | 300 | 3 tasks | 2 files |
 | Phase 11 P03 | 321 | 2 tasks | 1 files |
 | Phase 13 P01 | 5400 | 3 tasks | 9 files |
+| Phase 13.1 P01 | 25min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -165,9 +166,9 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-09-18T17:33:16.034Z
-**Stopped at:** Phase 13.1 context gathered
-**Resume file:** .planning/phases/13.1-close-gap-log4-02-log4-03-fail-button-deletes-log-instead-of/13.1-CONTEXT.md
+**Last session:** 2026-09-18T18:34:15.616Z
+**Stopped at:** Completed 13.1-01-PLAN.md — Phase 13.1 complete
+**Resume file:** None
 
 Next command: /gsd-plan-phase 13.1
 
@@ -200,3 +201,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Phase 13]: Phase 13 Plan 01: D-52 extended — markSkipped calls _recomputeLastCompletedDate when overwriting a completed log
 - [Debug 2026-09-18]: s1-weekly-period-premature resolved — _computeS1Periodic no longer counts a still-open current week/month as a miss; js/views/settings.js recomputeScores now calls the canonical `notify` directly instead of an optional caller-injected `store.notify` (js/desktop.js's #settings route omitted it, so recompute silently never refreshed the desktop Waveboard/Analytics view). Two independent root causes, both fixed and live-confirmed. See `.planning/debug/resolved/s1-weekly-period-premature.md` and knowledge-base entry.
 - [Debug 2026-09-18]: waveboard-wave-row-not-pinned resolved — `position: sticky` on a colspan-spanning `<td>` is a no-op (cell already full-width, no room to move); sticky moved to an inner `span.wave-header-label` instead. Also bumped APP_VERSION 0.5.0→0.5.1 (CSS-touching commits must bump per README/VERSIONING.md policy, or the SW's cache-first CSS strategy never picks up the fix). Two "still broken" live-verify failures during this session both turned out to be environment mismatches (checking the deployed site before the fix was pushed), not code defects — worth checking "which environment, and was it actually pushed?" before trusting a negative live-check going forward. See `.planning/debug/resolved/waveboard-wave-row-not-pinned.md` and knowledge-base entry.
+- [Phase 13.1]: Plan 13.1-01: swipe-fail tests live in one dedicated tests/integration/swipe-fail.test.js covering both Today and History (D-05 discretion)
+- [Phase 13.1]: Plan 13.1-01: LOG4-02/LOG4-03 moved Active to Validated in PROJECT.md; Phase 12 had marked them complete prematurely

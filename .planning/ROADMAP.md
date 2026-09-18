@@ -171,8 +171,8 @@ See [BACKLOG.md](BACKLOG.md) for captured ideas and issues.
 **Goal:** Fix the swipe-Fail dispatch bug on Today and History views so LOG4-02/LOG4-03 are genuinely closed — both handlers currently dispatch `markUncompleted` (which deletes the log row) instead of `markFailed` (which correctly writes `status:'failed'`)
 **Requirements**: LOG4-02, LOG4-03
 **Depends on:** Phase 13
-**Plans:** 1 plan
+**Plans:** 1/1 plans executed
 
 Plans:
 
-- [ ] 13.1-01-PLAN.md — Fix Today + History swipe-Fail dispatch (markUncompleted → markFailed), add regression test, close out LOG4-02/LOG4-03 in REQUIREMENTS.md/PROJECT.md
+- [x] 13.1-01-PLAN.md — Fix Today + History swipe-Fail dispatch (markUncompleted → markFailed), add regression test, close out LOG4-02/LOG4-03 in REQUIREMENTS.md/PROJECT.md
