@@ -182,6 +182,115 @@ describe('computeS1 — mastered habit (SCORING-07)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// S1 — weekly/monthly periodic denominator boundary (s1-weekly-period-premature)
+// ---------------------------------------------------------------------------
+//
+// _computeS1Periodic must not count the current, still-open period (the ISO
+// week / calendar month containing ctx.evaluationDate) as an expected-but-
+// missed period before it has actually elapsed (pEnd <= evaluationDate).
+// EVAL = '2026-06-24' is a Wednesday; with weekStart='mon' the current ISO
+// week is 2026-06-22..2026-06-28 (pEnd 06-28 > EVAL 06-24 → still open).
+// The current calendar month is 2026-06-01..2026-06-30 (pEnd 06-30 > EVAL →
+// still open). See .planning/debug/s1-weekly-period-premature.md.
+
+describe('computeS1 — weekly cadence periodic boundary (s1-weekly-period-premature)', () => {
+  const EVAL = '2026-06-24'; // Wednesday
+  const ctx21 = { ...makeCtx({ windowDays: 21, weekStart: 'mon' }), evaluationDate: EVAL };
+
+  function weeklyHabit() {
+    return {
+      id: 'hw',
+      cadence: { type: 'weekly' },
+      createdAt: '2026-01-01',
+      startDate: '2026-01-01',
+      targetType: 'binary',
+    };
+  }
+
+  test('current open week not yet logged does NOT count as a miss (elapsed weeks all completed → 100)', () => {
+    const habit = weeklyHabit();
+    // Elapsed periods within the 21-day window: partial week (06-04..06-07),
+    // full week (06-08..06-14), full week (06-15..06-21). Current week
+    // (06-22..06-24, clamped) has no completion yet — habit hasn't been
+    // logged today or this week, but 4 days remain until 06-28.
+    const logs = [
+      { habitId: 'hw', date: '2026-06-05', status: 'completed' }, // partial week 1
+      { habitId: 'hw', date: '2026-06-10', status: 'completed' }, // week 2
+      { habitId: 'hw', date: '2026-06-17', status: 'completed' }, // week 3
+      // no completion 06-22..06-24 — current week still open, not a miss
+    ];
+    const result = computeS1(habit, logs, ctx21);
+    assert.equal(result.s1Score, 100,
+      `Expected 100 (only elapsed weeks count), got ${result.s1Score} — ` +
+      `the still-open current week is being counted as a missed period`);
+    assert.equal(result.s1Status, 'Healthy');
+  });
+
+  test('current open week already completed mid-week still counts as completed (no regression)', () => {
+    const habit = weeklyHabit();
+    const logs = [
+      { habitId: 'hw', date: '2026-06-05', status: 'completed' },
+      { habitId: 'hw', date: '2026-06-10', status: 'completed' },
+      { habitId: 'hw', date: '2026-06-17', status: 'completed' },
+      { habitId: 'hw', date: '2026-06-23', status: 'completed' }, // current week, logged early
+    ];
+    const result = computeS1(habit, logs, ctx21);
+    assert.equal(result.s1Score, 100);
+    assert.equal(result.s1Status, 'Healthy');
+  });
+
+  test('a fully-elapsed past week with no completion still counts as a miss (no regression)', () => {
+    const habit = weeklyHabit();
+    const logs = [
+      { habitId: 'hw', date: '2026-06-05', status: 'completed' }, // partial week 1 — hit
+      // week 2 (06-08..06-14) — MISSED, fully elapsed
+      { habitId: 'hw', date: '2026-06-17', status: 'completed' }, // week 3 — hit
+      // current week (06-22..06-24) — not logged yet, still open (excluded)
+    ];
+    const result = computeS1(habit, logs, ctx21);
+    // 2 of 3 elapsed weeks completed → round(2/3*100) = 67, NOT 100 and NOT the
+    // old buggy 50 (which double-counted the still-open current week as a
+    // 4th expected-but-missed period: round(2/4*100) = 50).
+    assert.equal(result.s1Score, 67,
+      `Expected 67 (2/3 elapsed weeks), got ${result.s1Score}`);
+    assert.equal(result.s1Status, 'At-risk');
+  });
+});
+
+describe('computeS1 — monthly cadence periodic boundary (s1-weekly-period-premature)', () => {
+  const EVAL = '2026-06-24';
+  const ctx95 = { ...makeCtx({ windowDays: 95, weekStart: 'mon' }), evaluationDate: EVAL };
+
+  function monthlyHabit() {
+    return {
+      id: 'hm',
+      cadence: { type: 'monthly' },
+      createdAt: '2025-01-01',
+      startDate: '2025-01-01',
+      targetType: 'binary',
+    };
+  }
+
+  test('current open month not yet logged does NOT count as a miss (elapsed months all completed → 100)', () => {
+    const habit = monthlyHabit();
+    // windowStart = 2026-03-22 (partial March), then full April, full May.
+    // June (current month, pEnd 06-30 > EVAL 06-24) is still open — no
+    // completion yet, but days remain until 06-30.
+    const logs = [
+      { habitId: 'hm', date: '2026-03-25', status: 'completed' }, // partial March
+      { habitId: 'hm', date: '2026-04-10', status: 'completed' }, // April
+      { habitId: 'hm', date: '2026-05-15', status: 'completed' }, // May
+      // no completion in June — current month still open, not a miss
+    ];
+    const result = computeS1(habit, logs, ctx95);
+    assert.equal(result.s1Score, 100,
+      `Expected 100 (only elapsed months count), got ${result.s1Score} — ` +
+      `the still-open current month is being counted as a missed period`);
+    assert.equal(result.s1Status, 'Healthy');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // S2 — Day-Weighted Wave Score
 // ---------------------------------------------------------------------------
 

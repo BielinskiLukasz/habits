@@ -112,18 +112,31 @@ function _computeS1Periodic(habit, logsForHabit, ctx) {
 
     // startDate guard: habit hasn't started yet in this period.
     if (!habit.startDate || habit.startDate <= effectiveEnd) {
-      expectedPeriods++;
-
-      // Check for any completion within [effectiveStart, effectiveEnd].
+      // Check for any completion within [effectiveStart, effectiveEnd] FIRST —
+      // the elapsed-check below needs to know this to decide whether the
+      // still-open current period should count.
+      let hasCompletion = false;
       for (const log of logsForHabit) {
         if (
           log.date >= effectiveStart &&
           log.date <= effectiveEnd &&
           isLogCompleted(log, habit)
         ) {
-          completedPeriods++;
+          hasCompletion = true;
           break;
         }
+      }
+
+      // Only count this period toward expected/completed if it has fully
+      // elapsed (pEnd <= evaluationDate) OR it's already been completed.
+      // Without this check, the current in-progress week/month gets counted
+      // as an expected-but-missed period before it can possibly be
+      // completed (s1-weekly-period-premature) — a habit with 4 days left
+      // in its ISO week would already show as failing that week.
+      const periodElapsed = pEnd <= ctx.evaluationDate;
+      if (periodElapsed || hasCompletion) {
+        expectedPeriods++;
+        if (hasCompletion) completedPeriods++;
       }
     }
 
