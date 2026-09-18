@@ -1,11 +1,13 @@
 ---
 phase: 13-code-review-documentation
 verified: 2026-09-18T00:00:00Z
-status: gaps_found
-score: 4/6 must-haves verified
+status: passed
+score: 6/6 must-haves verified (post-resolution; see Resolution section)
 behavior_unverified: 0
 overrides_applied: 0
 retroactive: true
+resolved_by: Phase 13.2
+resolved_date: 2026-09-18T22:15:00Z
 gaps:
   - truth: "Code review confirms no hardcoded UI strings remain (I18N-02 adjacent quality gate) in files within the v1.0..HEAD review scope"
     status: failed
@@ -114,5 +116,19 @@ Because finding #2 is real, independently verified, and currently open, this ver
 
 ---
 
+## Resolution (2026-09-18, post-Phase 13.2)
+
+Both open findings in this report are now closed:
+
+1. **Truth #7/#8, `js/views/settings/builders.js` hardcoded strings** — fixed by Phase 13.2. `js/views/settings/builders.js` lines 484, 494, 497 now call `t('settings.data.undoBtn')`; proven by a Polish-locale regression test in `tests/unit/builders.settings.test.js` (a hardcoded English literal cannot coincidentally pass under `'pl'`). See `.planning/phases/13.2-close-gap-i18n-02-hardcoded-undo-last-action-strings-in-sett/13.2-VERIFICATION.md` (status: passed, 4/4).
+2. **Truth #7, swipe-Fail dispatch bug** — already noted above as fixed by Phase 13.1 (status: passed, 6/6) at the time this report was originally written.
+
+With both gaps closed by their respective gap-closure phases, Phase 13's overall status is updated from `gaps_found` to `passed`. The original findings above are preserved verbatim as an honest historical record of what Phase 13's own review caught vs. missed — this resolution note does not retract them, it records that both were subsequently fixed.
+
+QA-01 and QA-02 are both **SATISFIED** as of this resolution.
+
+---
+
 _Verified: 2026-09-18 (retroactive)_
+_Resolved: 2026-09-18 (post-Phase 13.2)_
 _Verifier: Claude (gsd-verifier)_
