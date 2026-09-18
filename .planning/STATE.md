@@ -54,7 +54,7 @@ Archives: `.planning/milestones/`
 
 Phase: 13.2 (Close gap: I18N-02 - hardcoded 'Undo last action' strings in settings/builders.js) — COMPLETE
 Status: Phase 13.2 complete (1/1 plans) — I18N-02 genuinely closed, regression-tested
-Last activity: 2026-09-18 — Phase 13.2 execution complete
+Last activity: 2026-09-18 — Completed quick task 260918-vtr: Remove dead/unwired today-row-info (Polish name disclosure) button from Today view; superseded by full EN/PL language toggle
 
 █████████████████████ 100% (4/4 v1.2 phases + 2 inserted gap-close phases complete)
 
@@ -162,6 +162,7 @@ None
 | 260917-n8p | Extend desktop waveboard heat-map beyond 12 weeks to full history with horizontal scroll | 2026-09-17 | 6c7d78c | [260917-n8p-extend-the-desktop-waveboard-heat-map-be](.planning/quick/260917-n8p-extend-the-desktop-waveboard-heat-map-be/) |
 | 260917-o9h | Pin waveboard wave-header label to left edge during horizontal scroll | 2026-09-17 | 55780e2 | [260917-o9h-waveboard-heat-map-the-wave-number-wave-](.planning/quick/260917-o9h-waveboard-heat-map-the-wave-number-wave-/) |
 | 260918-kzo | Fix CSV import: add skipped-day status code and rebuild today's import from cleaned Nawyki v2.csv | 2026-09-18 | — | [260918-kzo-fix-csv-import-add-skipped-day-status-co](.planning/quick/260918-kzo-fix-csv-import-add-skipped-day-status-co/) |
+| 260918-vtr | Remove dead/unwired today-row-info (Polish name disclosure) button from Today view; superseded by full EN/PL language toggle | 2026-09-18 | 5d1a5a3 | [260918-vtr-remove-dead-unwired-today-row-info-polis](.planning/quick/260918-vtr-remove-dead-unwired-today-row-info-polis/) |
 
 ### Roadmap Evolution
 
