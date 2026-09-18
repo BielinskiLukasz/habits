@@ -22,13 +22,13 @@ Retroactive quality validation of 6 quick-task features shipped outside the mile
 
 ### UX Features
 
-- [ ] **UX-01**: Analytics footer nav is visible and functional on both mobile and desktop; settings panel no longer contains a duplicate desktop analytics link
-- [ ] **UX-02**: Desktop sidebar collapse/expand state persists across hash-route navigation within the desktop shell session
+- [x] **UX-01**: Analytics footer nav is visible and functional on both mobile and desktop; settings panel no longer contains a duplicate desktop analytics link
+- [x] **UX-02**: Desktop sidebar collapse/expand state persists across hash-route navigation within the desktop shell session
 
 ### Quality Assurance
 
 - [x] **QA-01**: Code review confirms all new modules follow project patterns — no `switch` on log status or cadence types; no `.innerHTML`; JSDoc `@file` headers present; no `indexedDB.*` calls outside `js/db/idb.js`
-- [ ] **QA-02**: PROJECT.md documents new architectural decisions: 4-state log status model rationale and i18n architecture (locale dictionary shape, no Intl framework, t() signature)
+- [x] **QA-02**: PROJECT.md documents new architectural decisions: 4-state log status model rationale and i18n architecture (locale dictionary shape, no Intl framework, t() signature)
 
 ## Future Requirements
 
@@ -59,10 +59,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LOG4-02 | Phase 12 (fixed Phase 13.1) | Complete |
 | LOG4-03 | Phase 12 (fixed Phase 13.1) | Complete |
 | LOG4-04 | Phase 11 | Complete |
-| UX-01 | Phase 12 | Pending |
-| UX-02 | Phase 12 | Pending |
+| UX-01 | Phase 12 | Complete |
+| UX-02 | Phase 12 | Complete |
 | QA-01 | Phase 13 | Complete |
-| QA-02 | Phase 13 | Pending |
+| QA-02 | Phase 13 | Complete |
 
 **Coverage:**
 
