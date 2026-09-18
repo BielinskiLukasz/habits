@@ -395,7 +395,7 @@ async function handleMarkSkipTap(evt) {
 }
 
 /**
- * Fail action tap: dispatches `markUncompleted` (status → 'failed') for the
+ * Fail action tap: dispatches `markFailed` for the
  * habit and closes the swipe panel.
  *
  * @param {object} evt
@@ -407,7 +407,7 @@ async function handleMarkFailTap(evt) {
   const date = todayLocal();
   _closeOpenSwipeRow();
   try {
-    await apply({ type: 'markUncompleted', payload: { habitId, date } });
+    await apply({ type: 'markFailed', payload: { habitId, date } });
     const habitName = getCachedHabits().find((h) => h.id === habitId)?.name ?? '(habit)';
     showUndoToast({ message: t('today.markedNotDone', { name: habitName }), undoFn: () => undo() });
   } catch (_err) {

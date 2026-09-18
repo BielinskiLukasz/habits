@@ -130,7 +130,7 @@ export function buildFooterNav({ activeHash, linkBase = '' }) {
  *   - Swipe right on the slide → commits `markCompleted` (wired in today.js pointer handler).
  *   - Swipe left on the slide → reveals `.today-row__actions` panel.
  *   - Skip button: `data-action="swipeSkip"` → dispatches `markSkipped`.
- *   - Fail button: `data-action="swipeFail"` → dispatches `markUncompleted` (status: 'failed').
+ *   - Fail button: `data-action="swipeFail"` → dispatches `markFailed`.
  *
  * Inside `.today-row__slide`:
  *   - Uncompleted/failed/skipped: button `aria-pressed="false"`, `data-action="markComplete"`,
