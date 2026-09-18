@@ -79,7 +79,10 @@ describe('computeS1 — basic rolling-window score', () => {
       createdAt: daysFrom(EVAL, -30),
       targetType: 'binary',
     };
-    const logs = buildCompletedLogs('h1', EVAL, 14);
+    // Window is [EVAL-14, EVAL-1] (evaluationDate itself excluded — see
+    // s1-systemic-low-bias), so the 14 completed days must end the day
+    // BEFORE EVAL, not on EVAL.
+    const logs = buildCompletedLogs('h1', daysFrom(EVAL, -1), 14);
     const result = computeS1(habit, logs, ctx14);
     assert.equal(result.s1Score, 100);
     assert.equal(result.s1Status, 'Healthy');
@@ -130,7 +133,9 @@ describe('computeS1 — status thresholds (D-110)', () => {
       targetType: 'binary',
     };
     // Build exactly targetScore completed logs out of 100 applicable days.
-    const logs = buildCompletedLogs('h1', EVAL, targetScore);
+    // Window is [EVAL-100, EVAL-1] (evaluationDate itself excluded — see
+    // s1-systemic-low-bias), so anchor the log run on EVAL-1, not EVAL.
+    const logs = buildCompletedLogs('h1', daysFrom(EVAL, -1), targetScore);
     return { ctx, habit, logs };
   }
 
@@ -177,6 +182,50 @@ describe('computeS1 — mastered habit (SCORING-07)', () => {
     };
     const result = computeS1(habit, [], ctx);
     assert.equal(result.s1Score, 100);
+    assert.equal(result.s1Status, 'Healthy');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// S1 — daily rolling window must exclude the still-open evaluationDate
+// (s1-systemic-low-bias)
+// ---------------------------------------------------------------------------
+//
+// The rolling window for non-periodic cadences (daily / day-of-week-subset /
+// every-n-days) must be the `windowDays` days STRICTLY BEFORE evaluationDate —
+// [evaluationDate-windowDays, evaluationDate-1] — not
+// [evaluationDate-(windowDays-1), evaluationDate] (evaluationDate INCLUSIVE).
+// evaluationDate itself is the current, still-in-progress day: it has not
+// fully elapsed, so counting it as an applicable-but-undecided day biases the
+// score. This mirrors the already-correct "still-open period doesn't count
+// as a miss" guard `_computeS1Periodic` applies to weekly/monthly cadences —
+// see .planning/debug/s1-systemic-low-bias.md for the full investigation
+// (real-data replay dropped the average |reference-computed| discrepancy
+// from 1.040pp to 0.042pp once the boundary was moved).
+
+describe('computeS1 — daily rolling window excludes evaluationDate itself (s1-systemic-low-bias)', () => {
+  const EVAL = '2026-09-18'; // "today" — still open/in-progress, not yet logged
+  const ctx5 = { ...makeCtx({ windowDays: 5 }), evaluationDate: EVAL };
+
+  test('5/5 FULLY-ELAPSED prior days completed, evaluationDate itself not yet logged → s1Score 100 (evaluationDate excluded from window)', () => {
+    const habit = {
+      id: 'h1',
+      cadence: { type: 'daily' },
+      createdAt: daysFrom(EVAL, -30),
+      targetType: 'binary',
+    };
+    // Completed for the 5 days strictly BEFORE EVAL: EVAL-5..EVAL-1.
+    // Nothing logged for EVAL itself — the still-open current day.
+    const logs = [];
+    for (let i = 5; i >= 1; i--) {
+      logs.push({ habitId: 'h1', date: daysFrom(EVAL, -i), status: 'completed' });
+    }
+    const result = computeS1(habit, logs, ctx5);
+    assert.equal(result.s1Score, 100,
+      `Expected 100 — the 5-day trailing window is [EVAL-5, EVAL-1]; EVAL ` +
+      `itself (still open, unlogged) must not be counted as an ` +
+      `applicable-but-missed day. Got ${result.s1Score} (a value < 100 ` +
+      `means evaluationDate is still being counted in the window).`);
     assert.equal(result.s1Status, 'Healthy');
   });
 });
@@ -286,6 +335,115 @@ describe('computeS1 — monthly cadence periodic boundary (s1-weekly-period-prem
     assert.equal(result.s1Score, 100,
       `Expected 100 (only elapsed months count), got ${result.s1Score} — ` +
       `the still-open current month is being counted as a missed period`);
+    assert.equal(result.s1Status, 'Healthy');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// S1 — weekly/monthly periodic leading-window completion visibility
+// (s1-weekly-numeric-anomalies)
+// ---------------------------------------------------------------------------
+//
+// _computeS1Periodic's completion scan clamped its LEFT bound to windowStart
+// when checking whether a period had any completion. For the leading period
+// that straddles the rolling window's start (pStart < windowStart <= pEnd),
+// this hides a real completion that landed a few days BEFORE windowStart but
+// still within that same period — the period is fully elapsed, so it gets
+// counted as "expected", but the (invisible) completion means it also gets
+// wrongly counted as "missed". A period that was actually completed is
+// misclassified as a miss purely because the visible slice happened not to
+// contain the completion date. Fix: scan the FULL period [pStart, pEnd]
+// (clamped only on the right, to evaluationDate) for a completion — the left
+// edge of the rolling window should bound which periods are *counted*, not
+// which days are *visible* to the completion check for a period that is
+// counted. See .planning/debug/s1-weekly-numeric-anomalies.md.
+
+describe('computeS1 — weekly cadence leading-window completion visibility (s1-weekly-numeric-anomalies)', () => {
+  const EVAL = '2026-06-24'; // Wednesday; windowStart(21) = 2026-06-04
+  const ctx21 = { ...makeCtx({ windowDays: 21, weekStart: 'mon' }), evaluationDate: EVAL };
+
+  function weeklyHabit() {
+    return {
+      id: 'hw',
+      cadence: { type: 'weekly' },
+      createdAt: '2026-01-01',
+      startDate: '2026-01-01',
+      targetType: 'binary',
+    };
+  }
+
+  test('a completion 2 days before windowStart (same leading period) is not misclassified as a miss', () => {
+    const habit = weeklyHabit();
+    // Leading period is the ISO week 2026-06-01..2026-06-07 (windowStart
+    // 06-04 falls inside it). The completion landed on 06-02 — before
+    // windowStart, but still within the leading period.
+    const logs = [
+      { habitId: 'hw', date: '2026-06-02', status: 'completed' }, // leading period, before windowStart
+      { habitId: 'hw', date: '2026-06-10', status: 'completed' }, // week 2
+      { habitId: 'hw', date: '2026-06-17', status: 'completed' }, // week 3
+      // current week (06-22..06-24) still open, not logged yet — excluded
+    ];
+    const result = computeS1(habit, logs, ctx21);
+    assert.equal(result.s1Score, 100,
+      `Expected 100 (leading period's completion is visible even though it ` +
+      `landed before windowStart), got ${result.s1Score}`);
+    assert.equal(result.s1Status, 'Healthy');
+  });
+
+  test('boundary neighbor: a completion exactly ON windowStart still counts (no regression)', () => {
+    const habit = weeklyHabit();
+    const logs = [
+      { habitId: 'hw', date: '2026-06-04', status: 'completed' }, // exactly windowStart
+      { habitId: 'hw', date: '2026-06-10', status: 'completed' },
+      { habitId: 'hw', date: '2026-06-17', status: 'completed' },
+    ];
+    const result = computeS1(habit, logs, ctx21);
+    assert.equal(result.s1Score, 100);
+    assert.equal(result.s1Status, 'Healthy');
+  });
+
+  test('leading period genuinely never completed still counts as a miss (no over-correction)', () => {
+    const habit = weeklyHabit();
+    const logs = [
+      // no completion anywhere in the leading period (06-01..06-07)
+      { habitId: 'hw', date: '2026-06-10', status: 'completed' }, // week 2
+      { habitId: 'hw', date: '2026-06-17', status: 'completed' }, // week 3
+    ];
+    const result = computeS1(habit, logs, ctx21);
+    assert.equal(result.s1Score, 67,
+      `Expected 67 (2/3 — leading period is a genuine miss), got ${result.s1Score}`);
+    assert.equal(result.s1Status, 'At-risk');
+  });
+});
+
+describe('computeS1 — monthly cadence leading-window completion visibility (s1-weekly-numeric-anomalies)', () => {
+  const EVAL = '2026-06-24';
+  const ctx95 = { ...makeCtx({ windowDays: 95, weekStart: 'mon' }), evaluationDate: EVAL };
+
+  function monthlyHabit() {
+    return {
+      id: 'hm',
+      cadence: { type: 'monthly' },
+      createdAt: '2025-01-01',
+      startDate: '2025-01-01',
+      targetType: 'binary',
+    };
+  }
+
+  test('a completion before windowStart in the leading partial month is not misclassified as a miss', () => {
+    const habit = monthlyHabit();
+    // windowStart = 2026-03-22; leading period is March (03-01..03-31).
+    // Completion landed 03-05 — before windowStart, but still within March.
+    const logs = [
+      { habitId: 'hm', date: '2026-03-05', status: 'completed' }, // March, before windowStart
+      { habitId: 'hm', date: '2026-04-10', status: 'completed' }, // April
+      { habitId: 'hm', date: '2026-05-15', status: 'completed' }, // May
+      // June (current month) still open, not logged yet — excluded
+    ];
+    const result = computeS1(habit, logs, ctx95);
+    assert.equal(result.s1Score, 100,
+      `Expected 100 (March's completion is visible even though it landed ` +
+      `before windowStart), got ${result.s1Score}`);
     assert.equal(result.s1Status, 'Healthy');
   });
 });

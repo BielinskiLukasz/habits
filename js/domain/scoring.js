@@ -106,19 +106,26 @@ function _computeS1Periodic(habit, logsForHabit, ctx) {
       ? isoWeekEnd(periodPtr, ctx.weekStart)
       : getMonthEnd(periodPtr);
 
-    // Clamp period boundaries to the rolling window.
-    const effectiveStart = pStart < windowStart ? windowStart : pStart;
-    const effectiveEnd   = pEnd > ctx.evaluationDate ? ctx.evaluationDate : pEnd;
+    // Clamp the RIGHT edge only, to the evaluation date (a period cannot be
+    // checked for completion past "now"). The LEFT edge is intentionally NOT
+    // clamped to windowStart: clamping it hid completions that landed inside
+    // the leading period but before windowStart, misclassifying an
+    // already-completed weekly/monthly period as a miss purely because the
+    // rolling window's boundary bisects it (s1-weekly-numeric-anomalies).
+    // The window's left edge should bound which PERIODS are counted (via
+    // periodPtr starting at windowStart), not which days are visible when
+    // scanning a counted period for a completion.
+    const effectiveEnd = pEnd > ctx.evaluationDate ? ctx.evaluationDate : pEnd;
 
     // startDate guard: habit hasn't started yet in this period.
     if (!habit.startDate || habit.startDate <= effectiveEnd) {
-      // Check for any completion within [effectiveStart, effectiveEnd] FIRST —
-      // the elapsed-check below needs to know this to decide whether the
-      // still-open current period should count.
+      // Check for any completion within the FULL period [pStart, effectiveEnd]
+      // FIRST — the elapsed-check below needs to know this to decide whether
+      // the still-open current period should count.
       let hasCompletion = false;
       for (const log of logsForHabit) {
         if (
-          log.date >= effectiveStart &&
+          log.date >= pStart &&
           log.date <= effectiveEnd &&
           isLogCompleted(log, habit)
         ) {
@@ -213,9 +220,15 @@ export function computeS1(habit, logsForHabit, ctx) {
     return _computeS1Periodic(habit, logsForHabit, ctx);
   }
 
-  // Rolling window: [windowStart, evaluationDate] inclusive.
-  // daysFrom(evaluationDate, -(windowDays-1)) gives a span of exactly windowDays.
-  const windowStart = daysFrom(ctx.evaluationDate, -(ctx.windowDays - 1));
+  // Rolling window: [windowStart, windowEnd], where windowEnd is the day
+  // BEFORE evaluationDate. evaluationDate itself is the current, still-open
+  // day — it has not fully elapsed, so counting it as a decided
+  // applicable-but-missed (or completed) day biases the score by one day
+  // (s1-systemic-low-bias). windowStart..windowEnd spans exactly windowDays
+  // days, mirroring _computeS1Periodic's "still-open period doesn't count
+  // as a miss" guard for the non-periodic cadences.
+  const windowEnd = daysFrom(ctx.evaluationDate, -1);
+  const windowStart = daysFrom(windowEnd, -(ctx.windowDays - 1));
 
   // Build a log lookup for skipped-day exclusion.
   const s1LogByDate = new Map();
@@ -240,12 +253,12 @@ export function computeS1(habit, logsForHabit, ctx) {
   }
 
   // Count completed days within the window.
-  // Only logs within [windowStart, evaluationDate] are considered; ISO YYYY-MM-DD
+  // Only logs within [windowStart, windowEnd] are considered; ISO YYYY-MM-DD
   // string comparison is safe for lexicographic (= chronological) ordering.
   let completedCount = 0;
   for (const log of logsForHabit) {
     if (log.date < windowStart) continue;
-    if (log.date > ctx.evaluationDate) continue;
+    if (log.date > windowEnd) continue;
     if (isLogCompleted(log, habit)) completedCount++;
   }
 
