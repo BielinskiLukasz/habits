@@ -1,8 +1,8 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "S1 score for weekly-cadence habits counts the current, still-open ISO week as a failure before the week has actually ended. In js/domain/scoring.js, _computeS1Periodic clamps effectiveEnd to ctx.evaluationDate (today) and immediately increments expectedPeriods for the in-progress week even though pEnd > evaluationDate, so if the habit hasn't been logged yet this week it counts as a miss even though there's still time left in the week to do it. Same issue applies to monthly-cadence habits and the current open month."
 created: 2026-09-17
-updated: 2026-09-18T01:45:00Z
+updated: 2026-09-18T02:00:00Z
 ---
 
 ## Symptoms
@@ -147,7 +147,7 @@ updated: 2026-09-18T01:45:00Z
     adjacent_tests: { result: pass, suites_run: ["tests/unit/scoring.test.js (22/22)", "tests/integration/settings.recomputeScoresNotify.test.js (1/1, new)", "tests/integration/settings.dataCard.test.js + settings.backup-nag.test.js + settings.masterySettings.test.js + settings.mount.test.js (all settings.* integration tests, pass)", "full suite node --test tests/**/*.test.js (890/890, 329 suites, 0 fail)"] }
     revert_and_reconfirm: { result: pass, bug_returned_on_revert: true, fixed_on_reapply: true, note: "Cause 1: git stash push -- js/domain/scoring.js reverted only that fix; re-ran tests/unit/scoring.test.js → 3 tests failed at the exact predicted buggy values (75/50/75). git stash pop reapplied; 22/22 pass again. Cause 2: git stash push -- js/views/settings.js reverted only that fix; re-ran tests/integration/settings.recomputeScoresNotify.test.js → failed with the identical assertion (notify fan-out never fires). git stash pop reapplied; diff matched pre-stash exactly, test passed again." }
     guardrail_verdict: accepted
-  human_verification: "PENDING — SECOND checkpoint requested (first human-verify attempt failed because of root cause 2, which is now also fixed). Reproduction ask: hard-refresh desktop.html, open Settings, click Recompute Scores, THEN navigate to Waveboard/Analytics without reloading and confirm the score updates in place."
+  human_verification: "CONFIRMED (2026-09-18) — user verified live after deploy: Recompute Scores now correctly propagates to the desktop Waveboard/Analytics views, and the weekly habit's S1 score displays correctly. Second checkpoint passed."
 - files_changed:
     - "js/domain/scoring.js (_computeS1Periodic: gate expectedPeriods++/completedPeriods++ on period-elapsed OR already-completed instead of startDate guard alone)"
     - "tests/unit/scoring.test.js (4 new tests: 'computeS1 — weekly cadence periodic boundary' x3, 'computeS1 — monthly cadence periodic boundary' x1)"

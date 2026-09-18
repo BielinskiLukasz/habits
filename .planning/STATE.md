@@ -160,8 +160,8 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-09-08T21:00:00.000Z
-**Stopped at:** Phase 13 complete — v1.2 milestone done
+**Last session:** 2026-09-18T02:00:00.000Z
+**Stopped at:** Debug session `s1-weekly-period-premature` resolved and archived — S1 scoring fix + desktop notify-wiring fix both confirmed live by user after deploy
 **Resume file:** None
 
 Next command: `/gsd-complete-milestone` to archive v1.2 and open v1.3
@@ -193,3 +193,4 @@ Items acknowledged and deferred at milestone close, most recent first:
 - [Phase 11]: [Phase 11]: Plan 11-03: exportJSON returns a JSON string (not Blob) — plan description corrected; tests use configureExport+exportJSON() API correctly
 - [Phase 13]: Phase 13 Plan 01: D-43 applied — legacy completed boolean rows normalized to status string on import
 - [Phase 13]: Phase 13 Plan 01: D-52 extended — markSkipped calls _recomputeLastCompletedDate when overwriting a completed log
+- [Debug 2026-09-18]: s1-weekly-period-premature resolved — _computeS1Periodic no longer counts a still-open current week/month as a miss; js/views/settings.js recomputeScores now calls the canonical `notify` directly instead of an optional caller-injected `store.notify` (js/desktop.js's #settings route omitted it, so recompute silently never refreshed the desktop Waveboard/Analytics view). Two independent root causes, both fixed and live-confirmed. See `.planning/debug/resolved/s1-weekly-period-premature.md` and knowledge-base entry.
