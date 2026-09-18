@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: UX & i18n Quality Gate (Phases 10–13)
-current_phase: 13
-current_phase_name: Code Review & Documentation
+current_phase: 13.1
+current_phase_name: "Close gap: LOG4-02/LOG4-03"
 status: milestone_complete
-stopped_at: Completed Phase 13 — all 3 plans done (13-01 TDD fixes, 13-02 QA-01 code review, 13-03 QA-02 D-43+D-44 docs)
-last_updated: "2026-09-08T21:00:00.000Z"
-last_activity: 2026-09-08
+stopped_at: Phase 13.1 context gathered
+last_updated: "2026-09-18T17:33:20.770Z"
+last_activity: 2026-09-18
 last_activity_desc: Phase 13 complete — v1.2 milestone done
-state_head: 52d510c
+state_head: 2143ac738d6fc56dc1389a3cdfd799ffa8f7cf57
 progress:
-  total_phases: 4
-  completed_phases: 4
+  total_phases: 5
+  completed_phases: 1
   total_plans: 13
   completed_plans: 13
-  percent: 100
+  percent: 20
 ---
 
 # Project State
@@ -25,7 +25,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 13 — Code Review & Documentation
+**Current focus:** Phase 13.1 — Close gap: LOG4-02/LOG4-03
 
 ## Milestone Status
 
@@ -52,7 +52,7 @@ Archives: `.planning/milestones/`
 
 ## Current Position
 
-Phase: 13 (Code Review & Documentation) — EXECUTING
+Phase: 13.1 (Close gap: LOG4-02/LOG4-03) — NOT STARTED
 Status: Executing Phase 13
 Last activity: 2026-09-18 — Completed quick task 260918-kzo: Fix CSV import: add skipped-day status code and rebuild today's import from cleaned Nawyki v2.csv
 
@@ -159,13 +159,17 @@ None
 | 260917-o9h | Pin waveboard wave-header label to left edge during horizontal scroll | 2026-09-17 | 55780e2 | [260917-o9h-waveboard-heat-map-the-wave-number-wave-](.planning/quick/260917-o9h-waveboard-heat-map-the-wave-number-wave-/) |
 | 260918-kzo | Fix CSV import: add skipped-day status code and rebuild today's import from cleaned Nawyki v2.csv | 2026-09-18 | — | [260918-kzo-fix-csv-import-add-skipped-day-status-co](.planning/quick/260918-kzo-fix-csv-import-add-skipped-day-status-co/) |
 
+### Roadmap Evolution
+
+- Phase 13.1 inserted after Phase 13: Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed (URGENT)
+
 ## Session Continuity
 
-**Last session:** 2026-09-18T03:00:00.000Z
-**Stopped at:** Debug session `waveboard-wave-row-not-pinned` resolved and archived — wave-header sticky fix + APP_VERSION bump confirmed live by user after push/deploy
-**Resume file:** None
+**Last session:** 2026-09-18T17:33:16.034Z
+**Stopped at:** Phase 13.1 context gathered
+**Resume file:** .planning/phases/13.1-close-gap-log4-02-log4-03-fail-button-deletes-log-instead-of/13.1-CONTEXT.md
 
-Next command: `/gsd-complete-milestone` to archive v1.2 and open v1.3
+Next command: /gsd-plan-phase 13.1
 
 ## Deferred Items
 
