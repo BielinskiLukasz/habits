@@ -24,6 +24,8 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 - ✓ LOG4-01 — Unit tests for 4-state log status model (completed/failed/skipped/undefined) — Phase 11 — v1.2
 - ✓ LOG4-04 — JSON export/import round-trips all 4 log states without data loss; CSV export emits correct cell values for all 4 states — Phase 11 — v1.2
 - ✓ LOG4-05 — CSV export emits correct cell values for all 4 states (`x` for skipped, `1` for completed, `0` for failed/undefined-applicable) — Phase 11 — v1.2
+- ✓ LOG4-02 — Swipe UX on Today view correctly cycles all 4 states (Fail button now dispatches markFailed, not the row-deleting markUncompleted) — Phase 13.1 — v1.2
+- ✓ LOG4-03 — History screen swipe UX matches Today's 4-state interaction model (same fix) — Phase 13.1 — v1.2
 
 <!-- v1.1 Scheduled Habits — Phases 7–9 (shipped 2026-08-27) -->
 
@@ -56,8 +58,6 @@ Everything else — scoring, ranking, dashboards — can fail. Daily check-in an
 
 <!-- v1.2 UX & i18n Quality Gate — retroactive validation of quick-task features -->
 
-- [ ] LOG4-02 — Swipe UX on Today view correctly cycles all 4 states — v1.2
-- [ ] LOG4-03 — History screen swipe UX matches Today's 4-state interaction model — v1.2
 - [ ] UX-01 — Analytics footer nav visible and functional on mobile and desktop — v1.2
 - [ ] UX-02 — Desktop sidebar collapse/expand persists across navigation — v1.2
 - [ ] QA-01 — Code review: no switch on log status/cadence types; no innerHTML; JSDoc headers present — v1.2

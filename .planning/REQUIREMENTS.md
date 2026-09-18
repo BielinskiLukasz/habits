@@ -16,8 +16,8 @@ Retroactive quality validation of 6 quick-task features shipped outside the mile
 ### 4-State Log Status
 
 - [x] **LOG4-01**: Domain logic for 4-state log status (completed/failed/skipped/undefined) has unit tests covering all state transitions, persistence, and invalid inputs
-- [ ] **LOG4-02**: Swipe UX on Today view cycles all 4 states in the correct order and shows correct visual indicator for each state
-- [ ] **LOG4-03**: History screen swipe UX is consistent with Today's 4-state interaction model — same gestures, same visual states, same result
+- [x] **LOG4-02**: Swipe UX on Today view cycles all 4 states in the correct order and shows correct visual indicator for each state
+- [x] **LOG4-03**: History screen swipe UX is consistent with Today's 4-state interaction model — same gestures, same visual states, same result
 - [x] **LOG4-04**: JSON export round-trips all 4 log states without data loss; CSV export emits correct cell values (numerics for applicable days, `x` for non-applicable) regardless of state
 
 ### UX Features
@@ -56,8 +56,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | I18N-02 | Phase 10 | Complete |
 | I18N-03 | Phase 10 | Complete |
 | LOG4-01 | Phase 11 | Complete |
-| LOG4-02 | Phase 12 | Pending |
-| LOG4-03 | Phase 12 | Pending |
+| LOG4-02 | Phase 12 (fixed Phase 13.1) | Complete |
+| LOG4-03 | Phase 12 (fixed Phase 13.1) | Complete |
 | LOG4-04 | Phase 11 | Complete |
 | UX-01 | Phase 12 | Pending |
 | UX-02 | Phase 12 | Pending |
