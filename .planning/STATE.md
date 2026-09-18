@@ -21,10 +21,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-31)
+See: .planning/PROJECT.md (updated 2026-09-18)
 
 **Core value:** Daily check-in must be friction-free, and the system's existing model (waves, stages, multi-occurrence, threshold-based graduation) must be honored exactly as the user already practices it.
-**Current focus:** Phase 13.1 — Close gap: LOG4-02/LOG4-03 — Fail button deletes log instead of marking failed (INSERTED)
+**Current focus:** v1.2 milestone complete (Phases 10–13 + inserted gap-close 13.1) — ready to close out
 
 ## Milestone Status
 
@@ -139,6 +139,8 @@ None
 
 All deferred to Phase 13 (Code Review & Documentation). These do not affect the Phase 11 test coverage success criteria.
 
+- ⚠️ [Phase 13.1] `js/views/today.js` swipe-gesture handler resolves the target habit via a generic `row.querySelector('[data-habit-id]')`, which also matches the +/− and slot-toggle controls on numeric/slot-checklist rows (`js/views/today/builders.js` `buildNumericRow`/`buildSlotRow`). A swipe starting over those controls fires a binary status write whose `apply` handler `put()`s a replacement log row, silently destroying any `count`/`slots` progress already logged for that habit that day. Touch-reachable, invisible in the UI. Pre-existing, not introduced by Phase 13.1, explicitly out of that phase's scope. See `13.1-REVIEW.md` CR-01 for the fix (scope the lookup to `.today-row-tap`).
+
 ### Blockers
 
 None
@@ -166,10 +168,10 @@ None
 ## Session Continuity
 
 **Last session:** 2026-09-18T18:34:15.616Z
-**Stopped at:** Phase 13.1 complete — all phases complete
+**Stopped at:** Phase 13.1 complete — v1.2 milestone fully complete, ready to close out
 **Resume file:** None
 
-Next command: /gsd-plan-phase 13.1
+Next command: /gsd-complete-milestone v1.2
 
 ## Deferred Items
 

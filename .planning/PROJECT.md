@@ -202,4 +202,4 @@ This document evolves at phase transitions and milestone boundaries.
 - JSON import preserves `status:'scheduled'` through mergeImportedStores
 
 ---
-*Last updated: 2026-08-31 after Phase 11 (4-State Log Model Tests)*
+*Last updated: 2026-09-18 after Phase 13.1 (Close gap: LOG4-02/LOG4-03)*
