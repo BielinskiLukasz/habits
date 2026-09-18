@@ -54,7 +54,7 @@ Archives: `.planning/milestones/`
 
 Phase: 13 (Code Review & Documentation) — EXECUTING
 Status: Executing Phase 13
-Last activity: 2026-09-17 — Completed quick task 260917-o9h: Pin waveboard wave-header label to left edge during horizontal scroll
+Last activity: 2026-09-18 — Completed quick task 260918-kzo: Fix CSV import: add skipped-day status code and rebuild today's import from cleaned Nawyki v2.csv
 
 ███████████████░░░░░ 75% (3/4 phases complete)
 
@@ -157,6 +157,7 @@ None
 | 260917-lst | Make catalog-habit-actions buttons (edit, archive, activate) lay out in one row instead of a column | 2026-09-17 | aeeaf01 | [260917-lst-make-catalog-habit-actions-buttons-edit-](.planning/quick/260917-lst-make-catalog-habit-actions-buttons-edit-/) |
 | 260917-n8p | Extend desktop waveboard heat-map beyond 12 weeks to full history with horizontal scroll | 2026-09-17 | 6c7d78c | [260917-n8p-extend-the-desktop-waveboard-heat-map-be](.planning/quick/260917-n8p-extend-the-desktop-waveboard-heat-map-be/) |
 | 260917-o9h | Pin waveboard wave-header label to left edge during horizontal scroll | 2026-09-17 | 55780e2 | [260917-o9h-waveboard-heat-map-the-wave-number-wave-](.planning/quick/260917-o9h-waveboard-heat-map-the-wave-number-wave-/) |
+| 260918-kzo | Fix CSV import: add skipped-day status code and rebuild today's import from cleaned Nawyki v2.csv | 2026-09-18 | — | [260918-kzo-fix-csv-import-add-skipped-day-status-co](.planning/quick/260918-kzo-fix-csv-import-add-skipped-day-status-co/) |
 
 ## Session Continuity
 
