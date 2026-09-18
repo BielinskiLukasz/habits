@@ -44,11 +44,6 @@
  *          render `showUndoToast({message: "Marked <name> complete",
  *          undoFn: () => undo()})` (UNDO-01, UNDO-02, D-71).
  *
- * Polish-toggle (`togglePolish`) tap wiring also lands in a future slice —
- * builders emit the `data-action` attribute but the action map omits it
- * here (mount() simply doesn't wire the listener when the closure is
- * absent).
- *
  * `clearChildren` loops `removeChild` instead of `parent.innerHTML = ''`
  * to honor D-78 (the discipline grep gate). The same loop is the only safe
  * way to drop everything when the parent has accumulated event listeners
@@ -567,7 +562,6 @@ function renderTodayInto(parent) {
     'log-decrement': handleLogDecrementTap,
     'toggle-slots': handleToggleSlotsTap,
     'toggle-slot': handleToggleSlotTap,
-    // togglePolish: bound in a future slice (D-55 inline popover lives there).
   };
 
   // Header — date + wave.

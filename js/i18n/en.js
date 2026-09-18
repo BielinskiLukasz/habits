@@ -22,7 +22,6 @@ export const EN = {
   'today.empty': 'No habits scheduled today.',
   'today.allDone': 'All done today — see you tomorrow.',
   'today.count': '{done} of {total}',
-  'today.showPolish': 'Show original Polish name',
   'today.phaseTooltip': 'Coming in Phase 4',
   'today.skip': 'Skip',
   'today.fail': 'Fail',

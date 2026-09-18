@@ -20,7 +20,6 @@ export const PL = {
   'today.empty': 'Brak nawyków na dziś.',
   'today.allDone': 'Wszystko gotowe — do jutra!',
   'today.count': '{done} z {total}',
-  'today.showPolish': 'Pokaż oryginalną nazwę',
   'today.phaseTooltip': 'Coming in Phase 4',
   'today.skip': 'Pomiń',
   'today.fail': 'Nie udało się',
