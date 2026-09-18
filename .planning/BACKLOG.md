@@ -2,8 +2,8 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-09-17 (resolved B-004 — catalog action buttons row layout via quick task 260917-lst)
-Last assigned ID: **B-027** — next new item must be **B-028**
+Last updated: 2026-09-18 (captured B-028 — habit-day status model, from pending todo)
+Last assigned ID: **B-028** — next new item must be **B-029**
 
 ---
 
@@ -641,3 +641,29 @@ The Phase 2 plan author deliberately limited the doc-alignment scope (02-06) to 
 - Render as a small `<p class="settings-version">v{VERSION}</p>` (or equivalent) in the Settings view builder (`js/views/settings.js` or `settings/builders.js`). No new module or component needed.
 - Style with a muted, small-text token from `css/tokens.css` — `--font-size-xs` + `--color-text-muted` or equivalent.
 - Effort: Very low.
+
+---
+
+## Captured 2026-09-18
+
+### B-028 · Explicit habit-day status model (done/failed/skipped/not tracked)
+
+**Source:** captured as pending todo `2026-09-18-habit-day-status-model.md`; surfaced during Phase 13.1 discussion (deferred, not folded)
+**Status:** captured · not scheduled
+**Earliest sensible slot:** needs scoping; natural follow-on once Phase 13.1's Fail-button fix ships
+
+**What:** Historic days with no log entry currently show as missing data with no explicit recorded reason. Give every habit-day one of four explicit statuses — done, failed (applicable, not completed, counts as a miss), skipped (user explicitly excluded), or not tracked (no data / habit wasn't being tracked) — and add a UI affordance (History/Today) to retroactively set status on days with missing data. `skipped` and `not tracked` collapse to the same "not counted" bucket for scoring and CSV `x`.
+
+**Why:** The 4-state log model (D-43) already distinguishes completed/failed/skipped by presence+status, but there is no way to retroactively mark a historic "missing" day as skipped-vs-not-tracked-vs-failed, and `appliesToday()` (`js/domain/cadence.js`) only decides applicability at render/export time, not as a persisted per-day fact.
+
+**Open questions when this gets planned:**
+
+- Is this a new persisted concept on `logs`, or a derived read combining `logs` + cadence applicability?
+- What UI affordance lets the user retroactively set status on a missing day, and where (History view seems the natural home)?
+- Must not rewrite historical logs destructively — respect the "History integrity" constraint in CLAUDE.md.
+
+**Implementation notes:**
+
+- Related files: `js/domain/cadence.js`, `js/db/schema.js`, `js/domain/scoring.js` (skipped/not-tracked collapse for denominators).
+- Full problem statement: `.planning/todos/pending/2026-09-18-habit-day-status-model.md`.
+- Effort: Medium–High — likely a schema-adjacent concept plus new UI surface, not a quick fix.
