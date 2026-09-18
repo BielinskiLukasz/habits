@@ -20,7 +20,11 @@
  *   - Leftmost column: habit names (sticky: position sticky; left: 0)
  *   - Week columns: one per ISO week from the earliest week with any
  *     score_snapshots data through the current week, with "W26" style labels
- *   - Wave header rows: full-width spanning all columns
+ *   - Wave header rows: full-width spanning all columns (colspan td); label
+ *     text lives in an inner `<span class="wave-header-label">`, which is
+ *     the actual `position: sticky` target — a colspan'd td has no "room"
+ *     for sticky to move it (see css/desktop.css and the
+ *     waveboard-wave-row-not-pinned debug session for the empirical proof)
  *   - Cell classes: waveboard-cell waveboard-cell--{healthy|watch|atrisk|failing|na}
  *   - Cell title: "{status} ({completed}/{applicable} days)" or "Not applicable"
  *
@@ -229,7 +233,9 @@ export function buildWaveboardHeader({ weeks }) {
  * Build all body rows for the wave-board heat-map.
  *
  * Returns an array of `<tr>` description objects:
- *   - One wave header row per wave group (full-width, class analytics-wave-header)
+ *   - One wave header row per wave group (full-width, class analytics-wave-header;
+ *     label text wrapped in an inner `<span class="wave-header-label">` so
+ *     the CSS sticky rule has a non-colspan'd element to target)
  *   - One habit row per visible habit
  *     - First cell: habit name (sticky column)
  *     - One cell per week: colored by worst S1 status in that week
@@ -249,7 +255,13 @@ export function buildWaveboardRows({ habitsByWave, cellData, weeks, showArchived
   const rows = [];
 
   for (const waveGroup of habitsByWave) {
-    // Wave header row — spans all columns (habit col + week cols)
+    // Wave header row — spans all columns (habit col + week cols).
+    // The label lives in an inner <span class="wave-header-label"> rather
+    // than directly as the <td>'s text: a colspan'd cell is exactly as wide
+    // as the whole scrollable table, leaving `position: sticky` zero room
+    // to move the box (verified empirically — see waveboard-wave-row-not-
+    // pinned debug session). The inner span is the actual sticky target;
+    // css/desktop.css pins the span, not the td.
     rows.push({
       tag: 'tr',
       attrs: { class: 'analytics-wave-header' },
@@ -257,7 +269,13 @@ export function buildWaveboardRows({ habitsByWave, cellData, weeks, showArchived
         {
           tag: 'td',
           attrs: { colspan: String(weeks.length + 1) },
-          text: t('catalog.wave', { n: waveGroup.waveNumber }),
+          children: [
+            {
+              tag: 'span',
+              attrs: { class: 'wave-header-label' },
+              text: t('catalog.wave', { n: waveGroup.waveNumber }),
+            },
+          ],
         },
       ],
     });

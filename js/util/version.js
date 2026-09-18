@@ -32,7 +32,7 @@
  */
 
 /** @type {string} */
-export const APP_VERSION = '0.5.0';
+export const APP_VERSION = '0.5.1';
 
 // Convenience side-effect assignment — exposes APP_VERSION on `self` /
 // `globalThis` for ad-hoc DevTools probing in either context. Not relied on

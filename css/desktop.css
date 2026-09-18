@@ -206,14 +206,25 @@
     font-weight: 600;
     font-size: var(--text-md);
   }
-  /* Scoped to the waveboard only (mirrors .waveboard-sticky-column's
-     position: sticky; left: 0) — pins the wave-header label at the left
-     edge during horizontal scroll. Leaves the plain analytics table's
-     bare .analytics-wave-header td rule above untouched/non-sticky. */
+  /* Scoped to the waveboard only. A colspan'd <td> (spans every column) is
+     exactly as wide as the whole scrollable table, so `position: sticky`
+     applied directly to the <td> has zero room to move it — verified
+     empirically against real Chromium (getComputedStyle reports
+     position:sticky/left:0 correctly, but the box tracks scrollLeft
+     exactly, i.e. never actually sticks). The fix pins an inner
+     inline-block span instead (mirrors .waveboard-sticky-column's
+     small-box pattern, which works because it's exactly one column wide).
+     Leaves the plain analytics table's bare .analytics-wave-header td rule
+     above untouched/non-sticky. */
   .waveboard-grid .analytics-wave-header td {
+    padding: 0;
+  }
+  .waveboard-grid .analytics-wave-header td .wave-header-label {
+    display: inline-block;
     position: sticky;
     left: 0;
     z-index: 1;
+    padding: var(--space-2) var(--space-3);
   }
   .analytics-row--archived {
     opacity: 0.4;

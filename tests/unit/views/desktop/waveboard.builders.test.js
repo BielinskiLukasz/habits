@@ -223,6 +223,40 @@ describe('buildWaveboardRows — DESKTOP-04 heat-map body rows', () => {
     assert.ok(archivedRow, 'Archived habit row should have "analytics-row--archived" class');
   });
 
+  test('wave header td wraps its label in an inner sticky-positionable span (wave-header-label), not directly as td text', () => {
+    // Regression test for waveboard-wave-row-not-pinned: a <td> with colspan
+    // spanning every column has zero "room" for position: sticky to move it
+    // (verified empirically against real Chromium — the box already equals
+    // the full scrollable width, so sticky computes a zero offset even
+    // though getComputedStyle reports position:sticky/left:0 correctly).
+    // The fix moves the sticky target to a small inner inline-block span,
+    // mirroring how the single-column .waveboard-sticky-column cells work.
+    // This test asserts the DOM *structure* the CSS fix depends on — a
+    // CSS-text-only assertion (see waveboard.css.test.js) cannot catch this
+    // class of bug, because the old CSS rule was syntactically correct and
+    // still failed to pin the content in a real browser.
+    const out = buildWaveboardRows({
+      habitsByWave: HABITS_BY_WAVE,
+      cellData: CELL_DATA_HEALTHY,
+      weeks: WEEKS,
+      showArchived: false,
+    });
+    const waveHeaderRow = out.find(row =>
+      row.tag === 'tr' && row.attrs && row.attrs.class &&
+      row.attrs.class.includes('analytics-wave-header')
+    );
+    assert.ok(waveHeaderRow, 'Should have a wave header row');
+    const td = waveHeaderRow.children[0];
+    assert.equal(td.tag, 'td');
+    assert.equal(td.text, undefined,
+      'Label text must live on an inner span, not directly on the colspan td (colspan tds cannot be sticky-positioned in real browsers)');
+    const label = (td.children ?? []).find(c =>
+      c.tag === 'span' && c.attrs && c.attrs.class === 'wave-header-label'
+    );
+    assert.ok(label, 'Expected an inner <span class="wave-header-label"> carrying the sticky-positionable label');
+    assert.equal(label.text, 'Wave 1', 'Label span should carry the wave label text');
+  });
+
   test('archived habit is not rendered when showArchived is false', () => {
     const out = buildWaveboardRows({
       habitsByWave: HABITS_BY_WAVE,
