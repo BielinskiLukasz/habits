@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for js/views/today/builders.js — pure description-tree
- * builders for the Today view (D-26 Tier 1, D-54, D-55, D-56, D-58, D-76,
+ * builders for the Today view (D-26 Tier 1, D-54, D-56, D-58, D-76,
  * D-79, D-80).
  *
  * The builders are pure functions returning `{tag, attrs?, text?, children?}`
@@ -13,8 +13,7 @@
  *   - `buildTodayHeader`: tag + class + h1 + date + wave slots
  *   - `buildFooterNav`: 5 anchors (today/history/catalog/settings/analytics),
  *     aria-current on active, aria-disabled + tabindex + title on history (D-80)
- *   - `buildTodayRow`: button + aria-pressed + data-action + ⓘ disclosure
- *     (D-54, D-55, D-79)
+ *   - `buildTodayRow`: button + aria-pressed + data-action (D-54, D-79)
  *   - `buildTodayList`: 3 branches — empty / all-done / normal list (D-58)
  *
  * Pattern S8 (D-26 Tier 1) — pure-fn fixture tests.
@@ -192,31 +191,20 @@ describe('buildTodayRow — uncompleted row (D-53, D-54, D-79)', () => {
     assert.equal(name.text, 'Drink water');
   });
 
-  test('emits ⓘ disclosure button inside slide when habit.name_pl is truthy (D-55, D-79)', () => {
-    const habit = { id: 'h1', name: 'Drink water', name_pl: 'Picie wody' };
-    const out = buildTodayRow({ habit, status: null });
-    const slide = findSlide(out);
-    const info = slide.children.find((c) => c.tag === 'button' && c.attrs?.class === 'today-row-info');
-    assert.ok(info, 'ⓘ button present when name_pl truthy');
-    assert.equal(info.attrs['aria-label'], 'Show original Polish name');
-    assert.equal(info.attrs['aria-expanded'], 'false');
-    assert.equal(info.attrs['data-action'], 'togglePolish');
-    assert.equal(info.attrs['data-habit-id'], 'h1');
-    assert.equal(info.text, 'ⓘ');
-  });
-
-  test('omits ⓘ disclosure button when habit.name_pl is null/undefined', () => {
-    const habit = { id: 'h1', name: 'English-only', name_pl: null };
-    const out = buildTodayRow({ habit, status: null });
-    const slide = findSlide(out);
-    const info = slide.children.find((c) => c.attrs?.class === 'today-row-info');
-    assert.equal(info, undefined, 'no ⓘ when name_pl null');
-
-    const habit2 = { id: 'h2', name: 'No PL field' };
-    const out2 = buildTodayRow({ habit: habit2, status: null });
-    const slide2 = findSlide(out2);
-    const info2 = slide2.children.find((c) => c.attrs?.class === 'today-row-info');
-    assert.equal(info2, undefined, 'no ⓘ when name_pl missing entirely');
+  test('never renders a togglePolish/ⓘ button, even when habit.name_pl is set (removed — superseded by full EN/PL toggle D-35)', () => {
+    const fixtures = [
+      { id: 'h1', name: 'Drink water', name_pl: 'Picie wody' },
+      { id: 'h2', name: 'English-only', name_pl: null },
+      { id: 'h3', name: 'No PL field' },
+    ];
+    for (const habit of fixtures) {
+      const out = buildTodayRow({ habit, status: null });
+      const slide = findSlide(out);
+      const infoByClass = slide.children.find((c) => c.attrs?.class === 'today-row-info');
+      assert.equal(infoByClass, undefined, `no today-row-info button for habit ${habit.id}`);
+      const infoByAction = slide.children.find((c) => c.attrs?.['data-action'] === 'togglePolish');
+      assert.equal(infoByAction, undefined, `no togglePolish action for habit ${habit.id}`);
+    }
   });
 
   test('actions panel emits Skip + Fail buttons with correct data-action values', () => {

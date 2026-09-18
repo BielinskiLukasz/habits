@@ -2,7 +2,7 @@
 
 Ideas and scope items captured outside the active roadmap. Anything here is *not* in v1 — it has either been deferred by explicit decision, surfaced during UAT, or earmarked for a later milestone. Items graduate to a `ROADMAP.md` phase when picked up (`/gsd-review-backlog` to promote, `/gsd-phase add` to materialize).
 
-Last updated: 2026-09-18 (captured B-028 — habit-day status model, from pending todo)
+Last updated: 2026-09-18 (removed B-002 — ⓘ Polish-name button deleted via quick task 260918-vtr, moot by obsolescence)
 Last assigned ID: **B-028** — next new item must be **B-029**
 
 ---
@@ -42,27 +42,6 @@ Last assigned ID: **B-028** — next new item must be **B-029**
 **Implementation notes:**
 
 - Add `habit-row--complete` logic to `buildNumericRow()` and `buildSlotRow()` in `today/builders.js` — mirror the existing binary check.
-- Effort: Low.
-
----
-
-### B-002 · Polish name button (ⓘ) missing for numeric/slot habits
-
-**Status:** captured · not scheduled
-**Earliest sensible slot:** next UI polish pass
-
-**What:** The ⓘ button that reveals `name_pl` only renders for binary habits (line 168 in `today/builders.js`). Numeric and slot rows omit it, so those habits have no bilingual name reveal.
-
-**Why:** All habit types carry a `name_pl` field from the seed; hiding the reveal affordance on two of three types creates an arbitrary and unexplained inconsistency in the daily check-in view.
-
-**Open questions when this gets planned:**
-
-- Should the shared helper live in `today/builders.js` or a sibling utility module?
-
-**Implementation notes:**
-
-- Refactor the ⓘ button construction into a shared helper function.
-- Call the helper from `buildNumericRow()` and `buildSlotRow()` alongside the existing `buildTodayRow()` call.
 - Effort: Low.
 
 ---
