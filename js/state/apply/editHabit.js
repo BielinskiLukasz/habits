@@ -43,6 +43,7 @@ import { todayLocal } from '../../util/date.js';
  *     stages?: Array<{label: string, target: number}>,
  *     masteryThresholdOverride?: number|null,
  *     masteryWindowOverride?: number|null,
+ *     startDate?: string|null,
  *   }
  * }} event
  * @param {{ getHabit: (id: string) => Promise<object|undefined> }} repo
@@ -60,6 +61,7 @@ export async function handleEditHabit(event, repo) {
     stages,
     masteryThresholdOverride,
     masteryWindowOverride,
+    startDate,
   } = event.payload;
 
   const priorHabit = await repo.getHabit(habitId);
@@ -83,6 +85,7 @@ export async function handleEditHabit(event, repo) {
   if (stages !== undefined) habitRow.stages = stages;
   if (masteryThresholdOverride !== undefined) habitRow.masteryThresholdOverride = masteryThresholdOverride;
   if (masteryWindowOverride !== undefined) habitRow.masteryWindowOverride = masteryWindowOverride;
+  if (startDate !== undefined) habitRow.startDate = startDate;
 
   // New version entry captures the habit's definition state as of today.
   /** @type {object} */

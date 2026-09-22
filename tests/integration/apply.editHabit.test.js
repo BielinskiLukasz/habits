@@ -164,6 +164,80 @@ describe('apply(editHabit) — creates new version, preserves logs (NFR-10)', ()
     assert.ok(editEvt.inverse.payload.priorVersion, 'priorVersion must be present for undo');
   });
 
+  test('editHabit updates startDate when provided (catalog-start-date-not-saving regression)', async () => {
+    const apply = await freshApply();
+    apply.configure({ repo, broadcast: () => {}, trackTx: () => {} });
+
+    // Step 1: Create a scheduled habit with a future startDate.
+    await apply.apply({
+      type: 'createHabit',
+      payload: {
+        name: 'Future habit',
+        wave: 1,
+        cadence: { type: 'daily' },
+        targetType: 'binary',
+        startDate: '2099-01-01',
+      },
+    });
+    const habitId = Array.from(repo._stores.habits.values())[0].id;
+
+    // Step 2: Edit the habit's startDate to a different future date.
+    await apply.apply({
+      type: 'editHabit',
+      payload: {
+        habitId,
+        name: 'Future habit',
+        wave: 1,
+        cadence: { type: 'daily' },
+        targetType: 'binary',
+        startDate: '2099-06-15',
+      },
+    });
+
+    const updatedHabit = await repo.getHabit(habitId);
+    assert.equal(
+      updatedHabit.startDate,
+      '2099-06-15',
+      'editHabit must persist the new startDate, not silently keep the old one',
+    );
+  });
+
+  test('editHabit leaves startDate unchanged when omitted from payload (undefined-safety boundary)', async () => {
+    const apply = await freshApply();
+    apply.configure({ repo, broadcast: () => {}, trackTx: () => {} });
+
+    await apply.apply({
+      type: 'createHabit',
+      payload: {
+        name: 'Untouched date habit',
+        wave: 1,
+        cadence: { type: 'daily' },
+        targetType: 'binary',
+        startDate: '2026-02-01',
+      },
+    });
+    const habitId = Array.from(repo._stores.habits.values())[0].id;
+
+    // Edit without including startDate in the payload at all.
+    await apply.apply({
+      type: 'editHabit',
+      payload: {
+        habitId,
+        name: 'Renamed, no startDate field in payload',
+        wave: 1,
+        cadence: { type: 'daily' },
+        targetType: 'binary',
+      },
+    });
+
+    const updatedHabit = await repo.getHabit(habitId);
+    assert.equal(
+      updatedHabit.startDate,
+      '2026-02-01',
+      'omitting startDate from the payload must preserve the existing value (undefined != erase)',
+    );
+  });
+
   test('editHabit writes array NEVER contains a logs entry (NFR-10 structural proof)', async () => {
     const apply = await freshApply();
     apply.configure({ repo, broadcast: () => {}, trackTx: () => {} });
